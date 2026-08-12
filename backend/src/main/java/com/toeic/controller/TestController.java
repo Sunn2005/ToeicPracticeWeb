@@ -15,7 +15,10 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/tests")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(originPatterns = {
+        "http://localhost:5173",
+        "https://*.vercel.app"
+})
 public class TestController {
 
     @GetMapping("/{testId}/parts/{partId}")

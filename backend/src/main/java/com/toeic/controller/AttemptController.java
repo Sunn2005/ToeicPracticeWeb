@@ -23,7 +23,10 @@ import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/attempts")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(originPatterns = {
+        "http://localhost:5173",
+        "https://*.vercel.app"
+})
 public class AttemptController {
 
     private static final Logger log = LoggerFactory.getLogger(AttemptController.class);

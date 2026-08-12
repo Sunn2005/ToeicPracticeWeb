@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import { auth } from "../firebase";
 
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.DEV
+    ? "http://localhost:8080"
+    : "https://toeicpracticeweb.onrender.com");
+
 function PracticePart() {
   const [part, setPart] = useState(null);
   const [answers, setAnswers] = useState({});
@@ -10,7 +16,7 @@ function PracticePart() {
   const [startingAttempt, setStartingAttempt] = useState(false);
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/tests/test_001/parts/part5")
+    fetch(`${API_BASE_URL}/api/tests/test_001/parts/part5`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Không lấy được dữ liệu");
@@ -43,7 +49,7 @@ function PracticePart() {
       // refresh token để backend không nhận lại token cũ trong cache.
       const idToken = await auth.currentUser.getIdToken(true);
 
-      const response = await fetch("http://localhost:8080/api/attempts", {
+      const response = await fetch(`${API_BASE_URL}/api/attempts`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
