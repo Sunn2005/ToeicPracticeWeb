@@ -1,7 +1,7 @@
-import { auth } from "../firebase";
+import { useNavigate } from "react-router-dom";
 
-function Welcome() {
-  const user = auth.currentUser;
+function Welcome({ user }) {
+  const navigate = useNavigate();
   const displayName = user?.displayName || "bạn";
 
   return (
@@ -70,21 +70,48 @@ function Welcome() {
                 ))}
               </div>
 
-              <div className="mt-8 grid gap-4 lg:grid-cols-2">
-                {[
-                  ["Listening Sprint", "Luyện phản xạ nghe với bộ câu hỏi ngắn."],
-                  ["Reading Focus", "Ôn ngữ pháp, từ vựng và đọc hiểu theo phần."],
-                  ["Review Mistakes", "Xem lại lỗi thường gặp để cải thiện nhanh hơn."],
-                  ["Mock Test", "Làm đề mô phỏng khi bạn đã sẵn sàng tăng tốc."],
-                ].map(([title, desc]) => (
-                  <button
-                    key={title}
-                    className="rounded-3xl border border-slate-100 bg-white p-5 text-left shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-lg hover:shadow-sky-100 focus:outline-none focus:ring-4 focus:ring-sky-100"
-                  >
-                    <p className="font-semibold text-slate-950">{title}</p>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">{desc}</p>
-                  </button>
-                ))}
+              <div className="mt-8">
+                <div className="mb-4 flex items-end justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-semibold uppercase tracking-wider text-sky-600">
+                      Bài luyện hiện có
+                    </p>
+                    <h3 className="mt-2 text-2xl font-bold text-slate-950">
+                      Chọn bài để bắt đầu
+                    </h3>
+                  </div>
+                  <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                    Sẵn sàng
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => navigate("/practice/part5")}
+                  className="group w-full rounded-3xl border border-sky-100 bg-linear-to-br from-white to-sky-50 p-6 text-left shadow-sm transition duration-200 hover:-translate-y-1 hover:border-sky-300 hover:shadow-xl hover:shadow-sky-100 focus:outline-none focus:ring-4 focus:ring-sky-100"
+                >
+                  <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
+                    <div className="flex items-start gap-4">
+                      <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-sky-500 text-lg font-bold text-white shadow-lg shadow-sky-200">
+                        P5
+                      </span>
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wider text-sky-600">
+                          Test 001 · Reading
+                        </p>
+                        <p className="mt-2 text-xl font-bold text-slate-950">
+                          Part 5: Incomplete Sentences
+                        </p>
+                        <p className="mt-2 text-sm leading-6 text-slate-600">
+                          Luyện ngữ pháp và từ vựng bằng các câu hoàn thành câu.
+                        </p>
+                      </div>
+                    </div>
+                    <span className="shrink-0 font-semibold text-sky-600 transition group-hover:translate-x-1">
+                      Vào bài →
+                    </span>
+                  </div>
+                </button>
               </div>
             </div>
           </div>

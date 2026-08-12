@@ -1,26 +1,15 @@
 import {
   GoogleAuthProvider,
-  onAuthStateChanged,
   signInWithPopup,
 } from "firebase/auth";
 import { auth } from "../firebase";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 function Login() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        navigate("/welcome", { replace: true });
-      }
-    });
-
-    return unsubscribe;
-  }, [navigate]);
 
   const loginWithGoogle = async () => {
     setIsLoading(true);
@@ -31,12 +20,13 @@ function Login() {
       provider.setCustomParameters({ prompt: "select_account" });
 
       await signInWithPopup(auth, provider);
+      navigate("/welcome", { replace: true });
     } catch (error) {
       console.error(error);
 
       if (error.code === "auth/unauthorized-domain") {
         setErrorMessage(
-          "Firebase chưa cho phép tên miền hiện tại. Hãy thêm localhost vào Authorized domains trong Firebase Console.",
+          "Firebase chưa cho phép tên miền hiện tại. Hãy thêm domain của website vào Authorized domains trong Firebase Console.",
         );
       } else if (error.message?.includes("Database is closing/hidden")) {
         setErrorMessage(
