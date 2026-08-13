@@ -40,14 +40,14 @@ function AppRoutes() {
     <Routes>
       <Route
         path="/"
-        element={<Navigate to={user ? "/welcome" : "/login"} replace />}
+        element={<Navigate to={user ? "/dashboard" : "/login"} replace />}
       />
       <Route
         path="/login"
-        element={user ? <Navigate to="/welcome" replace /> : <Login />}
+        element={user ? <Navigate to="/dashboard" replace /> : <Login />}
       />
       <Route
-        path="/welcome"
+        path="/dashboard"
         element={user ? <Welcome user={user} /> : <Navigate to="/login" replace />}
       />
       <Route
@@ -56,7 +56,7 @@ function AppRoutes() {
       />
       <Route
         path="*"
-        element={<Navigate to={user ? "/welcome" : "/login"} replace />}
+        element={<Navigate to={user ? "/dashboard" : "/login"} replace />}
       />
     </Routes>
   );

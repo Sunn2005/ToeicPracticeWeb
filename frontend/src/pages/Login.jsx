@@ -20,7 +20,7 @@ function Login() {
       provider.setCustomParameters({ prompt: "select_account" });
 
       await signInWithPopup(auth, provider);
-      navigate("/welcome", { replace: true });
+      navigate("/dashboard", { replace: true });
     } catch (error) {
       console.error(error);
 
