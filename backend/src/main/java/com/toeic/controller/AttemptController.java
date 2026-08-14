@@ -55,7 +55,9 @@ public class AttemptController {
                 userId,
                 request.getTestId(),
                 request.getMode(),
-                request.getPart()
+                request.getPart(),
+                request.getParts(),
+                request.getDurationMinutes()
         );
     }
 

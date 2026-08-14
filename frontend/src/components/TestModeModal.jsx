@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { EXAM_MODES, TOEIC_PARTS } from "../data/testCatalog";
+import { getSuggestedPartDuration } from "../config/examTiming";
 import ExamModeCard from "./ExamModeCard";
 
-function PartGroup({ title, parts, selectedPart, onSelect }) {
+function PartGroup({ title, parts, selectedParts, onToggle }) {
   return (
     <section>
       <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
@@ -10,7 +11,7 @@ function PartGroup({ title, parts, selectedPart, onSelect }) {
       </p>
       <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-white">
         {parts.map((item) => {
-          const selected = selectedPart === item.part;
+          const selected = selectedParts.includes(item.part);
           return (
             <label
               key={item.part}
@@ -20,10 +21,9 @@ function PartGroup({ title, parts, selectedPart, onSelect }) {
             >
               <span className="flex items-center gap-3">
                 <input
-                  type="radio"
-                  name="toeic-part"
+                  type="checkbox"
                   checked={selected}
-                  onChange={() => onSelect(item.part)}
+                  onChange={() => onToggle(item.part)}
                   className="h-4 w-4 accent-sky-600"
                 />
                 <span className={`text-sm font-bold ${selected ? "text-sky-700" : "text-slate-800"}`}>
@@ -41,7 +41,9 @@ function PartGroup({ title, parts, selectedPart, onSelect }) {
 
 function TestModeModal({ test, onClose, onStart }) {
   const [activeTab, setActiveTab] = useState("exam");
-  const [selectedPart, setSelectedPart] = useState(null);
+  const [selectedParts, setSelectedParts] = useState([]);
+  const [customTimeEnabled, setCustomTimeEnabled] = useState(false);
+  const [customMinutes, setCustomMinutes] = useState("");
   const [startingKey, setStartingKey] = useState("");
   const [error, setError] = useState("");
 
@@ -60,7 +62,9 @@ function TestModeModal({ test, onClose, onStart }) {
   }, [onClose, startingKey]);
 
   const startMode = async (selection) => {
-    const key = selection.mode === "PART" ? `PART-${selection.part}` : selection.mode;
+    const key = selection.mode === "PART"
+      ? `PART-${selection.parts.join("-")}`
+      : selection.mode;
     setStartingKey(key);
     setError("");
     try {
@@ -73,6 +77,30 @@ function TestModeModal({ test, onClose, onStart }) {
 
   const listeningParts = TOEIC_PARTS.filter((item) => item.section === "LISTENING");
   const readingParts = TOEIC_PARTS.filter((item) => item.section === "READING");
+  const suggestedMinutes = getSuggestedPartDuration(selectedParts) / 60;
+  const parsedCustomMinutes = Number(customMinutes);
+  const selectedQuestionCount = TOEIC_PARTS
+    .filter((item) => selectedParts.includes(item.part))
+    .reduce((total, item) => total + item.questions, 0);
+  const validCustomTime = !customTimeEnabled
+    || (Number.isInteger(parsedCustomMinutes)
+      && parsedCustomMinutes >= 1
+      && parsedCustomMinutes <= 180);
+
+  const togglePart = (part) => {
+    setSelectedParts((current) => current.includes(part)
+      ? current.filter((value) => value !== part)
+      : [...current, part].sort((left, right) => left - right));
+  };
+
+  const toggleCustomTime = () => {
+    setCustomTimeEnabled((enabled) => {
+      if (!enabled && !customMinutes) {
+        setCustomMinutes(String(suggestedMinutes || 1));
+      }
+      return !enabled;
+    });
+  };
 
   return (
     <div
@@ -166,32 +194,102 @@ function TestModeModal({ test, onClose, onStart }) {
               <section className="mt-8 border-t border-slate-200 pt-7">
                 <div>
                   <h3 className="text-xl font-bold text-slate-950">Thi theo Part</h3>
-                  <p className="mt-1 text-sm text-slate-500">Chọn Part cụ thể để thi thử</p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Chọn một hoặc nhiều Part, sau đó dùng thời gian đề xuất hoặc tự đặt.
+                  </p>
                 </div>
 
                 <div className="mt-5 grid gap-5 md:grid-cols-2">
                   <PartGroup
                     title="Listening"
                     parts={listeningParts}
-                    selectedPart={selectedPart}
-                    onSelect={setSelectedPart}
+                    selectedParts={selectedParts}
+                    onToggle={togglePart}
                   />
                   <PartGroup
                     title="Reading"
                     parts={readingParts}
-                    selectedPart={selectedPart}
-                    onSelect={setSelectedPart}
+                    selectedParts={selectedParts}
+                    onToggle={togglePart}
                   />
                 </div>
 
-                <div className="mt-6 flex justify-end">
+                <div className="mt-6 rounded-3xl bg-slate-100 p-5 sm:p-6">
+                  <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                    <div>
+                      <h4 className="font-bold text-slate-900">Thời gian làm bài</h4>
+                      {!customTimeEnabled && selectedParts.length > 0 && (
+                        <p className="mt-3 text-sm text-slate-500">
+                          <span className="mr-2 rounded-full border border-sky-200 bg-sky-50 px-3 py-1.5 font-bold text-sky-600">
+                            {suggestedMinutes} phút
+                          </span>
+                          Thời gian đề xuất
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={customTimeEnabled}
+                      onClick={toggleCustomTime}
+                      className="flex items-center gap-3 font-semibold text-slate-600"
+                    >
+                      Tự đặt
+                      <span className={`relative h-7 w-12 rounded-full transition ${
+                        customTimeEnabled ? "bg-sky-500" : "bg-slate-300"
+                      }`}>
+                        <span className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition ${
+                          customTimeEnabled ? "left-6" : "left-1"
+                        }`} />
+                      </span>
+                    </button>
+                  </div>
+
+                  {customTimeEnabled && (
+                    <label className="mt-5 block max-w-xs">
+                      <span className="text-sm font-semibold text-slate-700">Số phút (1–180)</span>
+                      <div className="mt-2 flex items-center rounded-xl border border-slate-200 bg-white px-4 focus-within:border-sky-400 focus-within:ring-4 focus-within:ring-sky-100">
+                        <input
+                          type="number"
+                          min="1"
+                          max="180"
+                          step="1"
+                          value={customMinutes}
+                          onChange={(event) => setCustomMinutes(event.target.value)}
+                          className="min-w-0 flex-1 bg-transparent py-3 font-bold text-slate-900 outline-none"
+                        />
+                        <span className="text-sm text-slate-500">phút</span>
+                      </div>
+                      {!validCustomTime && (
+                        <span className="mt-2 block text-sm text-red-600">
+                          Vui lòng nhập số nguyên từ 1 đến 180.
+                        </span>
+                      )}
+                    </label>
+                  )}
+                </div>
+
+                <div className="mt-5 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                  <div className="flex flex-wrap items-center gap-3 text-sm font-semibold text-slate-500">
+                    <span className="rounded-full bg-sky-50 px-3 py-2 text-sky-700">
+                      {selectedQuestionCount} câu
+                    </span>
+                    <span>Đã chọn {selectedParts.length} Part</span>
+                  </div>
                   <button
                     type="button"
-                    onClick={() => startMode({ mode: "PART", part: selectedPart })}
-                    disabled={!selectedPart || Boolean(startingKey)}
+                    onClick={() => startMode({
+                      mode: "PART",
+                      part: selectedParts.length === 1 ? selectedParts[0] : null,
+                      parts: selectedParts,
+                      durationMinutes: customTimeEnabled
+                        ? parsedCustomMinutes
+                        : suggestedMinutes,
+                    })}
+                    disabled={!selectedParts.length || !validCustomTime || Boolean(startingKey)}
                     className="w-full rounded-xl bg-sky-500 px-7 py-3.5 font-bold text-white shadow-lg shadow-sky-100 transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none sm:w-auto"
                   >
-                    {startingKey.startsWith("PART-") ? "Đang chuẩn bị..." : "Bắt đầu Part đã chọn"}
+                    {startingKey.startsWith("PART-") ? "Đang chuẩn bị..." : "Bắt đầu các Part đã chọn"}
                   </button>
                 </div>
               </section>

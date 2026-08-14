@@ -54,7 +54,14 @@ public class TestController {
         String userId = authenticationService.requireUid(authorization);
         String mode = request == null ? null : request.getMode();
         Integer part = request == null ? null : request.getPart();
-        return attemptService.createOrResume(userId, testId, mode, part);
+        return attemptService.createOrResume(
+                userId,
+                testId,
+                mode,
+                part,
+                request == null ? null : request.getParts(),
+                request == null ? null : request.getDurationMinutes()
+        );
     }
 
     // Endpoint tương thích để các trang luyện Part cũ vẫn lấy được dữ liệu,

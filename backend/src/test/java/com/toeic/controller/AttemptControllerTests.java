@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -73,7 +74,9 @@ class AttemptControllerTests {
         );
         when(authenticationService.requireUid("Bearer firebase-id-token"))
                 .thenReturn("firebase-uid-123");
-        when(attemptService.createOrResume("firebase-uid-123", "ets-2026-test-1", null, null))
+        when(attemptService.createOrResume(
+                "firebase-uid-123", "ets-2026-test-1", null, null, null, null
+        ))
                 .thenReturn(expected);
 
         Map<String, Object> result = controller.createAttempt(
@@ -82,7 +85,9 @@ class AttemptControllerTests {
         );
 
         assertEquals(expected, result);
-        verify(attemptService).createOrResume("firebase-uid-123", "ets-2026-test-1", null, null);
+        verify(attemptService).createOrResume(
+                "firebase-uid-123", "ets-2026-test-1", null, null, null, null
+        );
     }
 
     @Test
@@ -99,7 +104,9 @@ class AttemptControllerTests {
         );
         when(authenticationService.requireUid("Bearer firebase-id-token"))
                 .thenReturn("firebase-uid-123");
-        when(attemptService.createOrResume("firebase-uid-123", "ets-2026-test-1", "PART", 6))
+        when(attemptService.createOrResume(
+                "firebase-uid-123", "ets-2026-test-1", "PART", 6, null, null
+        ))
                 .thenReturn(expected);
 
         Map<String, Object> result = controller.createAttempt(
@@ -108,6 +115,43 @@ class AttemptControllerTests {
         );
 
         assertEquals(expected, result);
-        verify(attemptService).createOrResume("firebase-uid-123", "ets-2026-test-1", "PART", 6);
+        verify(attemptService).createOrResume(
+                "firebase-uid-123", "ets-2026-test-1", "PART", 6, null, null
+        );
+    }
+
+    @Test
+    void passesMultiplePartsAndCustomDurationToAttemptService() throws Exception {
+        CreateAttemptRequest request = new CreateAttemptRequest();
+        request.setTestId("ets-2026-test-1");
+        request.setMode("PART");
+        request.setParts(List.of(5, 6));
+        request.setDurationMinutes(25);
+        Map<String, Object> expected = Map.of(
+                "id", "attempt-parts-5-6",
+                "selectedParts", List.of(5, 6)
+        );
+        when(authenticationService.requireUid("Bearer firebase-id-token"))
+                .thenReturn("firebase-uid-123");
+        when(attemptService.createOrResume(
+                "firebase-uid-123",
+                "ets-2026-test-1",
+                "PART",
+                null,
+                List.of(5, 6),
+                25
+        )).thenReturn(expected);
+
+        Map<String, Object> result = controller.createAttempt(request, "Bearer firebase-id-token");
+
+        assertEquals(expected, result);
+        verify(attemptService).createOrResume(
+                "firebase-uid-123",
+                "ets-2026-test-1",
+                "PART",
+                null,
+                List.of(5, 6),
+                25
+        );
     }
 }

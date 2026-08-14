@@ -82,11 +82,11 @@ function Welcome({ user }) {
     }
   };
 
-  const handleStartExam = async ({ mode, part }) => {
+  const handleStartExam = async ({ mode, part, parts, durationMinutes }) => {
     const attempt = await apiFetch(`/api/tests/${selectedTest.id}/attempts`, {
       method: "POST",
       forceRefresh: true,
-      body: JSON.stringify({ mode, part }),
+      body: JSON.stringify({ mode, part, parts, durationMinutes }),
     });
     navigate(`/full-test/${attempt.id}/exam`);
   };

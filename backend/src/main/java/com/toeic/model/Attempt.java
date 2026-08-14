@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Map;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,6 +17,8 @@ public class Attempt {
     private String type;
     private String mode;
     private Integer selectedPart;
+    private List<Integer> selectedParts;
+    private Integer timeLimitSeconds;
     private String status;
     private String currentSection;
     private Integer currentQuestionNumber;

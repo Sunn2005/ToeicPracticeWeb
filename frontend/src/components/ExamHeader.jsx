@@ -5,6 +5,7 @@ function ExamHeader({
   section,
   mode,
   selectedPart,
+  selectedParts,
   firstQuestion,
   lastQuestion,
   remainingSeconds,
@@ -19,7 +20,7 @@ function ExamHeader({
     mode === "FULL"
       ? "Full Test"
       : mode === "PART"
-        ? `Part ${selectedPart}`
+        ? `Part ${(selectedParts?.length ? selectedParts : [selectedPart]).filter(Boolean).join(" + ")}`
         : mode === "LISTENING"
           ? "Thi Listening"
           : "Thi Reading";

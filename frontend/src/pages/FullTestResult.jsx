@@ -48,6 +48,11 @@ function FullTestResult() {
   const readingTotal = result?.readingTotalQuestions
     ?? (resultMode === "LISTENING" ? 0 : 100);
   const totalQuestions = result?.totalQuestions || listeningTotal + readingTotal;
+  const selectedParts = result?.selectedParts?.length
+    ? result.selectedParts
+    : result?.selectedPart
+      ? [result.selectedPart]
+      : [];
   const modeTitle =
     resultMode === "FULL"
       ? "Full Test"
@@ -55,8 +60,8 @@ function FullTestResult() {
         ? "Thi Listening"
         : resultMode === "READING"
           ? "Thi Reading"
-          : `Part ${result?.selectedPart} - Test 1`;
-  const maxScore = resultMode === "FULL" ? 990 : 495;
+          : `Part ${selectedParts.join(" + ")} - Test 1`;
+  const maxScore = resultMode === "FULL" || (listeningTotal > 0 && readingTotal > 0) ? 990 : 495;
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-sky-50 to-cyan-100 px-5 py-8 text-slate-900 sm:px-8 sm:py-12">

@@ -37,10 +37,17 @@ function FullTestReview() {
   const allQuestions = useMemo(() => {
     const first = data?.attempt?.firstQuestionNumber || 1;
     const last = data?.attempt?.lastQuestionNumber || 200;
+    const selectedParts = data?.attempt?.selectedParts?.length
+      ? data.attempt.selectedParts
+      : data?.attempt?.selectedPart
+        ? [data.attempt.selectedPart]
+        : null;
     return getAllQuestions(data?.test).filter(
-      ({ question }) => question.questionNumber >= first && question.questionNumber <= last,
+      ({ question, partNumber }) => question.questionNumber >= first
+        && question.questionNumber <= last
+        && (!selectedParts || selectedParts.includes(partNumber)),
     );
-  }, [data?.attempt?.firstQuestionNumber, data?.attempt?.lastQuestionNumber, data?.test]);
+  }, [data]);
   const filteredQuestions = useMemo(
     () =>
       filter === "ALL"
@@ -69,18 +76,22 @@ function FullTestReview() {
   const audioUrl = unit?.audioUrl || question?.audioUrl;
   const transcript = unit?.transcript || question?.transcript;
   const questionsToDisplay = [3, 4].includes(unit?.partNumber)
-    ? unit.questions.filter(
-      (item) => item.questionNumber >= data.attempt.firstQuestionNumber
-        && item.questionNumber <= data.attempt.lastQuestionNumber,
-    )
+    ? unit.questions
     : [question];
+  const selectedParts = data.attempt.selectedParts?.length
+    ? data.attempt.selectedParts
+    : data.attempt.selectedPart
+      ? [data.attempt.selectedPart]
+      : [];
   const modeTitle =
     data.attempt.mode === "FULL"
       ? "Full Test"
       : data.attempt.mode === "PART"
-        ? `Part ${data.attempt.selectedPart}`
+        ? `Part ${selectedParts.join(" + ")}`
         : `Thi ${data.attempt.mode === "LISTENING" ? "Listening" : "Reading"}`;
-  const maxScore = data.attempt.mode === "FULL" ? 990 : 495;
+  const hasListening = data.result.listeningTotalQuestions > 0;
+  const hasReading = data.result.readingTotalQuestions > 0;
+  const maxScore = data.attempt.mode === "FULL" || (hasListening && hasReading) ? 990 : 495;
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900">

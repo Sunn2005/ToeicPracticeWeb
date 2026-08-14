@@ -17,6 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class AttemptService {
@@ -35,6 +36,13 @@ public class AttemptService {
     private static final long LISTENING_DURATION_MS = 45L * 60L * 1000L;
     private static final long READING_DURATION_MS = 75L * 60L * 1000L;
     private static final long FULL_TEST_DURATION_MS = LISTENING_DURATION_MS + READING_DURATION_MS;
+    private static final int MIN_CUSTOM_DURATION_MINUTES = 1;
+    private static final int MAX_CUSTOM_DURATION_MINUTES = 180;
+    private static final int[][] PART_RANGES = {
+            {1, 6}, {7, 31}, {32, 70}, {71, 100},
+            {101, 130}, {131, 146}, {147, 200}
+    };
+    private static final int[] PART_SUGGESTED_MINUTES = {5, 10, 15, 15, 20, 10, 45};
 
     private final AttemptDao attemptDao;
     private final TestService testService;
@@ -54,10 +62,21 @@ public class AttemptService {
             String requestedMode,
             Integer selectedPart
     ) throws Exception {
-        testService.getMetadata(testId);
-        AttemptScope scope = resolveScope(requestedMode, selectedPart);
+        return createOrResume(userId, testId, requestedMode, selectedPart, null, null);
+    }
 
-        Attempt active = findCurrentAttempt(userId, testId, scope.mode(), scope.selectedPart());
+    public Map<String, Object> createOrResume(
+            String userId,
+            String testId,
+            String requestedMode,
+            Integer selectedPart,
+            List<Integer> requestedParts,
+            Integer durationMinutes
+    ) throws Exception {
+        testService.getMetadata(testId);
+        AttemptScope scope = resolveScope(requestedMode, selectedPart, requestedParts, durationMinutes);
+
+        Attempt active = findCurrentAttempt(userId, testId, scope.mode(), scope.selectedParts());
         if (active != null) {
             active = reconcileTimeout(active);
             if (IN_PROGRESS.equals(active.getStatus())) {
@@ -73,12 +92,16 @@ public class AttemptService {
         attempt.setType(FULL_TEST);
         attempt.setMode(scope.mode());
         attempt.setSelectedPart(scope.selectedPart());
+        attempt.setSelectedParts(scope.selectedParts());
+        attempt.setTimeLimitSeconds(Math.toIntExact(
+                (MODE_FULL.equals(scope.mode()) ? FULL_TEST_DURATION_MS : scope.durationMs()) / 1000L
+        ));
         attempt.setStatus(IN_PROGRESS);
         attempt.setCurrentSection(scope.section());
         attempt.setCurrentQuestionNumber(scope.firstQuestion());
         attempt.setFirstQuestionNumber(scope.firstQuestion());
         attempt.setLastQuestionNumber(scope.lastQuestion());
-        attempt.setTotalQuestions(scope.lastQuestion() - scope.firstQuestion() + 1);
+        attempt.setTotalQuestions(scope.totalQuestions());
         attempt.setStartedAt(now);
         attempt.setUpdatedAt(now);
         attempt.setSectionStartedAt(now);
@@ -103,7 +126,7 @@ public class AttemptService {
     }
 
     public Map<String, Object> getCurrent(String userId, String testId) throws Exception {
-        Attempt active = findCurrentAttempt(userId, testId, MODE_FULL, null);
+        Attempt active = findCurrentAttempt(userId, testId, MODE_FULL, List.of(1, 2, 3, 4, 5, 6, 7));
         if (active == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không có bài đang làm");
         }
@@ -145,7 +168,7 @@ public class AttemptService {
         String normalizedAnswer = normalizeAnswer(selectedAnswer);
         Attempt attempt = reconcileTimeout(getOwnedAttempt(userId, attemptId));
         requireInProgress(attempt);
-        if (questionNumber < firstQuestion(attempt) || questionNumber > lastQuestion(attempt)) {
+        if (!isQuestionSelected(attempt, questionNumber)) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "Câu hỏi không thuộc phạm vi của chế độ thi này"
@@ -198,8 +221,8 @@ public class AttemptService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Chưa đến phần Reading");
         }
         if (questionNumber == null
-                || questionNumber < Math.max(101, firstQuestion(attempt))
-                || questionNumber > lastQuestion(attempt)) {
+                || questionNumber < 101
+                || !isQuestionSelected(attempt, questionNumber)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Câu Reading không thuộc phạm vi của chế độ thi này"
@@ -227,16 +250,15 @@ public class AttemptService {
         }
 
         int currentStart = listeningUnitStart(attempt.getCurrentQuestionNumber());
-        int currentEnd = listeningUnitEnd(currentStart);
-        if (currentEnd >= lastQuestion(attempt)) {
-            if (MODE_FULL.equals(mode(attempt))) {
+        Integer next = nextSelectedListeningUnit(attempt, currentStart);
+        if (next == null) {
+            if (hasSelectedReadingPart(attempt)) {
                 transitionToReading(attempt, System.currentTimeMillis());
                 saveAttempt(attempt);
             } else {
                 attempt = submitInternal(attempt, false);
             }
         } else {
-            int next = currentStart < 31 ? currentStart + 1 : currentStart == 31 ? 32 : currentStart + 3;
             attempt.setCurrentQuestionNumber(next);
             attempt.setUpdatedAt(System.currentTimeMillis());
             saveAttempt(attempt);
@@ -253,7 +275,7 @@ public class AttemptService {
         requireInProgress(attempt);
 
         if (LISTENING.equals(attempt.getCurrentSection())) {
-            if (MODE_FULL.equals(mode(attempt))) {
+            if (hasSelectedReadingPart(attempt)) {
                 transitionToReading(attempt, System.currentTimeMillis());
                 saveAttempt(attempt);
             } else {
@@ -309,7 +331,7 @@ public class AttemptService {
             String userId,
             String testId,
             String requestedMode,
-            Integer selectedPart
+            List<Integer> requestedParts
     ) throws Exception {
         List<Attempt> candidates = new ArrayList<>();
         for (Attempt attempt : attemptDao.findByUserId(userId)) {
@@ -317,7 +339,7 @@ public class AttemptService {
             if (testId.equals(attempt.getTestId())
                     && FULL_TEST.equals(attempt.getType())
                     && requestedMode.equals(mode(attempt))
-                    && java.util.Objects.equals(selectedPart, attempt.getSelectedPart())
+                    && Objects.equals(requestedParts, selectedParts(attempt))
                     && IN_PROGRESS.equals(attempt.getStatus())) {
                 candidates.add(attempt);
             }
@@ -370,13 +392,21 @@ public class AttemptService {
     private void transitionToReading(Attempt attempt, long readingStart) {
         long now = System.currentTimeMillis();
         attempt.setCurrentSection(READING);
-        attempt.setCurrentQuestionNumber(101);
+        attempt.setCurrentQuestionNumber(firstSelectedReadingQuestion(attempt));
         attempt.setListeningEndAt(readingStart);
         attempt.setReadingStartedAt(readingStart);
-        attempt.setReadingEndAt(readingStart + READING_DURATION_MS);
         attempt.setSectionStartedAt(readingStart);
-        attempt.setSectionEndAt(readingStart + READING_DURATION_MS);
-        attempt.setOverallEndAt(readingStart + READING_DURATION_MS);
+        if (MODE_FULL.equals(mode(attempt))) {
+            attempt.setReadingEndAt(readingStart + READING_DURATION_MS);
+            attempt.setSectionEndAt(readingStart + READING_DURATION_MS);
+            attempt.setOverallEndAt(readingStart + READING_DURATION_MS);
+        } else {
+            Long sessionEnd = attempt.getOverallEndAt() == null
+                    ? attempt.getSectionEndAt()
+                    : attempt.getOverallEndAt();
+            attempt.setReadingEndAt(sessionEnd);
+            attempt.setSectionEndAt(sessionEnd);
+        }
         attempt.setUpdatedAt(now);
     }
 
@@ -393,18 +423,16 @@ public class AttemptService {
 
         int firstQuestion = firstQuestion(attempt);
         int lastQuestion = lastQuestion(attempt);
-        int listeningTotal = Math.max(0, Math.min(100, lastQuestion) - firstQuestion + 1);
-        if (firstQuestion > 100) {
-            listeningTotal = 0;
-        }
-        int readingTotal = Math.max(0, lastQuestion - Math.max(101, firstQuestion) + 1);
+        List<Integer> questionNumbers = selectedQuestionNumbers(attempt);
+        int listeningTotal = (int) questionNumbers.stream().filter(number -> number <= 100).count();
+        int readingTotal = questionNumbers.size() - listeningTotal;
 
         int listeningCorrect = 0;
         int readingCorrect = 0;
         int listeningAnswered = 0;
         int readingAnswered = 0;
 
-        for (int number = firstQuestion; number <= lastQuestion; number++) {
+        for (int number : questionNumbers) {
             String selected = selectedAnswers.get(number);
             if (selected != null) {
                 if (number <= 100) {
@@ -425,13 +453,15 @@ public class AttemptService {
         long submittedAt = System.currentTimeMillis();
         int listeningScore = estimateSectionScore(listeningCorrect, listeningTotal);
         int readingScore = estimateSectionScore(readingCorrect, readingTotal);
-        int totalQuestions = lastQuestion - firstQuestion + 1;
+        int totalQuestions = questionNumbers.size();
 
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("attemptId", attempt.getId());
         result.put("testId", attempt.getTestId());
         result.put("mode", mode(attempt));
         result.put("selectedPart", attempt.getSelectedPart());
+        result.put("selectedParts", selectedParts(attempt));
+        result.put("timeLimitSeconds", attempt.getTimeLimitSeconds());
         result.put("firstQuestionNumber", firstQuestion);
         result.put("lastQuestionNumber", lastQuestion);
         result.put("listeningTotalQuestions", listeningTotal);
@@ -487,6 +517,8 @@ public class AttemptService {
         response.put("type", attempt.getType());
         response.put("mode", mode(attempt));
         response.put("selectedPart", attempt.getSelectedPart());
+        response.put("selectedParts", selectedParts(attempt));
+        response.put("timeLimitSeconds", attempt.getTimeLimitSeconds());
         response.put("status", attempt.getStatus());
         response.put("currentSection", attempt.getCurrentSection());
         response.put("currentQuestionNumber", attempt.getCurrentQuestionNumber());
@@ -547,7 +579,12 @@ public class AttemptService {
         return unitStart <= 31 ? unitStart : Math.min(100, unitStart + 2);
     }
 
-    private AttemptScope resolveScope(String requestedMode, Integer selectedPart) {
+    private AttemptScope resolveScope(
+            String requestedMode,
+            Integer selectedPart,
+            List<Integer> requestedParts,
+            Integer durationMinutes
+    ) {
         String normalizedMode = requestedMode == null || requestedMode.isBlank()
                 ? MODE_FULL
                 : requestedMode.trim().toUpperCase(Locale.ROOT);
@@ -562,36 +599,67 @@ public class AttemptService {
         }
 
         return switch (examMode) {
-            case FULL -> new AttemptScope(MODE_FULL, null, LISTENING, 1, 200, LISTENING_DURATION_MS);
+            case FULL -> new AttemptScope(
+                    MODE_FULL, null, List.of(1, 2, 3, 4, 5, 6, 7),
+                    LISTENING, 1, 200, 200, LISTENING_DURATION_MS
+            );
             case LISTENING -> new AttemptScope(
-                    MODE_LISTENING, null, LISTENING, 1, 100, LISTENING_DURATION_MS
+                    MODE_LISTENING, null, List.of(1, 2, 3, 4),
+                    LISTENING, 1, 100, 100, LISTENING_DURATION_MS
             );
             case READING -> new AttemptScope(
-                    MODE_READING, null, READING, 101, 200, READING_DURATION_MS
+                    MODE_READING, null, List.of(5, 6, 7),
+                    READING, 101, 200, 100, READING_DURATION_MS
             );
-            case PART -> resolvePartScope(selectedPart);
+            case PART -> resolvePartScope(selectedPart, requestedParts, durationMinutes);
         };
     }
 
-    private AttemptScope resolvePartScope(Integer selectedPart) {
-        if (selectedPart == null || selectedPart < 1 || selectedPart > 7) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Chế độ PART cần part từ 1 đến 7");
+    private AttemptScope resolvePartScope(
+            Integer selectedPart,
+            List<Integer> requestedParts,
+            Integer durationMinutes
+    ) {
+        List<Integer> parts = new ArrayList<>();
+        if (requestedParts != null) {
+            parts.addAll(requestedParts);
+        }
+        if (parts.isEmpty() && selectedPart != null) {
+            parts.add(selectedPart);
+        }
+        if (parts.isEmpty() || parts.stream().anyMatch(part -> part == null || part < 1 || part > 7)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Chế độ PART cần ít nhất một part từ 1 đến 7"
+            );
+        }
+        parts = parts.stream().distinct().sorted().toList();
+
+        int resolvedDurationMinutes = durationMinutes == null
+                ? parts.stream().mapToInt(part -> PART_SUGGESTED_MINUTES[part - 1]).sum()
+                : durationMinutes;
+        if (resolvedDurationMinutes < MIN_CUSTOM_DURATION_MINUTES
+                || resolvedDurationMinutes > MAX_CUSTOM_DURATION_MINUTES) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Thời gian tự đặt phải từ 1 đến 180 phút"
+            );
         }
 
-        int[][] ranges = {
-                {1, 6}, {7, 31}, {32, 70}, {71, 100},
-                {101, 130}, {131, 146}, {147, 200}
-        };
-        int first = ranges[selectedPart - 1][0];
-        int last = ranges[selectedPart - 1][1];
-        boolean isListeningPart = selectedPart <= 4;
+        int first = PART_RANGES[parts.getFirst() - 1][0];
+        int last = PART_RANGES[parts.getLast() - 1][1];
+        int totalQuestions = parts.stream()
+                .mapToInt(part -> PART_RANGES[part - 1][1] - PART_RANGES[part - 1][0] + 1)
+                .sum();
         return new AttemptScope(
                 MODE_PART,
-                selectedPart,
-                isListeningPart ? LISTENING : READING,
+                parts.size() == 1 ? parts.getFirst() : null,
+                parts,
+                parts.getFirst() <= 4 ? LISTENING : READING,
                 first,
                 last,
-                isListeningPart ? LISTENING_DURATION_MS : READING_DURATION_MS
+                totalQuestions,
+                resolvedDurationMinutes * 60L * 1000L
         );
     }
 
@@ -599,13 +667,26 @@ public class AttemptService {
         if (attempt.getMode() == null || attempt.getMode().isBlank()) {
             attempt.setMode(MODE_FULL);
         }
+        List<Integer> parts = selectedParts(attempt);
+        attempt.setSelectedParts(parts);
+        attempt.setSelectedPart(parts.size() == 1 ? parts.getFirst() : null);
         if (attempt.getFirstQuestionNumber() == null
                 || attempt.getLastQuestionNumber() == null
                 || attempt.getTotalQuestions() == null) {
-            AttemptScope scope = resolveScope(attempt.getMode(), attempt.getSelectedPart());
-            attempt.setFirstQuestionNumber(scope.firstQuestion());
-            attempt.setLastQuestionNumber(scope.lastQuestion());
-            attempt.setTotalQuestions(scope.lastQuestion() - scope.firstQuestion() + 1);
+            attempt.setFirstQuestionNumber(PART_RANGES[parts.getFirst() - 1][0]);
+            attempt.setLastQuestionNumber(PART_RANGES[parts.getLast() - 1][1]);
+            attempt.setTotalQuestions(parts.stream()
+                    .mapToInt(part -> PART_RANGES[part - 1][1] - PART_RANGES[part - 1][0] + 1)
+                    .sum());
+        }
+        if (attempt.getTimeLimitSeconds() == null) {
+            if (attempt.getStartedAt() != null && attempt.getOverallEndAt() != null) {
+                attempt.setTimeLimitSeconds(Math.toIntExact(
+                        Math.max(0L, (attempt.getOverallEndAt() - attempt.getStartedAt()) / 1000L)
+                ));
+            } else {
+                attempt.setTimeLimitSeconds(defaultTimeLimitSeconds(attempt));
+            }
         }
         if (attempt.getOverallEndAt() == null) {
             if (MODE_FULL.equals(mode(attempt)) && attempt.getStartedAt() != null) {
@@ -636,6 +717,82 @@ public class AttemptService {
                 : attempt.getTotalQuestions();
     }
 
+    private List<Integer> selectedParts(Attempt attempt) {
+        if (attempt.getSelectedParts() != null && !attempt.getSelectedParts().isEmpty()) {
+            return attempt.getSelectedParts().stream().distinct().sorted().toList();
+        }
+        if (attempt.getSelectedPart() != null) {
+            return List.of(attempt.getSelectedPart());
+        }
+        return switch (mode(attempt)) {
+            case MODE_LISTENING -> List.of(1, 2, 3, 4);
+            case MODE_READING -> List.of(5, 6, 7);
+            default -> List.of(1, 2, 3, 4, 5, 6, 7);
+        };
+    }
+
+    private int defaultTimeLimitSeconds(Attempt attempt) {
+        return switch (mode(attempt)) {
+            case MODE_FULL -> (int) (FULL_TEST_DURATION_MS / 1000L);
+            case MODE_LISTENING -> (int) (LISTENING_DURATION_MS / 1000L);
+            case MODE_READING -> (int) (READING_DURATION_MS / 1000L);
+            default -> selectedParts(attempt).stream()
+                    .mapToInt(part -> PART_SUGGESTED_MINUTES[part - 1] * 60)
+                    .sum();
+        };
+    }
+
+    private boolean isQuestionSelected(Attempt attempt, int questionNumber) {
+        int part = partForQuestion(questionNumber);
+        return part > 0 && selectedParts(attempt).contains(part);
+    }
+
+    private int partForQuestion(int questionNumber) {
+        for (int index = 0; index < PART_RANGES.length; index++) {
+            if (questionNumber >= PART_RANGES[index][0] && questionNumber <= PART_RANGES[index][1]) {
+                return index + 1;
+            }
+        }
+        return -1;
+    }
+
+    private List<Integer> selectedQuestionNumbers(Attempt attempt) {
+        List<Integer> questionNumbers = new ArrayList<>();
+        for (int part : selectedParts(attempt)) {
+            for (int number = PART_RANGES[part - 1][0]; number <= PART_RANGES[part - 1][1]; number++) {
+                questionNumbers.add(number);
+            }
+        }
+        return questionNumbers;
+    }
+
+    private boolean hasSelectedReadingPart(Attempt attempt) {
+        return selectedParts(attempt).stream().anyMatch(part -> part >= 5);
+    }
+
+    private int firstSelectedReadingQuestion(Attempt attempt) {
+        return selectedParts(attempt).stream()
+                .filter(part -> part >= 5)
+                .findFirst()
+                .map(part -> PART_RANGES[part - 1][0])
+                .orElse(101);
+    }
+
+    private Integer nextSelectedListeningUnit(Attempt attempt, int currentStart) {
+        int candidate = currentStart < 31
+                ? currentStart + 1
+                : currentStart == 31 ? 32 : currentStart + 3;
+        while (candidate <= 100) {
+            if (isQuestionSelected(attempt, candidate)) {
+                return candidate;
+            }
+            candidate = candidate < 31
+                    ? candidate + 1
+                    : candidate == 31 ? 32 : candidate + 3;
+        }
+        return null;
+    }
+
     private void requireInProgress(Attempt attempt) {
         if (!IN_PROGRESS.equals(attempt.getStatus())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Bài thi đã kết thúc và bị khóa");
@@ -649,9 +806,11 @@ public class AttemptService {
     private record AttemptScope(
             String mode,
             Integer selectedPart,
+            List<Integer> selectedParts,
             String section,
             int firstQuestion,
             int lastQuestion,
+            int totalQuestions,
             long durationMs
     ) {
     }

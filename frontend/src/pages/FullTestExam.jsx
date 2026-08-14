@@ -110,17 +110,28 @@ function FullTestExam() {
 
   const scopeFirst = payload?.attempt.firstQuestionNumber || 1;
   const scopeLast = payload?.attempt.lastQuestionNumber || 200;
+  const selectedParts = useMemo(() => (
+    payload?.attempt.selectedParts?.length
+      ? payload.attempt.selectedParts
+      : payload?.attempt.selectedPart
+        ? [payload.attempt.selectedPart]
+        : null
+  ), [payload]);
   const listeningUnits = useMemo(
     () => buildListeningUnits(payload?.test).filter(
-      (unit) => unit.start >= scopeFirst && unit.end <= scopeLast,
+      (unit) => unit.start >= scopeFirst
+        && unit.end <= scopeLast
+        && (!selectedParts || selectedParts.includes(unit.partNumber)),
     ),
-    [payload?.test, scopeFirst, scopeLast],
+    [payload?.test, scopeFirst, scopeLast, selectedParts],
   );
   const readingUnits = useMemo(
     () => buildReadingUnits(payload?.test).filter(
-      (unit) => unit.start >= scopeFirst && unit.end <= scopeLast,
+      (unit) => unit.start >= scopeFirst
+        && unit.end <= scopeLast
+        && (!selectedParts || selectedParts.includes(unit.partNumber)),
     ),
-    [payload?.test, scopeFirst, scopeLast],
+    [payload?.test, scopeFirst, scopeLast, selectedParts],
   );
 
   const attempt = payload?.attempt;
@@ -408,10 +419,19 @@ function FullTestExam() {
   const isListening = attempt.currentSection === "LISTENING";
   const readingStart = Math.max(101, scopeFirst);
   const readingEnd = scopeLast;
-  const readingQuestionNumbers = Array.from(
-    { length: Math.max(0, readingEnd - readingStart + 1) },
-    (_, index) => readingStart + index,
-  );
+  const readingQuestionNumbers = [...new Set(
+    readingUnits.flatMap((unit) => unit.questions.map((question) => question.questionNumber)),
+  )].sort((left, right) => left - right);
+  const currentReadingIndex = readingQuestionNumbers.indexOf(currentQuestion);
+  const previousReadingQuestion = currentReadingIndex > 0
+    ? readingQuestionNumbers[currentReadingIndex - 1]
+    : null;
+  const nextReadingQuestion = currentReadingIndex >= 0
+    && currentReadingIndex < readingQuestionNumbers.length - 1
+    ? readingQuestionNumbers[currentReadingIndex + 1]
+    : null;
+  const selectedReadingParts = (selectedParts || [5, 6, 7])
+    .filter((part) => part >= 5);
   const mediaImage = currentUnit.imageUrl;
   const mediaAudio = currentUnit.audioUrl;
 
@@ -421,6 +441,7 @@ function FullTestExam() {
         section={attempt.currentSection}
         mode={attempt.mode}
         selectedPart={attempt.selectedPart}
+        selectedParts={attempt.selectedParts}
         firstQuestion={scopeFirst}
         lastQuestion={scopeLast}
         remainingSeconds={remainingSeconds ?? 0}
@@ -433,7 +454,11 @@ function FullTestExam() {
       {sectionNotice && attempt.currentSection === "READING" && (
         <div className="fixed left-1/2 top-24 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-2xl border border-emerald-200 bg-white p-5 text-center shadow-2xl">
           <p className="font-bold text-emerald-700">Listening đã kết thúc</p>
-          <p className="mt-1 text-sm text-slate-600">Bắt đầu phần Reading · 75 phút</p>
+          <p className="mt-1 text-sm text-slate-600">
+            {attempt.mode === "PART"
+              ? "Bắt đầu các Part Reading · đồng hồ chung tiếp tục đếm"
+              : "Bắt đầu phần Reading · 75 phút"}
+          </p>
           <button
             type="button"
             onClick={() => setSectionNotice(false)}
@@ -540,8 +565,8 @@ function FullTestExam() {
               <div className="flex flex-wrap items-center justify-between gap-3 pb-8">
                 <button
                   type="button"
-                  onClick={() => moveReading(currentQuestion - 1)}
-                  disabled={currentQuestion <= readingStart || busy}
+                  onClick={() => moveReading(previousReadingQuestion)}
+                  disabled={previousReadingQuestion === null || busy}
                   className="rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40"
                 >
                   ← Câu trước
@@ -556,8 +581,8 @@ function FullTestExam() {
                   </button>
                   <button
                   type="button"
-                  onClick={() => moveReading(currentQuestion + 1)}
-                  disabled={currentQuestion >= readingEnd || busy}
+                  onClick={() => moveReading(nextReadingQuestion)}
+                  disabled={nextReadingQuestion === null || busy}
                     className="rounded-xl bg-sky-500 px-5 py-3 font-bold text-white hover:bg-sky-600 disabled:opacity-40"
                   >
                     Câu tiếp →
@@ -572,7 +597,9 @@ function FullTestExam() {
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-widest text-violet-600">Bảng câu hỏi</p>
-                  <h2 className="mt-1 font-bold">Reading {readingStart}–{readingEnd}</h2>
+                  <h2 className="mt-1 font-bold">
+                    {selectedReadingParts.map((part) => `Part ${part}`).join(" + ")}
+                  </h2>
                 </div>
                 <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-700">
                   {Object.entries(answers).filter(
