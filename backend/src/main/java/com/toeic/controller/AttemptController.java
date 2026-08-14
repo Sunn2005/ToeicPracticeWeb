@@ -1,25 +1,25 @@
 package com.toeic.controller;
 
-import com.google.cloud.firestore.DocumentReference;
-import com.google.cloud.firestore.Firestore;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthException;
-import com.google.firebase.auth.FirebaseToken;
 import com.toeic.dto.CreateAttemptRequest;
-import com.toeic.model.Attempt;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.toeic.dto.SaveAnswerRequest;
+import com.toeic.dto.UpdatePositionRequest;
+import com.toeic.service.AttemptService;
+import com.toeic.service.FirebaseAuthenticationService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/attempts")
@@ -29,66 +29,125 @@ import java.util.HashMap;
 })
 public class AttemptController {
 
-    private static final Logger log = LoggerFactory.getLogger(AttemptController.class);
+    private final FirebaseAuthenticationService authenticationService;
+    private final AttemptService attemptService;
 
-    private final FirebaseAuth firebaseAuth;
-    private final Firestore firestore;
-
-    public AttemptController(FirebaseAuth firebaseAuth, Firestore firestore) {
-        this.firebaseAuth = firebaseAuth;
-        this.firestore = firestore;
+    public AttemptController(
+            FirebaseAuthenticationService authenticationService,
+            AttemptService attemptService
+    ) {
+        this.authenticationService = authenticationService;
+        this.attemptService = attemptService;
     }
 
+    // Tương thích với frontend cũ. Full Test mới ưu tiên
+    // POST /api/tests/{testId}/attempts.
     @PostMapping
-    public Attempt createAttempt(
+    public Map<String, Object> createAttempt(
             @RequestBody CreateAttemptRequest request,
             @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization
     ) throws Exception {
-        String idToken = extractBearerToken(authorization);
-
-        FirebaseToken decodedToken;
-        try {
-            decodedToken = firebaseAuth.verifyIdToken(idToken);
-        } catch (FirebaseAuthException | IllegalArgumentException exception) {
-            log.warn("Firebase ID token verification failed: {}", exception.getMessage());
-            throw unauthorized("Firebase ID token không hợp lệ", exception);
+        if (request.getTestId() == null || request.getTestId().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Thiếu testId");
         }
-
-        String userId = decodedToken.getUid();
-        DocumentReference document = firestore.collection("attempts").document();
-
-        Attempt attempt = new Attempt();
-        attempt.setId(document.getId());
-        attempt.setUserId(userId);
-        attempt.setTestId(request.getTestId());
-        attempt.setStatus("IN_PROGRESS");
-        attempt.setStartedAt(System.currentTimeMillis());
-        attempt.setSubmittedAt(null);
-        attempt.setScore(null);
-        attempt.setAnswers(new HashMap<>());
-
-        document.set(attempt).get();
-        return attempt;
+        String userId = authenticationService.requireUid(authorization);
+        return attemptService.createOrResume(userId, request.getTestId());
     }
 
-    private String extractBearerToken(String authorization) {
-        if (authorization == null || authorization.isBlank()) {
-            throw unauthorized("Thiếu Authorization header", null);
-        }
-
-        String[] parts = authorization.trim().split("\\s+", 2);
-        if (parts.length != 2
-                || !"Bearer".equalsIgnoreCase(parts[0])
-                || parts[1].isBlank()) {
-            throw unauthorized("Authorization header phải có dạng Bearer <token>", null);
-        }
-
-        return parts[1];
+    @GetMapping("/current")
+    public Map<String, Object> getCurrentAttempt(
+            @RequestParam String testId,
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization
+    ) throws Exception {
+        String userId = authenticationService.requireUid(authorization);
+        return attemptService.getCurrent(userId, testId);
     }
 
-    private ResponseStatusException unauthorized(String reason, Throwable cause) {
-        return cause == null
-                ? new ResponseStatusException(HttpStatus.UNAUTHORIZED, reason)
-                : new ResponseStatusException(HttpStatus.UNAUTHORIZED, reason, cause);
+    @GetMapping("/{attemptId}")
+    public Map<String, Object> getAttempt(
+            @PathVariable String attemptId,
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization
+    ) throws Exception {
+        String userId = authenticationService.requireUid(authorization);
+        return attemptService.getAttempt(userId, attemptId);
+    }
+
+    @GetMapping("/{attemptId}/exam")
+    public Map<String, Object> getExam(
+            @PathVariable String attemptId,
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization
+    ) throws Exception {
+        String userId = authenticationService.requireUid(authorization);
+        return attemptService.getExam(userId, attemptId);
+    }
+
+    @PutMapping("/{attemptId}/answers")
+    public Map<String, Object> saveAnswer(
+            @PathVariable String attemptId,
+            @RequestBody SaveAnswerRequest request,
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization
+    ) throws Exception {
+        String userId = authenticationService.requireUid(authorization);
+        return attemptService.saveAnswer(
+                userId,
+                attemptId,
+                request.getQuestionNumber(),
+                request.getSelectedAnswer()
+        );
+    }
+
+    @PutMapping("/{attemptId}/position")
+    public Map<String, Object> updatePosition(
+            @PathVariable String attemptId,
+            @RequestBody UpdatePositionRequest request,
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization
+    ) throws Exception {
+        String userId = authenticationService.requireUid(authorization);
+        return attemptService.updatePosition(userId, attemptId, request.getQuestionNumber());
+    }
+
+    @PostMapping("/{attemptId}/listening/next")
+    public Map<String, Object> nextListening(
+            @PathVariable String attemptId,
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization
+    ) throws Exception {
+        String userId = authenticationService.requireUid(authorization);
+        return attemptService.nextListening(userId, attemptId);
+    }
+
+    @PostMapping("/{attemptId}/finish-listening")
+    public Map<String, Object> finishListening(
+            @PathVariable String attemptId,
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization
+    ) throws Exception {
+        String userId = authenticationService.requireUid(authorization);
+        return attemptService.finishListening(userId, attemptId);
+    }
+
+    @PostMapping("/{attemptId}/submit")
+    public Map<String, Object> submit(
+            @PathVariable String attemptId,
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization
+    ) throws Exception {
+        String userId = authenticationService.requireUid(authorization);
+        return attemptService.submit(userId, attemptId);
+    }
+
+    @GetMapping("/{attemptId}/result")
+    public Map<String, Object> getResult(
+            @PathVariable String attemptId,
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization
+    ) throws Exception {
+        String userId = authenticationService.requireUid(authorization);
+        return attemptService.getResult(userId, attemptId);
+    }
+
+    @GetMapping("/{attemptId}/review")
+    public Map<String, Object> getReview(
+            @PathVariable String attemptId,
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization
+    ) throws Exception {
+        String userId = authenticationService.requireUid(authorization);
+        return attemptService.getReview(userId, attemptId);
     }
 }

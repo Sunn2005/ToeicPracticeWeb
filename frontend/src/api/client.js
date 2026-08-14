@@ -1,0 +1,80 @@
+import { auth } from "../firebase";
+
+export const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.DEV
+    ? "http://localhost:8080"
+    : "https://toeicpracticeweb.onrender.com");
+
+export class ApiError extends Error {
+  constructor(message, status, body) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+    this.body = body;
+  }
+}
+
+async function parseResponse(response) {
+  const contentType = response.headers.get("content-type") || "";
+  if (contentType.includes("application/json")) {
+    return response.json();
+  }
+  const text = await response.text();
+  return text || null;
+}
+
+async function request(path, options, forceRefresh) {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new ApiError("Bạn cần đăng nhập để tiếp tục.", 401, null);
+  }
+
+  const idToken = await user.getIdToken(forceRefresh);
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+      Authorization: `Bearer ${idToken}`,
+    },
+  });
+  const body = await parseResponse(response);
+
+  if (!response.ok) {
+    const message =
+      body?.detail ||
+      body?.message ||
+      body?.error ||
+      (typeof body === "string" ? body : `Yêu cầu thất bại (${response.status})`);
+    throw new ApiError(message, response.status, body);
+  }
+  return body;
+}
+
+export async function apiFetch(
+  path,
+  { forceRefresh = false, ...options } = {},
+) {
+  try {
+    return await request(path, options, forceRefresh);
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401 && !forceRefresh) {
+      return request(path, options, true);
+    }
+    throw error;
+  }
+}
+
+export async function publicApiFetch(path) {
+  const response = await fetch(`${API_BASE_URL}${path}`);
+  const body = await parseResponse(response);
+  if (!response.ok) {
+    throw new ApiError(
+      body?.detail || body?.message || `Không tải được dữ liệu (${response.status})`,
+      response.status,
+      body,
+    );
+  }
+  return body;
+}

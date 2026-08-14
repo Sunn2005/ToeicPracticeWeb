@@ -1,0 +1,5597 @@
+# ETS 2026 TOEIC Listening & Reading – Test 1
+
+Dữ liệu được trích từ hai PDF Listening và Reading do người dùng cung cấp.
+
+Các URL audio của Part 1-4 và URL ảnh của Part 1 trỏ đến bucket Supabase `toeic-media`. Các ảnh graphic của Part 3-4 chưa có trong bucket nên vẫn là `null`. Một số description, grammarTopic và explanation cũng được giữ là `null`. Với Part 6, vị trí cần điền đã nằm trong `content`, vì vậy trường `question` của từng câu được giữ là `null`.
+
+## JSON
+
+```json
+{
+  "testId": "ets-2026-test-1",
+  "title": "ETS 2026 TOEIC Listening & Reading - Test 1",
+  "description": null,
+  "totalQuestions": 200,
+  "parts": [
+    {
+      "partNumber": 1,
+      "name": "Photographs",
+      "questions": [
+        {
+          "questionNumber": 1,
+          "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/picture/T01-01.png",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-01.mp3",
+          "description": null,
+          "question": null,
+          "answers": [
+            {
+              "label": "A",
+              "content": "The woman is carrying a tray of food."
+            },
+            {
+              "label": "B",
+              "content": "The woman is wearing a jacket."
+            },
+            {
+              "label": "C",
+              "content": "The woman is tying up her hair."
+            },
+            {
+              "label": "D",
+              "content": "The woman is removing her hat."
+            }
+          ],
+          "correctAnswer": "B",
+          "explanation": null,
+          "transcript": "(A) The woman is carrying a tray of food. (B) The woman is wearing a jacket. (C) The woman is tying up her hair. (D) The woman is removing her hat."
+        },
+        {
+          "questionNumber": 2,
+          "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/picture/T01-02.png",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-02.mp3",
+          "description": null,
+          "question": null,
+          "answers": [
+            {
+              "label": "A",
+              "content": "Some people are standing next to a filing cabinet."
+            },
+            {
+              "label": "B",
+              "content": "Some people are searching through a desk."
+            },
+            {
+              "label": "C",
+              "content": "Some people are watching a presentation."
+            },
+            {
+              "label": "D",
+              "content": "Some people are looking at a book."
+            }
+          ],
+          "correctAnswer": "D",
+          "explanation": null,
+          "transcript": "(A) Some people are standing next to a filing cabinet. (B) Some people are searching through a desk. (C) Some people are watching a presentation. (D) Some people are looking at a book."
+        },
+        {
+          "questionNumber": 3,
+          "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/picture/T01-03.png",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-03.mp3",
+          "description": null,
+          "question": null,
+          "answers": [
+            {
+              "label": "A",
+              "content": "A woman is holding a phone up to her ear."
+            },
+            {
+              "label": "B",
+              "content": "A woman is pouring a beverage into a glass."
+            },
+            {
+              "label": "C",
+              "content": "Some light fixtures are hanging from the ceiling."
+            },
+            {
+              "label": "D",
+              "content": "Some tiles are being installed in a hallway."
+            }
+          ],
+          "correctAnswer": "C",
+          "explanation": null,
+          "transcript": "(A) A woman is holding a phone up to her ear. (B) A woman is pouring a beverage into a glass. (C) Some light fixtures are hanging from the ceiling. (D) Some tiles are being installed in a hallway."
+        },
+        {
+          "questionNumber": 4,
+          "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/picture/T01-04.png",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-04.mp3",
+          "description": null,
+          "question": null,
+          "answers": [
+            {
+              "label": "A",
+              "content": "A wooden crate is filled with vegetables."
+            },
+            {
+              "label": "B",
+              "content": "One of the men is putting vegetables into a shopping bag."
+            },
+            {
+              "label": "C",
+              "content": "A backpack has been set on the ground."
+            },
+            {
+              "label": "D",
+              "content": "One of the men is reaching into a bucket."
+            }
+          ],
+          "correctAnswer": "A",
+          "explanation": null,
+          "transcript": "(A) A wooden crate is filled with vegetables. (B) One of the men is putting vegetables into a shopping bag. (C) A backpack has been set on the ground. (D) One of the men is reaching into a bucket."
+        },
+        {
+          "questionNumber": 5,
+          "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/picture/T01-05.png",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-05.mp3",
+          "description": null,
+          "question": null,
+          "answers": [
+            {
+              "label": "A",
+              "content": "Painting supplies have been laid out on the floor."
+            },
+            {
+              "label": "B",
+              "content": "He's laying a brush down on a windowsill."
+            },
+            {
+              "label": "C",
+              "content": "He's lifting a can of paint by its handle."
+            },
+            {
+              "label": "D",
+              "content": "Cans of paint have been placed on a step stool."
+            }
+          ],
+          "correctAnswer": "A",
+          "explanation": null,
+          "transcript": "(A) Painting supplies have been laid out on the floor. (B) He's laying a brush down on a windowsill. (C) He's lifting a can of paint by its handle. (D) Cans of paint have been placed on a step stool."
+        },
+        {
+          "questionNumber": 6,
+          "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/picture/T01-06.png",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-06.mp3",
+          "description": null,
+          "question": null,
+          "answers": [
+            {
+              "label": "A",
+              "content": "A path is covered with fallen branches."
+            },
+            {
+              "label": "B",
+              "content": "A tree is lying across a grassy area."
+            },
+            {
+              "label": "C",
+              "content": "Some water has pooled on a path."
+            },
+            {
+              "label": "D",
+              "content": "Some cyclists are riding through a field."
+            }
+          ],
+          "correctAnswer": "C",
+          "explanation": null,
+          "transcript": "(A) A path is covered with fallen branches. (B) A tree is lying across a grassy area. (C) Some water has pooled on a path. (D) Some cyclists are riding through a field."
+        }
+      ]
+    },
+    {
+      "partNumber": 2,
+      "name": "Question-Response",
+      "questions": [
+        {
+          "questionNumber": 7,
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-07.mp3",
+          "description": null,
+          "question": "Where is the conference being held?",
+          "answers": [
+            {
+              "label": "A",
+              "content": "A three-day vacation."
+            },
+            {
+              "label": "B",
+              "content": "At the Riverview Hotel."
+            },
+            {
+              "label": "C",
+              "content": "In the supply cabinet."
+            }
+          ],
+          "correctAnswer": "B",
+          "explanation": null,
+          "transcript": "Where is the conference being held? (A) A three-day vacation. (B) At the Riverview Hotel. (C) In the supply cabinet."
+        },
+        {
+          "questionNumber": 8,
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-08.mp3",
+          "description": null,
+          "question": "When does the warehouse manager arrive?",
+          "answers": [
+            {
+              "label": "A",
+              "content": "Sure, no problem."
+            },
+            {
+              "label": "B",
+              "content": "About twelve shipping boxes."
+            },
+            {
+              "label": "C",
+              "content": "Not until this afternoon."
+            }
+          ],
+          "correctAnswer": "C",
+          "explanation": null,
+          "transcript": "When does the warehouse manager arrive? (A) Sure, no problem. (B) About twelve shipping boxes. (C) Not until this afternoon."
+        },
+        {
+          "questionNumber": 9,
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-09.mp3",
+          "description": null,
+          "question": "There's a nice park nearby, right?",
+          "answers": [
+            {
+              "label": "A",
+              "content": "Did you order paper for the copier?"
+            },
+            {
+              "label": "B",
+              "content": "Yes-it's next to Greendale Lake."
+            },
+            {
+              "label": "C",
+              "content": "They're in the parking garage."
+            }
+          ],
+          "correctAnswer": "B",
+          "explanation": null,
+          "transcript": "There's a nice park nearby, right? (A) Did you order paper for the copier? (B) Yes-it's next to Greendale Lake. (C) They're in the parking garage."
+        },
+        {
+          "questionNumber": 10,
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-10.mp3",
+          "description": null,
+          "question": "Who sent the meeting minutes to the accounting department?",
+          "answers": [
+            {
+              "label": "A",
+              "content": "Our office assistant."
+            },
+            {
+              "label": "B",
+              "content": "They have a savings account."
+            },
+            {
+              "label": "C",
+              "content": "Cash and credit cards."
+            }
+          ],
+          "correctAnswer": "A",
+          "explanation": null,
+          "transcript": "Who sent the meeting minutes to the accounting department? (A) Our office assistant. (B) They have a savings account. (C) Cash and credit cards."
+        },
+        {
+          "questionNumber": 11,
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-11.mp3",
+          "description": null,
+          "question": "I'd like to know what you think of our new finance analyst.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "I've prepared the decorations for tomorrow."
+            },
+            {
+              "label": "B",
+              "content": "He seems very competent."
+            },
+            {
+              "label": "C",
+              "content": "It's finally stopped raining."
+            }
+          ],
+          "correctAnswer": "B",
+          "explanation": null,
+          "transcript": "I'd like to know what you think of our new finance analyst. (A) I've prepared the decorations for tomorrow. (B) He seems very competent. (C) It's finally stopped raining."
+        },
+        {
+          "questionNumber": 12,
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-12.mp3",
+          "description": null,
+          "question": "Let's go on the company retreat.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "Oh, did he?"
+            },
+            {
+              "label": "B",
+              "content": "Yes, that's a good idea."
+            },
+            {
+              "label": "C",
+              "content": "He tried to solve that problem."
+            }
+          ],
+          "correctAnswer": "B",
+          "explanation": null,
+          "transcript": "Let's go on the company retreat. (A) Oh, did he? (B) Yes, that's a good idea. (C) He tried to solve that problem."
+        },
+        {
+          "questionNumber": 13,
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-13.mp3",
+          "description": null,
+          "question": "What time can I pick up my glasses?",
+          "answers": [
+            {
+              "label": "A",
+              "content": "No, it's not very heavy."
+            },
+            {
+              "label": "B",
+              "content": "About twenty meters."
+            },
+            {
+              "label": "C",
+              "content": "We close at six o'clock."
+            }
+          ],
+          "correctAnswer": "C",
+          "explanation": null,
+          "transcript": "What time can I pick up my glasses? (A) No, it's not very heavy. (B) About twenty meters. (C) We close at six o'clock."
+        },
+        {
+          "questionNumber": 14,
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-14.mp3",
+          "description": null,
+          "question": "The sales team knows how to use the tracking software, don't they?",
+          "answers": [
+            {
+              "label": "A",
+              "content": "It's on the lower shelf."
+            },
+            {
+              "label": "B",
+              "content": "A twelve-thirty departure."
+            },
+            {
+              "label": "C",
+              "content": "I haven't seen them using it yet."
+            }
+          ],
+          "correctAnswer": "C",
+          "explanation": null,
+          "transcript": "The sales team knows how to use the tracking software, don't they? (A) It's on the lower shelf. (B) A twelve-thirty departure. (C) I haven't seen them using it yet."
+        },
+        {
+          "questionNumber": 15,
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-15.mp3",
+          "description": null,
+          "question": "Are you going to the hardware store on Mill Street?",
+          "answers": [
+            {
+              "label": "A",
+              "content": "That store hasn't opened yet."
+            },
+            {
+              "label": "B",
+              "content": "The blue package you sent me."
+            },
+            {
+              "label": "C",
+              "content": "Some nails and a hammer."
+            }
+          ],
+          "correctAnswer": "A",
+          "explanation": null,
+          "transcript": "Are you going to the hardware store on Mill Street? (A) That store hasn't opened yet. (B) The blue package you sent me. (C) Some nails and a hammer."
+        },
+        {
+          "questionNumber": 16,
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-16.mp3",
+          "description": null,
+          "question": "Would you be able to write the introduction for the workshop?",
+          "answers": [
+            {
+              "label": "A",
+              "content": "That was a great book."
+            },
+            {
+              "label": "B",
+              "content": "OK, I'd be happy to."
+            },
+            {
+              "label": "C",
+              "content": "He doesn't have any more."
+            }
+          ],
+          "correctAnswer": "B",
+          "explanation": null,
+          "transcript": "Would you be able to write the introduction for the workshop? (A) That was a great book. (B) OK, I'd be happy to. (C) He doesn't have any more."
+        },
+        {
+          "questionNumber": 17,
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-17.mp3",
+          "description": null,
+          "question": "I picked up some flowers for Tunji's retirement party.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "No, pick any day."
+            },
+            {
+              "label": "B",
+              "content": "That was thoughtful."
+            },
+            {
+              "label": "C",
+              "content": "A delivery driver."
+            }
+          ],
+          "correctAnswer": "B",
+          "explanation": null,
+          "transcript": "I picked up some flowers for Tunji's retirement party. (A) No, pick any day. (B) That was thoughtful. (C) A delivery driver."
+        },
+        {
+          "questionNumber": 18,
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-18.mp3",
+          "description": null,
+          "question": "Which meeting room did you tell the interns to go to?",
+          "answers": [
+            {
+              "label": "A",
+              "content": "The Jefferson Room."
+            },
+            {
+              "label": "B",
+              "content": "The meeting was fun, thanks."
+            },
+            {
+              "label": "C",
+              "content": "Yes, it's a conference call."
+            }
+          ],
+          "correctAnswer": "A",
+          "explanation": null,
+          "transcript": "Which meeting room did you tell the interns to go to? (A) The Jefferson Room. (B) The meeting was fun, thanks. (C) Yes, it's a conference call."
+        },
+        {
+          "questionNumber": 19,
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-19.mp3",
+          "description": null,
+          "question": "Is your dental appointment next Tuesday?",
+          "answers": [
+            {
+              "label": "A",
+              "content": "You can borrow mine."
+            },
+            {
+              "label": "B",
+              "content": "I'll have to check my calendar."
+            },
+            {
+              "label": "C",
+              "content": "Yes, it was a good meeting."
+            }
+          ],
+          "correctAnswer": "B",
+          "explanation": null,
+          "transcript": "Is your dental appointment next Tuesday? (A) You can borrow mine. (B) I'll have to check my calendar. (C) Yes, it was a good meeting."
+        },
+        {
+          "questionNumber": 20,
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-20.mp3",
+          "description": null,
+          "question": "Why aren't there any brochures in the lobby?",
+          "answers": [
+            {
+              "label": "A",
+              "content": "No, I haven't received my confirmation e-mail yet."
+            },
+            {
+              "label": "B",
+              "content": "My winter coat."
+            },
+            {
+              "label": "C",
+              "content": "Because someone just took the last one."
+            }
+          ],
+          "correctAnswer": "C",
+          "explanation": null,
+          "transcript": "Why aren't there any brochures in the lobby? (A) No, I haven't received my confirmation e-mail yet. (B) My winter coat. (C) Because someone just took the last one."
+        },
+        {
+          "questionNumber": 21,
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-21.mp3",
+          "description": null,
+          "question": "What's the process for submitting my expense report?",
+          "answers": [
+            {
+              "label": "A",
+              "content": "You send it to the finance department."
+            },
+            {
+              "label": "B",
+              "content": "The end of the day."
+            },
+            {
+              "label": "C",
+              "content": "That's correct."
+            }
+          ],
+          "correctAnswer": "A",
+          "explanation": null,
+          "transcript": "What's the process for submitting my expense report? (A) You send it to the finance department. (B) The end of the day. (C) That's correct."
+        },
+        {
+          "questionNumber": 22,
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-22.mp3",
+          "description": null,
+          "question": "Do you sell your products online or in stores?",
+          "answers": [
+            {
+              "label": "A",
+              "content": "About twenty percent off."
+            },
+            {
+              "label": "B",
+              "content": "A product demonstration."
+            },
+            {
+              "label": "C",
+              "content": "Only online."
+            }
+          ],
+          "correctAnswer": "C",
+          "explanation": null,
+          "transcript": "Do you sell your products online or in stores? (A) About twenty percent off. (B) A product demonstration. (C) Only online."
+        },
+        {
+          "questionNumber": 23,
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-23.mp3",
+          "description": null,
+          "question": "How often do you charge this device?",
+          "answers": [
+            {
+              "label": "A",
+              "content": "Whenever the light turns red."
+            },
+            {
+              "label": "B",
+              "content": "A wireless one."
+            },
+            {
+              "label": "C",
+              "content": "At the hardware store."
+            }
+          ],
+          "correctAnswer": "A",
+          "explanation": null,
+          "transcript": "How often do you charge this device? (A) Whenever the light turns red. (B) A wireless one. (C) At the hardware store."
+        },
+        {
+          "questionNumber": 24,
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-24.mp3",
+          "description": null,
+          "question": "The tickets to Friday night's concert cost ten dollars each.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "Actually, they're fifteen."
+            },
+            {
+              "label": "B",
+              "content": "No, I can't play the guitar."
+            },
+            {
+              "label": "C",
+              "content": "It's in aisle five."
+            }
+          ],
+          "correctAnswer": "A",
+          "explanation": null,
+          "transcript": "The tickets to Friday night's concert cost ten dollars each. (A) Actually, they're fifteen. (B) No, I can't play the guitar. (C) It's in aisle five."
+        },
+        {
+          "questionNumber": 25,
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-25.mp3",
+          "description": null,
+          "question": "Can't you update the database today?",
+          "answers": [
+            {
+              "label": "A",
+              "content": "I did it yesterday."
+            },
+            {
+              "label": "B",
+              "content": "That's an interesting movie."
+            },
+            {
+              "label": "C",
+              "content": "No, just me."
+            }
+          ],
+          "correctAnswer": "A",
+          "explanation": null,
+          "transcript": "Can't you update the database today? (A) I did it yesterday. (B) That's an interesting movie. (C) No, just me."
+        },
+        {
+          "questionNumber": 26,
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-26.mp3",
+          "description": null,
+          "question": "How are we going to fit the extra supplies in that closet?",
+          "answers": [
+            {
+              "label": "A",
+              "content": "I've already read them."
+            },
+            {
+              "label": "B",
+              "content": "Natalie's in charge of supplies."
+            },
+            {
+              "label": "C",
+              "content": "It's the door at the end of the hallway."
+            }
+          ],
+          "correctAnswer": "B",
+          "explanation": null,
+          "transcript": "How are we going to fit the extra supplies in that closet? (A) I've already read them. (B) Natalie's in charge of supplies. (C) It's the door at the end of the hallway."
+        },
+        {
+          "questionNumber": 27,
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-27.mp3",
+          "description": null,
+          "question": "Have all the new windows been installed?",
+          "answers": [
+            {
+              "label": "A",
+              "content": "Sure, I'll close the blinds."
+            },
+            {
+              "label": "B",
+              "content": "The construction crew is almost finished."
+            },
+            {
+              "label": "C",
+              "content": "This isn't the tallest ladder available."
+            }
+          ],
+          "correctAnswer": "B",
+          "explanation": null,
+          "transcript": "Have all the new windows been installed? (A) Sure, I'll close the blinds. (B) The construction crew is almost finished. (C) This isn't the tallest ladder available."
+        },
+        {
+          "questionNumber": 28,
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-28.mp3",
+          "description": null,
+          "question": "Would you rather go to lunch now or at noon?",
+          "answers": [
+            {
+              "label": "A",
+              "content": "I'm taking a client to lunch."
+            },
+            {
+              "label": "B",
+              "content": "On the corner of Fourth and Main."
+            },
+            {
+              "label": "C",
+              "content": "The daily special is soup and a sandwich."
+            }
+          ],
+          "correctAnswer": "A",
+          "explanation": null,
+          "transcript": "Would you rather go to lunch now or at noon? (A) I'm taking a client to lunch. (B) On the corner of Fourth and Main. (C) The daily special is soup and a sandwich."
+        },
+        {
+          "questionNumber": 29,
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-29.mp3",
+          "description": null,
+          "question": "You're taking the training in the afternoon, aren't you?",
+          "answers": [
+            {
+              "label": "A",
+              "content": "The new head of the accounting department."
+            },
+            {
+              "label": "B",
+              "content": "No, I take my coffee black."
+            },
+            {
+              "label": "C",
+              "content": "Well, it depends on my schedule."
+            }
+          ],
+          "correctAnswer": "C",
+          "explanation": null,
+          "transcript": "You're taking the training in the afternoon, aren't you? (A) The new head of the accounting department. (B) No, I take my coffee black. (C) Well, it depends on my schedule."
+        },
+        {
+          "questionNumber": 30,
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-30.mp3",
+          "description": null,
+          "question": "Shouldn't Ms. Ishida look over the financial projections?",
+          "answers": [
+            {
+              "label": "A",
+              "content": "I just got this monitor."
+            },
+            {
+              "label": "B",
+              "content": "To the south entrance."
+            },
+            {
+              "label": "C",
+              "content": "I'm meeting with her at ten."
+            }
+          ],
+          "correctAnswer": "C",
+          "explanation": null,
+          "transcript": "Shouldn't Ms. Ishida look over the financial projections? (A) I just got this monitor. (B) To the south entrance. (C) I'm meeting with her at ten."
+        },
+        {
+          "questionNumber": 31,
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-31.mp3",
+          "description": null,
+          "question": "When are you going to choose a new project manager?",
+          "answers": [
+            {
+              "label": "A",
+              "content": "The projector's not working correctly."
+            },
+            {
+              "label": "B",
+              "content": "Next to the front entrance."
+            },
+            {
+              "label": "C",
+              "content": "I'm really busy this week."
+            }
+          ],
+          "correctAnswer": "C",
+          "explanation": null,
+          "transcript": "When are you going to choose a new project manager? (A) The projector's not working correctly. (B) Next to the front entrance. (C) I'm really busy this week."
+        }
+      ]
+    },
+    {
+      "partNumber": 3,
+      "name": "Conversations",
+      "groups": [
+        {
+          "groupNumber": 1,
+          "questionRange": "32-34",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-32-34.mp3",
+          "imageUrl": null,
+          "transcript": "W: Hey, Oliver. Did you see the focus group results for our new spicy cheddar cheese? Everyone really liked it. M: Yes. It should be a great addition to our company's line of cheeses. W: Several people mentioned that they'd like to use it in recipes-to add to sauces, for example. M: So maybe we should consider selling a shredded version that would melt easily when cooked. W: I'm sure we could do that. I'll get in touch with the production manager with that request.",
+          "questions": [
+            {
+              "questionNumber": 32,
+              "description": null,
+              "question": "What type of food product does the speakers' company sell?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Candy"
+                },
+                {
+                  "label": "B",
+                  "content": "Cheese"
+                },
+                {
+                  "label": "C",
+                  "content": "Bread"
+                },
+                {
+                  "label": "D",
+                  "content": "Pasta"
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": null
+            },
+            {
+              "questionNumber": 33,
+              "description": null,
+              "question": "What does the man suggest?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Lowering prices"
+                },
+                {
+                  "label": "B",
+                  "content": "Hiring more workers"
+                },
+                {
+                  "label": "C",
+                  "content": "Publishing a recipe"
+                },
+                {
+                  "label": "D",
+                  "content": "Offering additional options"
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": null
+            },
+            {
+              "questionNumber": 34,
+              "description": null,
+              "question": "What does the woman say she will do?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Send a schedule update"
+                },
+                {
+                  "label": "B",
+                  "content": "Contact a production manager"
+                },
+                {
+                  "label": "C",
+                  "content": "Visit the company headquarters"
+                },
+                {
+                  "label": "D",
+                  "content": "Plan an advertising campaign"
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": null
+            }
+          ]
+        },
+        {
+          "groupNumber": 2,
+          "questionRange": "35-37",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-35-37.mp3",
+          "imageUrl": null,
+          "transcript": "M: Hi. I'm calling to book three tickets for this Thursday's tennis match. Are there any seats left? W: Just a few! Tickets for Thursday's match have been selling quickly. M: I'm not surprised! After all, Ife Rotimi won the regional championship tournament last month. Everyone wants to see her play after her incredible performance. W: Well, there's only one group of three seats together. Advance payment is required to hold them.",
+          "questions": [
+            {
+              "questionNumber": 35,
+              "description": null,
+              "question": "Why is the man calling?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "To sign up for lessons"
+                },
+                {
+                  "label": "B",
+                  "content": "To enter a competition"
+                },
+                {
+                  "label": "C",
+                  "content": "To buy tickets to an event"
+                },
+                {
+                  "label": "D",
+                  "content": "To ask about branded merchandise"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": null
+            },
+            {
+              "questionNumber": 36,
+              "description": null,
+              "question": "What did Ife Rotimi do last month?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "She won a regional tournament."
+                },
+                {
+                  "label": "B",
+                  "content": "She gave a television interview."
+                },
+                {
+                  "label": "C",
+                  "content": "She started an institute."
+                },
+                {
+                  "label": "D",
+                  "content": "She hired a new coach."
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": null
+            },
+            {
+              "questionNumber": 37,
+              "description": null,
+              "question": "What does the woman say is required?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "A parking permit"
+                },
+                {
+                  "label": "B",
+                  "content": "A photo ID"
+                },
+                {
+                  "label": "C",
+                  "content": "Contact information"
+                },
+                {
+                  "label": "D",
+                  "content": "Advance payment"
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": null
+            }
+          ]
+        },
+        {
+          "groupNumber": 3,
+          "questionRange": "38-40",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-38-40.mp3",
+          "imageUrl": null,
+          "transcript": "W: Thanks for agreeing to help me organize the library's annual fund-raising dinner, Klaus. We hope the event brings in enough money to expand our children's book section. M: What task would you like me to start with? W: Well, I could use some help sending out the invitations. M: OK, I can take care of that. Is there a list of attendees available? W: It's in my computer files. I'll e-mail it to you.",
+          "questions": [
+            {
+              "questionNumber": 38,
+              "description": null,
+              "question": "What event are the speakers planning?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "A fund-raising dinner"
+                },
+                {
+                  "label": "B",
+                  "content": "An art gallery opening"
+                },
+                {
+                  "label": "C",
+                  "content": "An awards ceremony"
+                },
+                {
+                  "label": "D",
+                  "content": "A children's book fair"
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": null
+            },
+            {
+              "questionNumber": 39,
+              "description": null,
+              "question": "What task does the woman ask the man to help with?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Arranging a shuttle service"
+                },
+                {
+                  "label": "B",
+                  "content": "Choosing a catering firm"
+                },
+                {
+                  "label": "C",
+                  "content": "Preparing a speech"
+                },
+                {
+                  "label": "D",
+                  "content": "Sending out invitations"
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": null
+            },
+            {
+              "questionNumber": 40,
+              "description": null,
+              "question": "What does the woman say she will do?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "E-mail a list"
+                },
+                {
+                  "label": "B",
+                  "content": "Speak with a colleague"
+                },
+                {
+                  "label": "C",
+                  "content": "Provide a password"
+                },
+                {
+                  "label": "D",
+                  "content": "Post a job opening"
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": null
+            }
+          ]
+        },
+        {
+          "groupNumber": 4,
+          "questionRange": "41-43",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-41-43.mp3",
+          "imageUrl": null,
+          "transcript": "W: Hey, Brian and Matteo. I found some great pens to give away at the community festival to promote our business. M1: Great. Can we put our cleaning service logo on them? W: Yes, for no extra charge. And they're biodegradable. They're made from paper. M2: So when we hand them out, we can mention that. M1: As well as talk about the organic cleaning supplies our company uses. W: OK. I'll go ahead and order several cases.",
+          "questions": [
+            {
+              "questionNumber": 41,
+              "description": null,
+              "question": "What event are the speakers preparing for?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "A new-employee orientation"
+                },
+                {
+                  "label": "B",
+                  "content": "A grand opening"
+                },
+                {
+                  "label": "C",
+                  "content": "A community festival"
+                },
+                {
+                  "label": "D",
+                  "content": "A trade show"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": null
+            },
+            {
+              "questionNumber": 42,
+              "description": null,
+              "question": "What is mentioned about some pens?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "They are available in multiple colors."
+                },
+                {
+                  "label": "B",
+                  "content": "They use permanent ink."
+                },
+                {
+                  "label": "C",
+                  "content": "They are preferred by book authors."
+                },
+                {
+                  "label": "D",
+                  "content": "They are made from paper."
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": null
+            },
+            {
+              "questionNumber": 43,
+              "description": null,
+              "question": "What does the woman offer to do?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Reserve a booth"
+                },
+                {
+                  "label": "B",
+                  "content": "Place an order"
+                },
+                {
+                  "label": "C",
+                  "content": "Organize a focus group"
+                },
+                {
+                  "label": "D",
+                  "content": "Revise a budget"
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": null
+            }
+          ]
+        },
+        {
+          "groupNumber": 5,
+          "questionRange": "44-46",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-44-46.mp3",
+          "imageUrl": null,
+          "transcript": "W: Jamestown Recycling Facility. How can I help you? M: Hi. I'm preparing to move soon, and I have some electronics, such as televisions and computers, that I'd like to get rid of before I put my house on the market. W: Yes, that's right. We'll take all electronics. M: Great. I just have one question. Do you provide a pickup service? W: No, unfortunately you'll have to bring everything here yourself. However, on our Web site we list a number of companies that can remove and dispose of the items for you.",
+          "questions": [
+            {
+              "questionNumber": 44,
+              "description": null,
+              "question": "Where does the woman work?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "At a delivery service"
+                },
+                {
+                  "label": "B",
+                  "content": "At an electronics store"
+                },
+                {
+                  "label": "C",
+                  "content": "At a recycling facility"
+                },
+                {
+                  "label": "D",
+                  "content": "At a real estate agency"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": null
+            },
+            {
+              "questionNumber": 45,
+              "description": null,
+              "question": "What does the man want to dispose of?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Yard waste"
+                },
+                {
+                  "label": "B",
+                  "content": "Used furniture"
+                },
+                {
+                  "label": "C",
+                  "content": "Electronics"
+                },
+                {
+                  "label": "D",
+                  "content": "Books"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": null
+            },
+            {
+              "questionNumber": 46,
+              "description": null,
+              "question": "What does the woman say can be found on a Web site?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "A list of companies"
+                },
+                {
+                  "label": "B",
+                  "content": "Hours of operation"
+                },
+                {
+                  "label": "C",
+                  "content": "A permit application"
+                },
+                {
+                  "label": "D",
+                  "content": "Directions to a site"
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": null
+            }
+          ]
+        },
+        {
+          "groupNumber": 6,
+          "questionRange": "47-49",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-47-49.mp3",
+          "imageUrl": null,
+          "transcript": "M: Zaina! What a surprise! I haven't seen you since we took that class for business owners together last year. W: Great, thanks. I was just in the neighborhood and thought I'd stop in for a cookie or a piece of cake. You have so many delicious baked goods here. M: Thank you! It's been a good year for business. I'm even considering opening a second location. W: Really? Well, I noticed that Sunnyvale Restaurant went out of business, and the building's up for lease. It's very close to the local university.",
+          "questions": [
+            {
+              "questionNumber": 47,
+              "description": null,
+              "question": "How do the speakers know each other?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "They took a class together."
+                },
+                {
+                  "label": "B",
+                  "content": "They used to work for the same company."
+                },
+                {
+                  "label": "C",
+                  "content": "They grew up in the same neighborhood."
+                },
+                {
+                  "label": "D",
+                  "content": "They met on a train."
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": null
+            },
+            {
+              "questionNumber": 48,
+              "description": null,
+              "question": "What type of business does the man most likely own?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "A fitness center"
+                },
+                {
+                  "label": "B",
+                  "content": "A real estate agency"
+                },
+                {
+                  "label": "C",
+                  "content": "A culinary school"
+                },
+                {
+                  "label": "D",
+                  "content": "A bakery"
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": null
+            },
+            {
+              "questionNumber": 49,
+              "description": null,
+              "question": "What advantage does the woman point out about a rental space?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Its price"
+                },
+                {
+                  "label": "B",
+                  "content": "Its size"
+                },
+                {
+                  "label": "C",
+                  "content": "Its location"
+                },
+                {
+                  "label": "D",
+                  "content": "Its design"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": null
+            }
+          ]
+        },
+        {
+          "groupNumber": 7,
+          "questionRange": "50-52",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-50-52.mp3",
+          "imageUrl": null,
+          "transcript": "W: Hi, Koji. I think our new video game is nearly ready to be released. Are you aware of any improvements that need to be made before then? M: Actually, I just finished testing the game this morning. I found a problem in the third stage of the game. There were a few times when my character couldn't move. W: Oh, that's strange! M: I double-checked the problem using a different controller. The same issue came up. W: Oh. I think Pauline had a similar problem with a game she tested. Maybe you should ask her about it.",
+          "questions": [
+            {
+              "questionNumber": 50,
+              "description": null,
+              "question": "Who most likely are the speakers?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Film actors"
+                },
+                {
+                  "label": "B",
+                  "content": "Museum directors"
+                },
+                {
+                  "label": "C",
+                  "content": "Video game developers"
+                },
+                {
+                  "label": "D",
+                  "content": "Investigative journalists"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": null
+            },
+            {
+              "questionNumber": 51,
+              "description": null,
+              "question": "What did the man recently do?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "He secured some funding."
+                },
+                {
+                  "label": "B",
+                  "content": "He tested a product."
+                },
+                {
+                  "label": "C",
+                  "content": "He read a script."
+                },
+                {
+                  "label": "D",
+                  "content": "He conducted an interview."
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": null
+            },
+            {
+              "questionNumber": 52,
+              "description": null,
+              "question": "What does the woman suggest?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Consulting a colleague"
+                },
+                {
+                  "label": "B",
+                  "content": "Planning an event"
+                },
+                {
+                  "label": "C",
+                  "content": "Negotiating a contract"
+                },
+                {
+                  "label": "D",
+                  "content": "Giving a client an update"
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": null
+            }
+          ]
+        },
+        {
+          "groupNumber": 8,
+          "questionRange": "53-55",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-53-55.mp3",
+          "imageUrl": null,
+          "transcript": "M: You've reached the maintenance office at Hillview Apartment Complex. W: Hi. This is Palavi Sen from unit 35B. I'm calling because the new thermostat in my apartment isn't working. It keeps shutting off and turning on randomly, so my apartment is getting cold. M: When did this issue start? W: A few hours ago. The thermostat was just installed yesterday. M: OK. I can come and take a look at it tomorrow morning. W: But it's supposed to be below freezing tonight!",
+          "questions": [
+            {
+              "questionNumber": 53,
+              "description": null,
+              "question": "Who most likely is the man?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "A delivery driver"
+                },
+                {
+                  "label": "B",
+                  "content": "A security guard"
+                },
+                {
+                  "label": "C",
+                  "content": "A maintenance worker"
+                },
+                {
+                  "label": "D",
+                  "content": "A customer service representative"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": null
+            },
+            {
+              "questionNumber": 54,
+              "description": null,
+              "question": "What problem does the woman describe?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "A device is malfunctioning."
+                },
+                {
+                  "label": "B",
+                  "content": "A key is missing."
+                },
+                {
+                  "label": "C",
+                  "content": "A parking area is unavailable."
+                },
+                {
+                  "label": "D",
+                  "content": "A package was not received."
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": null
+            },
+            {
+              "questionNumber": 55,
+              "description": null,
+              "question": "What does the woman mean when she says, \"it's supposed to be below freezing tonight\"?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "She is surprised by the weather forecast."
+                },
+                {
+                  "label": "B",
+                  "content": "She wants a service to be completed sooner."
+                },
+                {
+                  "label": "C",
+                  "content": "She will move some items indoors."
+                },
+                {
+                  "label": "D",
+                  "content": "She would prefer to park near her apartment."
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": null
+            }
+          ]
+        },
+        {
+          "groupNumber": 9,
+          "questionRange": "56-58",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-56-58.mp3",
+          "imageUrl": null,
+          "transcript": "W: Good morning! Welcome to Jasper Bank. M1: Thanks for meeting with us to discuss a loan for our business. W: Why don't you tell me more about your business? I understand it's a repair shop? M2: Well, ten years ago, we opened as a snowmobile repair shop, but after a few years, we also started renting out snowmobiles and other sports equipment. M1: Yes, and because winter tourism has increased recently, we'd like to expand our space so that we can carry more inventory.",
+          "questions": [
+            {
+              "questionNumber": 56,
+              "description": null,
+              "question": "Why do the men want to speak to the woman?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "To review a building design"
+                },
+                {
+                  "label": "B",
+                  "content": "To discuss a loan"
+                },
+                {
+                  "label": "C",
+                  "content": "To develop an advertising plan"
+                },
+                {
+                  "label": "D",
+                  "content": "To purchase some supplies"
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": null
+            },
+            {
+              "questionNumber": 57,
+              "description": null,
+              "question": "What type of business do the men own?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "A sports equipment store"
+                },
+                {
+                  "label": "B",
+                  "content": "A winter apparel store"
+                },
+                {
+                  "label": "C",
+                  "content": "An automobile dealership"
+                },
+                {
+                  "label": "D",
+                  "content": "A hotel chain"
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": null
+            },
+            {
+              "questionNumber": 58,
+              "description": null,
+              "question": "According to the men, what has changed recently?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Roads have become more accessible."
+                },
+                {
+                  "label": "B",
+                  "content": "Costs have decreased."
+                },
+                {
+                  "label": "C",
+                  "content": "Tourism has increased."
+                },
+                {
+                  "label": "D",
+                  "content": "Weather patterns have shifted"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": null
+            }
+          ]
+        },
+        {
+          "groupNumber": 10,
+          "questionRange": "59-61",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-59-61.mp3",
+          "imageUrl": null,
+          "transcript": "M: Many of our factory workers have expressed interest in upgrading their skills. I'd like to implement a peer-training program, where learners shadow more-experienced employees and observe how they do their jobs. W: I'm afraid that might become a burden for our long-time employees. They'll have to slow down their work to explain what they're doing. M: What if we videotaped experienced employees doing specific tasks? High-quality video can be recorded and edited with a smartphone. W: I like that idea. It would allow us to capture our workers' expertise without slowing down the production line.",
+          "questions": [
+            {
+              "questionNumber": 59,
+              "description": null,
+              "question": "What does the man want to do?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Provide training opportunities"
+                },
+                {
+                  "label": "B",
+                  "content": "Upgrade machinery"
+                },
+                {
+                  "label": "C",
+                  "content": "Hire additional employees"
+                },
+                {
+                  "label": "D",
+                  "content": "Reorganize the factory layout"
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": null
+            },
+            {
+              "questionNumber": 60,
+              "description": null,
+              "question": "What is the woman concerned about?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Increasing expenses"
+                },
+                {
+                  "label": "B",
+                  "content": "Introducing errors"
+                },
+                {
+                  "label": "C",
+                  "content": "Reducing productivity"
+                },
+                {
+                  "label": "D",
+                  "content": "Causing confusion"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": null
+            },
+            {
+              "questionNumber": 61,
+              "description": null,
+              "question": "What does the man mean when he says, \"High-quality video can be recorded and edited with a smartphone\"?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "A new policy should be established."
+                },
+                {
+                  "label": "B",
+                  "content": "An idea is easy to implement."
+                },
+                {
+                  "label": "C",
+                  "content": "Data security is a concern."
+                },
+                {
+                  "label": "D",
+                  "content": "Some information should be verified."
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": null
+            }
+          ]
+        },
+        {
+          "groupNumber": 11,
+          "questionRange": "62-64",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-62-64.mp3",
+          "imageUrl": null,
+          "transcript": "W: Hi, Suresh, I'm at the airport waiting for my flight. I want to meet with a potential investor while I'm in Chicago. Her name's Marta Gomez. M: OK. Which day would you prefer to meet with her? W: How about right after my meeting with the Chicago staff? M: OK. By the way, did you see that our company won an award for our contributions to the community? It was just announced this morning.",
+          "questions": [
+            {
+              "questionNumber": 62,
+              "description": null,
+              "question": "Where is the woman?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "At a restaurant"
+                },
+                {
+                  "label": "B",
+                  "content": "At a travel agency"
+                },
+                {
+                  "label": "C",
+                  "content": "At an airport"
+                },
+                {
+                  "label": "D",
+                  "content": "At a warehouse"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": null
+            },
+            {
+              "questionNumber": 63,
+              "description": null,
+              "question": "Look at the graphic. When does the woman prefer to meet with an investor?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "On Monday"
+                },
+                {
+                  "label": "B",
+                  "content": "On Tuesday"
+                },
+                {
+                  "label": "C",
+                  "content": "On Wednesday"
+                },
+                {
+                  "label": "D",
+                  "content": "On Thursday"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": null
+            },
+            {
+              "questionNumber": 64,
+              "description": null,
+              "question": "What good news does the man share?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "A colleague received a promotion."
+                },
+                {
+                  "label": "B",
+                  "content": "A conference proposal was accepted."
+                },
+                {
+                  "label": "C",
+                  "content": "An airline ticket has been upgraded."
+                },
+                {
+                  "label": "D",
+                  "content": "A company won an award."
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": null
+            }
+          ]
+        },
+        {
+          "groupNumber": 12,
+          "questionRange": "65-67",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-65-67.mp3",
+          "imageUrl": null,
+          "transcript": "M: Marion, we keep getting calls from people who want to visit the botanical garden but can't find parking information. Isn't it on our Web site? W: It is, but you have to click on the \"About Us\" page and scroll to the bottom of that page. Maybe people don't see it. M: Oh, I think we should move that information from the \"About Us\" page and make a separate page for directions and parking information. W: I'd be happy to make that change. But we're in the middle of updating our software, so it'll have to wait until Monday.",
+          "questions": [
+            {
+              "questionNumber": 65,
+              "description": null,
+              "question": "Where do the speakers work?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "At an amusement park"
+                },
+                {
+                  "label": "B",
+                  "content": "At an art museum"
+                },
+                {
+                  "label": "C",
+                  "content": "At a concert hall"
+                },
+                {
+                  "label": "D",
+                  "content": "At a botanical garden"
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": null
+            },
+            {
+              "questionNumber": 66,
+              "description": null,
+              "question": "Look at the graphic. Which page on the Web site does the man want to change?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Page 1"
+                },
+                {
+                  "label": "B",
+                  "content": "Page 2"
+                },
+                {
+                  "label": "C",
+                  "content": "Page 3"
+                },
+                {
+                  "label": "D",
+                  "content": "Page 4"
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": null
+            },
+            {
+              "questionNumber": 67,
+              "description": null,
+              "question": "Why does the woman say she cannot complete a task until Monday?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "She requires approval from a manager."
+                },
+                {
+                  "label": "B",
+                  "content": "She is attending a workshop."
+                },
+                {
+                  "label": "C",
+                  "content": "Some software is being updated."
+                },
+                {
+                  "label": "D",
+                  "content": "Some clients will be arriving soon."
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": null
+            }
+          ]
+        },
+        {
+          "groupNumber": 13,
+          "questionRange": "68-70",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-68-70.mp3",
+          "imageUrl": null,
+          "transcript": "M: Good news! We have finally received the go-ahead for our department's project to install bicycle racks at the train station downtown. W: At last! So, now we need to decide where to place the racks. How about by the station entrance? M: Hmm. If we asked riders, I bet they'd say that the most convenient spot is as close to the platform as possible. W: Let's do that. I'll contact some companies for estimates.",
+          "questions": [
+            {
+              "questionNumber": 68,
+              "description": null,
+              "question": "What news does the man share?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "A station road will be closed for repair."
+                },
+                {
+                  "label": "B",
+                  "content": "A project has been approved."
+                },
+                {
+                  "label": "C",
+                  "content": "A parking area has been expanded."
+                },
+                {
+                  "label": "D",
+                  "content": "An office will relocate."
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": null
+            },
+            {
+              "questionNumber": 69,
+              "description": null,
+              "question": "Look at the graphic. Where do the speakers decide to install some bicycle racks?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Near the covered parking area"
+                },
+                {
+                  "label": "B",
+                  "content": "Near the long-term parking area"
+                },
+                {
+                  "label": "C",
+                  "content": "Near the short-term parking area"
+                },
+                {
+                  "label": "D",
+                  "content": "Near the overflow parking area"
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": null
+            },
+            {
+              "questionNumber": 70,
+              "description": null,
+              "question": "Why does the woman say she will contact some companies?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "To arrange a loan"
+                },
+                {
+                  "label": "B",
+                  "content": "To apply for a permit"
+                },
+                {
+                  "label": "C",
+                  "content": "To ask for estimates"
+                },
+                {
+                  "label": "D",
+                  "content": "To create a proposal"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "partNumber": 4,
+      "name": "Talks",
+      "groups": [
+        {
+          "groupNumber": 1,
+          "questionRange": "71-73",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-71-73.mp3",
+          "imageUrl": null,
+          "transcript": "You've reached Select Repair Service. We specialize in all makes and models of automobiles. Our factory-trained specialists will keep your vehicle running in top condition. As an added benefit, we offer extended warranties on all vehicles we service. Please note that Select Repair Service will be closing on Friday, June 30, so we can complete our quarterly inventory of supplies.",
+          "questions": [
+            {
+              "questionNumber": 71,
+              "description": null,
+              "question": "What type of products does the business repair?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Computers"
+                },
+                {
+                  "label": "B",
+                  "content": "Vehicles"
+                },
+                {
+                  "label": "C",
+                  "content": "Light fixtures"
+                },
+                {
+                  "label": "D",
+                  "content": "Kitchen appliances"
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": null
+            },
+            {
+              "questionNumber": 72,
+              "description": null,
+              "question": "What special benefit does the speaker mention?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Free pickup"
+                },
+                {
+                  "label": "B",
+                  "content": "Online scheduling"
+                },
+                {
+                  "label": "C",
+                  "content": "Extended warranties"
+                },
+                {
+                  "label": "D",
+                  "content": "A membership loyalty program"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": null
+            },
+            {
+              "questionNumber": 73,
+              "description": null,
+              "question": "Why will a business close on Friday?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "For an inventory count"
+                },
+                {
+                  "label": "B",
+                  "content": "For employee training"
+                },
+                {
+                  "label": "C",
+                  "content": "For a company celebration"
+                },
+                {
+                  "label": "D",
+                  "content": "For equipment installation"
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": null
+            }
+          ]
+        },
+        {
+          "groupNumber": 2,
+          "questionRange": "74-76",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-74-76.mp3",
+          "imageUrl": null,
+          "transcript": "Welcome, new employees! My name is Diego, and I facilitate all orientation sessions. Before we start today, you will need to set up your employee account. If you look at the first page of your training binder, you'll see your username and a temporary password. Once that's complete, you'll have access to all your department's files. Please note that you can only access them from your company computer.",
+          "questions": [
+            {
+              "questionNumber": 74,
+              "description": null,
+              "question": "Who most likely is the speaker?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "A facilities manager"
+                },
+                {
+                  "label": "B",
+                  "content": "A human resources representative"
+                },
+                {
+                  "label": "C",
+                  "content": "A security officer"
+                },
+                {
+                  "label": "D",
+                  "content": "A corporate executive"
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": null
+            },
+            {
+              "questionNumber": 75,
+              "description": null,
+              "question": "According to the speaker, what will the listeners find in a binder?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "A map of the building"
+                },
+                {
+                  "label": "B",
+                  "content": "An employment contract"
+                },
+                {
+                  "label": "C",
+                  "content": "An identification badge"
+                },
+                {
+                  "label": "D",
+                  "content": "Log-in credentials"
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": null
+            },
+            {
+              "questionNumber": 76,
+              "description": null,
+              "question": "What does the speaker say about department files?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "They are only accessible from company computers."
+                },
+                {
+                  "label": "B",
+                  "content": "They must be password protected."
+                },
+                {
+                  "label": "C",
+                  "content": "They must follow a specific naming convention."
+                },
+                {
+                  "label": "D",
+                  "content": "They must be archived annually."
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": null
+            }
+          ]
+        },
+        {
+          "groupNumber": 3,
+          "questionRange": "77-79",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-77-79.mp3",
+          "imageUrl": null,
+          "transcript": "Hello. This is Heather Ross calling from Denville Amusement Park. About a month ago, I ordered one of your new video-game machines, Space Defenders. I'm really happy with my purchase, since the game has been incredibly popular with our park guests! I heard you may be releasing a new game soon. Could you call me back and let me know if that's true?",
+          "questions": [
+            {
+              "questionNumber": 77,
+              "description": null,
+              "question": "Where does the speaker work?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "At a laundry facility"
+                },
+                {
+                  "label": "B",
+                  "content": "At an amusement park"
+                },
+                {
+                  "label": "C",
+                  "content": "At a sports stadium"
+                },
+                {
+                  "label": "D",
+                  "content": "At a fitness center"
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": null
+            },
+            {
+              "questionNumber": 78,
+              "description": null,
+              "question": "What does the speaker say about an item she ordered a month ago?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "It arrived later than expected."
+                },
+                {
+                  "label": "B",
+                  "content": "It was damaged during delivery."
+                },
+                {
+                  "label": "C",
+                  "content": "She needs help assembling it."
+                },
+                {
+                  "label": "D",
+                  "content": "She is pleased with it."
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": null
+            },
+            {
+              "questionNumber": 79,
+              "description": null,
+              "question": "What does the speaker ask the listener to confirm?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Whether a new product will be available soon"
+                },
+                {
+                  "label": "B",
+                  "content": "When a replacement part will be shipped"
+                },
+                {
+                  "label": "C",
+                  "content": "How long a warranty lasts"
+                },
+                {
+                  "label": "D",
+                  "content": "Who to contact about future orders"
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": null
+            }
+          ]
+        },
+        {
+          "groupNumber": 4,
+          "questionRange": "80-82",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-80-82.mp3",
+          "imageUrl": null,
+          "transcript": "The first agenda item for our board meeting is the annual sales report. We're all disappointed by the drop in our clothing sales. So I'm recommending that we start manufacturing some clothing locally. I hired a consultant to put together a list of locations we could use. He'll be at our next board meeting to explain the pros and cons of each.",
+          "questions": [
+            {
+              "questionNumber": 80,
+              "description": null,
+              "question": "What type of product does the speaker's company make?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Furniture"
+                },
+                {
+                  "label": "B",
+                  "content": "Luggage"
+                },
+                {
+                  "label": "C",
+                  "content": "Bedding"
+                },
+                {
+                  "label": "D",
+                  "content": "Clothing"
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": null
+            },
+            {
+              "questionNumber": 81,
+              "description": null,
+              "question": "What does the speaker recommend doing?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Manufacturing some products locally"
+                },
+                {
+                  "label": "B",
+                  "content": "Offering free shipping"
+                },
+                {
+                  "label": "C",
+                  "content": "Participating in a trade show"
+                },
+                {
+                  "label": "D",
+                  "content": "Developing a new product line"
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": null
+            },
+            {
+              "questionNumber": 82,
+              "description": null,
+              "question": "What will happen at the next meeting?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "A vote will take place."
+                },
+                {
+                  "label": "B",
+                  "content": "A consultant will give a presentation."
+                },
+                {
+                  "label": "C",
+                  "content": "Some contracts will be updated."
+                },
+                {
+                  "label": "D",
+                  "content": "Safety procedures will be reviewed."
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": null
+            }
+          ]
+        },
+        {
+          "groupNumber": 5,
+          "questionRange": "83-85",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-83-85.mp3",
+          "imageUrl": null,
+          "transcript": "Attention, passengers. All trains to Midway Station are delayed for track repairs. They expect to complete the repair within the hour. A bus will be departing for that destination in fifteen minutes. Also, a reminder that the station café opens at eight A.M., and there are food kiosks on platform one.",
+          "questions": [
+            {
+              "questionNumber": 83,
+              "description": null,
+              "question": "What is the announcement mainly about?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "A promotional event"
+                },
+                {
+                  "label": "B",
+                  "content": "A vacation package"
+                },
+                {
+                  "label": "C",
+                  "content": "A building renovation"
+                },
+                {
+                  "label": "D",
+                  "content": "A travel delay"
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": null
+            },
+            {
+              "questionNumber": 84,
+              "description": null,
+              "question": "Why does the speaker say, \"A bus will be departing for that destination in fifteen minutes\"?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "To suggest an alternative arrangement"
+                },
+                {
+                  "label": "B",
+                  "content": "To explain an extended wait time"
+                },
+                {
+                  "label": "C",
+                  "content": "To recommend changing the travel date"
+                },
+                {
+                  "label": "D",
+                  "content": "To inform customers about a new destination"
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": null
+            },
+            {
+              "questionNumber": 85,
+              "description": null,
+              "question": "What does the speaker remind the listeners about?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "How to download a mobile application"
+                },
+                {
+                  "label": "B",
+                  "content": "Where a waiting area is located"
+                },
+                {
+                  "label": "C",
+                  "content": "How to reserve tickets"
+                },
+                {
+                  "label": "D",
+                  "content": "Where to buy food"
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": null
+            }
+          ]
+        },
+        {
+          "groupNumber": 6,
+          "questionRange": "86-88",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-86-88.mp3",
+          "imageUrl": null,
+          "transcript": "I'm calling about the work my design team's doing to update your company logo. I've just e-mailed two versions for you to review. Take your time to think about which one you'd like to choose. I'll be on vacation all next week, but if you call the office, my assistant will set up a meeting for when I get back.",
+          "questions": [
+            {
+              "questionNumber": 86,
+              "description": null,
+              "question": "Where does the speaker most likely work?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "At a graphic design company"
+                },
+                {
+                  "label": "B",
+                  "content": "At a law firm"
+                },
+                {
+                  "label": "C",
+                  "content": "At a photography studio"
+                },
+                {
+                  "label": "D",
+                  "content": "At a museum"
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": null
+            },
+            {
+              "questionNumber": 87,
+              "description": null,
+              "question": "What did the listener receive by e-mail?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "A newsletter"
+                },
+                {
+                  "label": "B",
+                  "content": "Some images"
+                },
+                {
+                  "label": "C",
+                  "content": "An invoice"
+                },
+                {
+                  "label": "D",
+                  "content": "Some contracts"
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": null
+            },
+            {
+              "questionNumber": 88,
+              "description": null,
+              "question": "Why is the speaker unavailable next week?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "She will be working at another branch."
+                },
+                {
+                  "label": "B",
+                  "content": "She will be with other clients."
+                },
+                {
+                  "label": "C",
+                  "content": "She will be on vacation."
+                },
+                {
+                  "label": "D",
+                  "content": "She will be at an industry conference."
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": null
+            }
+          ]
+        },
+        {
+          "groupNumber": 7,
+          "questionRange": "89-91",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-89-91.mp3",
+          "imageUrl": null,
+          "transcript": "I've scheduled this press conference to officially respond to your inquiries regarding fuel-efficient engines. We hired a firm to determine if this upgrade would be feasible for our trains. It reported that the upgrade would be economical only for trains less than five years old. All of ours are at least ten years old. If you're interested in more details, e-mail our media relations department to receive a summary of the findings.",
+          "questions": [
+            {
+              "questionNumber": 89,
+              "description": null,
+              "question": "Who most likely are the listeners?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Investors"
+                },
+                {
+                  "label": "B",
+                  "content": "Government officials"
+                },
+                {
+                  "label": "C",
+                  "content": "Engineers"
+                },
+                {
+                  "label": "D",
+                  "content": "Journalists"
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": null
+            },
+            {
+              "questionNumber": 90,
+              "description": null,
+              "question": "What does the speaker mean when she says, \"All of ours are at least ten years old\"?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "An event needs to be relocated."
+                },
+                {
+                  "label": "B",
+                  "content": "An upgrade is not feasible."
+                },
+                {
+                  "label": "C",
+                  "content": "A project team has a lot of experience."
+                },
+                {
+                  "label": "D",
+                  "content": "Some company policies are outdated."
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": null
+            },
+            {
+              "questionNumber": 91,
+              "description": null,
+              "question": "According to the speaker, what can be requested by e-mail?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Some presentation slides"
+                },
+                {
+                  "label": "B",
+                  "content": "Some product samples"
+                },
+                {
+                  "label": "C",
+                  "content": "A report summary"
+                },
+                {
+                  "label": "D",
+                  "content": "A discounted ticket"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": null
+            }
+          ]
+        },
+        {
+          "groupNumber": 8,
+          "questionRange": "92-94",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-92-94.mp3",
+          "imageUrl": null,
+          "transcript": "I want to explore the use of a more modernized payment system in our cosmetics stores. This system would allow any sales associate to take customer payments from a tablet anywhere in the store. The main complaint about shopping at our stores is waiting in long lines to pay. I've decided to conduct a trial run at our store in the Center City Mall.",
+          "questions": [
+            {
+              "questionNumber": 92,
+              "description": null,
+              "question": "What does the speaker want to do?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Increase online sales"
+                },
+                {
+                  "label": "B",
+                  "content": "Upgrade a payment system"
+                },
+                {
+                  "label": "C",
+                  "content": "Create a new product line"
+                },
+                {
+                  "label": "D",
+                  "content": "Add store locations"
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": null
+            },
+            {
+              "questionNumber": 93,
+              "description": null,
+              "question": "According to the speaker, what is the customers' main complaint?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Long lines"
+                },
+                {
+                  "label": "B",
+                  "content": "High prices"
+                },
+                {
+                  "label": "C",
+                  "content": "Unavailable items"
+                },
+                {
+                  "label": "D",
+                  "content": "Unfriendly staff"
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": null
+            },
+            {
+              "questionNumber": 94,
+              "description": null,
+              "question": "Why does the speaker say, \"that's our busiest location\"?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "To request some feedback"
+                },
+                {
+                  "label": "B",
+                  "content": "To compliment some staff"
+                },
+                {
+                  "label": "C",
+                  "content": "To express frustration"
+                },
+                {
+                  "label": "D",
+                  "content": "To justify a choice"
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": null
+            }
+          ]
+        },
+        {
+          "groupNumber": 9,
+          "questionRange": "95-97",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-95-97.mp3",
+          "imageUrl": null,
+          "transcript": "The downtown Reston Office Tower is completed. The most extraordinary feature of the building is its beautiful garden, located in the lobby. We interviewed the CEO of Barnum Financial Services about its new offices. He said he and his team are excited to move in in January. A recording of the full interview is available on our Web site.",
+          "questions": [
+            {
+              "questionNumber": 95,
+              "description": null,
+              "question": "According to the speaker, what is special about the Reston Office Tower?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "It features an indoor garden."
+                },
+                {
+                  "label": "B",
+                  "content": "It exhibits work from local artists."
+                },
+                {
+                  "label": "C",
+                  "content": "It runs on solar power."
+                },
+                {
+                  "label": "D",
+                  "content": "It has won many awards."
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": null
+            },
+            {
+              "questionNumber": 96,
+              "description": null,
+              "question": "Look at the graphic. Which floors will be occupied in January?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Floors 1-5"
+                },
+                {
+                  "label": "B",
+                  "content": "Floors 6-10"
+                },
+                {
+                  "label": "C",
+                  "content": "Floors 11-14"
+                },
+                {
+                  "label": "D",
+                  "content": "Floors 15-17"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": null
+            },
+            {
+              "questionNumber": 97,
+              "description": null,
+              "question": "What does the speaker say is available on a Web site?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Some photographs"
+                },
+                {
+                  "label": "B",
+                  "content": "An event schedule"
+                },
+                {
+                  "label": "C",
+                  "content": "A floor layout"
+                },
+                {
+                  "label": "D",
+                  "content": "A recorded interview"
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": null
+            }
+          ]
+        },
+        {
+          "groupNumber": 10,
+          "questionRange": "98-100",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-98-100.mp3",
+          "imageUrl": null,
+          "transcript": "Thank you for attending this meeting for prospective investors. ZZ Mining has been planning to expand our operations by opening an additional silver mine. The site with 390 grams per ton has a larger deposit, so that's where we'll build the new mine. Our next step is to apply for the necessary permits. We'll do that next week.",
+          "questions": [
+            {
+              "questionNumber": 98,
+              "description": null,
+              "question": "Who most likely are the listeners?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Safety engineers"
+                },
+                {
+                  "label": "B",
+                  "content": "Laboratory technicians"
+                },
+                {
+                  "label": "C",
+                  "content": "Legal consultants"
+                },
+                {
+                  "label": "D",
+                  "content": "Business investors"
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": null
+            },
+            {
+              "questionNumber": 99,
+              "description": null,
+              "question": "Look at the graphic. Where will a new mine be built?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "At site 1"
+                },
+                {
+                  "label": "B",
+                  "content": "At site 2"
+                },
+                {
+                  "label": "C",
+                  "content": "At site 3"
+                },
+                {
+                  "label": "D",
+                  "content": "At site 4"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": null
+            },
+            {
+              "questionNumber": 100,
+              "description": null,
+              "question": "What does the speaker say is the next step?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Applying for permits"
+                },
+                {
+                  "label": "B",
+                  "content": "Installing equipment"
+                },
+                {
+                  "label": "C",
+                  "content": "Hiring additional staff"
+                },
+                {
+                  "label": "D",
+                  "content": "Updating a manual"
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "partNumber": 5,
+      "name": "Incomplete Sentences",
+      "questions": [
+        {
+          "questionNumber": 101,
+          "description": null,
+          "question": "The lecture will take place at 6:00 P.M., _____ which attendees may ask questions.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "across"
+            },
+            {
+              "label": "B",
+              "content": "after"
+            },
+            {
+              "label": "C",
+              "content": "inside"
+            },
+            {
+              "label": "D",
+              "content": "among"
+            }
+          ],
+          "correctAnswer": "B",
+          "explanation": "Ta thấy Dấu phẩy + which → đây là mệnh đề quan hệ không xác định. Phía trước có 6 PM là thời gian nên cần giới từ chỉ thời gian, KHÔNG phải giới từ vị trí. => Chọn (B). Cụm \"after which\" là một cấu trúc mệnh đề quan hệ trạng từ, có nghĩa là \"sau thời điểm đó/sau sự kiện đó\" Dịch: Bài giảng sẽ diễn ra vào lúc 6 giờ tối, sau đó người tham dự có thể đặt câu hỏi.",
+          "grammarTopic": null
+        },
+        {
+          "questionNumber": 102,
+          "description": null,
+          "question": "The_____ antique shop in Pepper Valley will close down next month.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "last"
+            },
+            {
+              "label": "B",
+              "content": "lasts"
+            },
+            {
+              "label": "C",
+              "content": "lasted"
+            },
+            {
+              "label": "D",
+              "content": "lasting"
+            }
+          ],
+          "correctAnswer": "A",
+          "explanation": "Chọn (A). (A) last (Tính từ): cuối cùng / duy nhất còn lại. (B) lasts (Động từ chia số ít): kéo dài. (C) lasted (Động từ quá khứ): đã kéo dài. (D) lasting (Tính từ): bền vững, lâu dài. Chỗ trống nằm giữa mạo từ \"The\" và cụm danh từ \"antique shop\". Vị trí này chỉ có thể điền một Tính từ để bổ nghĩa cho danh từ phía sau. \"The last antique shop\" có nghĩa là \"Cửa hàng đồ cổ cuối cùng/duy nhất còn lại\", rất phù hợp với ngữ cảnh là nó sắp đóng cửa (\"close down\"). Dịch: Cửa hàng đồ cổ cuối cùng ở Thung lũng Pepper sẽ đóng cửa vào tháng tới.",
+          "grammarTopic": null
+        },
+        {
+          "questionNumber": 103,
+          "description": null,
+          "question": "Merryville residents will receive an online status _____ about the ongoing bridge construction project.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "update"
+            },
+            {
+              "label": "B",
+              "content": "change"
+            },
+            {
+              "label": "C",
+              "content": "payment"
+            },
+            {
+              "label": "D",
+              "content": "request"
+            }
+          ],
+          "correctAnswer": "A",
+          "explanation": "Chọn (A). Câu hỏi về từ vựng. (A) update (n) bản cập nhật (B) change (n) sự thay đổi (C) payment (n) thanh toán (D) request (n) yêu cầu “status” thường đi với update. Cụm từ \"status update\" (cập nhật trạng thái/tình hình) là một \"collocation\" phổ biến trong môi trường làm việc và đề TOEIC.",
+          "grammarTopic": null
+        },
+        {
+          "questionNumber": 104,
+          "description": null,
+          "question": "As a result of _____ many years leading media organizations, Ms. Ayo was selected for the Dowel Journalism Prize.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "she"
+            },
+            {
+              "label": "B",
+              "content": "her"
+            },
+            {
+              "label": "C",
+              "content": "hers"
+            },
+            {
+              "label": "D",
+              "content": "herself"
+            }
+          ],
+          "correctAnswer": "B",
+          "explanation": "Chọn (B). (A) she (Đại từ nhân xưng): cô ấy (làm chủ ngữ). (B) her (Tính từ sở hữu/Tân ngữ): của cô ấy/cô ấy. (C) hers (Đại từ sở hữu): cái của cô ấy (D) herself (Đại từ phản thân): chính cô ấy. Đằng sau chỗ trống là một cụm danh từ bắt đầu bằng V-ing (many years leading media organizations) => Chúng ta cần một tính từ sở hữu để bổ nghĩa cho danh từ đó. Useful Structures: As a result of + N/V-ing Dịch: Kết quả của nhiều năm dẫn dắt các tổ chức truyền thông, bà Ayo đã được chọn cho Giải thưởng Báo chí Dowel.",
+          "grammarTopic": null
+        },
+        {
+          "questionNumber": 105,
+          "description": null,
+          "question": "To stop the _____ of computer viruses, do not open suspicious e-mails.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "break"
+            },
+            {
+              "label": "B",
+              "content": "spread"
+            },
+            {
+              "label": "C",
+              "content": "balance"
+            },
+            {
+              "label": "D",
+              "content": "surface"
+            }
+          ],
+          "correctAnswer": "B",
+          "explanation": "Chọn (B). (A) break (Danh từ): sự gãy vỡ, giờ nghỉ. (B) spread (Danh từ): sự lan truyền, sự phổ biến. (C) balance (Danh từ/Động từ): sự cân bằng, số dư tài khoản. (D) surface (Danh từ): bề mặt. Danh từ \"spread\" thường đi với virus, tin tức hoặc dịch bệnh. Useful Structures: the spread of + N (thường gặp trong các bài thông báo về an ninh mạng hoặc y tế) Dịch: Để ngăn chặn sự lây lan của virus máy tính, đừng mở các email đáng ngờ.",
+          "grammarTopic": null
+        },
+        {
+          "questionNumber": 106,
+          "description": null,
+          "question": "The hiring manager _____ considered each applicant's résumé and qualifications.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "caring"
+            },
+            {
+              "label": "B",
+              "content": "careful"
+            },
+            {
+              "label": "C",
+              "content": "carefully"
+            },
+            {
+              "label": "D",
+              "content": "carefulness"
+            }
+          ],
+          "correctAnswer": "C",
+          "explanation": "Chọn (C). (A) caring (Tính từ/Danh động từ): chu đáo, sự quan tâm. (B) careful (Tính từ): cẩn thận (bổ nghĩa cho danh từ). (C) carefully (Trạng từ): một cách cẩn thận. (D) carefulness (Danh từ): sự cẩn thận. Chọn trạng từ cho chỗ trống để bổ nghĩa cho động từ \"considered\" (xem xét). (A), (B) tính từ không bổ nghĩa cho động từ thường; (D) danh từ không phù hợp cấu trúc. Useful Structures: consider + n/ Ving : cân nhắc/ xem xét cái gì, làm gì. Dịch: Quản lý tuyển dụng đã xem xét hồ sơ và năng lực của từng ứng viên một cách cẩn thận.",
+          "grammarTopic": null
+        },
+        {
+          "questionNumber": 107,
+          "description": null,
+          "question": "In October, Mr. Sakamoto will leave for New Zealand _____ will oversee the opening of the new Auckland branch.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "because"
+            },
+            {
+              "label": "B",
+              "content": "in addition"
+            },
+            {
+              "label": "C",
+              "content": "and"
+            },
+            {
+              "label": "D",
+              "content": "prior to"
+            }
+          ],
+          "correctAnswer": "C",
+          "explanation": "Chọn (C). Câu này có hai mệnh đề: (1) Mr. Sakamoto sẽ đi NZ và (2) [ông ấy] sẽ giám sát... Vì chủ ngữ \"Mr. Sakamoto\" được lược bỏ ở vế sau, ta dùng and để nối hai hành động của cùng một chủ ngữ. (A) because (Liên từ): bởi vì (theo sau là một mệnh đề S+V). (B) in addition (Trạng từ liên kết): ngoài ra (thường đứng đầu câu, có dấu phẩy). (C) and (Liên từ): và. (D) prior to (Giới từ): trước khi (theo sau là Danh từ/V-ing). Useful Structures: because / in addition là bẫy thói quen của TOEIC. Dịch: Vào tháng 10, ông Sakamoto sẽ đến New Zealand và sẽ giám sát việc khai trương chi nhánh mới tại Auckland.",
+          "grammarTopic": null
+        },
+        {
+          "questionNumber": 108,
+          "description": null,
+          "question": "Tarateer Pharmaceuticals is varying its product _____ to include over-the-counter medications.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "to line"
+            },
+            {
+              "label": "B",
+              "content": "lining"
+            },
+            {
+              "label": "C",
+              "content": "lined"
+            },
+            {
+              "label": "D",
+              "content": "line"
+            }
+          ],
+          "correctAnswer": "D",
+          "explanation": "Chọn (D). Cụm danh từ ghép \"product line\" (dòng sản phẩm) là từ vựng cực kỳ \"kinh điển\" trong TOEIC (A) to line (Động từ nguyên mẫu có 'to'): để xếp hàng. (B) lining (Danh từ/V-ing): lớp vải lót, việc lót. (C) lined (Tính từ/V-ed): có kẻ hàng, được lót. (D) line (Danh từ): dòng, hàng. Useful phrases: product line: dòng sản phẩm over-the-counter (OTC) medications: thuốc không kê đơn Dịch: Dược phẩm Tarateer Pharmaceuticals đang đa dạng hóa dòng sản phẩm để bao gồm cả thuốc không kê đơn.",
+          "grammarTopic": null
+        },
+        {
+          "questionNumber": 109,
+          "description": null,
+          "question": "Dynart, Inc., continuously _____ new ways to reduce its use of plastics.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "seeks"
+            },
+            {
+              "label": "B",
+              "content": "seeker"
+            },
+            {
+              "label": "C",
+              "content": "to seek"
+            },
+            {
+              "label": "D",
+              "content": "seeking"
+            }
+          ],
+          "correctAnswer": "A",
+          "explanation": "Chọn (A). (A) seeks (Động từ chia số ít): tìm kiếm. (B) seeker (Danh từ): người tìm kiếm. (C) to seek (Động từ nguyên mẫu có 'to'): để tìm kiếm. (D) seeking (Phân từ/Danh động từ): đang tìm kiếm/việc tìm kiếm. Câu đã có chủ ngữ (Dynart, Inc.) và trạng từ (continuously), đang thiếu một động từ chính được chia thì (Finite Verb). Vì chủ ngữ số ít, ta chọn \"seeks\". Dịch: Tập đoàn Dynart liên tục tìm kiếm những cách mới để giảm thiểu việc sử dụng nhựa của mình.",
+          "grammarTopic": null
+        },
+        {
+          "questionNumber": 110,
+          "description": null,
+          "question": "The cash registers at Pirkle Books automatically _____ the remaining inventory of books available.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "calculate"
+            },
+            {
+              "label": "B",
+              "content": "calculator"
+            },
+            {
+              "label": "C",
+              "content": "calculating"
+            },
+            {
+              "label": "D",
+              "content": "calculation"
+            }
+          ],
+          "correctAnswer": "A",
+          "explanation": "Chọn (A). (A) calculate (Động từ nguyên thể): tính toán. (B) calculator (Danh từ): máy tính cầm tay (dụng cụ). (C) calculating (Phân từ/Danh động từ): đang tính toán/việc tính toán. (D) calculation (Danh từ): sự tính toán/phép tính. Chủ ngữ là \"The cash registers\" (số nhiều). Trạng từ \"automatically\" bổ nghĩa cho động từ chính. Ta cần một động từ nguyên thể phù hợp với chủ ngữ số nhiều. Useful phrases: Inventory (hàng tồn kho) thường đi với các động từ: calculate, monitor, track, take. Dịch: Các máy tính tiền tại Pirkle Books tự động tính toán lượng sách tồn kho còn lại hiện có.",
+          "grammarTopic": null
+        },
+        {
+          "questionNumber": 111,
+          "description": null,
+          "question": "The product team is designing mapping software that can _____ locate underground minerals.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "infinitely"
+            },
+            {
+              "label": "B",
+              "content": "sincerely"
+            },
+            {
+              "label": "C",
+              "content": "precisely"
+            },
+            {
+              "label": "D",
+              "content": "greatly"
+            }
+          ],
+          "correctAnswer": "C",
+          "explanation": "Chọn (C). (A) infinitely (adv): vô tận, không giới hạn. (B) sincerely (adv): một cách chân thành (thường dùng kết thư). (C) precisely (adv): một cách chính xác. (D) greatly (adv): rất nhiều, tuyệt vời. Cần tìm 1 trạng từ, và trạng từ này bổ nghĩa cho động từ \"locate\" (xác định vị trí). Trong kỹ thuật và phần mềm “software” việc xác định vị trí khoáng sản cần sự \"chính xác\". Useful phrases: \"precisely locate/identify\" (xác định vị trí/danh tính một cách chính xác) Dịch: Nhóm sản phẩm đang thiết kế phần mềm lập bản đồ có thể xác định vị trí các khoáng sản dưới lòng đất một cách chính xác.",
+          "grammarTopic": null
+        },
+        {
+          "questionNumber": 112,
+          "description": null,
+          "question": "According to CEO Mayu Yamada, it would not be _____ responsible to expand the warehouse at this time.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "finance"
+            },
+            {
+              "label": "B",
+              "content": "financials"
+            },
+            {
+              "label": "C",
+              "content": "financially"
+            },
+            {
+              "label": "D",
+              "content": "financing"
+            }
+          ],
+          "correctAnswer": "C",
+          "explanation": "Chọn (C). (A) finance (n/v): tài chính/cấp vốn. (B) financials (n): báo cáo tài chính. (C) financially (adv): về mặt tài chính. (D) financing (n/v-ing): sự cấp vốn/việc cấp vốn. Chỗ trống đứng trước tính từ \"responsible\" (có trách nhiệm). Theo quy tắc: Adv + Adj. Ta chọn 1 Trạng từ bổ nghĩa cho tính từ để chỉ rõ trách",
+          "grammarTopic": null
+        },
+        {
+          "questionNumber": 113,
+          "description": null,
+          "question": "Analysts cannot say with any _____ what the regional demand for electric trucks will be.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "certainty"
+            },
+            {
+              "label": "B",
+              "content": "justice"
+            },
+            {
+              "label": "C",
+              "content": "excellence"
+            },
+            {
+              "label": "D",
+              "content": "denial"
+            }
+          ],
+          "correctAnswer": "A",
+          "explanation": "Chọn (A) (A) certainty (n): sự chắc chắn. (B) justice (n): sự công bằng, tư pháp. (C) excellence (n): sự xuất sắc. (D) denial (n): sự phủ nhận. Cụm từ \"with certainty\" (một cách chắc chắn) là một cụm cố định. Kết hợp với \"cannot say\", câu này diễn tả việc các nhà phân tích không dám khẳng định chắc chắn về nhu cầu thị trường. Dịch: Các nhà phân tích không thể khẳng định chắc chắn nhu cầu của khu vực đối với xe tải điện sẽ là bao nhiêu.",
+          "grammarTopic": null
+        },
+        {
+          "questionNumber": 114,
+          "description": null,
+          "question": "As part of its marketing campaign, Elegancia Dishware is _____ soliciting feedback from customers.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "lightly"
+            },
+            {
+              "label": "B",
+              "content": "loyally"
+            },
+            {
+              "label": "C",
+              "content": "actively"
+            },
+            {
+              "label": "D",
+              "content": "cleanly"
+            }
+          ],
+          "correctAnswer": "C",
+          "explanation": "Chọn C (A) lightly (adv): nhẹ nhàng, sơ sài. (B) loyally (adv): một cách trung thành. (C) actively (adv): một cách chủ động/tích cực. (D) cleanly (adv): một cách sạch sẽ. Động từ \"solicit\" nghĩa là khẩn khoản, nài ép hoặc thu thập (ý kiến/vốn). Trong marketing, người ta thường \"chủ động thu thập\" (actively solicit) phản hồi khách hàng Useful phrases: \"Actively\" thường đi với các động từ hành động như: seek, recruit, solicit, participate. Dịch: Như một phần của chiến dịch tiếp thị, Elegancia Dishware đang chủ động thu thập phản hồi từ khách hàng.",
+          "grammarTopic": null
+        },
+        {
+          "questionNumber": 115,
+          "description": null,
+          "question": "Rain gardens are intended to _____ water to prevent flooding of local roads.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "engage"
+            },
+            {
+              "label": "B",
+              "content": "undergo"
+            },
+            {
+              "label": "C",
+              "content": "absorb"
+            },
+            {
+              "label": "D",
+              "content": "overwhelm"
+            }
+          ],
+          "correctAnswer": "C",
+          "explanation": "Chọn (C) (A) engage (v): thuê, thu hút, tham gia. (B) undergo (v): trải qua (kiểm tra/phẫu thuật). (C) absorb (v): hấp thụ, hút (nước/kiến thức). (D) overwhelm (v): áp đảo, lấn át. Dựa vào ngữ cảnh \"vườn mưa\" (rain gardens) và \"ngăn chặn ngập lụt\" (prevent flooding) , động từ phù hợp nhất với tân ngữ \"water\" là \"hấp thụ/hút nước\" absorb Dịch: Các vườn mưa được thiết kế để hấp thụ nước nhằm ngăn chặn tình trạng ngập lụt các tuyến đường địa phương.",
+          "grammarTopic": null
+        },
+        {
+          "questionNumber": 116,
+          "description": null,
+          "question": "Theta Industries' training program aims to increase the _____ of its manufacturing systems.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "producer"
+            },
+            {
+              "label": "B",
+              "content": "produced"
+            },
+            {
+              "label": "C",
+              "content": "productive"
+            },
+            {
+              "label": "D",
+              "content": "productivity"
+            }
+          ],
+          "correctAnswer": "D",
+          "explanation": "Chọn (D). (A) producer (n - chỉ người): nhà sản xuất. (B) produced (v-ed): đã sản xuất. (C) productive (adj): có năng suất. (D) productivity (n - chỉ sự vật): năng suất, hiệu suất. Sau mạo từ \"the\" và trước giới từ \"of\" phải là một danh từ. Xét về nghĩa, tăng cường \"năng suất\" của hệ thống sản xuất là hợp lý nhất. (A) là người sản xuất, không thể là năng suất của hệ thống; (C) là tính từ; (B) là động từ. Dịch: Chương trình đào tạo của Theta Industries nhằm mục đích tăng năng suất của các hệ thống sản xuất của mình.",
+          "grammarTopic": null
+        },
+        {
+          "questionNumber": 117,
+          "description": null,
+          "question": "The board of directors has voted to award Mr. Mitrakos a bonus for his role _____ obtaining the international contract.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "in"
+            },
+            {
+              "label": "B",
+              "content": "at"
+            },
+            {
+              "label": "C",
+              "content": "except"
+            },
+            {
+              "label": "D",
+              "content": "apart"
+            }
+          ],
+          "correctAnswer": "A",
+          "explanation": "Chọn (A) (A) in (prep): trong. (B) at (prep): tại. (C) except (prep): ngoại trừ. (D) apart (adv): tách biệt. Cấu trúc: \"one's role in doing something\" (vai trò của ai đó trong việc làm gì). Đây là cách dùng giới từ cố định sau danh từ \"role\". Useful phrases: Bonus for (tiền thưởng cho cái gì) Role in (vai trò trong việc gì) Dịch: Ban giám đốc đã bỏ phiếu thưởng cho ông Mitrakos vì vai trò của ông trong việc giành được hợp đồng quốc tế.",
+          "grammarTopic": null
+        },
+        {
+          "questionNumber": 118,
+          "description": null,
+          "question": "The finance director gave his approval _____ the project can move forward.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "along"
+            },
+            {
+              "label": "B",
+              "content": "furthermore"
+            },
+            {
+              "label": "C",
+              "content": "cautiously"
+            },
+            {
+              "label": "D",
+              "content": "so that"
+            }
+          ],
+          "correctAnswer": "D",
+          "explanation": "Chọn (D) (A) along (prep): dọc theo. (B) furthermore (adv): hơn nữa (dùng nối câu, sau có dấu phẩy). (C) cautiously (adv): một cách thận trọng. (D) so that (conj): để cho, nhằm mục đích. Phía sau chỗ trống là một mệnh đề hoàn chỉnh (S + V). \"So that\" đóng vai trò liên từ chỉ mục đích. Giám đốc phê duyệt \"để\" dự án có thể tiến triển. Useful phrases: Move forward\" (tiến triển/tiến về phía trước) Dịch: Giám đốc tài chính đã đưa ra sự chấp thuận để dự án có thể tiếp tục triển khai.",
+          "grammarTopic": null
+        },
+        {
+          "questionNumber": 119,
+          "description": null,
+          "question": "The newspaper article describes ways job seekers can _____ for having little workplace experience.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "reply"
+            },
+            {
+              "label": "B",
+              "content": "capture"
+            },
+            {
+              "label": "C",
+              "content": "compensate"
+            },
+            {
+              "label": "D",
+              "content": "accumulate"
+            }
+          ],
+          "correctAnswer": "C",
+          "explanation": "Chọn (C). (A) reply (v): phản hồi (thường đi với 'to'). (B) capture (v): bắt giữ, chiếm lĩnh. (C) compensate (v): đền bù, bù đắp. (D) accumulate (v): tích lũy (kinh nghiệm/tiền bạc). Động từ compensate đi với giới từ for. Cấu trúc: \"compensate for something\" (bù đắp cho cái gì đó). Người tìm việc bù đắp cho việc thiếu kinh nghiệm bằng những cách thức khác. Câu D Mặc dù \"accumulate\" đi với experience nhưng ở đây experience là tân ngữ của \"having\", không phải tân ngữ của động từ chính. Dịch: ài báo mô tả những cách mà người tìm việc có thể bù đắp cho việc có ít kinh nghiệm làm việc.",
+          "grammarTopic": null
+        },
+        {
+          "questionNumber": 120,
+          "description": null,
+          "question": "Mr. Ellis and Ms. Barnes were both highly qualified, but _____ got the job.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "myself"
+            },
+            {
+              "label": "B",
+              "content": "neither"
+            },
+            {
+              "label": "C",
+              "content": "anybody"
+            },
+            {
+              "label": "D",
+              "content": "whoever"
+            }
+          ],
+          "correctAnswer": "B",
+          "explanation": "Chọn (B). (A) myself (Đại từ phản thân): chính tôi. (B) neither (Đại từ): không ai trong cả hai. (C) anybody (Đại từ bất định): bất cứ ai (thường dùng trong câu phủ định/nghi vấn). (D) whoever (Đại từ quan hệ): bất cứ ai người mà. Liên từ \"but\" nối hai sự đối lập. Mặc dù cả hai (both) đều đủ năng lực, nhưng \"không ai\" trong số họ nhận được công việc. \"Neither\" dùng cho 2 đối tượng. Useful phrases: Phân biệt \"Neither\" (không ai trong 2), \"None\" (không ai trong 3 trở lên) và \"Either\" (1 trong 2) Dịch: Ông Ellis và bà Barnes đều rất có năng lực, nhưng không ai trong hai người nhận được công việc.",
+          "grammarTopic": null
+        },
+        {
+          "questionNumber": 121,
+          "description": null,
+          "question": "Ennis Photography purchased all new lighting equipment _____ the high cost.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "even though"
+            },
+            {
+              "label": "B",
+              "content": "however"
+            },
+            {
+              "label": "C",
+              "content": "until"
+            },
+            {
+              "label": "D",
+              "content": "despite"
+            }
+          ],
+          "correctAnswer": "D",
+          "explanation": "Chọn (D) despite (A) even though (Liên từ): Mặc dù (+ Mệnh đề S+V). (B) however (Trạng từ liên kết): Tuy nhiên (Thường đứng đầu câu hoặc giữa 2 dấu phẩy). (C) until (Giới từ/Liên từ): Cho đến khi. (D) despite (Giới từ): Mặc dù (+ Cụm danh từ/V-ing). Sau chỗ trống là \"the high cost\" (cụm danh từ). Even though (+ mệnh đề) và Despite (+ cụm danh từ) đều nghĩa là \"mặc dù\". Do đó chỉ có despite là đúng ngữ pháp. Useful phrases: Purchase equipment (Mua sắm thiết bị) Dịch: Ennis Photography đã mua toàn bộ thiết bị chiếu sáng mới mặc dù chi phí cao.",
+          "grammarTopic": null
+        },
+        {
+          "questionNumber": 122,
+          "description": null,
+          "question": "Marburton residents who wish to _____ a home should contact the award-winning team at Kwan Real Estate.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "seller"
+            },
+            {
+              "label": "B",
+              "content": "sold"
+            },
+            {
+              "label": "C",
+              "content": "sell"
+            },
+            {
+              "label": "D",
+              "content": "selling"
+            }
+          ],
+          "correctAnswer": "C",
+          "explanation": "Chọn (C) sell (A) seller (Danh từ): Người bán. (B) sold (Động từ V2/V3): Đã bán. (C) sell (Động từ nguyên mẫu): Bán. (D) selling (V-ing): Việc bán/đang bán Cấu trúc \"wish to + V-bare\" (muốn làm gì). Sau \"to\" là một động từ nguyên mẫu. để đóng vai trò hành động chính trong mệnh đề quan hệ. Useful phrases: Award-winning team (Đội ngũ từng đạt giải thưởng) Real Estate (Bất động sản) Dịch: Cư dân Marburton, những người muốn bán nhà, nên liên hệ với đội ngũ chuyên nghiệp tại Bất động sản Kwan.",
+          "grammarTopic": null
+        },
+        {
+          "questionNumber": 123,
+          "description": null,
+          "question": "Maswa Bistro began a _____ agreement with local farmers to purchase a set amount of produce each week.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "disruptive"
+            },
+            {
+              "label": "B",
+              "content": "cooperative"
+            },
+            {
+              "label": "C",
+              "content": "grateful"
+            },
+            {
+              "label": "D",
+              "content": "concerned"
+            }
+          ],
+          "correctAnswer": "B",
+          "explanation": "Chọn (B) cooperative (A) disruptive (Tính từ): Gây gián đoạn, phiền phức. (B) cooperative (Tính từ): Có tính hợp tác. (C) grateful (Tính từ): Biết ơn. (D) concerned (Tính từ): Lo lắng, quan tâm. Đây là câu hỏi từ vựng. Chỗ trống bổ nghĩa cho danh từ \"agreement\" (thỏa thuận). Việc nhà hàng mua nông sản từ nông dân là một hành động hợp tác. Cụm \"cooperative agreement\" (thỏa thuận hợp tác) là một thuật ngữ phổ biến trong kinh doanh. Useful phrases: A set amount of produce (Một lượng nông sản cố định). Lưu ý: \"Produce\" ở đây là danh từ không đếm được nghĩa là nông sản, không phải động từ \"sản xuất\" Dịch: Maswa Bistro đã bắt đầu một thỏa thuận hợp tác với các nông dân địa phương.",
+          "grammarTopic": null
+        },
+        {
+          "questionNumber": 124,
+          "description": null,
+          "question": "The City of Doyle's new downtown parking _____ have been met with opposition by residents and visitors.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "restricts"
+            },
+            {
+              "label": "B",
+              "content": "restricted"
+            },
+            {
+              "label": "C",
+              "content": "restrictions"
+            },
+            {
+              "label": "D",
+              "content": "restricting"
+            }
+          ],
+          "correctAnswer": "C",
+          "explanation": "Chọn (C) restrictions (A) restricts (Động từ số ít): Hạn chế. (B) restricted (V-ed/Tính từ): Bị hạn chế. (C) restrictions (Danh từ số nhiều): Sự hạn chế/quy định hạn chế. (D) restricting (V-ing): Việc hạn chế. Chỗ trống đóng vai trò là Chủ ngữ chính của câu, Động từ chính của câu là \"have been\" (số nhiều). Vì vậy, chủ ngữ của câu phải là một danh từ số nhiều -> restrictions. Useful phrases: Meet with opposition (Vấp phải sự phản đối) Dịch: Những quy định hạn chế đậu xe mới ở trung tâm thành phố Doyle đã vấp phải sự phản đối của cư dân.",
+          "grammarTopic": null
+        },
+        {
+          "questionNumber": 125,
+          "description": null,
+          "question": "The plumbing position requires extensive training, even for those who studied _____ in technical school.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "diligently"
+            },
+            {
+              "label": "B",
+              "content": "scientifically"
+            },
+            {
+              "label": "C",
+              "content": "objectively"
+            },
+            {
+              "label": "D",
+              "content": "decidedly"
+            }
+          ],
+          "correctAnswer": "A",
+          "explanation": "Chọn (A) diligently (A) diligently (Trạng từ): Một cách chăm chỉ, cần mẫn. (B) scientifically (Trạng từ): Một cách khoa học. (C) objectively (Trạng từ): Một cách khách quan. (D) decidedly (Trạng từ): Một cách dứt khoát, rõ rệt. Trạng từ bổ nghĩa cho động từ \"studied\" (học tập). Trong giáo dục, ta dùng \"study diligently\" để chỉ việc học tập cần mẫn. Useful phrases: Extensive training (Đào tạo chuyên sâu/rộng rãi) Dịch: Vị trí thợ ống nước yêu cầu đào tạo chuyên sâu, ngay cả với những người đã học tập chăm chỉ ở trường kỹ thuật.",
+          "grammarTopic": null
+        },
+        {
+          "questionNumber": 126,
+          "description": null,
+          "question": "With its fixed price _____, Omega Cellular guarantees no phone bill increases for three years.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "assurance"
+            },
+            {
+              "label": "B",
+              "content": "assuredly"
+            },
+            {
+              "label": "C",
+              "content": "assuring"
+            },
+            {
+              "label": "D",
+              "content": "assures"
+            }
+          ],
+          "correctAnswer": "A",
+          "explanation": "Chọn (A) assurance (A) assurance (Danh từ): Sự đảm bảo, sự cam đoan. (B) assuredly (Trạng từ): Một cách chắc chắn. (C) assuring (V-ing/Tính từ): Đảm bảo. (D) assures (Động từ): Cam đoan. Sau \"fixed price\" (giá cố định) cần một danh từ để tạo thành cụm danh từ làm tân ngữ sau giới từ \"With\". \"Price assurance\" (Sự đảm bảo về giá) là một cụm danh từ hoàn chỉnh về nghĩa. Useful phrases: Fixed price (Giá cố định) Phone bill increases (Sự tăng hóa đơn điện thoại) Dịch: Với sự đảm bảo về mức giá cố định, Omega Cellular cam kết không tăng hóa đơn điện thoại trong vòng ba năm.",
+          "grammarTopic": null
+        },
+        {
+          "questionNumber": 127,
+          "description": null,
+          "question": "As chief analytics officer, Mr. Ko has worked at Lochston Ltd. with great _____ for more than twenty years.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "deduction"
+            },
+            {
+              "label": "B",
+              "content": "duplication"
+            },
+            {
+              "label": "C",
+              "content": "declaration"
+            },
+            {
+              "label": "D",
+              "content": "dedication"
+            }
+          ],
+          "correctAnswer": "D",
+          "explanation": "Chọn (D) dedication (A) deduction (Danh từ): Sự khấu trừ/sự suy luận. (B) duplication (Danh từ): Sự sao chép, nhân bản. (C) declaration (Danh từ): Sự tuyên bố, tờ khai. (D) dedication (Danh từ): Sự tận tụy, cống hiến. Câu hỏi từ vựng. Dấu hiệu là cụm \"for more than twenty years\" (hơn 20 năm) -> thể hiện sự cống hiến/tận tụy (dedication) lâu dài. Useful phrases: Chief analytics officer (Giám đốc phân tích dữ liệu) Dịch: Với tư cách là giám đốc phân tích, ông Ko đã làm việc tại Lochston Ltd. với sự tận tụy to lớn trong hơn hai mươi năm.",
+          "grammarTopic": null
+        },
+        {
+          "questionNumber": 128,
+          "description": null,
+          "question": "Milltown Hospital's cafeteria serves lunch seven days a week _____ only on weekdays.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "up to"
+            },
+            {
+              "label": "B",
+              "content": "as though"
+            },
+            {
+              "label": "C",
+              "content": "each time"
+            },
+            {
+              "label": "D",
+              "content": "rather than"
+            }
+          ],
+          "correctAnswer": "D",
+          "explanation": "Chọn (D) rather than (A) up to (Giới từ): Lên đến. (B) as though (Liên từ): Như thể là. (C) each time (Trạng từ): Mỗi lần. (D) rather than (Liên từ/Giới từ): Thay vì. Câu này so sánh sự ưu tiên/lựa chọn. \"7 ngày một tuần\" đối lập với \"chỉ ngày thường\" -> dùng rather than (thay vì) để nhấn mạnh sự thay đổi. Useful phrases: Weekdays (Ngày trong tuần - từ thứ 2 đến thứ 6 Dịch: Nhà ăn phục vụ bữa trưa 7 ngày một tuần thay vì chỉ vào các ngày trong tuần.",
+          "grammarTopic": null
+        },
+        {
+          "questionNumber": 129,
+          "description": null,
+          "question": "The store's entire inventory of lumber comes from a nearby _____ supplier.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "financial"
+            },
+            {
+              "label": "B",
+              "content": "promotional"
+            },
+            {
+              "label": "C",
+              "content": "chemical"
+            },
+            {
+              "label": "D",
+              "content": "commercial"
+            }
+          ],
+          "correctAnswer": "D",
+          "explanation": "Chọn (D) commercial (A) financial (Tính từ): Thuộc về tài chính. (B) promotional (Tính từ): Thuộc về quảng cáo/khuyến mãi. (C) chemical (Tính từ): Thuộc về hóa học. (D) commercial (Tính từ): Thuộc về thương mại. \"Lumber\" (gỗ xẻ) là hàng hóa được mua bán số lượng lớn. \"Commercial supplier\" (nhà cung cấp thương mại) là cụm từ chỉ đơn vị cung ứng hàng hóa cho doanh nghiệp. Useful phrases: Entire inventory (Toàn bộ hàng tồn kho) Dịch: Toàn bộ kho gỗ của cửa hàng đến từ một nhà cung cấp thương mại gần đó.",
+          "grammarTopic": null
+        },
+        {
+          "questionNumber": 130,
+          "description": null,
+          "question": "For a $95 _____ fee, our mechanics will determine what repairs are needed.",
+          "answers": [
+            {
+              "label": "A",
+              "content": "diagnosed"
+            },
+            {
+              "label": "B",
+              "content": "diagnostic"
+            },
+            {
+              "label": "C",
+              "content": "diagnosable"
+            },
+            {
+              "label": "D",
+              "content": "diagnose"
+            }
+          ],
+          "correctAnswer": "B",
+          "explanation": "Chọn (B) diagnostic (A) diagnosed (V-ed): Đã được chẩn đoán. (B) diagnostic (Tính từ): Có tính chẩn đoán. (C) diagnosable (Tính từ): Có thể chẩn đoán được. (D) diagnose (Động từ): Chẩn đoán.",
+          "grammarTopic": null
+        }
+      ]
+    },
+    {
+      "partNumber": 6,
+      "name": "Text Completion",
+      "passages": [
+        {
+          "passageNumber": 1,
+          "title": "Look to Riessler Landscaping for Your Garden Needs",
+          "passageType": "Advertisement",
+          "content": "Look to Riessler Landscaping for your Garden Needs Riessler Landscaping has everything you need to create your dream garden. We will listen to your ideas and offer suggestions that match your gardening desires. 131. The nursery here at Riessler Landscaping includes plants of many varieties and sizes that burst with eye-catching colors year-round. You are guaranteed to find something that will add 132: to your garden. We -- equipped to construct small ponds or other water features. And as our name suggests, 133. we can take on more ambitious landscaping projects-whatever you need! With more than 40 -- expertise is unmatched. years in the landscape-design business, - 134.",
+          "imageUrl": null,
+          "questions": [
+            {
+              "questionNumber": 131,
+              "description": null,
+              "question": null,
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Staff members have written articles for the local newspaper."
+                },
+                {
+                  "label": "B",
+                  "content": "Installing lights can enhance the effect of a well-designed garden."
+                },
+                {
+                  "label": "C",
+                  "content": "Local competitors cannot beat the prices we charge."
+                },
+                {
+                  "label": "D",
+                  "content": "Riessler Landscaping's goal is to make your vision a reality."
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": "Chọn D Trước chỗ trống: nói về lắng nghe & đưa ra gợi ý, Sau chỗ trống: chuyển sang giới thiệu dịch vụ cụ thể → Cần 1 câu kết nối, nói rõ mục tiêu của công ty -> Chọn D: → Tổng kết ý trước, dẫn sang phần giới thiệu dịch vụ A) Các nhân viên đã viết bài cho báo địa phương. -> Lạc đề, không liên quan làm vườn (B) Việc lắp đèn có thể làm tăng hiệu quả của một khu vườn được thiết kế tốt. -> Quá chi tiết, chưa được dẫn dắt (C) Các đối thủ địa phương không thể cạnh tranh được với mức giá của chúng tôi. -> Quảng cáo giá – không phù hợp mạch (D) Mục tiêu của Riessler Landscaping là biến tầm nhìn của bạn thành hiện thực. → Tổng kết ý trước, dẫn sang phần giới thiệu dịch vụ Dịch:... Chúng tôi sẽ lắng nghe ý tưởng của bạn và đưa ra những gợi ý phù hợp với mong muốn làm vườn của bạn. Mục tiêu của Riessler Landscaping là biến tầm nhìn của bạn thành hiện thực…."
+            },
+            {
+              "questionNumber": 132,
+              "description": null,
+              "question": null,
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "years"
+                },
+                {
+                  "label": "B",
+                  "content": "space"
+                },
+                {
+                  "label": "C",
+                  "content": "beauty"
+                },
+                {
+                  "label": "D",
+                  "content": "moisture"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": "Chọn C Cấu trúc add + NOUN + to Ngữ cảnh ở trước có những từ như “ eye-catching colors” màu sắc bắt mắt, “plants”cây cối, “year-round” đẹp quanh năm -> chọn C là phù hợp ngữ nghĩa nhất. (A) years (n) năm (B) space (n) không gian (C) beauty (n) vẻ đẹp (D) moisture (n) độ ẩm Dịch: Bạn chắc chắn sẽ tìm được thứ gì đó có"
+            },
+            {
+              "questionNumber": 133,
+              "description": null,
+              "question": null,
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "also"
+                },
+                {
+                  "label": "B",
+                  "content": "rarely"
+                },
+                {
+                  "label": "C",
+                  "content": "somehow"
+                },
+                {
+                  "label": "D",
+                  "content": "nevertheless"
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": "Chọn A Cần một trạng từ bổ nghĩa cho equipped với nghĩa là “ngoài ra / thêm nữa” để tiếp nối nói về những lợi ích mà dịch vụ cung cấp. (A) also (adv) cũng (B) rarely (adv) hiếm khi (C) somehow (adv) bằng cách nào đó (D) nevertheless ((adv liên kết) tuy nhiên Useful Structures: also equipped to + V Dịch: Chúng tôi cũng được trang bị đầy đủ để xây dựng các hồ nước nhỏ hoặc các hạng mục cảnh quan liên quan đến nước khác."
+            },
+            {
+              "questionNumber": 134,
+              "description": null,
+              "question": null,
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "its"
+                },
+                {
+                  "label": "B",
+                  "content": "our"
+                },
+                {
+                  "label": "C",
+                  "content": "others"
+                },
+                {
+                  "label": "D",
+                  "content": "their"
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": "Chọn B Phía sau chỗ trống là Danh từ expertise, do vậy cần 1 tính từ đứng ở chỗ ô trống. -> chọn our. Dịch: Với hơn 40 năm hoạt động trong lĩnh vực thiết kế cảnh quan, chuyên môn của chúng tôi là vô song."
+            }
+          ]
+        },
+        {
+          "passageNumber": 2,
+          "title": null,
+          "passageType": "Letter",
+          "content": "10 January Cindy Mulligan 88 Manchester Road HARROGATE HG82 2MJ Dear Ms. Mulligan, -. Your We are delighted to celebrate your 30th anniversary with Brandrix Distribution Centre. - 135. dedication, loyalty, and hard work have contributed greatly to our success over the years. We appreciate your commitment to excellence. Over the years, you - great initiative, creativity, 136. and leadership. You will --- - be receiving a commemorative plaque by post. We hope this token of our gratitude 137. reminds you how much you mean to us. -. Thank you for being part of our Brandrix family. Congratulations on reaching this 138. Sincerely, Lance Powar, Vice President of Human Resources Brandrix Distribution Centre",
+          "imageUrl": null,
+          "questions": [
+            {
+              "questionNumber": 135,
+              "description": null,
+              "question": null,
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "We especially value our long-term customers."
+                },
+                {
+                  "label": "B",
+                  "content": "Please join our holiday celebration."
+                },
+                {
+                  "label": "C",
+                  "content": "Our annual report will be released soon."
+                },
+                {
+                  "label": "D",
+                  "content": "You have been a valuable member of our team."
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": "Chọn D (A) Chúng tôi đặc biệt coi trọng những khách hàng lâu năm. (B) Vui lòng tham gia lễ kỷ niệm ngày lễ của chúng tôi. (C) Báo cáo thường niên của chúng tôi sẽ sớm được phát hành. (D) Bạn đã là một thành viên quý giá của đội ngũ chúng tôi. Câu trước đó nói về việc kỷ niệm 30 năm làm việc của bà Mulligan tại công ty. Câu sau đó khen ngợi sự tận tụy và làm việc chăm chỉ của bà. Đáp án (D) kết nối hoàn hảo giữa việc chúc mừng thâm niên làm việc và việc khen ngợi đóng góp cá nhân. Các đáp án A, B, C đều lạc đề (nói về khách hàng, ngày lễ hoặc báo cáo). Useful structures: Be delighted to do something: Rất vui mừng/hân hạnh được làm gì."
+            },
+            {
+              "questionNumber": 136,
+              "description": null,
+              "question": null,
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "will show"
+                },
+                {
+                  "label": "B",
+                  "content": "must show"
+                },
+                {
+                  "label": "C",
+                  "content": "have shown"
+                },
+                {
+                  "label": "D",
+                  "content": "are showing"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": "Chọn C (A) will show: sẽ cho thấy (Thì tương lai đơn) (B) must show: phải cho thấy (Động từ khuyết thiếu) (C) have shown: đã cho thấy (Thì hiện tại hoàn thành) (D) are showing: đang cho thấy (Thì hiện tại tiếp diễn) Cụm từ \"Over the years\" (Trong suốt những năm qua) là dấu hiệu kinh điển của thì Hiện tại hoàn thành, diễn tả một hành động kéo"
+            },
+            {
+              "questionNumber": 137,
+              "description": null,
+              "question": null,
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "then"
+                },
+                {
+                  "label": "B",
+                  "content": "soon"
+                },
+                {
+                  "label": "C",
+                  "content": "instead"
+                },
+                {
+                  "label": "D",
+                  "content": "likewise"
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": "Chọn B (A) then: sau đó (B) soon: sớm (C) instead: thay vào đó (D) likewise: tương tự như vậy Ngữ cảnh ta có \"You will _____ be receiving...\" (Bạn sẽ _____ nhận được một tấm kỷ niệm chương qua đường bưu điện).-> chọn B \"Will soon be receiving\" là một cấu trúc rất phổ biến trong thư từ thương mại để thông báo một việc sắp xảy ra trong tương lai gần. Useful structures: Commemorative plaque: Tấm kỷ niệm chương. Token of gratitude: Vật (quà) để bày tỏ lòng biết ơn."
+            },
+            {
+              "questionNumber": 138,
+              "description": null,
+              "question": null,
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "milestone"
+                },
+                {
+                  "label": "B",
+                  "content": "consensus"
+                },
+                {
+                  "label": "C",
+                  "content": "destination"
+                },
+                {
+                  "label": "D",
+                  "content": "understanding"
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": "Chọn A (A) milestone: cột mốc quan trọng (B) consensus: sự đồng thuận (C) destination: điểm đến (D) understanding: sự thấu hiểu/hiểu biết Ta có \"Congratulations on reaching this _____\" (Chúc mừng bạn đã đạt được _____ này).=>"
+            }
+          ]
+        },
+        {
+          "passageNumber": 3,
+          "title": "Plans for living room",
+          "passageType": "Email",
+          "content": "To: Kay Berman <kberman@xmail.com> From: Ali Chaleby <achaleby@ralenciadesign.com> Date: August 21 Subject: Plans for living room Attachment: Samples Dear Ms. Berman, My design team is in the process of --- the plans for your living room. Based on our last 139. conversation, I have chosen different paints for the walls and borders. Please review the attached - . If not, it is not too late to make a change. file and decide whether you like those new 140. - . Your review will help us refine the design before we start. 141. Please let 142. know if you have any questions. I look forward to hearing from you. Kind regards, Ali Chaleby, Ralencia Design",
+          "imageUrl": null,
+          "questions": [
+            {
+              "questionNumber": 139,
+              "description": null,
+              "question": null,
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "finalizing"
+                },
+                {
+                  "label": "B",
+                  "content": "finalize"
+                },
+                {
+                  "label": "C",
+                  "content": "finalized"
+                },
+                {
+                  "label": "D",
+                  "content": "finalizes"
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": "Chọn A (A) finalizing: đang hoàn thiện (V-ing) (B) finalize: hoàn thiện (V nguyên thể) (C) finalized: đã hoàn thiện (V-ed) (D) finalizes: hoàn thiện (V-s) Cụm từ cố định \"in the process of + V-ing\" (trong quá trình làm việc gì đó). Đằng sau giới từ \"of\" chúng ta luôn cần một danh động từ (Gerund). -> Chọn A: Chỉ có \"finalizing\" phù hợp với cấu trúc ngữ pháp này. Useful structures: In the process of doing something: Đang trong quá trình thực hiện điều gì."
+            },
+            {
+              "questionNumber": 140,
+              "description": null,
+              "question": null,
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "organizations"
+                },
+                {
+                  "label": "B",
+                  "content": "schedules"
+                },
+                {
+                  "label": "C",
+                  "content": "colors"
+                },
+                {
+                  "label": "D",
+                  "content": "times"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": "Chọn C (A) organizations: các tổ chức (B) schedules: các lịch trình (C) colors: các màu sắc (D) times: các thời điểm Câu trước đó đề cập đến: \"I have chosen different paints for the walls and borders\" (Tôi đã chọn các loại sơn khác nhau cho tường và viền). -> Trong thiết kế nội thất, khi nói đến sơn (paint), chúng ta đang nói về màu sắc (colors). \"Those new colors\" dùng để thay thế cho cụm \"different paints\" ở câu trước -> C là hợp lý nhất. Useful structures: Based on our last conversation: Dựa trên cuộc trò chuyện gần nhất của chúng ta (Cách dẫn dắt chuyên nghiệp)."
+            },
+            {
+              "questionNumber": 141,
+              "description": null,
+              "question": null,
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "I have already begun drawing up plans for your kitchen."
+                },
+                {
+                  "label": "B",
+                  "content": "We are not planning to begin work for another two weeks."
+                },
+                {
+                  "label": "C",
+                  "content": "Your living room is particularly spacious and airy."
+                },
+                {
+                  "label": "D",
+                  "content": "We have not yet received your current payment."
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": "Chọn B (A) Tôi đã bắt đầu lập kế hoạch cho nhà bếp của bạn. (B) Chúng tôi chưa có kế hoạch bắt đầu công việc trong hai tuần tới. (C) Phòng khách của bạn đặc biệt rộng rãi và thoáng đãng. (D) Chúng tôi vẫn chưa nhận được khoản thanh toán hiện tại của bạn. Câu ngay sau chỗ trống là: \"Your review will help us refine the design before we start\" (Sự xem xét của bạn sẽ giúp chúng tôi tinh chỉnh thiết kế trước khi chúng tôi bắt đầu). -> Câu (B) tạo ra sự logic về thời gian. Vì họ chưa định bắt đầu làm việc ngay (trong 2 tuần tới) nên khách hàng vẫn còn thời gian để xem xét và thay đổi thiết kế. Đáp án (A) lạc đề sang \"nhà bếp\", (C) khen phòng khách không liên quan đến việc \"tinh chỉnh thiết kế\", (D) nhắc đến thanh toán quá đột ngột. Useful structures: Refine the design: Tinh chỉnh/cải thiện thiết kế. Review the attached file: Xem xét tệp đính kèm (Xuất hiện liên tục trong Part 6 & 7)"
+            },
+            {
+              "questionNumber": 142,
+              "description": null,
+              "question": null,
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "them"
+                },
+                {
+                  "label": "B",
+                  "content": "ours"
+                },
+                {
+                  "label": "C",
+                  "content": "his"
+                },
+                {
+                  "label": "D",
+                  "content": "me"
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": "Chọn D (A) them: họ/chúng (tân ngữ số nhiều) (B) ours: của chúng tôi (đại từ sở hữu) (C) his: của anh ấy (tính từ/đại từ sở hữu) (D) me: tôi (tân ngữ số ít) Chọn me là phù hợp ngữ pháp và ý nghĩa nhất. Cấu trúc \"Please let me know\" (Vui lòng cho tôi biết) là một câu kết email cực kỳ kinh điển. Người viết đang yêu cầu khách hàng phản hồi trực tiếp cho mình."
+            }
+          ]
+        },
+        {
+          "passageNumber": 4,
+          "title": "Your recent office visit",
+          "passageType": "Email",
+          "content": "To: Marsha Zalen <mzalen@mansfield.com> From: Kaymar PCP <info@kaymarpcp.com> Date: September 8 Subject: Your recent office visit Dear Ms. Zalen, Thank you for your recent visit to Kaymar Primary Care Practice. We hope you found our services 143. and we welcome suggestions for improvement. We have posted a 144. of your consultation on our portal. Please take a moment to go through it and let us know if you have any questions. As a reminder, you can log in to the portal for various activities. --, you can make 145. appointments and payments, view your medical history, review lab results, and request -. Rest assured that your personal information is safe and secure. medication refills. 146. We thank you for your business and look forward to serving you again. Kaymar Primary Care Practice",
+          "imageUrl": null,
+          "questions": [
+            {
+              "questionNumber": 143,
+              "description": null,
+              "question": null,
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "satisfied"
+                },
+                {
+                  "label": "B",
+                  "content": "satisfaction"
+                },
+                {
+                  "label": "C",
+                  "content": "satisfactory"
+                },
+                {
+                  "label": "D",
+                  "content": "satisfactorily"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": "Chọn C (A) satisfied (adj/V-ed): cảm thấy hài lòng (thường dùng cho người). (B) satisfaction (noun): sự hài lòng. (C) satisfactory (adj): thỏa đáng, vừa ý (dùng để miêu tả tính chất sự vật/dịch vụ). (D) satisfactorily (adv): một cách thỏa đáng. Ta có \"found our services + [Adj]\". Sau động từ \"find\" cộng tân ngữ, chúng ta cần một tính từ để bổ nghĩa cho tân ngữ \"services\" đó. => \"Satisfactory\" miêu tả chất lượng của dịch vụ là tốt, vừa ý. Đáp án (A) sai vì"
+            },
+            {
+              "questionNumber": 144,
+              "description": null,
+              "question": null,
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "photo"
+                },
+                {
+                  "label": "B",
+                  "content": "lecture"
+                },
+                {
+                  "label": "C",
+                  "content": "summary"
+                },
+                {
+                  "label": "D",
+                  "content": "schedule"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": "Chọn C (A) photo (noun): bức ảnh. (B) lecture (noun): bài giảng. (C) summary (noun): bản tóm tắt. (D) schedule (noun): lịch trình. Ngữ cảnh có \"We have posted a _____ of your consultation on our portal.\" (Chúng tôi đã đăng một _____ về buổi tư vấn của bạn lên cổng thông tin của chúng tôi) -> Chọn C vì trong y tế, sau khi khám (consultation), phòng khám thường cung cấp một \"bản tóm tắt\" nội dung buổi khám để bệnh nhân theo dõi. Các từ như ảnh, bài giảng hay lịch trình đều không phù hợp logic trong ngữ cảnh này."
+            },
+            {
+              "questionNumber": 145,
+              "description": null,
+              "question": null,
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "To repeat"
+                },
+                {
+                  "label": "B",
+                  "content": "For instance"
+                },
+                {
+                  "label": "C",
+                  "content": "Otherwise"
+                },
+                {
+                  "label": "D",
+                  "content": "Consequently"
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": "Chọn B (A) To repeat: để nhắc lại. (B) For instance: ví dụ như. (C) Otherwise: nếu không thì. (D) Consequently: hệ quả là. Ta thấy Câu trước nói về việc portal có \"various activities\" (nhiều hoạt động khác nhau). Vế sau liệt kê các hoạt động cụ thể như đặt lịch hẹn, thanh toán, xem lịch sử y tế… -> Chọn B \"For instance\" dùng để đưa ra các ví dụ cụ thể cho cụm \"various activities\" đã nêu trước đó. Useful phrases: Medical history: Lịch sử y tế/tiền sử bệnh án. Medication refills: Việc cấp thêm thuốc theo đơn cũ."
+            },
+            {
+              "questionNumber": 146,
+              "description": null,
+              "question": null,
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "We hope you will use this resource to manage your health-care needs."
+                },
+                {
+                  "label": "B",
+                  "content": "The staff will close the office early on Friday afternoons."
+                },
+                {
+                  "label": "C",
+                  "content": "Please be sure to come to our office fifteen minutes in advance."
+                },
+                {
+                  "label": "D",
+                  "content": "We apologize for any confusion about your appointment time."
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": "Chọn A (A) Chúng tôi hy vọng bạn sẽ sử dụng nguồn tài nguyên này để quản lý các nhu cầu chăm sóc sức khỏe của mình. (B) Nhân viên sẽ đóng cửa văn phòng sớm vào chiều thứ Sáu. (C) Hãy nhớ đến văn phòng của chúng tôi trước 15 phút. (D) Chúng tôi xin lỗi vì bất kỳ sự nhầm lẫn nào về thời gian hẹn của bạn. Ta thấy ngữ cảnh Cả đoạn văn đang giới thiệu về các tính năng của \"portal\" (cổng thông tin trực tuyến). Câu ngay sau chỗ trống là lời cam đoan về bảo mật thông tin cá nhân. -> Câu (A) tóm gọn lại mục đích của việc sử dụng portal (nguồn tài nguyên này) là để giúp bệnh nhân quản lý sức khỏe, rất phù hợp với mạch văn Useful structures: Rest assured that...: Hãy yên tâm rằng..."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "partNumber": 7,
+      "name": "Reading Comprehension",
+      "passageGroups": [
+        {
+          "groupNumber": 1,
+          "questionRange": "147-148",
+          "passageType": "SINGLE",
+          "passages": [
+            {
+              "passageNumber": 1,
+              "title": null,
+              "content": "Dear High View Apartments Resident, Riverside Paving Company is coming to High View Apartments on May 3 and 4 to resurface the parking area. All vehicles must be removed by 8 A.M. on May 3 for the work to commence. Residents may use the parking area again starting on May 5 at 8 A.M. We realize that trying to find another place to park is inconvenient, but it is necessary for the job to be completed in the two days scheduled. Note that all parking spaces will be widened, and some spaces could be moved during the work. You will receive an e-mail if your parking space is moved more than 20 meters from your previous one. Thank you for your cooperation, Judith Alvarez, Property Manager",
+              "imageUrl": null,
+              "type": "Notice"
+            }
+          ],
+          "questions": [
+            {
+              "questionNumber": 147,
+              "description": null,
+              "question": "What is the purpose of the notice?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "To invite residents to a meeting on May 3"
+                },
+                {
+                  "label": "B",
+                  "content": "To request feedback about parking facilities"
+                },
+                {
+                  "label": "C",
+                  "content": "To inform residents of an upcoming project"
+                },
+                {
+                  "label": "D",
+                  "content": "To announce an increase in parking fees"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": "C Mục đích của thông báo là gì? (A) Mời cư dân tham dự một cuộc họp vào ngày 3 tháng 5 (B) Yêu cầu ý kiến phản hồi về khu vực đỗ xe (C) Thông báo cho cư dân về một dự án sắp diễn ra (D) Thông báo việc tăng phí đỗ xe"
+            },
+            {
+              "questionNumber": 148,
+              "description": null,
+              "question": "What is suggested about High View Apartments?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "It charges residents a monthly maintenance fee."
+                },
+                {
+                  "label": "B",
+                  "content": "It recently hired a new property manager."
+                },
+                {
+                  "label": "C",
+                  "content": "It has the parking area repaved every year."
+                },
+                {
+                  "label": "D",
+                  "content": "It assigns tenants specific parking spots."
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": "D Điều gì được gợi ý về High View Apartments? (A) Nơi này thu phí bảo trì hàng tháng từ cư dân (B) Gần đây đã thuê một người quản lý tòa nhà mới (C) Khu vực đỗ xe được trải nhựa lại hằng năm (D) Mỗi cư dân được phân công chỗ đỗ xe riêng"
+            }
+          ]
+        },
+        {
+          "groupNumber": 2,
+          "questionRange": "149-150",
+          "passageType": "SINGLE",
+          "passages": [
+            {
+              "passageNumber": 1,
+              "title": null,
+              "content": "Carol Barger (10:45 A.M.) Hello, Ms. Seang. Leakhena Seang (10:55 A.M.) Good morning! Carol Barger (11:15 A.M.) We have fifteen participants enrolled in your mosaic workshop tomorrow. That is five more than last summer. Your workshops get more popular every year! Do you have enough materials on hand for that many participants? Leakhena Seang (11:23 A.M.) I have plenty to go around. We'll be creating mosaic designs using bits of sea glass I collected on my vacation last summer. They are pieces of brown, green, and blue bottles that have washed ashore. The sand smoothed all the sharp edges, so they're perfectly safe for everyone to use. Carol Barger (11:30 A.M.) Sounds great. See you at breakfast tomorrow.",
+              "imageUrl": null,
+              "type": "Online Chat"
+            }
+          ],
+          "questions": [
+            {
+              "questionNumber": 149,
+              "description": null,
+              "question": "What most likely is Ms. Seang's job?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Glassmaker"
+                },
+                {
+                  "label": "B",
+                  "content": "Art instructor"
+                },
+                {
+                  "label": "C",
+                  "content": "Beach lifeguard"
+                },
+                {
+                  "label": "D",
+                  "content": "Program administrator"
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": "B Công việc của cô Seang có khả năng cao nhất là gì? (A) Thợ làm đồ thủy tinh (B) Giảng viên nghệ thuật (C) Nhân viên cứu hộ bãi biển (D) Điều phối viên chương trình"
+            },
+            {
+              "questionNumber": 150,
+              "description": null,
+              "question": "At 11:23 A.M., what does Ms. Seang imply when she writes, \"I have plenty to go around\"?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "She intends to create an extra-large mosaic."
+                },
+                {
+                  "label": "B",
+                  "content": "She has been collecting sea glass for many years."
+                },
+                {
+                  "label": "C",
+                  "content": "She can share her sea glass with all the workshop participants."
+                },
+                {
+                  "label": "D",
+                  "content": "She does not think she will use much of her sea glass"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": "Vào lúc 11:23 sáng, khi cô Seang viết “I have plenty to go around” (Tôi có rất nhiều để chia sẻ), cô ấy ngụ ý điều gì? (A) Cô ấy dự định tạo ra một bức tranh khảm cỡ rất lớn. (B) Cô ấy đã sưu tầm thủy tinh biển trong nhiều năm. (C) Cô ấy có thể chia sẻ thủy tinh biển của mình với tất cả những người tham gia hội thảo. (D) Cô ấy nghĩ rằng mình sẽ không sử dụng nhiều thủy tinh biển."
+            }
+          ]
+        },
+        {
+          "groupNumber": 3,
+          "questionRange": "151-152",
+          "passageType": "SINGLE",
+          "passages": [
+            {
+              "passageNumber": 1,
+              "title": "Updates",
+              "content": "To: Sales Team. From: Laura Correa. Date: 5 October Subject: Updates Dear Team, As announced in the Brighter Sails September newsletter, our performance has been consistently strong this year. This is an accomplishment we can all be proud of. Please take a moment to congratulate each other. We will continue to dream up new and exciting plans for the future! In other news, Jasen Norton will transfer to our Kingston headquarters next month. We are sad to lose Mr. Norton, but we gratefully acknowledge his excellent work and wish him continued success in his new role. There will be a farewell luncheon for Mr. Norton on 28 October at 1:00 P.M. in the second-floor conference room. Bring your good cheer and perhaps a story to share. The company will supply lunch, a cake, and decorations. Let me know by 12 October whether you will be able to attend. Sincerely, Laura Correa, Sales Manager Brighter Sails Ltd.",
+              "imageUrl": null,
+              "type": "Email"
+            }
+          ],
+          "questions": [
+            {
+              "questionNumber": 151,
+              "description": null,
+              "question": "What is mentioned about Mr. Norton?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "He will be attending a sales conference."
+                },
+                {
+                  "label": "B",
+                  "content": "He sent Ms. Correa an office supply request."
+                },
+                {
+                  "label": "C",
+                  "content": "He wrote an article in the September newsletter."
+                },
+                {
+                  "label": "D",
+                  "content": "He will be moving to another company location."
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": "Điều gì được đề cập về ông Norton? (A) Ông ấy sẽ tham dự một hội nghị bán hàng. (B) Ông ấy đã gửi cho cô Correa một yêu cầu về vật dụng văn phòng. (C) Ông ấy đã viết một bài báo trong bản tin tháng Chín. (D) Ông ấy sẽ chuyển đến làm việc tại một chi nhánh khác của công ty."
+            },
+            {
+              "questionNumber": 152,
+              "description": null,
+              "question": "What does Ms. Correa ask members of the sales team to do?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Send her stories for a newsletter"
+                },
+                {
+                  "label": "B",
+                  "content": "Give her names of potential new hires"
+                },
+                {
+                  "label": "C",
+                  "content": "Inform her of plans to attend an event"
+                },
+                {
+                  "label": "D",
+                  "content": "Help her decorate the office"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": "C Cô Correa yêu cầu các thành viên trong nhóm bán hàng làm gì? (A) Gửi cho cô ấy các câu chuyện/bài viết cho bản tin (B) Cung cấp cho cô ấy tên của những ứng viên tiềm năng (C) Thông báo cho cô ấy kế hoạch tham dự một sự kiện (D) Giúp cô ấy trang trí văn phòng"
+            }
+          ]
+        },
+        {
+          "groupNumber": 4,
+          "questionRange": "153-154",
+          "passageType": "SINGLE",
+          "passages": [
+            {
+              "passageNumber": 1,
+              "title": "Refurbished Theater Gives Town a Boost",
+              "content": "Refurbished Theater Gives Town a Boost BEACHVILLE (February 24)—Beachville residents and tourists have a good reason to celebrate. The 40-year-old Crown Coastal Theater is scheduled to reopen in June. Many were saddened when the former theater owners decided to close the venue over a year ago, citing the cost of needed renovations. Fortunately, the theater has new owners who have spent the last year updating the interior and the projection system. Christine Lafferty said that she and her childhood friend Morgan Flanagan spent plenty of time at the theater while growing up. \"Going to the movies is the thing to do on a rainy day in a seaside town. We were sorry to see it close.\" The friends, who also own the popular Blue Bay Bistro, decided to buy the theater and make the necessary repairs to keep it a thriving business. For more information about the theater and its upcoming events, visit www.crowncoastaltheater.com.",
+              "imageUrl": null,
+              "type": "Article"
+            }
+          ],
+          "questions": [
+            {
+              "questionNumber": 153,
+              "description": null,
+              "question": "What is the purpose of the article?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "To report on beach conditions"
+                },
+                {
+                  "label": "B",
+                  "content": "To announce a business reopening"
+                },
+                {
+                  "label": "C",
+                  "content": "To promote a movie premiere"
+                },
+                {
+                  "label": "D",
+                  "content": "To advertise a new restaurant"
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": "B Mục đích của bài báo là gì? (A) Báo cáo về tình trạng bãi biển (B) Thông báo việc một doanh nghiệp mở cửa trở lại (C) Quảng bá buổi ra mắt một bộ phim (D) Quảng cáo một nhà hàng mới"
+            },
+            {
+              "questionNumber": 154,
+              "description": null,
+              "question": "Who is Ms. Flanagan?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "A town council member"
+                },
+                {
+                  "label": "B",
+                  "content": "An event coordinator"
+                },
+                {
+                  "label": "C",
+                  "content": "Ms. Lafferty's business partner"
+                },
+                {
+                  "label": "D",
+                  "content": "The writer of the article"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": "C Bà Flanagan là ai? (A) Một thành viên hội đồng thị trấn (B) Một điều phối viên sự kiện (C) Đối tác kinh doanh của bà Lafferty (D) Tác giả của bài viết"
+            }
+          ]
+        },
+        {
+          "groupNumber": 5,
+          "questionRange": "155-157",
+          "passageType": "SINGLE",
+          "passages": [
+            {
+              "passageNumber": 1,
+              "title": "Makatasi model METX-33948",
+              "content": "To: Randi Longfellow <rlongfellow@sapphiremail.com.au>. From: Deon Welman <deonwelman@skyviewscopes.com.au>. Date: 27 March. Subject: Makatasi model METX-33948. Dear Ms. Longfellow, Thank you for ordering the Makatasi ET-Triple Refracting Telescope, model METX-33948. Unfortunately, the item you requested is on back order. — [1] —. If you do not wish to wait, we have a similar telescope from a different manufacturer, Belter Telescopes. Like the Makatasi model you ordered, the Belter BTR-1483 has a 120 mm aperture and a retractable lens hood. — [2] —. In addition, all Belter telescopes include a padded carrying case. The Belter BTR-1483 costs $200 less than the Makatasi METX-33948. If you wish to revise your order, simply reply to this e-mail within 48 hours or go to our Web site to chat with a representative at http://www.skyviewscopes.com.au. We will then change your order, refund $200 to your credit card, and ship your new telescope overnight at no extra charge. — [3] —. Otherwise, we will notify you when the Makatasi model METX-33948 is back in stock and provide delivery information at that point. — [4] —. Best regards, Deon Welman, Sales Representative, Skyview Scopes.",
+              "imageUrl": null,
+              "type": "Email"
+            }
+          ],
+          "questions": [
+            {
+              "questionNumber": 155,
+              "description": null,
+              "question": "What is the purpose of the e-mail?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "To request payment"
+                },
+                {
+                  "label": "B",
+                  "content": "To provide operating instructions"
+                },
+                {
+                  "label": "C",
+                  "content": "To advertise a new product"
+                },
+                {
+                  "label": "D",
+                  "content": "To offer a substitute item"
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": "D Mục đích của email là gì? (A) Yêu cầu thanh toán (B) Cung cấp hướng dẫn sử dụng (C) Quảng cáo một sản phẩm mới (D) Đề nghị một sản phẩm thay thế"
+            },
+            {
+              "questionNumber": 156,
+              "description": null,
+              "question": "What is mentioned about the Belter BTR-1483 telescope?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "It can only be ordered online."
+                },
+                {
+                  "label": "B",
+                  "content": "It will ship directly from the manufacturer."
+                },
+                {
+                  "label": "C",
+                  "content": "It includes a protective case."
+                },
+                {
+                  "label": "D",
+                  "content": "It is the most expensive telescope of its type."
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": "C Điều gì được đề cập về kính thiên văn Belter BTR-1483? (A) Chỉ có thể đặt mua trực tuyến. (B) Sẽ được vận chuyển trực tiếp từ nhà sản xuất. (C) Có kèm theo hộp bảo vệ. (D) Là kính thiên văn đắt nhất trong cùng loại."
+            },
+            {
+              "questionNumber": 157,
+              "description": null,
+              "question": "In which of the positions marked [1], [2], [3], and [4] does the following sentence best belong? \"You can see a full list of specifications on our Web site.\"",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "[1]"
+                },
+                {
+                  "label": "B",
+                  "content": "[2]"
+                },
+                {
+                  "label": "C",
+                  "content": "[3]"
+                },
+                {
+                  "label": "D",
+                  "content": "[4]"
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": "B 157. Câu sau đây nên được đặt ở vị trí nào trong các vị trí [1], [2], [3], [4]? \"Bạn có thể xem danh sách đầy đủ các thông số kỹ thuật trên trang web của chúng tôi.\" (A) [1] (B) [2] (C) [3] (D) [4]"
+            }
+          ]
+        },
+        {
+          "groupNumber": 6,
+          "questionRange": "158-160",
+          "passageType": "SINGLE",
+          "passages": [
+            {
+              "passageNumber": 1,
+              "title": "RE: Inquiry about job opening",
+              "content": "To: Sun-Hi Myo <shmyo@sunmail.co.nz> From: Jan Delpit <jdelpit@hamerkoptech.co.nz> Date: 8 March Subject: RE: Inquiry about job opening Hello, Thank you for your e-mail. I am currently on holiday and will return to the office on 15 March. I will respond to your message as soon as possible after I return. If you require general assistance during my absence or have questions about the open position in our sales department, please contact my assistant Sita Viswan at 04 555 0193 or sviswan@hamerkoptech.co.nz. For questions about specific Hamerkoptech software products, contact the customer service department at customerservice@hamerkoptech.co.nz. Additionally, I am happy to announce that our new graphic design software program will be released on 2 April. You can read more about the program at Hamerkoptech's newly redesigned Web site, www.hamerkoptech.co.nz. There, you may also sign up to receive our weekly newsletter by following the instructions on the home page. Sincerely, Jan Delpit",
+              "imageUrl": null,
+              "type": "Email"
+            }
+          ],
+          "questions": [
+            {
+              "questionNumber": 158,
+              "description": null,
+              "question": "What is one purpose of the e-mail?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "To explain how to use a software program"
+                },
+                {
+                  "label": "B",
+                  "content": "To request Ms. Myo's assistance with a project"
+                },
+                {
+                  "label": "C",
+                  "content": "To introduce a new staff member"
+                },
+                {
+                  "label": "D",
+                  "content": "To indicate that Mr. Delpit is out of the office"
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": "D Mục đích của email là gì? (A) Giải thích cách sử dụng một phần mềm (B) Yêu cầu cô Myo hỗ trợ một dự án (C) Giới thiệu một nhân viên mới (D) Thông báo rằng ông Delpit đang vắng mặt khỏi văn phòng"
+            },
+            {
+              "questionNumber": 159,
+              "description": null,
+              "question": "What will happen on April 2?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "A job opening will be filled."
+                },
+                {
+                  "label": "B",
+                  "content": "A product will be launched."
+                },
+                {
+                  "label": "C",
+                  "content": "A client meeting will take place."
+                },
+                {
+                  "label": "D",
+                  "content": "A Web site redesign will begin."
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": "B Điều gì sẽ xảy ra vào ngày 2 tháng 4? (A) Một vị trí công việc sẽ được tuyển dụng (B) Một sản phẩm sẽ được ra mắt (C) Một cuộc họp với khách hàng sẽ diễn ra (D) Việc thiết kế lại trang web sẽ bắt đầu"
+            },
+            {
+              "questionNumber": 160,
+              "description": null,
+              "question": "How can people subscribe to a newsletter?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "By calling Ms. Viswan"
+                },
+                {
+                  "label": "B",
+                  "content": "By replying to Mr. Delpit's e-mail"
+                },
+                {
+                  "label": "C",
+                  "content": "By visiting Hamerkoptech's Web site"
+                },
+                {
+                  "label": "D",
+                  "content": "By contacting the customer service department"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": "C Mọi người có thể đăng ký nhận bản tin bằng cách nào? (A) Gọi điện cho cô Viswan (B) Trả lời email của ông Delpit (C) Truy cập trang web của Hamerkoptech (D) Liên hệ bộ phận chăm sóc khách hàng"
+            }
+          ]
+        },
+        {
+          "groupNumber": 7,
+          "questionRange": "161-163",
+          "passageType": "SINGLE",
+          "passages": [
+            {
+              "passageNumber": 1,
+              "title": "Vimalo Brands Enters a New Era",
+              "content": "Vimalo Brands Enters a New Era. By Yvette Maurer. VANCOUVER (2 August)—Vimalo Brands, the large consumer goods company that markets popular nutritional-support and personal-care products, including Powerburst breakfast drinks and Honeysoft soaps and lotions, will soon offer something new for its customers: frozen foods. “Our new Nutridinna line is not just about convenience,” CEO Danitza Martens said during a press conference earlier today. “Frozen foods are not a new concept, but our method of flash-freezing fresh produce and meats ensures that our products retain their texture and flavour as well as their healthy vitamins and minerals. Now our customers can enjoy the convenience of frozen food without sacrificing quality.” Vimalo Brands has partnered with Vancouver-area farms to obtain produce and meat for the Nutridinna line. “By keeping our operations local, we avoid shipping delays and can flash-freeze freshly harvested vegetables at their peak of ripeness,” Martens said. “Our customers benefit further, since our products can be kept in the freezer for up to six months.” Nutridinna foods will be available in supermarkets beginning in November. Frozen fish and other seafood will be added early next year.",
+              "imageUrl": null,
+              "type": "Article"
+            }
+          ],
+          "questions": [
+            {
+              "questionNumber": 161,
+              "description": null,
+              "question": "What is one purpose of the article?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "To discuss a cooking technique"
+                },
+                {
+                  "label": "B",
+                  "content": "To report on a corporate merger"
+                },
+                {
+                  "label": "C",
+                  "content": "To announce a new product line"
+                },
+                {
+                  "label": "D",
+                  "content": "To introduce a recently hired executive"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": "C Mục đích của bài viết là gì? (A) Thảo luận về một kỹ thuật nấu ăn (B) Báo cáo về một vụ sáp nhập doanh nghiệp (C) Thông báo về một dòng sản phẩm mới (D) Giới thiệu một giám đốc điều hành mới được tuyển dụng"
+            },
+            {
+              "questionNumber": 162,
+              "description": null,
+              "question": "The word \"just\" in paragraph 1, line 8, is closest in meaning to",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "recently"
+                },
+                {
+                  "label": "B",
+                  "content": "exactly"
+                },
+                {
+                  "label": "C",
+                  "content": "slightly"
+                },
+                {
+                  "label": "D",
+                  "content": "only"
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": "D Từ “just” ở đoạn 1, dòng 8, gần nghĩa nhất với từ nào? (A) Gần đây (B) Chính xác (C) Hơi / một chút (D) Chỉ"
+            },
+            {
+              "questionNumber": 163,
+              "description": null,
+              "question": "What does Ms. Martens suggest about flash-frozen food?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "It is less expensive than fresh food."
+                },
+                {
+                  "label": "B",
+                  "content": "It is as nutritious as fresh food."
+                },
+                {
+                  "label": "C",
+                  "content": "It is as easy to ship as fresh food."
+                },
+                {
+                  "label": "D",
+                  "content": "It is less flavorful than fresh food."
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": "B Bà Martens gợi ý điều gì về thực phẩm đông lạnh nhanh? (A) Rẻ hơn thực phẩm tươi (B) Có giá trị dinh dưỡng tương đương thực phẩm tươi (C) Dễ vận chuyển như thực phẩm tươi (D) Ít hương vị hơn thực phẩm tươi"
+            }
+          ]
+        },
+        {
+          "groupNumber": 8,
+          "questionRange": "164-167",
+          "passageType": "SINGLE",
+          "passages": [
+            {
+              "passageNumber": 1,
+              "title": "Karning Creative Designs",
+              "content": "Are you ready to work hard as part of a team of like-minded individuals? Are you willing to put your education, your experience, and your imagination to great use? If so, then we have the job for you. Karning Creative Designs is expanding, and with our success comes your opportunity. Karning Creative Designs began ten years ago as a two-person operation set up in the home of our current CEO and founder Shirin Navani. Now located in a beautiful loft in downtown Hollinson, our firm currently employs 25 full-time staff members. At Karning, we design paper-based brochures, catalogs, ads, and posters for our clients. We are currently seeking qualified designers and artists who will shine in a fast-paced, collaborative environment. The ideal candidate • Holds a degree in design, advertising, or graphic art—although several years of direct experience may substitute for a degree • Demonstrates a strong ability to work closely with colleagues • Maintains a critical eye for detail and precision • Consistently meets deadlines and can flourish under pressure Graphic design or related experience is a plus but not strictly necessary. If you are ready to join our team, we want to meet you! Contact Salvador Tomassin at 608-555-0144 for further details. All applications must be received by March 31.",
+              "imageUrl": null,
+              "type": "Advertisement"
+            }
+          ],
+          "questions": [
+            {
+              "questionNumber": 164,
+              "description": null,
+              "question": "According to the advertisement, who most likely is Ms. Navani?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "A Karning Creative Designs client"
+                },
+                {
+                  "label": "B",
+                  "content": "A business owner"
+                },
+                {
+                  "label": "C",
+                  "content": "A photographer"
+                },
+                {
+                  "label": "D",
+                  "content": "A real estate agent"
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": "B Theo quảng cáo, bà Navani có khả năng cao là ai? (A) Một khách hàng của Karning Creative Designs (B) Một chủ doanh nghiệp (C) Một nhiếp ảnh gia (D) Một nhân viên môi giới bất động sản"
+            },
+            {
+              "questionNumber": 165,
+              "description": null,
+              "question": "What is indicated about Karning Creative Designs?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Its primary focus is Web design."
+                },
+                {
+                  "label": "B",
+                  "content": "It initially employed two people."
+                },
+                {
+                  "label": "C",
+                  "content": "It was founded by Mr. Tomassin."
+                },
+                {
+                  "label": "D",
+                  "content": "Its staff are permitted to work from home"
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": "B Điều gì được đề cập về Karning Creative Designs? (A) Trọng tâm chính của công ty là thiết kế web (B) Ban đầu công ty có hai nhân viên (C) Công ty được thành lập bởi ông Tomassin (D) Nhân viên được phép làm việc tại nhà"
+            },
+            {
+              "questionNumber": 166,
+              "description": null,
+              "question": "What is required of job applicants?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Skill in working with others"
+                },
+                {
+                  "label": "B",
+                  "content": "Previous design experience"
+                },
+                {
+                  "label": "C",
+                  "content": "A willingness to work on weekends"
+                },
+                {
+                  "label": "D",
+                  "content": "An ability to use certain software applications"
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": "A Ứng viên xin việc cần đáp ứng yêu cầu gì? (A) Có kỹ năng làm việc nhóm (B) Có kinh nghiệm thiết kế trước đó (C) Sẵn sàng làm việc vào cuối tuần (D) Có khả năng sử dụng một số phần mềm nhất định"
+            },
+            {
+              "questionNumber": 167,
+              "description": null,
+              "question": "What will happen on March 31?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "A project will begin."
+                },
+                {
+                  "label": "B",
+                  "content": "A deadline will occur."
+                },
+                {
+                  "label": "C",
+                  "content": "A graphic designer will relocate."
+                },
+                {
+                  "label": "D",
+                  "content": "An application form will be made available"
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": "B Điều gì sẽ xảy ra vào ngày 31 tháng 3? (A) Một dự án sẽ bắt đầu (B) Một hạn chót sẽ diễn ra (C) Một nhà thiết kế đồ họa sẽ chuyển nơi làm việc (D) Mẫu đơn đăng ký sẽ được công bố"
+            }
+          ]
+        },
+        {
+          "groupNumber": 9,
+          "questionRange": "168-171",
+          "passageType": "SINGLE",
+          "passages": [
+            {
+              "passageNumber": 1,
+              "title": null,
+              "content": "NEW HAVEN (June 1)—Marco's Italian Restaurant on Frontage Road will be reopening in late June. It closed three months ago after a water leak caused extensive damage to the kitchen. A significant amount of work needed to be done in the kitchen and dining areas. - [1] —. The restaurant will accommodate larger parties when it reopens. During the past three months, many of the restaurant's employees were able to work at Marco's Italian Market, which is located on the opposite side of the street. - [2] -. \"The leak happened right before the market's busy season started,\" said Tom Marco, who owns both businesses. \"We needed to add staff there temporarily, and I was happy to keep my restaurant crew employed.\" Most of those employees have now returned to work in the restaurant. - [3] -. Mr. Marco has planned a grand reopening for June 25. Guests will enjoy live music and a new tasting menu. - [4] -. Reservations are required for the day of the celebration and can be made by calling 203-555-0124. \"We are excited to be able to prepare our traditional dishes and welcome the community back again,\" stated Mr. Marco.",
+              "imageUrl": null,
+              "type": "Article"
+            }
+          ],
+          "questions": [
+            {
+              "questionNumber": 168,
+              "description": null,
+              "question": "What does the article mention about Marco's Italian Restaurant?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "It is the oldest restaurant in New Haven."
+                },
+                {
+                  "label": "B",
+                  "content": "It is looking for a chef who can cook traditional dishes."
+                },
+                {
+                  "label": "C",
+                  "content": "It needed major renovations."
+                },
+                {
+                  "label": "D",
+                  "content": "It opened in a new location."
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": "C Bài viết đề cập điều gì về Nhà hàng Ý Marco? (A) Đây là nhà hàng lâu đời nhất ở New Haven. (B) Nhà hàng đang tìm một đầu bếp có thể nấu các món truyền thống. (C) Nhà hàng đã cần được cải tạo lớn. (D) Nhà hàng đã mở tại một địa điểm mới."
+            },
+            {
+              "questionNumber": 169,
+              "description": null,
+              "question": "What is indicated about Marco's Italian Market?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "It supplies ingredients to Marco's Italian Restaurant."
+                },
+                {
+                  "label": "B",
+                  "content": "It occasionally hires temporary workers."
+                },
+                {
+                  "label": "C",
+                  "content": "It is scheduled to close in three months."
+                },
+                {
+                  "label": "D",
+                  "content": "It is located next door to Marco's Italian Restaurant."
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": "B Điều gì được cho biết về Marco’s Italian Market? (A) Cung cấp nguyên liệu cho Nhà hàng Ý Marco. (B) Thỉnh thoảng thuê nhân viên thời vụ. (C) Dự kiến sẽ đóng cửa trong ba tháng tới. (D) Nằm ngay cạnh Nhà hàng Ý Marco."
+            },
+            {
+              "questionNumber": 170,
+              "description": null,
+              "question": "What will happen during the event on June 25?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "The restaurant will reduce its menu prices."
+                },
+                {
+                  "label": "B",
+                  "content": "The restaurant will offer special menu items."
+                },
+                {
+                  "label": "C",
+                  "content": "Mr. Marco will celebrate his retirement."
+                },
+                {
+                  "label": "D",
+                  "content": "The New Haven business community will honor Mr. Marco."
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": "B Điều gì sẽ diễn ra trong sự kiện vào ngày 25 tháng 6? (A) Nhà hàng sẽ giảm giá thực đơn. (B) Nhà hàng sẽ giới thiệu các món ăn đặc biệt. (C) Ông Marco sẽ tổ chức lễ nghỉ hưu. (D) Cộng đồng doanh nghiệp New Haven sẽ vinh danh ông Marco."
+            },
+            {
+              "questionNumber": 171,
+              "description": null,
+              "question": "In which of the positions marked [1], [2], [3], and [4] does the following sentence best belong? \"During repairs, some additional dining space was added.\"",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "[1]"
+                },
+                {
+                  "label": "B",
+                  "content": "[2]"
+                },
+                {
+                  "label": "C",
+                  "content": "[3]"
+                },
+                {
+                  "label": "D",
+                  "content": "[4]"
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": "A Câu sau nên được đặt ở vị trí nào trong các vị trí [1], [2], [3], và [4]? \"Trong quá trình sửa chữa, một số không gian ăn uống bổ sung đã được thêm vào.\" (A) [1] (B) [2] (C) [3] (D) [4]"
+            }
+          ]
+        },
+        {
+          "groupNumber": 10,
+          "questionRange": "172-175",
+          "passageType": "SINGLE",
+          "passages": [
+            {
+              "passageNumber": 1,
+              "title": null,
+              "content": "Marlys Barry (10:17 A.M.) This is Ms. Barry from the data analysis department. I have included my colleague, Ms. Choi. We're contacting you about your data request for the e-mail addresses of all account holders, sorted by age. Alexander Kubelski (10:17 A.M.) Yes, how soon can you complete the request? Marlys Barry (10:18 A.M.) I have a question for you first. Do you really need the e-mail addresses of all account holders? That would be a huge file. Or do you need the e-mail addresses of account holders only within a certain age-group? Alexander Kubelski (10:19 A.M.) I see what you mean. I want to e-mail account holders aged 55 to 65 to invite them to meet with a retirement planning expert. Do I have to submit a new project request form? Bora Choi (10:21 A.M.) That's not necessary, Mr. Kubelski. We can update your current request form for you. You do not want to lose your place in the queue. Alexander Kubelski (10:21 A.M.) Great, thank you! Is it possible for you to get me that list right away? Marlys Barry (10:22 A.M.) There are several projects ahead of yours. Alexander Kubelski (10:23 A.M.) I was hoping to send out the e-mail invitations tomorrow. Marlys Barry (10:24 A.M.) We will get to it as soon as we can.",
+              "imageUrl": null,
+              "type": "Online Chat"
+            }
+          ],
+          "questions": [
+            {
+              "questionNumber": 172,
+              "description": null,
+              "question": "Why did Ms. Barry begin an online chat with Mr. Kubelski?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "To refer him to a different department"
+                },
+                {
+                  "label": "B",
+                  "content": "To decline an invitation"
+                },
+                {
+                  "label": "C",
+                  "content": "To issue an apology"
+                },
+                {
+                  "label": "D",
+                  "content": "To ask for clarification about a request"
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": "D Vì sao cô Barry bắt đầu cuộc trò chuyện trực tuyến với ông Kubelski? (A) Để giới thiệu ông ấy sang một bộ phận khác (B) Để từ chối một lời mời (C) Để đưa ra lời xin lỗi (D) Để hỏi rõ hơn về một yêu cầu"
+            },
+            {
+              "questionNumber": 173,
+              "description": null,
+              "question": "Who will receive an e-mail from Mr. Kubelski?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Account holders in one age-group"
+                },
+                {
+                  "label": "B",
+                  "content": "Data analysis team members"
+                },
+                {
+                  "label": "C",
+                  "content": "Financial planners"
+                },
+                {
+                  "label": "D",
+                  "content": "All Mr. Kubelski's clients"
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": "A Ai sẽ nhận được email từ ông Kubelski? (A) Những người có tài khoản trong cùng một nhóm tuổi (B) Các thành viên của nhóm phân tích dữ liệu (C) Các chuyên viên tư vấn tài chính"
+            },
+            {
+              "questionNumber": 174,
+              "description": null,
+              "question": "What does Ms. Choi offer to do?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Write an e-mail"
+                },
+                {
+                  "label": "B",
+                  "content": "Make a change to a form"
+                },
+                {
+                  "label": "C",
+                  "content": "Open an account"
+                },
+                {
+                  "label": "D",
+                  "content": "Revise a policy"
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": "B Cô Choi đề nghị làm gì? (A) Viết một email (B) Chỉnh sửa một biểu mẫu (C) Mở một tài khoản (D) Sửa đổi một chính sách"
+            },
+            {
+              "questionNumber": 175,
+              "description": null,
+              "question": "At 10:22 A.M., what does Ms. Barry most likely mean when she writes, \"There are several projects ahead of yours\"?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Ms. Barry will move Mr. Kubelski's request to the end of the queue."
+                },
+                {
+                  "label": "B",
+                  "content": "Ms. Barry will not be able to send out the invitations for Mr. Kubelski."
+                },
+                {
+                  "label": "C",
+                  "content": "Mr. Kubelski's request will not be the first job Ms. Barry completes."
+                },
+                {
+                  "label": "D",
+                  "content": "Mr. Kubelski will need to assist with other projects first."
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": "C Vào lúc 10:22 sáng, khi cô Barry viết “There are several projects ahead of yours” (Có một vài dự án đang xếp trước của bạn), cô ấy có ý gì? (A) Cô Barry sẽ đưa yêu cầu của ông Kubelski xuống cuối danh sách xử lý (B) Cô Barry sẽ không thể gửi lời mời thay cho ông Kubelski (C) Yêu cầu của ông Kubelski sẽ không phải là công việc đầu tiên cô Barry thực hiện (D) Ông Kubelski sẽ cần hỗ trợ các dự án khác trước"
+            }
+          ]
+        },
+        {
+          "groupNumber": 11,
+          "questionRange": "176-180",
+          "passageType": "DOUBLE",
+          "passages": [
+            {
+              "passageNumber": 1,
+              "title": "Tips for designing a Web site for a food-truck business",
+              "content": "Tips for designing a Web site for a food-truck business Owners of food trucks move from place to place, within and between cities, as they carry out their business, so they often rely on word of mouth or social media to attract customers. As a result, they may not build a Web site of their own. But in fact, by the very nature of their business, it is crucial that food truck owners have a fixed place for the public to learn about them, order from them, contact them, etc. Furthermore, market research shows that a Web site can help build a loyal customer base. So, here are some tips for developing a great Web site for your food truck. The Home page should have bold graphics with your food truck's name. The text must prominently display key information, such as your truck's locations and operating hours. Online forms with fields to fill out, such as reservation requests for special events or services, give new visitors too much visual information. They are better incorporated as links or pop-up windows. The Food Menu page needs attractive, high-definition images along with vivid and precise text that describes each menu item in detail. Remember that your photos should be big enough to look appealing on larger computer monitors. The About Us page should include some text explaining your food truck's theme and concept, and some biographical data detailing your background in the food industry. The News page can include text informing visitors about seasonal food items and upcoming promotions or special events such as food festivals.",
+              "imageUrl": null,
+              "type": "Article"
+            },
+            {
+              "passageNumber": 2,
+              "title": "Feedback",
+              "content": "To: Doug Abruzzo <dabruzzo@dzacreative.com> From: Ed Vale <evale@saffronmail.com> Date: March 29 Feedback Subject: Dear Mr. Abruzzo, Thank you again for creating the prototype Web site for my food-truck business. I just wanted to reiterate that it has gotten positive feedback from customers who have tested it. I am so glad we followed the advice in that article you sent me about Web site design for food trucks! As we discussed in our phone call yesterday, we will move forward with the prototype Web site and launch it as the official site on April 5. However, I still do not see the information I sent about our new promotion that will begin in mid-April, a free dessert with any sandwich purchase. Please be sure to add this important information before we launch the site. Regards, Ed",
+              "imageUrl": null,
+              "type": "Email"
+            }
+          ],
+          "questions": [
+            {
+              "questionNumber": 176,
+              "description": null,
+              "question": "According to the article, what is one way that food truck owners traditionally attract customers?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "By word of mouth"
+                },
+                {
+                  "label": "B",
+                  "content": "From highway billboards"
+                },
+                {
+                  "label": "C",
+                  "content": "Through newspaper advertisements"
+                },
+                {
+                  "label": "D",
+                  "content": "From signs at food festivals"
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": "A 176. Theo bài viết, một cách truyền thống mà các chủ xe bán đồ ăn thu hút khách hàng là gì? (A) Truyền miệng (B) Qua bảng quảng cáo trên đường cao tốc (C) Thông qua quảng cáo trên báo (D) Từ các biển hiệu tại lễ hội ẩm thực"
+            },
+            {
+              "questionNumber": 177,
+              "description": null,
+              "question": "According to the article, what information does not need to appear on the Home page?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Truck locations"
+                },
+                {
+                  "label": "B",
+                  "content": "Hours of operation"
+                },
+                {
+                  "label": "C",
+                  "content": "Company name"
+                },
+                {
+                  "label": "D",
+                  "content": "Seasonal food items"
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": "D 177. Theo bài viết, thông tin nào không cần xuất hiện trên trang chủ? (A) Địa điểm của xe bán đồ ăn (B) Giờ hoạt động (C) Tên công ty (D) Các món ăn theo mùa"
+            },
+            {
+              "questionNumber": 178,
+              "description": null,
+              "question": "In what field does Mr. Abruzzo most likely work?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Market research"
+                },
+                {
+                  "label": "B",
+                  "content": "Catering"
+                },
+                {
+                  "label": "C",
+                  "content": "Web design"
+                },
+                {
+                  "label": "D",
+                  "content": "Package delivery"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": "C Ông Abruzzo có khả năng làm việc trong lĩnh vực nào? (A) Nghiên cứu thị trường (B) Dịch vụ ăn uống (C) Thiết kế website (D) Giao hàng"
+            },
+            {
+              "questionNumber": 179,
+              "description": null,
+              "question": "In which section of the Web site will information most likely be added?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "The Home page"
+                },
+                {
+                  "label": "B",
+                  "content": "The Food Menu page"
+                },
+                {
+                  "label": "C",
+                  "content": "The About Us page"
+                },
+                {
+                  "label": "D",
+                  "content": "The News page"
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": "D Thông tin nhiều khả năng sẽ được thêm vào phần nào của trang web? (A) Trang chủ (B) Trang thực đơn (C) Trang Giới thiệu (D) Trang Tin tức"
+            },
+            {
+              "questionNumber": 180,
+              "description": null,
+              "question": "According to the e-mail, when will the Web site launch?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "On March 28"
+                },
+                {
+                  "label": "B",
+                  "content": "On March 29"
+                },
+                {
+                  "label": "C",
+                  "content": "On April 5"
+                },
+                {
+                  "label": "D",
+                  "content": "On April 15"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": "C Theo email, khi nào trang web sẽ được ra mắt? (A) Ngày 28 tháng 3 (B) Ngày 29 tháng 3 (C) Ngày 5 tháng 4 (D) Ngày 15 tháng 4"
+            }
+          ]
+        },
+        {
+          "groupNumber": 12,
+          "questionRange": "181-185",
+          "passageType": "DOUBLE",
+          "passages": [
+            {
+              "passageNumber": 1,
+              "title": "Drilling notice",
+              "content": "To: Manny Green <mgreen@rhba.com> From: John LaRose <jlarose @rilamore.edu> Date: May 18 Subject: Drilling notice Dear Mr. Green: As a courtesy, I am writing to you at the Red Hills Business Association, asking you to help me get the word out to your membership. It was announced in last month's Daily Gazette that Rilamore University is moving forward with its Net Zero Initiative. Within three years, we expect to have geothermal wells installed and operational for the heating and cooling of our entire campus. Limiting the institution's reliance on fossil fuels has long been a goal, and the new system is a significant step toward achieving that goal. Over the next month, we will conduct test drilling in several campus locations. If all goes according to schedule, the crew will be drilling adjacent to the Red Hills Business District and Oak Street Apartments starting Wednesday, June 5. We want to tell business owners and residents near the campus to expect a higher-than-usual noise level during the two weeks we estimate it will take to complete the work. The work hours for the drilling crew are 10 A.M. to 3 P.M. each day, Monday through Friday. We apologize in advance for the inconvenience this may cause to our neighbors. Any questions or concerns should be directed to me at 813-555-0123. John LaRose Community Liaison, Rilamore University Office of Communications",
+              "imageUrl": null,
+              "type": "Email"
+            },
+            {
+              "passageNumber": 2,
+              "title": null,
+              "content": "FOR IMMEDIATE RELEASE Contact: Manny Green, mgreen@rhba.com RED HILLS (May 25)—The Red Hills Business Association is shifting the dates of its much-anticipated Lunch Hour Concert Series. Normally presented each Thursday in June, the four free concerts will instead take place each Thursday in July. The lineup of artists remains unchanged—the Jaystone Jazz Trio will open the series on July 4, followed on successive Thursdays by Joss and the Jaybirds, Ray Starform, and the Barklay Bass Quintet. As usual, all three blocks of Oak Street will be closed to traffic, restaurants will serve lunch at outdoor tables, and local arts-and-crafts vendors will display their work on the lawn of the Cultural Center. It is a beautiful celebration in the heart of a popular Red Hills neighborhood. We hope to see you there!",
+              "imageUrl": null,
+              "type": "Press Release"
+            }
+          ],
+          "questions": [
+            {
+              "questionNumber": 181,
+              "description": null,
+              "question": "What is indicated about the Net Zero Initiative?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "It is being funded by the Red Hills Business Association."
+                },
+                {
+                  "label": "B",
+                  "content": "It was inspired by similar initiatives in other cities."
+                },
+                {
+                  "label": "C",
+                  "content": "It will use geothermal energy to power a city."
+                },
+                {
+                  "label": "D",
+                  "content": "It will change the way an institution heats its buildings."
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": "D Điều gì được đề cập về Sáng kiến Net Zero? (A) Dự án được tài trợ bởi Hiệp hội Doanh nghiệp Red Hills. (B) Dự án được lấy cảm hứng từ các sáng kiến tương tự ở những thành phố khác. (C) Dự án sẽ sử dụng năng lượng địa nhiệt để cung cấp điện cho cả thành phố. (D) Dự án sẽ thay đổi cách một tổ chức làm nóng các tòa nhà của mình."
+            },
+            {
+              "questionNumber": 182,
+              "description": null,
+              "question": "In the e-mail, the word \"conduct\" in paragraph 2, line 1, is closest in meaning to",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "behave"
+                },
+                {
+                  "label": "B",
+                  "content": "accompany"
+                },
+                {
+                  "label": "C",
+                  "content": "transmit"
+                },
+                {
+                  "label": "D",
+                  "content": "carry out"
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": "D Trong email, từ “conduct” ở đoạn 2, dòng 1, gần nghĩa nhất với từ nào? (A) Cư xử (B) Đi cùng (C) Truyền tải (D) Tiến hành / thực hiện"
+            },
+            {
+              "questionNumber": 183,
+              "description": null,
+              "question": "What can be concluded about the Red Hills Business District?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "It is located near a university campus."
+                },
+                {
+                  "label": "B",
+                  "content": "It hosts an arts festival every July."
+                },
+                {
+                  "label": "C",
+                  "content": "It includes the Oak Street Apartments."
+                },
+                {
+                  "label": "D",
+                  "content": "It is home to the offices of the Daily Gazette."
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": "A Có thể kết luận điều gì về Khu Thương mại Red Hills? (A) Nằm gần khuôn viên trường đại học (B) Tổ chức một lễ hội nghệ thuật vào mỗi tháng 7 (C) Bao gồm khu căn hộ Oak Street (D) Là nơi đặt văn phòng của tờ Daily Gazette"
+            },
+            {
+              "questionNumber": 184,
+              "description": null,
+              "question": "Why most likely did the Red Hills Business Association change the dates of its concert series?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "To take advantage of a new power source"
+                },
+                {
+                  "label": "B",
+                  "content": "To accommodate students' schedules"
+                },
+                {
+                  "label": "C",
+                  "content": "To avoid noise from nearby construction"
+                },
+                {
+                  "label": "D",
+                  "content": "To prevent a conflict with a similar event"
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": "C Vì sao Hiệp hội Doanh nghiệp Red Hills nhiều khả năng đã thay đổi ngày tổ chức chuỗi hòa nhạc? (A) Để tận dụng một nguồn năng lượng mới (B) Để phù hợp với lịch học của sinh viên (C) Để tránh tiếng ồn từ công trình xây dựng gần đó (D) Để tránh trùng với một sự kiện tương tự"
+            },
+            {
+              "questionNumber": 185,
+              "description": null,
+              "question": "What is mentioned in the press release about the Cultural Center?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "It will provide lunch for musicians."
+                },
+                {
+                  "label": "B",
+                  "content": "It will have artwork for sale on its property."
+                },
+                {
+                  "label": "C",
+                  "content": "It will offer arts-and-crafts workshops."
+                },
+                {
+                  "label": "D",
+                  "content": "It will provide the stage for performers."
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": "B Thông cáo báo chí đề cập điều gì về Trung tâm Văn hóa? (A) Sẽ cung cấp bữa trưa cho các nhạc sĩ (B) Sẽ có các tác phẩm nghệ thuật được bày bán tại khuôn viên (C) Sẽ tổ chức các lớp học thủ công – mỹ thuật (D) Sẽ cung cấp sân khấu cho các nghệ sĩ biểu diễn"
+            }
+          ]
+        },
+        {
+          "groupNumber": 13,
+          "questionRange": "186-190",
+          "passageType": "TRIPLE",
+          "passages": [
+            {
+              "passageNumber": 1,
+              "title": "Lawal Home Service",
+              "content": "Lawal Home Service: Serving Southern California for over 40 years. Lawal Home Service provides roofing and solar solutions for Southern California residents in Inglewood and the surrounding areas. In addition to roof replacement, we offer a wide array of services, from attic insulation and gutter restoration to fixing leaks and installing solar panels. Lawal Home Service prides itself on transparent communication and attention to detail. Our project supervisors are always on-site to answer client questions, provide updates, and ensure a safe and clean worksite. To request a free roofing diagnosis, visit www.lawalhomeservice.com or call our booking agent at 310-555-0108.",
+              "imageUrl": null,
+              "type": "Advertisement"
+            },
+            {
+              "passageNumber": 2,
+              "title": "Lawal Home Service Contact Form",
+              "content": "Lawal Home Service Contact Form. Trust the experts at Lawal Home Service to diagnose your roofing needs promptly and professionally. Please take a few minutes to complete the form with as much detail as possible. Remember, all roofs installed by Lawal have a 25-year warranty. Name: Drew Gerson. Date: December 12. E-mail: dgerson95@onyxmail.com. Phone: 310-555-0192. Address: 820 North Acacia Street, Inglewood, CA 90301. How may we help you? During last week's windstorm, several roof shingles were torn loose and need replacing. I am considering replacing the entire roof as it is over 30 years old, and water has begun to drip through the section over the patio. I would appreciate talking to someone who could tell me my options and provide an estimate.",
+              "imageUrl": null,
+              "type": "Form"
+            },
+            {
+              "passageNumber": 3,
+              "title": "Neighborhood Reviews: Lawal Home Service",
+              "content": "Neighborhood Reviews: Lawal Home Service ***** \"I was very pleased with the thoroughness of their work.\" I left a description of my problem with Lawal Home Service, and one of the company's estimators came to inspect my roof the very next day. After I decided to replace the roof, the Lawal Home Service crew was able to get to work the following week. Diana Perez was on-site for the whole job as promised and answered all my questions. Work was started on December 19, and it was finished on December 20. Once the roofing was finished, the crew did a great job cleaning up. They used two magnetic devices resembling lawnmowers and swept over my entire lawn to find any dropped roofing nails. I had never seen anything like that! I was very pleased with the thoroughness of their work. - Drew Gerson, Inglewood, CA",
+              "imageUrl": null,
+              "type": "Review"
+            }
+          ],
+          "questions": [
+            {
+              "questionNumber": 186,
+              "description": null,
+              "question": "According to the advertisement, what is one type of work performed by Lawal Home Service?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Planting trees"
+                },
+                {
+                  "label": "B",
+                  "content": "Repairing gutters"
+                },
+                {
+                  "label": "C",
+                  "content": "Building home additions"
+                },
+                {
+                  "label": "D",
+                  "content": "Replacing heating systems"
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": "B Theo quảng cáo, một trong những dịch vụ mà Lawal Home Service cung cấp là gì? (A) Trồng cây (B) Sửa chữa máng xối (C) Xây thêm phần mở rộng cho ngôi nhà (D) Thay thế hệ thống sưởi"
+            },
+            {
+              "questionNumber": 187,
+              "description": null,
+              "question": "What does Mr. Gerson indicate on the form about his roof?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "It has developed a leak."
+                },
+                {
+                  "label": "B",
+                  "content": "It was recently replaced."
+                },
+                {
+                  "label": "C",
+                  "content": "It was not expensive to install."
+                },
+                {
+                  "label": "D",
+                  "content": "It is under warranty for 30 years."
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": "A Ông Gerson cho biết điều gì về mái nhà của mình trong biểu mẫu? (A) Mái nhà đã bị dột (B) Mái nhà mới được thay gần đây (C) Việc lắp đặt không tốn kém (D) Mái nhà được bảo hành trong 30 năm"
+            },
+            {
+              "questionNumber": 188,
+              "description": null,
+              "question": "When did Lawal Home Service inspect Mr. Gerson's roof?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "On December 12"
+                },
+                {
+                  "label": "B",
+                  "content": "On December 13"
+                },
+                {
+                  "label": "C",
+                  "content": "On December 19"
+                },
+                {
+                  "label": "D",
+                  "content": "On December 20"
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": "B Lawal Home Service đã kiểm tra mái nhà của ông Gerson vào ngày nào? (A) Ngày 12 tháng 12 (B) Ngày 13 tháng 12 (C) Ngày 19 tháng 12 (D) Ngày 20 tháng 12"
+            },
+            {
+              "questionNumber": 189,
+              "description": null,
+              "question": "Who most likely is Ms. Perez?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "A project supervisor"
+                },
+                {
+                  "label": "B",
+                  "content": "A roofing estimator"
+                },
+                {
+                  "label": "C",
+                  "content": "An interior decorator"
+                },
+                {
+                  "label": "D",
+                  "content": "A booking agent"
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": "A Bà Perez nhiều khả năng là ai? (A) Giám sát dự án (B) Nhân viên ước tính chi phí sửa mái nhà (C) Nhà thiết kế nội thất (D) Nhân viên đặt lịch / điều phối lịch hẹn"
+            },
+            {
+              "questionNumber": 190,
+              "description": null,
+              "question": "According to the review, what surprised Mr. Gerson about the crew from Lawal Home Service?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "The price they charged"
+                },
+                {
+                  "label": "B",
+                  "content": "The warranty they offered"
+                },
+                {
+                  "label": "C",
+                  "content": "The quality of their materials"
+                },
+                {
+                  "label": "D",
+                  "content": "The tools they used for a job"
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": "D Theo bài đánh giá, điều gì khiến ông Gerson ngạc nhiên về đội ngũ của Lawal Home Service? (A) Mức giá họ đưa ra (B) Chế độ bảo hành mà họ cung cấp (C) Chất lượng vật liệu họ sử dụng (D) Những công cụ họ dùng để làm việc"
+            }
+          ]
+        },
+        {
+          "groupNumber": 14,
+          "questionRange": "191-195",
+          "passageType": "TRIPLE",
+          "passages": [
+            {
+              "passageNumber": 1,
+              "title": "Notebook inquiry",
+              "content": "To: Omar Balaji <obalaji@darbourycompany.com>. From: Juanita Pereira <jpereira@bunbunbooks.com>. Date: May 10. Subject: Notebook inquiry. Dear Mr. Balaji, We are expanding our office supply section at Bun Bun Books and would like to offer a selection of blank notebooks with lined pages. We would like your help creating the following cover designs: Great Thoughts—central image: lightbulb, lightning bolt, and star icons; background color: blue. World Suitcase—central image: suitcase with country-name travel stickers; background color: black. Lavender Bouquet—central image: large bunch of lavender on tall, pale green stems; background color: yellow. Sail Away—central image: sun setting in the sky above a sailboat on a lake; background color: white. We need to have notebooks in stock in time for our annual sale starting August 1. After approving the sample covers, when would we need to place our order? Thank you, Juanita Pereira.",
+              "imageUrl": null,
+              "type": "Email"
+            },
+            {
+              "passageNumber": 2,
+              "title": "Re: Notebook inquiry",
+              "content": "To: Juanita Pereira <jpereira@bunbunbooks.com> From: Omar Balaji <obalaji@darbourycompany.com> Date: May 25 Subject: Re: Notebook inquiry Hello, Ms. Pereira, I have shipped some sample notebook covers for your inspection. Unfortunately, I was not able to include one of the designs for your approval because it needed a late-stage change to the background color. The sticker art did not show up well against the original black background. We are testing a light-beige color, and I will send the updated sample cover to you after it has been approved internally. I should have the last sample to you by the end of this week. As long as you send your approval of all covers by June 11, we will be able to ship your entire order of bound notebooks before July 20. You will have everything before your sale that begins on August 1. Please contact me if you have any questions. Best regards, Omar Balaji, Darboury Company",
+              "imageUrl": null,
+              "type": "Email"
+            },
+            {
+              "passageNumber": 3,
+              "title": "Darboury Company Order Form",
+              "content": "Darboury Company Order Form. Customer: Bun Bun Books. Ship by: July 15. Shipping method: Standard. Requested delivery date: July 20. Items: N3-GT—standard-size spiral notebook, Great Thoughts cover design, quantity 200; N3-WS—standard-size spiral notebook, World Suitcase cover design, quantity 200; H3-LB—small hardbound journal notebook, Lavender Bouquet cover design, quantity 150; H3-SA—small hardbound journal notebook, Sail Away cover design, quantity 150; D1—large metal display rack holding standard-size spiral notebooks, quantity 1.",
+              "imageUrl": null,
+              "type": "Order Form"
+            }
+          ],
+          "questions": [
+            {
+              "questionNumber": 191,
+              "description": null,
+              "question": "What is one service that Darboury Company most likely provides?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Travel booking"
+                },
+                {
+                  "label": "B",
+                  "content": "Textbook publishing"
+                },
+                {
+                  "label": "C",
+                  "content": "Flower delivery"
+                },
+                {
+                  "label": "D",
+                  "content": "Graphic design"
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": "D Darboury Company có khả năng cung cấp dịch vụ nào? (A) Đặt vé du lịch (B) Xuất bản sách giáo khoa (C) Giao hoa (D) Thiết kế đồ họa"
+            },
+            {
+              "questionNumber": 192,
+              "description": null,
+              "question": "What sample was delayed?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Great Thoughts"
+                },
+                {
+                  "label": "B",
+                  "content": "World Suitcase"
+                },
+                {
+                  "label": "C",
+                  "content": "Lavender Bouquet"
+                },
+                {
+                  "label": "D",
+                  "content": "Sail Away"
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": "B Mẫu nào đã bị giao trễ? (A) Great Thoughts (B) World Suitcase (C) Lavender Bouquet (D) Sail Away"
+            },
+            {
+              "questionNumber": 193,
+              "description": null,
+              "question": "When is the deadline for Ms. Pereira to approve samples?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "May 25"
+                },
+                {
+                  "label": "B",
+                  "content": "June 11"
+                },
+                {
+                  "label": "C",
+                  "content": "July 20"
+                },
+                {
+                  "label": "D",
+                  "content": "August 1"
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": "B Hạn chót để cô Pereira phê duyệt các mẫu là khi nào? (A) Ngày 25 tháng 5 (B) Ngày 11 tháng 6 (C) Ngày 20 tháng 7 (D) Ngày 1 tháng 8"
+            },
+            {
+              "questionNumber": 194,
+              "description": null,
+              "question": "What does the form indicate about the Bun Bun Books order?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "It will include a display stand."
+                },
+                {
+                  "label": "B",
+                  "content": "It will ship overnight."
+                },
+                {
+                  "label": "C",
+                  "content": "It will be paid upon delivery."
+                },
+                {
+                  "label": "D",
+                  "content": "It will arrive late."
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": "A Biểu mẫu cho biết điều gì về đơn hàng của Bun Bun Books? (A) Sẽ bao gồm một kệ trưng bày (B) Sẽ được giao trong ngày hôm sau (C) Sẽ được thanh toán khi nhận hàng (D) Sẽ bị giao trễ"
+            },
+            {
+              "questionNumber": 195,
+              "description": null,
+              "question": "What is the background color on the cover of item N3-GT?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Blue"
+                },
+                {
+                  "label": "B",
+                  "content": "Black"
+                },
+                {
+                  "label": "C",
+                  "content": "Yellow"
+                },
+                {
+                  "label": "D",
+                  "content": "White"
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": "A Màu nền trên bìa của sản phẩm N3-GT là gì? (A) Màu xanh dương (B) Màu đen (C) Màu vàng (D) Màu trắng"
+            }
+          ]
+        },
+        {
+          "groupNumber": 15,
+          "questionRange": "196-200",
+          "passageType": "TRIPLE",
+          "passages": [
+            {
+              "passageNumber": 1,
+              "title": "Employee of the month",
+              "content": "To: Managers From: Charlotte Black Date: August 16 Subject: Employee of the month Dear Managers, It is time to vote for the Wilson Autos Employee of the Month for September. Here are the nominees. Erica Boyd has been with us for only a few months but has already shown great promise and is eager to learn new things. Lauren Almahdi is very proactive. If something needs to be done, she will point it out to a manager and volunteer to take care of it herself. Nick Salehi found a glitch in our computer system and stopped us from incorrectly ordering unnecessary inventory (thus saving us money). Max Rhodes has been especially helpful with training new hires. He is calm and patient and explains our procedures well Please respond to this e-mail by Friday with your vote. The winner must receive at least three votes. The winner will be posted at our front desk and on our Web site next Monday. Thanks, Charlotte Black General Manager, Wilson Autos",
+              "imageUrl": null,
+              "type": "Email"
+            },
+            {
+              "passageNumber": 2,
+              "title": "Wilson Autos (Westchester)",
+              "content": "Wilson Autos (Westchester) ***** My wife and I just bought a new Excelera truck at the Wilson Autos Westchester location with the help of Erica Boyd. Even though she was new, she was very knowledgeable about all the trucks on the lot that we wanted to test drive. The few questions she was unable to answer were quickly addressed by her mentor, Max. We were very pleased with the customer service and even more delighted when the general manager agreed to sell us the Excelera for the same price that a competing dealership was advertising. I highly recommend Wilson Autos if you are in the market for a new vehicle! -Henry Riggs, August 22",
+              "imageUrl": null,
+              "type": "Review"
+            },
+            {
+              "passageNumber": 3,
+              "title": "The employee of the month for September is Erica Boyd",
+              "content": "The employee of the month for September is ERICA BOYD! In her three months at Wilson Autos, Erica has picked up new skills quickly and is always trying to learn more. She has become very knowledgeable about our inventory and is able to share her knowledge with customers to complete sales. She has also been instrumental in encouraging satisfied customers to post comments on our social media pages. We received more great reviews in the past month than we did in the four previous months combined! Erica has received a $50 gift card to Alonzo's Restaurant as a thank-you for her excellent work. Congratulations, Erica!",
+              "imageUrl": null,
+              "type": "Notice"
+            }
+          ],
+          "questions": [
+            {
+              "questionNumber": 196,
+              "description": null,
+              "question": "What is the purpose of the e-mail?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "To share a list of job candidates"
+                },
+                {
+                  "label": "B",
+                  "content": "To ask for opinions from managers"
+                },
+                {
+                  "label": "C",
+                  "content": "To summarize a managers' meeting"
+                },
+                {
+                  "label": "D",
+                  "content": "To nominate a manager for an award"
+                }
+              ],
+              "correctAnswer": "B",
+              "explanation": "B Mục đích của email là gì? (A) Chia sẻ danh sách các ứng viên xin việc (B) Xin ý kiến từ các quản lý (C) Tóm tắt một cuộc họp của các quản lý (D) Đề cử một quản lý cho một giải thưởng"
+            },
+            {
+              "questionNumber": 197,
+              "description": null,
+              "question": "According to the e-mail, who identified a technical problem?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "Mr. Salehi"
+                },
+                {
+                  "label": "B",
+                  "content": "Ms. Almahdi"
+                },
+                {
+                  "label": "C",
+                  "content": "Mr. Rhodes"
+                },
+                {
+                  "label": "D",
+                  "content": "Ms. Black"
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": "A Theo email, ai là người phát hiện ra một vấn đề kỹ thuật? (A) Ông Salehi (B) Bà Almahdi (C) Ông Rhodes (D) Bà Black"
+            },
+            {
+              "questionNumber": 198,
+              "description": null,
+              "question": "What can be concluded about Mr. Riggs?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "His previous vehicle was an Excelera truck."
+                },
+                {
+                  "label": "B",
+                  "content": "He is a neighbor of Ms. Boyd's."
+                },
+                {
+                  "label": "C",
+                  "content": "He has purchased a vehicle from Wilson Autos in the past."
+                },
+                {
+                  "label": "D",
+                  "content": "He negotiated with Ms. Black for a lower price."
+                }
+              ],
+              "correctAnswer": "D",
+              "explanation": "D Có thể kết luận điều gì về ông Riggs? (A) Chiếc xe trước đây của ông là xe hiệu Excelera (B) Ông là hàng xóm của bà Boyd (C) Ông đã từng mua xe từ Wilson Autos trước đây (D) Ông đã thương lượng với bà Black để được giảm giá"
+            },
+            {
+              "questionNumber": 199,
+              "description": null,
+              "question": "What is indicated in the notice about Ms. Boyd?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "She eats regularly at Alonzo's Restaurant."
+                },
+                {
+                  "label": "B",
+                  "content": "She manages social media sites for Wilson Autos."
+                },
+                {
+                  "label": "C",
+                  "content": "She is responsible for an increase in customer feedback."
+                },
+                {
+                  "label": "D",
+                  "content": "She recently completed a sales training course."
+                }
+              ],
+              "correctAnswer": "C",
+              "explanation": "C Thông báo cho biết điều gì về bà Boyd? (A) Bà ấy thường xuyên ăn tại nhà hàng Alonzo’s (B) Bà ấy quản lý các trang mạng xã hội cho Wilson Autos (C) Bà ấy chịu trách nhiệm cho sự gia tăng phản hồi của khách hàng (D) Bà ấy vừa hoàn thành một khóa đào tạo bán hàng"
+            },
+            {
+              "questionNumber": 200,
+              "description": null,
+              "question": "What is most likely true about Ms. Boyd?",
+              "answers": [
+                {
+                  "label": "A",
+                  "content": "She received votes from at least three managers."
+                },
+                {
+                  "label": "B",
+                  "content": "She was the top salesperson in August."
+                },
+                {
+                  "label": "C",
+                  "content": "She has years of experience in the auto industry."
+                },
+                {
+                  "label": "D",
+                  "content": "She was hired by Wilson Autos in April."
+                }
+              ],
+              "correctAnswer": "A",
+              "explanation": "A Điều gì có khả năng đúng nhất về bà Boyd? (A) Bà ấy nhận được phiếu bầu từ ít nhất ba quản lý (B) Bà ấy là nhân viên bán hàng xuất sắc nhất trong tháng Tám (C) Bà ấy có nhiều năm kinh nghiệm trong ngành ô tô (D) Bà ấy được Wilson Autos tuyển dụng vào tháng Tư"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```

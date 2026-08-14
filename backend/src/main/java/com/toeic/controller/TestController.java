@@ -1,15 +1,19 @@
 package com.toeic.controller;
 
-import com.google.api.core.ApiFuture;
-import com.google.cloud.firestore.DocumentSnapshot;
-import com.google.cloud.firestore.Firestore;
-import com.google.firebase.cloud.FirestoreClient;
-import com.toeic.dto.OptionResponse;
-import com.toeic.dto.QuestionResponse;
-import org.springframework.web.bind.annotation.*;
+import com.toeic.service.AttemptService;
+import com.toeic.service.FirebaseAuthenticationService;
+import com.toeic.service.TestService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,74 +25,60 @@ import java.util.Map;
 })
 public class TestController {
 
+    private final TestService testService;
+    private final FirebaseAuthenticationService authenticationService;
+    private final AttemptService attemptService;
+
+    public TestController(
+            TestService testService,
+            FirebaseAuthenticationService authenticationService,
+            AttemptService attemptService
+    ) {
+        this.testService = testService;
+        this.authenticationService = authenticationService;
+        this.attemptService = attemptService;
+    }
+
+    @GetMapping("/{testId}")
+    public Map<String, Object> getTestMetadata(@PathVariable String testId) throws Exception {
+        return testService.getMetadata(testId);
+    }
+
+    @PostMapping("/{testId}/attempts")
+    public Map<String, Object> createAttempt(
+            @PathVariable String testId,
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization
+    ) throws Exception {
+        String userId = authenticationService.requireUid(authorization);
+        return attemptService.createOrResume(userId, testId);
+    }
+
+    // Endpoint tương thích để các trang luyện Part cũ vẫn lấy được dữ liệu,
+    // nhưng response đã được lọc correctAnswer/explanation/transcript.
     @GetMapping("/{testId}/parts/{partId}")
     public Map<String, Object> getPart(
             @PathVariable String testId,
             @PathVariable String partId
     ) throws Exception {
-
-        Firestore db = FirestoreClient.getFirestore();
-
-        ApiFuture<DocumentSnapshot> future = db
-                .collection("tests")
-                .document(testId)
-                .collection("parts")
-                .document(partId)
-                .get();
-
-        DocumentSnapshot document = future.get();
-
-        if (!document.exists()) {
-            throw new RuntimeException("Không tìm thấy part");
+        int partNumber;
+        try {
+            partNumber = Integer.parseInt(partId.replaceFirst("(?i)^part", ""));
+        } catch (NumberFormatException exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "partId phải có dạng part1 đến part7");
         }
 
-        Map<String, Object> data = document.getData();
-
-        // Danh sách câu hỏi gốc từ Firestore
-        List<Map<String, Object>> questions =
-                (List<Map<String, Object>>) data.get("questions");
-
-        List<QuestionResponse> questionResponses = new ArrayList<>();
-
-        for (Map<String, Object> question : questions) {
-
-            Long numberLong = (Long) question.get("number");
-            int number = numberLong.intValue();
-
-            String content = (String) question.get("content");
-
-            List<Map<String, Object>> options =
-                    (List<Map<String, Object>>) question.get("options");
-
-            List<OptionResponse> optionResponses = new ArrayList<>();
-
-            for (Map<String, Object> option : options) {
-
-                String key = (String) option.get("key");
-                String text = (String) option.get("text");
-
-                optionResponses.add(
-                        new OptionResponse(key, text)
-                );
+        Object partsValue = testService.getExamTest(testId).get("parts");
+        if (partsValue instanceof List<?> parts) {
+            for (Object value : parts) {
+                if (value instanceof Map<?, ?> part
+                        && part.get("partNumber") instanceof Number number
+                        && number.intValue() == partNumber) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> response = (Map<String, Object>) value;
+                    return response;
+                }
             }
-
-            QuestionResponse response =
-                    new QuestionResponse(
-                            number,
-                            content,
-                            optionResponses
-                    );
-
-            questionResponses.add(response);
         }
-
-        // Response cuối cùng trả cho frontend
-        Map<String, Object> response = new HashMap<>();
-
-        response.put("partNumber", data.get("partNumber"));
-        response.put("title", data.get("title"));
-        response.put("questions", questionResponses);
-
-        return response;
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy Part " + partNumber);
     }
 }

@@ -189,9 +189,54 @@ function Welcome({ user }) {
                   </h3>
                 </div>
                 <span className="w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                  1 bài sẵn sàng
+                  2 bài sẵn sàng
                 </span>
               </div>
+
+              <button
+                type="button"
+                onClick={() => navigate("/full-test/ets-2026-test-1")}
+                className="group mb-5 w-full overflow-hidden rounded-3xl bg-slate-950 p-6 text-left text-white shadow-xl transition duration-200 hover:-translate-y-1 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-sky-200 sm:p-7"
+              >
+                <div className="flex flex-col justify-between gap-6 md:flex-row md:items-center">
+                  <div className="flex items-start gap-4 sm:gap-5">
+                    <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-sky-400 to-cyan-400 text-lg font-black text-slate-950 shadow-lg shadow-sky-900/40 sm:h-16 sm:w-16">
+                      FT
+                    </span>
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-xs font-bold uppercase tracking-wider text-sky-300">
+                          ETS 2026 · Full Test
+                        </p>
+                        <span className="rounded-full bg-emerald-400/15 px-2.5 py-1 text-[10px] font-bold text-emerald-300 ring-1 ring-emerald-300/20">
+                          Mới
+                        </span>
+                      </div>
+                      <p className="mt-2 text-xl font-bold sm:text-2xl">
+                        TOEIC Listening & Reading – Test 1
+                      </p>
+                      <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
+                        Mô phỏng đủ 200 câu với Listening 45 phút, Reading 75 phút,
+                        tự động lưu và chấm điểm sau khi nộp.
+                      </p>
+                      <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-slate-300">
+                        <span className="rounded-full bg-white/10 px-3 py-1.5 ring-1 ring-white/10">
+                          200 câu
+                        </span>
+                        <span className="rounded-full bg-white/10 px-3 py-1.5 ring-1 ring-white/10">
+                          120 phút
+                        </span>
+                        <span className="rounded-full bg-white/10 px-3 py-1.5 ring-1 ring-white/10">
+                          Part 1–7
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <span className="shrink-0 self-end font-bold text-sky-300 transition group-hover:translate-x-1 md:self-auto">
+                    Xem đề thi →
+                  </span>
+                </div>
+              </button>
 
               <button
                 type="button"

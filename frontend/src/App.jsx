@@ -10,6 +10,10 @@ import { auth } from "./firebase";
 import Login from "./pages/Login";
 import PracticePart from "./pages/PracticePart";
 import Welcome from "./pages/Welcome";
+import FullTestExam from "./pages/FullTestExam";
+import FullTestIntro from "./pages/FullTestIntro";
+import FullTestResult from "./pages/FullTestResult";
+import FullTestReview from "./pages/FullTestReview";
 
 function LoadingScreen() {
   return (
@@ -53,6 +57,22 @@ function AppRoutes() {
       <Route
         path="/practice/part5"
         element={user ? <PracticePart /> : <Navigate to="/login" replace />}
+      />
+      <Route
+        path="/full-test/:testId"
+        element={user ? <FullTestIntro /> : <Navigate to="/login" replace />}
+      />
+      <Route
+        path="/full-test/:attemptId/exam"
+        element={user ? <FullTestExam /> : <Navigate to="/login" replace />}
+      />
+      <Route
+        path="/full-test/:attemptId/result"
+        element={user ? <FullTestResult /> : <Navigate to="/login" replace />}
+      />
+      <Route
+        path="/full-test/:attemptId/review"
+        element={user ? <FullTestReview /> : <Navigate to="/login" replace />}
       />
       <Route
         path="*"
