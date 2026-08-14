@@ -1,4 +1,5 @@
 import { formatClock } from "../utils/testData";
+import { TIMER_TYPES } from "../config/examTiming";
 
 function ExamHeader({
   section,
@@ -7,11 +8,13 @@ function ExamHeader({
   firstQuestion,
   lastQuestion,
   remainingSeconds,
+  timerType,
   answeredCount,
   totalQuestions,
   onExit,
 }) {
-  const isUrgent = remainingSeconds <= 300;
+  const isElapsed = timerType === TIMER_TYPES.ELAPSED;
+  const isUrgent = !isElapsed && remainingSeconds <= 300;
   const modeLabel =
     mode === "FULL"
       ? "Full Test"
@@ -47,7 +50,7 @@ function ExamHeader({
             }`}
           >
             <p className="text-[10px] font-semibold uppercase tracking-widest opacity-70">
-              Còn lại
+              {isElapsed ? "Thời gian làm bài" : "Còn lại"}
             </p>
             <p className="font-mono text-lg font-bold tabular-nums">
               {formatClock(remainingSeconds)}

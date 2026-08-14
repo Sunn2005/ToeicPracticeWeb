@@ -1,10 +1,13 @@
 package com.toeic.service;
 
-import com.google.cloud.firestore.DocumentSnapshot;
-import com.google.cloud.firestore.Firestore;
+import com.toeic.dao.TestDao;
+import com.toeic.model.Test;
+import com.toeic.model.TestPart;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -14,40 +17,51 @@ import java.util.Map;
 @Service
 public class TestService {
 
-    private final Firestore firestore;
+    private final TestDao testDao;
+    private final ObjectMapper objectMapper;
 
-    public TestService(Firestore firestore) {
-        this.firestore = firestore;
+    public TestService(TestDao testDao, ObjectMapper objectMapper) {
+        this.testDao = testDao;
+        this.objectMapper = objectMapper;
     }
 
     public Map<String, Object> getMetadata(String testId) throws Exception {
-        DocumentSnapshot snapshot = firestore.collection("tests").document(testId).get().get();
-        if (!snapshot.exists()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy đề thi");
-        }
-
-        Map<String, Object> data = new LinkedHashMap<>(snapshot.getData());
-        data.put("testId", testId);
-        data.putIfAbsent("type", "FULL_TEST");
-        data.putIfAbsent("listeningMinutes", 45);
-        data.putIfAbsent("readingMinutes", 75);
-        data.putIfAbsent("totalMinutes", 120);
-        return data;
+        Test test = requireMetadata(testId);
+        Map<String, Object> response = toMap(test);
+        response.remove("parts");
+        return response;
     }
 
     public Map<String, Object> getExamTest(String testId) throws Exception {
-        return loadTest(testId, true);
+        return toResponse(loadTest(testId), true);
+    }
+
+    public Map<String, Object> getExamPart(String testId, int partNumber) throws Exception {
+        requireMetadata(testId);
+        TestPart part = testDao.findPart(testId, partNumber).orElseThrow(
+                () -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Không tìm thấy Part " + partNumber
+                )
+        );
+        Map<String, Object> response = objectMapper.convertValue(
+                part,
+                new TypeReference<Map<String, Object>>() {
+                }
+        );
+        removeExamSecrets(response);
+        if (partNumber <= 2) {
+            removeListeningOptionText(response);
+        }
+        return response;
     }
 
     public Map<String, Object> getReviewTest(String testId) throws Exception {
-        return loadTest(testId, false);
+        return toResponse(loadTest(testId), false);
     }
 
     public Map<Integer, String> getAnswerKey(String testId) throws Exception {
-        Map<String, Object> test = getReviewTest(testId);
-        Map<Integer, String> answerKey = new LinkedHashMap<>();
-        collectAnswerKey(test, answerKey);
-        return answerKey;
+        return loadTest(testId).answerKey();
     }
 
     public Map<String, Object> addReviewAnswers(
@@ -58,61 +72,84 @@ public class TestService {
         return castMap(annotated);
     }
 
-    private Map<String, Object> loadTest(String testId, boolean examSafe) throws Exception {
-        Map<String, Object> test = new LinkedHashMap<>(getMetadata(testId));
-        List<Map<String, Object>> parts = new ArrayList<>();
+    private Test loadTest(String testId) throws Exception {
+        Test test = requireMetadata(testId);
+        List<TestPart> parts = new ArrayList<>();
 
         for (int partNumber = 1; partNumber <= 7; partNumber++) {
-            DocumentSnapshot partSnapshot = firestore
-                    .collection("tests")
-                    .document(testId)
-                    .collection("parts")
-                    .document("part" + partNumber)
-                    .get()
-                    .get();
-
-            if (!partSnapshot.exists()) {
-                throw new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Đề thi thiếu dữ liệu Part " + partNumber
-                );
-            }
-
-            Object copied = deepCopy(partSnapshot.getData(), examSafe);
-            if (examSafe && partNumber <= 2) {
-                removeListeningOptionText(copied);
-            }
-            parts.add(castMap(copied));
+            int currentPart = partNumber;
+            TestPart part = testDao.findPart(testId, partNumber).orElseThrow(
+                    () -> new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,
+                            "Đề thi thiếu dữ liệu Part " + currentPart
+                    )
+            );
+            parts.add(part);
         }
 
-        test.put("parts", parts);
+        test.setParts(parts);
         return test;
     }
 
-    private Object deepCopy(Object value, boolean examSafe) {
-        if (value instanceof Map<?, ?> source) {
-            Map<String, Object> copy = new LinkedHashMap<>();
-            for (Map.Entry<?, ?> entry : source.entrySet()) {
-                String key = String.valueOf(entry.getKey());
-                if (examSafe && ("correctAnswer".equals(key)
-                        || "explanation".equals(key)
-                        || "transcript".equals(key))) {
-                    continue;
+    private Test requireMetadata(String testId) throws Exception {
+        Test test = testDao.findMetadataById(testId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy đề thi")
+        );
+        test.setTestId(testId);
+        if (test.getType() == null) {
+            test.setType("FULL_TEST");
+        }
+        if (test.getListeningMinutes() == null) {
+            test.setListeningMinutes(45);
+        }
+        if (test.getReadingMinutes() == null) {
+            test.setReadingMinutes(75);
+        }
+        if (test.getTotalMinutes() == null) {
+            test.setTotalMinutes(120);
+        }
+        return test;
+    }
+
+    private Map<String, Object> toResponse(Test test, boolean examSafe) {
+        Map<String, Object> response = toMap(test);
+        if (examSafe) {
+            removeExamSecrets(response);
+            Object partsValue = response.get("parts");
+            if (partsValue instanceof List<?> parts) {
+                for (Object value : parts) {
+                    if (value instanceof Map<?, ?> part
+                            && part.get("partNumber") instanceof Number number
+                            && number.intValue() <= 2) {
+                        removeListeningOptionText(part);
+                    }
                 }
-                copy.put(key, deepCopy(entry.getValue(), examSafe));
             }
-            return copy;
         }
+        return response;
+    }
 
-        if (value instanceof List<?> source) {
-            List<Object> copy = new ArrayList<>();
-            for (Object item : source) {
-                copy.add(deepCopy(item, examSafe));
+    private Map<String, Object> toMap(Test test) {
+        return objectMapper.convertValue(
+                test,
+                new TypeReference<Map<String, Object>>() {
+                }
+        );
+    }
+
+    private void removeExamSecrets(Object value) {
+        if (value instanceof Map<?, ?> map) {
+            map.remove("correctAnswer");
+            map.remove("explanation");
+            map.remove("transcript");
+            for (Object child : map.values()) {
+                removeExamSecrets(child);
             }
-            return copy;
+        } else if (value instanceof List<?> list) {
+            for (Object child : list) {
+                removeExamSecrets(child);
+            }
         }
-
-        return value;
     }
 
     private void removeListeningOptionText(Object value) {
@@ -131,23 +168,6 @@ public class TestService {
         } else if (value instanceof List<?> list) {
             for (Object child : list) {
                 removeListeningOptionText(child);
-            }
-        }
-    }
-
-    private void collectAnswerKey(Object value, Map<Integer, String> answerKey) {
-        if (value instanceof Map<?, ?> map) {
-            Object questionNumber = map.get("questionNumber");
-            Object correctAnswer = map.get("correctAnswer");
-            if (questionNumber instanceof Number number && correctAnswer instanceof String answer) {
-                answerKey.put(number.intValue(), answer);
-            }
-            for (Object child : map.values()) {
-                collectAnswerKey(child, answerKey);
-            }
-        } else if (value instanceof List<?> list) {
-            for (Object child : list) {
-                collectAnswerKey(child, answerKey);
             }
         }
     }

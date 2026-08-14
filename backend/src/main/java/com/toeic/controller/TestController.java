@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -72,18 +71,6 @@ public class TestController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "partId phải có dạng part1 đến part7");
         }
 
-        Object partsValue = testService.getExamTest(testId).get("parts");
-        if (partsValue instanceof List<?> parts) {
-            for (Object value : parts) {
-                if (value instanceof Map<?, ?> part
-                        && part.get("partNumber") instanceof Number number
-                        && number.intValue() == partNumber) {
-                    @SuppressWarnings("unchecked")
-                    Map<String, Object> response = (Map<String, Object>) value;
-                    return response;
-                }
-            }
-        }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy Part " + partNumber);
+        return testService.getExamPart(testId, partNumber);
     }
 }

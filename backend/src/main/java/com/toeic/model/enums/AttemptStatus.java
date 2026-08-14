@@ -1,4 +1,4 @@
-package com.toeic.model;
+package com.toeic.model.enums;
 
 public enum AttemptStatus {
     IN_PROGRESS,

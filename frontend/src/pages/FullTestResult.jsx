@@ -55,7 +55,7 @@ function FullTestResult() {
         ? "Thi Listening"
         : resultMode === "READING"
           ? "Thi Reading"
-          : `Thi Part ${result?.selectedPart}`;
+          : `Part ${result?.selectedPart} - Test 1`;
   const maxScore = resultMode === "FULL" ? 990 : 495;
 
   return (

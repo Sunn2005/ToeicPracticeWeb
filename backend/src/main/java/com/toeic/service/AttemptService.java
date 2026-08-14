@@ -1,14 +1,12 @@
 package com.toeic.service;
 
-import com.google.cloud.firestore.DocumentReference;
-import com.google.cloud.firestore.DocumentSnapshot;
-import com.google.cloud.firestore.Firestore;
-import com.google.cloud.firestore.QueryDocumentSnapshot;
+import com.toeic.dao.AttemptDao;
 import com.toeic.model.Attempt;
-import com.toeic.model.AttemptSection;
-import com.toeic.model.AttemptStatus;
-import com.toeic.model.ExamMode;
-import com.toeic.model.TestType;
+import com.toeic.model.AttemptAnswer;
+import com.toeic.model.enums.AttemptSection;
+import com.toeic.model.enums.AttemptStatus;
+import com.toeic.model.enums.ExamMode;
+import com.toeic.model.enums.TestType;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -38,11 +36,11 @@ public class AttemptService {
     private static final long READING_DURATION_MS = 75L * 60L * 1000L;
     private static final long FULL_TEST_DURATION_MS = LISTENING_DURATION_MS + READING_DURATION_MS;
 
-    private final Firestore firestore;
+    private final AttemptDao attemptDao;
     private final TestService testService;
 
-    public AttemptService(Firestore firestore, TestService testService) {
-        this.firestore = firestore;
+    public AttemptService(AttemptDao attemptDao, TestService testService) {
+        this.attemptDao = attemptDao;
         this.testService = testService;
     }
 
@@ -68,10 +66,8 @@ public class AttemptService {
         }
 
         long now = System.currentTimeMillis();
-        DocumentReference document = firestore.collection("attempts").document();
-
         Attempt attempt = new Attempt();
-        attempt.setId(document.getId());
+        attempt.setId(attemptDao.nextId());
         attempt.setUserId(userId);
         attempt.setTestId(testId);
         attempt.setType(FULL_TEST);
@@ -102,7 +98,7 @@ public class AttemptService {
         attempt.setResult(null);
         attempt.setAnswers(null);
 
-        document.set(attempt).get();
+        attemptDao.save(attempt);
         return toResponse(attempt, true);
     }
 
@@ -177,23 +173,11 @@ public class AttemptService {
         }
 
         long now = System.currentTimeMillis();
-        Map<String, Object> answerDocument = new LinkedHashMap<>();
-        answerDocument.put("questionNumber", questionNumber);
-        answerDocument.put("selectedAnswer", normalizedAnswer);
-        answerDocument.put("answeredAt", now);
-
-        firestore.collection("attempts")
-                .document(attemptId)
-                .collection("answers")
-                .document(String.valueOf(questionNumber))
-                .set(answerDocument)
-                .get();
+        AttemptAnswer answer = new AttemptAnswer(questionNumber, normalizedAnswer, now);
+        attemptDao.saveAnswer(attemptId, answer);
 
         attempt.setUpdatedAt(now);
-        firestore.collection("attempts")
-                .document(attemptId)
-                .update("updatedAt", now)
-                .get();
+        attemptDao.updateTimestamp(attemptId, now);
 
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("questionNumber", questionNumber);
@@ -328,15 +312,7 @@ public class AttemptService {
             Integer selectedPart
     ) throws Exception {
         List<Attempt> candidates = new ArrayList<>();
-        for (QueryDocumentSnapshot snapshot : firestore.collection("attempts")
-                .whereEqualTo("userId", userId)
-                .get()
-                .get()
-                .getDocuments()) {
-            Attempt attempt = snapshot.toObject(Attempt.class);
-            if (attempt.getId() == null) {
-                attempt.setId(snapshot.getId());
-            }
+        for (Attempt attempt : attemptDao.findByUserId(userId)) {
             applyLegacyScope(attempt);
             if (testId.equals(attempt.getTestId())
                     && FULL_TEST.equals(attempt.getType())
@@ -353,18 +329,9 @@ public class AttemptService {
     }
 
     private Attempt getOwnedAttempt(String userId, String attemptId) throws Exception {
-        DocumentSnapshot snapshot = firestore.collection("attempts").document(attemptId).get().get();
-        if (!snapshot.exists()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy bài làm");
-        }
-
-        Attempt attempt = snapshot.toObject(Attempt.class);
-        if (attempt == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Dữ liệu bài làm không hợp lệ");
-        }
-        if (attempt.getId() == null) {
-            attempt.setId(snapshot.getId());
-        }
+        Attempt attempt = attemptDao.findById(attemptId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy bài làm")
+        );
         if (!userId.equals(attempt.getUserId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền truy cập bài làm này");
         }
@@ -510,21 +477,7 @@ public class AttemptService {
     }
 
     private Map<Integer, String> loadAnswers(String attemptId) throws Exception {
-        Map<Integer, String> answers = new LinkedHashMap<>();
-        for (QueryDocumentSnapshot snapshot : firestore.collection("attempts")
-                .document(attemptId)
-                .collection("answers")
-                .get()
-                .get()
-                .getDocuments()) {
-            Long questionNumber = snapshot.getLong("questionNumber");
-            if (questionNumber == null) {
-                continue;
-            }
-            String selected = snapshot.getString("selectedAnswer");
-            answers.put(questionNumber.intValue(), selected);
-        }
-        return answers;
+        return attemptDao.findAnswers(attemptId);
     }
 
     private Map<String, Object> toResponse(Attempt attempt, boolean includeAnswers) throws Exception {
@@ -690,7 +643,7 @@ public class AttemptService {
     }
 
     private void saveAttempt(Attempt attempt) throws Exception {
-        firestore.collection("attempts").document(attempt.getId()).set(attempt).get();
+        attemptDao.save(attempt);
     }
 
     private record AttemptScope(

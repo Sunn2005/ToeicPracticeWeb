@@ -1,10 +1,16 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ApiError, apiFetch } from "../api/client";
 import ExamHeader from "../components/ExamHeader";
 import LockedExamAudio from "../components/LockedExamAudio";
 import PassagePanel from "../components/PassagePanel";
 import QuestionCard from "../components/QuestionCard";
+import {
+  TIMER_TYPES,
+  getTimerSeconds,
+  getTimerType,
+  shouldSubmitAfterListeningAudio,
+} from "../config/examTiming";
 import {
   buildListeningUnits,
   buildReadingUnits,
@@ -13,12 +19,6 @@ import {
 
 function secondsUntil(endAt, serverNow) {
   return Math.max(0, Math.ceil((endAt - serverNow) / 1000));
-}
-
-function displayTimerEnd(attempt) {
-  return attempt.mode === "FULL"
-    ? attempt.overallEndAt || attempt.sectionEndAt
-    : attempt.sectionEndAt;
 }
 
 function SubmitDialog({ unansweredCount, submitting, onCancel, onConfirm }) {
@@ -79,6 +79,7 @@ function FullTestExam() {
   const answersRef = useRef({});
   const audioAdvanceInFlight = useRef(false);
   const submitInFlight = useRef(false);
+  const hasSubmitted = useRef(false);
   const timeoutHandled = useRef(false);
 
   useEffect(() => {
@@ -91,9 +92,7 @@ function FullTestExam() {
         setAnswers(data.attempt.answers || {});
         answersRef.current = data.attempt.answers || {};
         setClockSkew(serverNow - Date.now());
-        setRemainingSeconds(
-          secondsUntil(displayTimerEnd(data.attempt), serverNow),
-        );
+        setRemainingSeconds(getTimerSeconds(data.attempt, serverNow));
         setSectionRemainingSeconds(secondsUntil(data.attempt.sectionEndAt, serverNow));
       })
       .catch((requestError) => {
@@ -125,6 +124,7 @@ function FullTestExam() {
   );
 
   const attempt = payload?.attempt;
+  const timerType = getTimerType(attempt?.mode, attempt?.selectedPart);
   const currentQuestion = attempt?.currentQuestionNumber || 1;
   const currentUnits = attempt?.currentSection === "LISTENING" ? listeningUnits : readingUnits;
   const currentUnit = findUnit(currentUnits, currentQuestion);
@@ -147,61 +147,13 @@ function FullTestExam() {
 
     const updateClock = () => {
       const serverNow = Date.now() + clockSkew;
-      setRemainingSeconds(secondsUntil(displayTimerEnd(attempt), serverNow));
+      setRemainingSeconds(getTimerSeconds(attempt, serverNow));
       setSectionRemainingSeconds(secondsUntil(attempt.sectionEndAt, serverNow));
     };
     updateClock();
     const interval = window.setInterval(updateClock, 1000);
     return () => window.clearInterval(interval);
   }, [attempt, clockSkew]);
-
-  useEffect(() => {
-    if (
-      !attempt ||
-      sectionRemainingSeconds === null ||
-      sectionRemainingSeconds > 0 ||
-      audioAdvanceInFlight.current ||
-      timeoutHandled.current
-    ) return;
-    timeoutHandled.current = true;
-
-    const handleTimeout = async () => {
-      try {
-        if (attempt.currentSection === "LISTENING") {
-          const nextAttempt = await apiFetch(
-            `/api/attempts/${attemptId}/finish-listening`,
-            { method: "POST" },
-          );
-          const serverNow = nextAttempt.serverTime || Date.now();
-          if (nextAttempt.status === "COMPLETED") {
-            navigate(`/full-test/${attemptId}/result`, { replace: true });
-            return;
-          }
-          setPayload((previous) => ({ ...previous, attempt: nextAttempt }));
-          setAnswers(nextAttempt.answers || {});
-          answersRef.current = nextAttempt.answers || {};
-          setClockSkew(serverNow - Date.now());
-          setRemainingSeconds(
-            secondsUntil(displayTimerEnd(nextAttempt), serverNow),
-          );
-          setSectionRemainingSeconds(secondsUntil(nextAttempt.sectionEndAt, serverNow));
-          setSectionNotice(true);
-          timeoutHandled.current = false;
-        } else {
-          if (submitInFlight.current) return;
-          submitInFlight.current = true;
-          await apiFetch(`/api/attempts/${attemptId}/submit`, { method: "POST" });
-          navigate(`/full-test/${attemptId}/result`, { replace: true });
-        }
-      } catch (requestError) {
-        submitInFlight.current = false;
-        setError(requestError.message);
-        timeoutHandled.current = false;
-      }
-    };
-
-    handleTimeout();
-  }, [attempt, attemptId, busy, navigate, sectionRemainingSeconds]);
 
   const saveAnswer = (questionNumber, selectedAnswer) => {
     const previousAnswer = answers[String(questionNumber)] ?? null;
@@ -248,10 +200,112 @@ function FullTestExam() {
     return savePromise;
   };
 
-  const waitForPendingSaves = async () => {
+  const waitForPendingSaves = useCallback(async () => {
     const saves = [...pendingSaves.current.values()];
     if (saves.length) await Promise.all(saves);
-  };
+  }, []);
+
+  const saveCurrentAnswers = useCallback(async () => {
+    if (!currentUnit) return;
+    await waitForPendingSaves();
+    setSaveState("Đang lưu...");
+    await Promise.all(
+      currentUnit.questions.map((question) =>
+        apiFetch(`/api/attempts/${attemptId}/answers`, {
+          method: "PUT",
+          body: JSON.stringify({
+            questionNumber: question.questionNumber,
+            selectedAnswer: answersRef.current[String(question.questionNumber)] || null,
+          }),
+        }),
+      ),
+    );
+    setSaveState("Đã lưu tự động");
+  }, [attemptId, currentUnit, waitForPendingSaves]);
+
+  const submitExamOnce = useCallback(async ({ saveCurrent = true } = {}) => {
+    if (submitInFlight.current || hasSubmitted.current) return false;
+
+    submitInFlight.current = true;
+    setBusy(true);
+    setError("");
+    try {
+      if (saveCurrent) {
+        await saveCurrentAnswers();
+      } else {
+        await waitForPendingSaves();
+      }
+      await apiFetch(`/api/attempts/${attemptId}/submit`, { method: "POST" });
+      hasSubmitted.current = true;
+      navigate(`/full-test/${attemptId}/result`, { replace: true });
+      return true;
+    } catch (requestError) {
+      submitInFlight.current = false;
+      setError(requestError.message);
+      setBusy(false);
+      setShowSubmit(false);
+      return false;
+    }
+  }, [attemptId, navigate, saveCurrentAnswers, waitForPendingSaves]);
+
+  const timeoutRemainingSeconds = timerType === TIMER_TYPES.ELAPSED
+    ? null
+    : attempt?.mode === "PART"
+      ? remainingSeconds
+      : sectionRemainingSeconds;
+
+  useEffect(() => {
+    if (
+      !attempt
+      || timeoutRemainingSeconds === null
+      || timeoutRemainingSeconds > 0
+      || audioAdvanceInFlight.current
+      || timeoutHandled.current
+    ) return;
+    timeoutHandled.current = true;
+
+    const handleTimeout = async () => {
+      if (attempt.currentSection !== "LISTENING" || attempt.mode !== "FULL") {
+        const submitted = await submitExamOnce({ saveCurrent: attempt.mode === "PART" });
+        if (!submitted && !submitInFlight.current && !hasSubmitted.current) {
+          timeoutHandled.current = false;
+        }
+        return;
+      }
+
+      try {
+        const nextAttempt = await apiFetch(
+          `/api/attempts/${attemptId}/finish-listening`,
+          { method: "POST" },
+        );
+        const serverNow = nextAttempt.serverTime || Date.now();
+        if (nextAttempt.status === "COMPLETED") {
+          hasSubmitted.current = true;
+          navigate(`/full-test/${attemptId}/result`, { replace: true });
+          return;
+        }
+        setPayload((previous) => ({ ...previous, attempt: nextAttempt }));
+        setAnswers(nextAttempt.answers || {});
+        answersRef.current = nextAttempt.answers || {};
+        setClockSkew(serverNow - Date.now());
+        setRemainingSeconds(getTimerSeconds(nextAttempt, serverNow));
+        setSectionRemainingSeconds(secondsUntil(nextAttempt.sectionEndAt, serverNow));
+        setSectionNotice(true);
+        timeoutHandled.current = false;
+      } catch (requestError) {
+        setError(requestError.message);
+        timeoutHandled.current = false;
+      }
+    };
+
+    handleTimeout();
+  }, [
+    attempt,
+    attemptId,
+    navigate,
+    submitExamOnce,
+    timeoutRemainingSeconds,
+  ]);
 
   const advanceListeningAfterAudio = async () => {
     if (!currentUnit || audioAdvanceInFlight.current) return;
@@ -260,23 +314,24 @@ function FullTestExam() {
     setError("");
     setAudioAdvanceError("");
     try {
-      await waitForPendingSaves();
-      await Promise.all(
-        currentUnit.questions.map((question) =>
-          apiFetch(`/api/attempts/${attemptId}/answers`, {
-            method: "PUT",
-            body: JSON.stringify({
-              questionNumber: question.questionNumber,
-              selectedAnswer: answersRef.current[String(question.questionNumber)] || null,
-            }),
-          }),
-        ),
-      );
+      await saveCurrentAnswers();
+      if (shouldSubmitAfterListeningAudio(attempt, currentUnit, listeningUnits)) {
+        const submitted = await submitExamOnce({ saveCurrent: false });
+        if (!submitted && !submitInFlight.current && !hasSubmitted.current) {
+          audioAdvanceInFlight.current = false;
+          setAudioAdvanceError(
+            "Đáp án đã được lưu nhưng chưa thể nộp bài. Hãy kiểm tra mạng rồi thử lại.",
+          );
+        }
+        return;
+      }
+
       const nextAttempt = await apiFetch(
         `/api/attempts/${attemptId}/listening/next`,
         { method: "POST" },
       );
       if (nextAttempt.status === "COMPLETED") {
+        hasSubmitted.current = true;
         navigate(`/full-test/${attemptId}/result`, { replace: true });
         return;
       }
@@ -318,23 +373,6 @@ function FullTestExam() {
       setError(requestError.message);
     } finally {
       setBusy(false);
-    }
-  };
-
-  const submitTest = async () => {
-    if (submitInFlight.current) return;
-    submitInFlight.current = true;
-    setBusy(true);
-    setError("");
-    try {
-      await waitForPendingSaves();
-      await apiFetch(`/api/attempts/${attemptId}/submit`, { method: "POST" });
-      navigate(`/full-test/${attemptId}/result`, { replace: true });
-    } catch (requestError) {
-      submitInFlight.current = false;
-      setError(requestError.message);
-      setBusy(false);
-      setShowSubmit(false);
     }
   };
 
@@ -386,6 +424,7 @@ function FullTestExam() {
         firstQuestion={scopeFirst}
         lastQuestion={scopeLast}
         remainingSeconds={remainingSeconds ?? 0}
+        timerType={timerType}
         answeredCount={answeredCount}
         totalQuestions={totalQuestions}
         onExit={exitExam}
@@ -484,11 +523,16 @@ function FullTestExam() {
                     disabled={busy}
                     className="rounded-xl border border-red-200 bg-red-50 px-5 py-3 text-sm font-bold text-red-700 hover:bg-red-100 disabled:opacity-50"
                   >
-                    Thử lưu và tự chuyển lại
+                    {shouldSubmitAfterListeningAudio(attempt, currentUnit, listeningUnits)
+                      ? "Thử lưu và nộp lại"
+                      : "Thử lưu và tự chuyển lại"}
                   </button>
                 ) : (
                   <p className="text-sm font-medium text-slate-500">
-                    Audio kết thúc sẽ tự động lưu {currentUnit.questions.length > 1 ? "cả group" : "đáp án"} và chuyển tiếp.
+                    Audio kết thúc sẽ tự động lưu {currentUnit.questions.length > 1 ? "cả group" : "đáp án"}
+                    {shouldSubmitAfterListeningAudio(attempt, currentUnit, listeningUnits)
+                      ? " và nộp bài."
+                      : " và chuyển tiếp."}
                   </p>
                 )}
               </div>
@@ -589,7 +633,7 @@ function FullTestExam() {
           unansweredCount={unansweredCount}
           submitting={busy}
           onCancel={() => setShowSubmit(false)}
-          onConfirm={submitTest}
+          onConfirm={() => submitExamOnce()}
         />
       )}
     </div>
