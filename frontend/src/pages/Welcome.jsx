@@ -1,7 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
+import { apiFetch, publicApiFetch } from "../api/client";
+import TestList from "../components/TestList";
+import TestModeModal from "../components/TestModeModal";
+import { TOEIC_TESTS } from "../data/testCatalog";
 
 function UserAvatar({ user, displayName, size = "large" }) {
   const sizeClasses =
@@ -34,7 +38,35 @@ function Welcome({ user }) {
   const navigate = useNavigate();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState("");
+  const [selectedTest, setSelectedTest] = useState(null);
+  const [tests, setTests] = useState(TOEIC_TESTS);
   const displayName = user?.displayName || "bạn";
+
+  useEffect(() => {
+    let active = true;
+    Promise.all(
+      TOEIC_TESTS.map(async (test) => {
+        if (!test.available) return test;
+        try {
+          const metadata = await publicApiFetch(`/api/tests/${test.id}`);
+          return {
+            ...test,
+            title: metadata.title || test.title,
+            totalQuestions: metadata.totalQuestions || test.totalQuestions,
+            duration: metadata.totalMinutes || test.duration,
+          };
+        } catch {
+          return test;
+        }
+      }),
+    ).then((catalog) => {
+      if (active) setTests(catalog);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
@@ -48,6 +80,15 @@ function Welcome({ user }) {
       setSignOutError("Không thể đăng xuất lúc này. Vui lòng thử lại.");
       setIsSigningOut(false);
     }
+  };
+
+  const handleStartExam = async ({ mode, part }) => {
+    const attempt = await apiFetch(`/api/tests/${selectedTest.id}/attempts`, {
+      method: "POST",
+      forceRefresh: true,
+      body: JSON.stringify({ mode, part }),
+    });
+    navigate(`/full-test/${attempt.id}/exam`);
   };
 
   return (
@@ -182,101 +223,33 @@ function Welcome({ user }) {
               <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-wider text-sky-600">
-                    Bài luyện hiện có
+                    Bộ đề TOEIC
                   </p>
                   <h3 className="mt-2 text-2xl font-bold text-slate-950">
-                    Chọn bài để bắt đầu
+                    Chọn Test để bắt đầu
                   </h3>
+                  <p className="mt-2 text-sm text-slate-500">
+                    Chọn một bộ đề, sau đó chọn Full Test, Listening, Reading hoặc Part cụ thể.
+                  </p>
                 </div>
                 <span className="w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                  2 bài sẵn sàng
+                  {tests.filter((test) => test.available).length} đề sẵn sàng
                 </span>
               </div>
 
-              <button
-                type="button"
-                onClick={() => navigate("/full-test/ets-2026-test-1")}
-                className="group mb-5 w-full overflow-hidden rounded-3xl bg-slate-950 p-6 text-left text-white shadow-xl transition duration-200 hover:-translate-y-1 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-sky-200 sm:p-7"
-              >
-                <div className="flex flex-col justify-between gap-6 md:flex-row md:items-center">
-                  <div className="flex items-start gap-4 sm:gap-5">
-                    <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-sky-400 to-cyan-400 text-lg font-black text-slate-950 shadow-lg shadow-sky-900/40 sm:h-16 sm:w-16">
-                      FT
-                    </span>
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-xs font-bold uppercase tracking-wider text-sky-300">
-                          ETS 2026 · Full Test
-                        </p>
-                        <span className="rounded-full bg-emerald-400/15 px-2.5 py-1 text-[10px] font-bold text-emerald-300 ring-1 ring-emerald-300/20">
-                          Mới
-                        </span>
-                      </div>
-                      <p className="mt-2 text-xl font-bold sm:text-2xl">
-                        TOEIC Listening & Reading – Test 1
-                      </p>
-                      <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
-                        Mô phỏng đủ 200 câu với Listening 45 phút, Reading 75 phút,
-                        tự động lưu và chấm điểm sau khi nộp.
-                      </p>
-                      <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-slate-300">
-                        <span className="rounded-full bg-white/10 px-3 py-1.5 ring-1 ring-white/10">
-                          200 câu
-                        </span>
-                        <span className="rounded-full bg-white/10 px-3 py-1.5 ring-1 ring-white/10">
-                          120 phút
-                        </span>
-                        <span className="rounded-full bg-white/10 px-3 py-1.5 ring-1 ring-white/10">
-                          Part 1–7
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <span className="shrink-0 self-end font-bold text-sky-300 transition group-hover:translate-x-1 md:self-auto">
-                    Xem đề thi →
-                  </span>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => navigate("/practice/part5")}
-                className="group w-full rounded-3xl border border-sky-100 bg-linear-to-br from-white to-sky-50 p-6 text-left shadow-sm transition duration-200 hover:-translate-y-1 hover:border-sky-300 hover:shadow-xl hover:shadow-sky-100 focus:outline-none focus:ring-4 focus:ring-sky-100 sm:p-7"
-              >
-                <div className="flex flex-col justify-between gap-5 md:flex-row md:items-center">
-                  <div className="flex items-start gap-4 sm:gap-5">
-                    <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-sky-500 text-lg font-bold text-white shadow-lg shadow-sky-200 sm:h-16 sm:w-16">
-                      P5
-                    </span>
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-sky-600">
-                        Test 001 · Reading
-                      </p>
-                      <p className="mt-2 text-xl font-bold text-slate-950 sm:text-2xl">
-                        Part 5: Incomplete Sentences
-                      </p>
-                      <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-                        Luyện ngữ pháp và từ vựng bằng các câu hoàn thành câu.
-                      </p>
-                      <div className="mt-4 flex flex-wrap gap-2 text-xs font-medium text-slate-500">
-                        <span className="rounded-full bg-white px-3 py-1.5 ring-1 ring-slate-200">
-                          Reading
-                        </span>
-                        <span className="rounded-full bg-white px-3 py-1.5 ring-1 ring-slate-200">
-                          Part 5
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <span className="shrink-0 self-end font-semibold text-sky-600 transition group-hover:translate-x-1 md:self-auto">
-                    Vào bài →
-                  </span>
-                </div>
-              </button>
+              <TestList tests={tests} onSelectTest={setSelectedTest} />
             </div>
           </section>
         </div>
       </main>
+
+      {selectedTest && (
+        <TestModeModal
+          test={selectedTest}
+          onClose={() => setSelectedTest(null)}
+          onStart={handleStartExam}
+        />
+      )}
     </div>
   );
 }

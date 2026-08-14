@@ -1,7 +1,25 @@
 import { formatClock } from "../utils/testData";
 
-function ExamHeader({ section, remainingSeconds, answeredCount, onExit }) {
+function ExamHeader({
+  section,
+  mode,
+  selectedPart,
+  firstQuestion,
+  lastQuestion,
+  remainingSeconds,
+  answeredCount,
+  totalQuestions,
+  onExit,
+}) {
   const isUrgent = remainingSeconds <= 300;
+  const modeLabel =
+    mode === "FULL"
+      ? "Full Test"
+      : mode === "PART"
+        ? `Part ${selectedPart}`
+        : mode === "LISTENING"
+          ? "Thi Listening"
+          : "Thi Reading";
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur-xl">
@@ -11,9 +29,9 @@ function ExamHeader({ section, remainingSeconds, answeredCount, onExit }) {
             TP
           </span>
           <div className="min-w-0">
-            <p className="truncate text-sm font-bold text-slate-950">ETS 2026 · Test 1</p>
+            <p className="truncate text-sm font-bold text-slate-950">ETS 2026 · Test 1 · {modeLabel}</p>
             <p className="text-xs font-semibold uppercase tracking-wider text-sky-600">
-              {section === "LISTENING" ? "Listening · Câu 1–100" : "Reading · Câu 101–200"}
+              {section === "LISTENING" ? "Listening" : "Reading"} · Câu {firstQuestion}–{lastQuestion}
             </p>
           </div>
         </div>
@@ -21,7 +39,7 @@ function ExamHeader({ section, remainingSeconds, answeredCount, onExit }) {
         <div className="flex items-center gap-2 sm:gap-4">
           <div className="hidden text-right sm:block">
             <p className="text-xs text-slate-500">Đã trả lời</p>
-            <p className="text-sm font-bold text-slate-900">{answeredCount}/200</p>
+            <p className="text-sm font-bold text-slate-900">{answeredCount}/{totalQuestions}</p>
           </div>
           <div
             className={`rounded-xl px-4 py-2 text-center ${

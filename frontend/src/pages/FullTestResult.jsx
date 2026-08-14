@@ -42,6 +42,22 @@ function FullTestResult() {
     return <div className="flex min-h-screen items-center justify-center bg-slate-50">Đang chấm bài...</div>;
   }
 
+  const resultMode = result?.mode || "FULL";
+  const listeningTotal = result?.listeningTotalQuestions
+    ?? (resultMode === "READING" ? 0 : 100);
+  const readingTotal = result?.readingTotalQuestions
+    ?? (resultMode === "LISTENING" ? 0 : 100);
+  const totalQuestions = result?.totalQuestions || listeningTotal + readingTotal;
+  const modeTitle =
+    resultMode === "FULL"
+      ? "Full Test"
+      : resultMode === "LISTENING"
+        ? "Thi Listening"
+        : resultMode === "READING"
+          ? "Thi Reading"
+          : `Thi Part ${result?.selectedPart}`;
+  const maxScore = resultMode === "FULL" ? 990 : 495;
+
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-sky-50 to-cyan-100 px-5 py-8 text-slate-900 sm:px-8 sm:py-12">
       <main className="mx-auto max-w-5xl">
@@ -53,7 +69,7 @@ function FullTestResult() {
           <>
             <section className="overflow-hidden rounded-4xl bg-white shadow-2xl shadow-sky-100">
               <div className="bg-slate-950 px-6 py-8 text-white sm:px-10">
-                <p className="text-sm font-bold uppercase tracking-[0.2em] text-sky-300">Kết quả Full Test</p>
+                <p className="text-sm font-bold uppercase tracking-[0.2em] text-sky-300">Kết quả {modeTitle}</p>
                 <div className="mt-4 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
                   <div>
                     <h1 className="text-3xl font-bold sm:text-4xl">Bạn đã hoàn thành bài thi</h1>
@@ -65,33 +81,37 @@ function FullTestResult() {
                   <div className="rounded-3xl bg-white/10 px-8 py-5 text-center ring-1 ring-white/20">
                     <p className="text-xs font-bold uppercase tracking-widest text-sky-300">Điểm ước tính</p>
                     <p className="mt-1 text-5xl font-black">{result.totalScore}</p>
-                    <p className="text-sm text-slate-300">/ 990</p>
+                    <p className="text-sm text-slate-300">/ {maxScore}</p>
                   </div>
                 </div>
               </div>
 
               <div className="p-6 sm:p-10">
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                  <Metric label="Listening" value={`${result.listeningScore}/495`} tone="sky" />
-                  <Metric label="Reading" value={`${result.readingScore}/495`} tone="violet" />
-                  <Metric label="Tổng câu đúng" value={`${result.totalCorrect}/200`} tone="emerald" />
+                  {listeningTotal > 0 && (
+                    <Metric label="Listening" value={`${result.listeningScore}/495`} tone="sky" />
+                  )}
+                  {readingTotal > 0 && (
+                    <Metric label="Reading" value={`${result.readingScore}/495`} tone="violet" />
+                  )}
+                  <Metric label="Tổng câu đúng" value={`${result.totalCorrect}/${totalQuestions}`} tone="emerald" />
                   <Metric label="Tổng câu sai" value={result.totalWrong} />
                   <Metric label="Bỏ trống" value={result.totalUnanswered} />
                 </div>
 
                 <div className="mt-8 grid gap-5 sm:grid-cols-2">
-                  <section className="rounded-2xl border border-slate-200 p-5">
+                  {listeningTotal > 0 && <section className="rounded-2xl border border-slate-200 p-5">
                     <h2 className="font-bold">Listening</h2>
                     <p className="mt-3 text-sm leading-7 text-slate-600">
-                      Đúng {result.listeningCorrect} · Sai {result.listeningWrong} · Bỏ trống {result.listeningUnanswered}
+                      Đúng {result.listeningCorrect}/{listeningTotal} · Sai {result.listeningWrong} · Bỏ trống {result.listeningUnanswered}
                     </p>
-                  </section>
-                  <section className="rounded-2xl border border-slate-200 p-5">
+                  </section>}
+                  {readingTotal > 0 && <section className="rounded-2xl border border-slate-200 p-5">
                     <h2 className="font-bold">Reading</h2>
                     <p className="mt-3 text-sm leading-7 text-slate-600">
-                      Đúng {result.readingCorrect} · Sai {result.readingWrong} · Bỏ trống {result.readingUnanswered}
+                      Đúng {result.readingCorrect}/{readingTotal} · Sai {result.readingWrong} · Bỏ trống {result.readingUnanswered}
                     </p>
-                  </section>
+                  </section>}
                 </div>
 
                 <p className="mt-7 rounded-xl bg-amber-50 p-4 text-sm leading-6 text-amber-800">

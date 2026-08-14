@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ApiError, apiFetch } from "../api/client";
 import ExamHeader from "../components/ExamHeader";
+import LockedExamAudio from "../components/LockedExamAudio";
 import PassagePanel from "../components/PassagePanel";
 import QuestionCard from "../components/QuestionCard";
 import {
@@ -9,6 +10,16 @@ import {
   buildReadingUnits,
   findUnit,
 } from "../utils/testData";
+
+function secondsUntil(endAt, serverNow) {
+  return Math.max(0, Math.ceil((endAt - serverNow) / 1000));
+}
+
+function displayTimerEnd(attempt) {
+  return attempt.mode === "FULL"
+    ? attempt.overallEndAt || attempt.sectionEndAt
+    : attempt.sectionEndAt;
+}
 
 function SubmitDialog({ unansweredCount, submitting, onCancel, onConfirm }) {
   return (
@@ -56,13 +67,18 @@ function FullTestExam() {
   const [payload, setPayload] = useState(null);
   const [answers, setAnswers] = useState({});
   const [remainingSeconds, setRemainingSeconds] = useState(null);
+  const [sectionRemainingSeconds, setSectionRemainingSeconds] = useState(null);
   const [clockSkew, setClockSkew] = useState(0);
   const [error, setError] = useState("");
   const [saveState, setSaveState] = useState("Đã đồng bộ");
   const [busy, setBusy] = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
   const [sectionNotice, setSectionNotice] = useState(false);
+  const [audioAdvanceError, setAudioAdvanceError] = useState("");
   const pendingSaves = useRef(new Map());
+  const answersRef = useRef({});
+  const audioAdvanceInFlight = useRef(false);
+  const submitInFlight = useRef(false);
   const timeoutHandled = useRef(false);
 
   useEffect(() => {
@@ -73,10 +89,12 @@ function FullTestExam() {
         const serverNow = data.attempt.serverTime || Date.now();
         setPayload(data);
         setAnswers(data.attempt.answers || {});
+        answersRef.current = data.attempt.answers || {};
         setClockSkew(serverNow - Date.now());
         setRemainingSeconds(
-          Math.max(0, Math.ceil((data.attempt.sectionEndAt - serverNow) / 1000)),
+          secondsUntil(displayTimerEnd(data.attempt), serverNow),
         );
+        setSectionRemainingSeconds(secondsUntil(data.attempt.sectionEndAt, serverNow));
       })
       .catch((requestError) => {
         if (!active) return;
@@ -91,39 +109,58 @@ function FullTestExam() {
     };
   }, [attemptId, navigate]);
 
+  const scopeFirst = payload?.attempt.firstQuestionNumber || 1;
+  const scopeLast = payload?.attempt.lastQuestionNumber || 200;
   const listeningUnits = useMemo(
-    () => buildListeningUnits(payload?.test),
-    [payload?.test],
+    () => buildListeningUnits(payload?.test).filter(
+      (unit) => unit.start >= scopeFirst && unit.end <= scopeLast,
+    ),
+    [payload?.test, scopeFirst, scopeLast],
   );
   const readingUnits = useMemo(
-    () => buildReadingUnits(payload?.test),
-    [payload?.test],
+    () => buildReadingUnits(payload?.test).filter(
+      (unit) => unit.start >= scopeFirst && unit.end <= scopeLast,
+    ),
+    [payload?.test, scopeFirst, scopeLast],
   );
 
   const attempt = payload?.attempt;
   const currentQuestion = attempt?.currentQuestionNumber || 1;
   const currentUnits = attempt?.currentSection === "LISTENING" ? listeningUnits : readingUnits;
   const currentUnit = findUnit(currentUnits, currentQuestion);
-  const answeredCount = Object.values(answers).filter(Boolean).length;
-  const unansweredCount = 200 - answeredCount;
+  const totalQuestions = attempt?.totalQuestions || scopeLast - scopeFirst + 1;
+  const answeredCount = Object.entries(answers).filter(
+    ([number, value]) => Number(number) >= scopeFirst && Number(number) <= scopeLast && value,
+  ).length;
+  const unansweredCount = totalQuestions - answeredCount;
+
+  useEffect(() => {
+    answersRef.current = answers;
+  }, [answers]);
+
+  useEffect(() => {
+    audioAdvanceInFlight.current = false;
+  }, [currentUnit?.key]);
 
   useEffect(() => {
     if (!attempt?.sectionEndAt) return undefined;
 
     const updateClock = () => {
       const serverNow = Date.now() + clockSkew;
-      setRemainingSeconds(Math.max(0, Math.ceil((attempt.sectionEndAt - serverNow) / 1000)));
+      setRemainingSeconds(secondsUntil(displayTimerEnd(attempt), serverNow));
+      setSectionRemainingSeconds(secondsUntil(attempt.sectionEndAt, serverNow));
     };
     updateClock();
     const interval = window.setInterval(updateClock, 1000);
     return () => window.clearInterval(interval);
-  }, [attempt?.sectionEndAt, clockSkew]);
+  }, [attempt, clockSkew]);
 
   useEffect(() => {
     if (
       !attempt ||
-      remainingSeconds === null ||
-      remainingSeconds > 0 ||
+      sectionRemainingSeconds === null ||
+      sectionRemainingSeconds > 0 ||
+      audioAdvanceInFlight.current ||
       timeoutHandled.current
     ) return;
     timeoutHandled.current = true;
@@ -136,29 +173,42 @@ function FullTestExam() {
             { method: "POST" },
           );
           const serverNow = nextAttempt.serverTime || Date.now();
+          if (nextAttempt.status === "COMPLETED") {
+            navigate(`/full-test/${attemptId}/result`, { replace: true });
+            return;
+          }
           setPayload((previous) => ({ ...previous, attempt: nextAttempt }));
           setAnswers(nextAttempt.answers || {});
+          answersRef.current = nextAttempt.answers || {};
           setClockSkew(serverNow - Date.now());
           setRemainingSeconds(
-            Math.max(0, Math.ceil((nextAttempt.sectionEndAt - serverNow) / 1000)),
+            secondsUntil(displayTimerEnd(nextAttempt), serverNow),
           );
+          setSectionRemainingSeconds(secondsUntil(nextAttempt.sectionEndAt, serverNow));
           setSectionNotice(true);
           timeoutHandled.current = false;
         } else {
+          if (submitInFlight.current) return;
+          submitInFlight.current = true;
           await apiFetch(`/api/attempts/${attemptId}/submit`, { method: "POST" });
           navigate(`/full-test/${attemptId}/result`, { replace: true });
         }
       } catch (requestError) {
+        submitInFlight.current = false;
         setError(requestError.message);
         timeoutHandled.current = false;
       }
     };
 
     handleTimeout();
-  }, [attempt, attemptId, navigate, remainingSeconds]);
+  }, [attempt, attemptId, busy, navigate, sectionRemainingSeconds]);
 
   const saveAnswer = (questionNumber, selectedAnswer) => {
     const previousAnswer = answers[String(questionNumber)] ?? null;
+    answersRef.current = {
+      ...answersRef.current,
+      [questionNumber]: selectedAnswer,
+    };
     setAnswers((current) => ({ ...current, [questionNumber]: selectedAnswer }));
     setSaveState("Đang lưu...");
 
@@ -178,6 +228,12 @@ function FullTestExam() {
             ? { ...current, [questionNumber]: previousAnswer }
             : current,
         );
+        if (answersRef.current[String(questionNumber)] === selectedAnswer) {
+          answersRef.current = {
+            ...answersRef.current,
+            [questionNumber]: previousAnswer,
+          };
+        }
         setSaveState("Lưu thất bại");
         setError(requestError.message);
         throw requestError;
@@ -197,10 +253,12 @@ function FullTestExam() {
     if (saves.length) await Promise.all(saves);
   };
 
-  const handleListeningNext = async () => {
-    if (!currentUnit || busy) return;
+  const advanceListeningAfterAudio = async () => {
+    if (!currentUnit || audioAdvanceInFlight.current) return;
+    audioAdvanceInFlight.current = true;
     setBusy(true);
     setError("");
+    setAudioAdvanceError("");
     try {
       await waitForPendingSaves();
       await Promise.all(
@@ -209,7 +267,7 @@ function FullTestExam() {
             method: "PUT",
             body: JSON.stringify({
               questionNumber: question.questionNumber,
-              selectedAnswer: answers[String(question.questionNumber)] || null,
+              selectedAnswer: answersRef.current[String(question.questionNumber)] || null,
             }),
           }),
         ),
@@ -218,8 +276,14 @@ function FullTestExam() {
         `/api/attempts/${attemptId}/listening/next`,
         { method: "POST" },
       );
+      if (nextAttempt.status === "COMPLETED") {
+        navigate(`/full-test/${attemptId}/result`, { replace: true });
+        return;
+      }
+      setAudioAdvanceError("");
       setPayload((previous) => ({ ...previous, attempt: nextAttempt }));
-      setAnswers(nextAttempt.answers || answers);
+      setAnswers(nextAttempt.answers || answersRef.current);
+      answersRef.current = nextAttempt.answers || answersRef.current;
       if (attempt.currentSection === "LISTENING" && nextAttempt.currentSection === "READING") {
         setSectionNotice(true);
       }
@@ -227,13 +291,18 @@ function FullTestExam() {
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (requestError) {
       setError(requestError.message);
+      setAudioAdvanceError(
+        "Không thể lưu để tự chuyển. Hãy kiểm tra mạng rồi thử lại.",
+      );
+      audioAdvanceInFlight.current = false;
     } finally {
       setBusy(false);
     }
   };
 
   const moveReading = async (questionNumber) => {
-    if (questionNumber < 101 || questionNumber > 200 || busy) return;
+    const readingStart = Math.max(101, scopeFirst);
+    if (questionNumber < readingStart || questionNumber > scopeLast || busy) return;
     setBusy(true);
     setError("");
     try {
@@ -253,6 +322,8 @@ function FullTestExam() {
   };
 
   const submitTest = async () => {
+    if (submitInFlight.current) return;
+    submitInFlight.current = true;
     setBusy(true);
     setError("");
     try {
@@ -260,6 +331,7 @@ function FullTestExam() {
       await apiFetch(`/api/attempts/${attemptId}/submit`, { method: "POST" });
       navigate(`/full-test/${attemptId}/result`, { replace: true });
     } catch (requestError) {
+      submitInFlight.current = false;
       setError(requestError.message);
       setBusy(false);
       setShowSubmit(false);
@@ -296,6 +368,12 @@ function FullTestExam() {
   }
 
   const isListening = attempt.currentSection === "LISTENING";
+  const readingStart = Math.max(101, scopeFirst);
+  const readingEnd = scopeLast;
+  const readingQuestionNumbers = Array.from(
+    { length: Math.max(0, readingEnd - readingStart + 1) },
+    (_, index) => readingStart + index,
+  );
   const mediaImage = currentUnit.imageUrl;
   const mediaAudio = currentUnit.audioUrl;
 
@@ -303,8 +381,13 @@ function FullTestExam() {
     <div className="min-h-screen bg-slate-100 text-slate-900">
       <ExamHeader
         section={attempt.currentSection}
+        mode={attempt.mode}
+        selectedPart={attempt.selectedPart}
+        firstQuestion={scopeFirst}
+        lastQuestion={scopeLast}
         remainingSeconds={remainingSeconds ?? 0}
         answeredCount={answeredCount}
+        totalQuestions={totalQuestions}
         onExit={exitExam}
       />
 
@@ -340,7 +423,7 @@ function FullTestExam() {
                 <h1 className="mt-1 text-xl font-bold">
                   {isListening
                     ? `Câu ${currentUnit.start}${currentUnit.end !== currentUnit.start ? `–${currentUnit.end}` : ""}`
-                    : `Câu ${currentQuestion} / 200`}
+                    : `Câu ${currentQuestion} · phạm vi ${scopeFirst}–${scopeLast}`}
                 </h1>
               </div>
               <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
@@ -349,12 +432,18 @@ function FullTestExam() {
               </div>
             </div>
 
-            {mediaAudio && (
-              <div className="rounded-2xl border border-sky-100 bg-sky-50 p-5">
-                <p className="mb-3 text-sm font-semibold text-sky-800">
-                  Audio Listening {isListening ? "· Không thể quay lại sau khi bấm Tiếp theo" : ""}
-                </p>
-                <audio key={mediaAudio} src={mediaAudio} controls autoPlay className="w-full" />
+            {isListening && mediaAudio && (
+              <LockedExamAudio
+                key={currentUnit.key}
+                src={mediaAudio}
+                advancing={busy}
+                onEnded={advanceListeningAfterAudio}
+              />
+            )}
+
+            {isListening && !mediaAudio && (
+              <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+                Câu hoặc group này chưa có audioUrl nên hệ thống không thể tự chuyển.
               </div>
             )}
 
@@ -379,6 +468,7 @@ function FullTestExam() {
                   onSelect={(answer) => {
                     saveAnswer(question.questionNumber, answer).catch(() => undefined);
                   }}
+                  disabled={isListening && busy}
                   hideOptionContent={isListening && currentUnit.partNumber <= 2}
                   isFocused={question.questionNumber === currentQuestion}
                 />
@@ -386,22 +476,28 @@ function FullTestExam() {
             </div>
 
             {isListening ? (
-              <div className="flex justify-end pb-8">
-                <button
-                  type="button"
-                  onClick={handleListeningNext}
-                  disabled={busy}
-                  className="rounded-xl bg-sky-500 px-7 py-3.5 font-bold text-white shadow-lg shadow-sky-200 hover:bg-sky-600 disabled:cursor-wait disabled:bg-sky-300"
-                >
-                  {busy ? "Đang lưu..." : currentUnit.end === 100 ? "Sang phần Reading →" : "Lưu và tiếp theo →"}
-                </button>
+              <div className="pb-8 text-center">
+                {audioAdvanceError ? (
+                  <button
+                    type="button"
+                    onClick={advanceListeningAfterAudio}
+                    disabled={busy}
+                    className="rounded-xl border border-red-200 bg-red-50 px-5 py-3 text-sm font-bold text-red-700 hover:bg-red-100 disabled:opacity-50"
+                  >
+                    Thử lưu và tự chuyển lại
+                  </button>
+                ) : (
+                  <p className="text-sm font-medium text-slate-500">
+                    Audio kết thúc sẽ tự động lưu {currentUnit.questions.length > 1 ? "cả group" : "đáp án"} và chuyển tiếp.
+                  </p>
+                )}
               </div>
             ) : (
               <div className="flex flex-wrap items-center justify-between gap-3 pb-8">
                 <button
                   type="button"
                   onClick={() => moveReading(currentQuestion - 1)}
-                  disabled={currentQuestion <= 101 || busy}
+                  disabled={currentQuestion <= readingStart || busy}
                   className="rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40"
                 >
                   ← Câu trước
@@ -415,9 +511,9 @@ function FullTestExam() {
                     Nộp bài
                   </button>
                   <button
-                    type="button"
-                    onClick={() => moveReading(currentQuestion + 1)}
-                    disabled={currentQuestion >= 200 || busy}
+                  type="button"
+                  onClick={() => moveReading(currentQuestion + 1)}
+                  disabled={currentQuestion >= readingEnd || busy}
                     className="rounded-xl bg-sky-500 px-5 py-3 font-bold text-white hover:bg-sky-600 disabled:opacity-40"
                   >
                     Câu tiếp →
@@ -432,15 +528,17 @@ function FullTestExam() {
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-widest text-violet-600">Bảng câu hỏi</p>
-                  <h2 className="mt-1 font-bold">Reading 101–200</h2>
+                  <h2 className="mt-1 font-bold">Reading {readingStart}–{readingEnd}</h2>
                 </div>
                 <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-700">
-                  {Object.entries(answers).filter(([number, value]) => Number(number) >= 101 && value).length}/100
+                  {Object.entries(answers).filter(
+                    ([number, value]) => Number(number) >= readingStart && Number(number) <= readingEnd && value,
+                  ).length}/{readingQuestionNumbers.length}
                 </span>
               </div>
 
               <div className="mt-5 grid grid-cols-10 gap-1.5 xl:grid-cols-5">
-                {Array.from({ length: 100 }, (_, index) => index + 101).map((number) => {
+                {readingQuestionNumbers.map((number) => {
                   const isAnswered = Boolean(answers[String(number)]);
                   const isCurrent = number === currentQuestion;
                   return (
@@ -472,7 +570,7 @@ function FullTestExam() {
               <button
                 type="button"
                 onClick={() => {
-                  const firstUnanswered = Array.from({ length: 100 }, (_, index) => index + 101).find(
+                  const firstUnanswered = readingQuestionNumbers.find(
                     (number) => !answers[String(number)],
                   );
                   if (firstUnanswered) moveReading(firstUnanswered);

@@ -11,5 +11,10 @@ import lombok.Setter;
 @Setter
 public class CreateAttemptRequest {
     private String testId;
+    private String mode;
+    private Integer part;
 
+    public CreateAttemptRequest(String testId) {
+        this.testId = testId;
+    }
 }

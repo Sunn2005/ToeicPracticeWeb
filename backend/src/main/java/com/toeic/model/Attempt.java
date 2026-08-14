@@ -14,15 +14,21 @@ public class Attempt {
     private String userId;
     private String testId;
     private String type;
+    private String mode;
+    private Integer selectedPart;
     private String status;
     private String currentSection;
     private Integer currentQuestionNumber;
+    private Integer firstQuestionNumber;
+    private Integer lastQuestionNumber;
+    private Integer totalQuestions;
 
     private Long startedAt;
     private Long updatedAt;
     private Long submittedAt;
     private Long sectionStartedAt;
     private Long sectionEndAt;
+    private Long overallEndAt;
     private Long listeningStartedAt;
     private Long listeningEndAt;
     private Long readingStartedAt;

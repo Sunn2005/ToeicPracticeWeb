@@ -3,12 +3,14 @@ package com.toeic.controller;
 import com.toeic.service.AttemptService;
 import com.toeic.service.FirebaseAuthenticationService;
 import com.toeic.service.TestService;
+import com.toeic.dto.CreateAttemptRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,10 +49,13 @@ public class TestController {
     @PostMapping("/{testId}/attempts")
     public Map<String, Object> createAttempt(
             @PathVariable String testId,
+            @RequestBody(required = false) CreateAttemptRequest request,
             @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization
     ) throws Exception {
         String userId = authenticationService.requireUid(authorization);
-        return attemptService.createOrResume(userId, testId);
+        String mode = request == null ? null : request.getMode();
+        Integer part = request == null ? null : request.getPart();
+        return attemptService.createOrResume(userId, testId, mode, part);
     }
 
     // Endpoint tương thích để các trang luyện Part cũ vẫn lấy được dữ liệu,

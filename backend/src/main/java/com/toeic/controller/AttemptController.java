@@ -51,7 +51,12 @@ public class AttemptController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Thiếu testId");
         }
         String userId = authenticationService.requireUid(authorization);
-        return attemptService.createOrResume(userId, request.getTestId());
+        return attemptService.createOrResume(
+                userId,
+                request.getTestId(),
+                request.getMode(),
+                request.getPart()
+        );
     }
 
     @GetMapping("/current")

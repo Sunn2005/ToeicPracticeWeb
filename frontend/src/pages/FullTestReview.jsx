@@ -34,7 +34,13 @@ function FullTestReview() {
     };
   }, [attemptId]);
 
-  const allQuestions = useMemo(() => getAllQuestions(data?.test), [data?.test]);
+  const allQuestions = useMemo(() => {
+    const first = data?.attempt?.firstQuestionNumber || 1;
+    const last = data?.attempt?.lastQuestionNumber || 200;
+    return getAllQuestions(data?.test).filter(
+      ({ question }) => question.questionNumber >= first && question.questionNumber <= last,
+    );
+  }, [data?.attempt?.firstQuestionNumber, data?.attempt?.lastQuestionNumber, data?.test]);
   const filteredQuestions = useMemo(
     () =>
       filter === "ALL"
@@ -63,16 +69,26 @@ function FullTestReview() {
   const audioUrl = unit?.audioUrl || question?.audioUrl;
   const transcript = unit?.transcript || question?.transcript;
   const questionsToDisplay = [3, 4].includes(unit?.partNumber)
-    ? unit.questions
+    ? unit.questions.filter(
+      (item) => item.questionNumber >= data.attempt.firstQuestionNumber
+        && item.questionNumber <= data.attempt.lastQuestionNumber,
+    )
     : [question];
+  const modeTitle =
+    data.attempt.mode === "FULL"
+      ? "Full Test"
+      : data.attempt.mode === "PART"
+        ? `Part ${data.attempt.selectedPart}`
+        : `Thi ${data.attempt.mode === "LISTENING" ? "Listening" : "Reading"}`;
+  const maxScore = data.attempt.mode === "FULL" ? 990 : 495;
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900">
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-sky-600">Review Full Test</p>
-            <h1 className="mt-1 text-lg font-bold">Xem lại đáp án · {data.result.totalScore}/990</h1>
+            <p className="text-xs font-bold uppercase tracking-widest text-sky-600">Review {modeTitle}</p>
+            <h1 className="mt-1 text-lg font-bold">Xem lại đáp án · {data.result.totalScore}/{maxScore}</h1>
           </div>
           <div className="flex gap-2">
             <button

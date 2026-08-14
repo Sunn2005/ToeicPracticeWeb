@@ -73,7 +73,7 @@ class AttemptControllerTests {
         );
         when(authenticationService.requireUid("Bearer firebase-id-token"))
                 .thenReturn("firebase-uid-123");
-        when(attemptService.createOrResume("firebase-uid-123", "ets-2026-test-1"))
+        when(attemptService.createOrResume("firebase-uid-123", "ets-2026-test-1", null, null))
                 .thenReturn(expected);
 
         Map<String, Object> result = controller.createAttempt(
@@ -82,6 +82,32 @@ class AttemptControllerTests {
         );
 
         assertEquals(expected, result);
-        verify(attemptService).createOrResume("firebase-uid-123", "ets-2026-test-1");
+        verify(attemptService).createOrResume("firebase-uid-123", "ets-2026-test-1", null, null);
+    }
+
+    @Test
+    void passesExamModeAndPartToAttemptService() throws Exception {
+        CreateAttemptRequest request = new CreateAttemptRequest(
+                "ets-2026-test-1",
+                "PART",
+                6
+        );
+        Map<String, Object> expected = Map.of(
+                "id", "attempt-part-6",
+                "mode", "PART",
+                "selectedPart", 6
+        );
+        when(authenticationService.requireUid("Bearer firebase-id-token"))
+                .thenReturn("firebase-uid-123");
+        when(attemptService.createOrResume("firebase-uid-123", "ets-2026-test-1", "PART", 6))
+                .thenReturn(expected);
+
+        Map<String, Object> result = controller.createAttempt(
+                request,
+                "Bearer firebase-id-token"
+        );
+
+        assertEquals(expected, result);
+        verify(attemptService).createOrResume("firebase-uid-123", "ets-2026-test-1", "PART", 6);
     }
 }
