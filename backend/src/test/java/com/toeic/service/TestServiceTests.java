@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 class TestServiceTests {
 
     private TestService testService;
+    private String testId;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -32,6 +33,7 @@ class TestServiceTests {
         )) {
             test = objectMapper.readValue(input, com.toeic.model.Test.class);
         }
+        testId = test.getTestId();
 
         when(testDao.findMetadataById(test.getTestId())).thenReturn(Optional.of(test));
         for (TestPart part : test.getParts()) {
@@ -43,7 +45,7 @@ class TestServiceTests {
 
     @Test
     void loadsTypedTestAndBuildsCompleteAnswerKey() throws Exception {
-        Map<Integer, String> answerKey = testService.getAnswerKey("ets-2026-test-1");
+        Map<Integer, String> answerKey = testService.getAnswerKey(testId);
 
         assertEquals(200, answerKey.size());
         assertEquals("B", answerKey.get(1));
@@ -52,7 +54,7 @@ class TestServiceTests {
 
     @Test
     void removesAnswersAndListeningTextFromExamResponse() throws Exception {
-        Map<String, Object> exam = testService.getExamTest("ets-2026-test-1");
+        Map<String, Object> exam = testService.getExamTest(testId);
         String serialized = new ObjectMapper().writeValueAsString(exam);
 
         assertFalse(serialized.contains("correctAnswer"));
@@ -60,6 +62,8 @@ class TestServiceTests {
         assertFalse(serialized.contains("Bài giảng sẽ diễn ra"));
         assertFalse(serialized.contains("explanation"));
         assertFalse(serialized.contains("transcript"));
+        assertTrue(serialized.contains("T01-P6-131-134.png"));
+        assertTrue(serialized.contains("T01-P7-196-200-3.png"));
 
         Map<?, ?> partOne = (Map<?, ?>) ((java.util.List<?>) exam.get("parts")).getFirst();
         Map<?, ?> firstQuestion = (Map<?, ?>) ((java.util.List<?>) partOne.get("questions")).getFirst();
@@ -70,7 +74,7 @@ class TestServiceTests {
 
     @Test
     void keepsCorrectAnswersInReviewResponse() throws Exception {
-        Map<String, Object> review = testService.getReviewTest("ets-2026-test-1");
+        Map<String, Object> review = testService.getReviewTest(testId);
         String serialized = new ObjectMapper().writeValueAsString(review);
 
         assertTrue(serialized.contains("correctAnswer"));

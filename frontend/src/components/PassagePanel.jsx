@@ -1,6 +1,27 @@
-function PassagePanel({ passages = [] }) {
-  if (!passages.length) {
+function PassagePanel({ passages = [], imageUrls = [] }) {
+  const groupImages = imageUrls.filter(Boolean);
+
+  if (!passages.length && !groupImages.length) {
     return null;
+  }
+
+  if (groupImages.length) {
+    return (
+      <section className="space-y-4" aria-label="Nội dung bài đọc">
+        {groupImages.map((imageUrl, index) => (
+          <article
+            key={imageUrl}
+            className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4"
+          >
+            <img
+              src={imageUrl}
+              alt={`Nội dung bài đọc ${index + 1}`}
+              className="mx-auto h-auto w-full rounded-xl object-contain"
+            />
+          </article>
+        ))}
+      </section>
+    );
   }
 
   return (
@@ -25,7 +46,7 @@ function PassagePanel({ passages = [] }) {
               className="mx-auto mt-5 max-h-[520px] max-w-full rounded-xl object-contain"
             />
           )}
-          {passage.content && (
+          {!passage.imageUrl && passage.content && (
             <div className="mt-5 whitespace-pre-wrap text-sm leading-7 text-slate-700 sm:text-base">
               {passage.content}
             </div>

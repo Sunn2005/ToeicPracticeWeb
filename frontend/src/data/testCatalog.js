@@ -1,6 +1,6 @@
 export const TOEIC_TESTS = [
   {
-    id: "ets-2026-test-1",
+    id: "test-1",
     name: "Test 1",
     title: "TOEIC Listening & Reading – Test 1",
     year: 2026,

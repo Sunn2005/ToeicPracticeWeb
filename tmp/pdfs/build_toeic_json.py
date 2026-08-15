@@ -733,6 +733,46 @@ def attach_supabase_media(data: dict[str, Any]) -> None:
                 f"{SUPABASE_MEDIA_BASE_URL}/audio/T01-{group['questionRange']}.mp3"
             )
 
+    part6_files = [
+        "T01-P6-131-134.png",
+        "T01-P6-135-138.png",
+        "T01-P6-139-142.png",
+        "T01-P6-143-146.png",
+    ]
+    for passage_item, filename in zip(data["parts"][5]["passages"], part6_files, strict=True):
+        passage_item["imageUrl"] = f"{SUPABASE_MEDIA_BASE_URL}/picture/{filename}"
+
+    part7_files = [
+        ["T01-P7-147-148.png"],
+        ["T01-P7-149-151.png"],
+        ["T01-P7-152-153.png"],
+        ["T01-P7-154-156.png"],
+        ["T01-P7-157-158.png"],
+        ["T01-P7-159-161.png"],
+        ["T01-P7-162-163.png"],
+        ["T01-P7-164-167.png"],
+        ["T01-P7-168-171.png"],
+        ["T01-P7-172-175.png"],
+        ["T01-P7-176-180-1.png", "T01-P7-176-180-2.png"],
+        ["T01-P7-181-185-1.png", "T01-P7-181-185-2.png"],
+        ["T01-P7-186-190-1.png", "T01-P7-186-190-2.png"],
+        [
+            "T01-P7-191-195-1.png",
+            "T01-P7-191-195-2.png",
+            "T01-P7-191-195-3.png",
+        ],
+        [
+            "T01-P7-196-200-1.png",
+            "T01-P7-196-200-2.png",
+            "T01-P7-196-200-3.png",
+        ],
+    ]
+    for group, filenames in zip(data["parts"][6]["passageGroups"], part7_files, strict=True):
+        group["imageUrls"] = [
+            f"{SUPABASE_MEDIA_BASE_URL}/picture/{filename}"
+            for filename in filenames
+        ]
+
 
 def validate(data: dict[str, Any]) -> list[str]:
     issues: list[str] = []
@@ -812,8 +852,8 @@ def main() -> None:
         part5_questions.append(question)
 
     data = {
-        "testId": "ets-2026-test-1",
-        "title": "ETS 2026 TOEIC Listening & Reading - Test 1",
+        "testId": "test-1",
+        "title": "TOEIC Listening & Reading - Test 1",
         "description": None,
         "totalQuestions": 200,
         "parts": [
@@ -837,10 +877,10 @@ def main() -> None:
     Path("tmp/pdfs/validation.txt").write_text("\n".join(issues) + "\n", encoding="utf-8")
     if not issues:
         json_text = json.dumps(data, ensure_ascii=False, indent=2)
-        Path("output/ets-2026-test-1-data.json").write_text(
+        Path("output/test-1-data.json").write_text(
             json_text + "\n", encoding="utf-8"
         )
-        Path("backend/src/main/resources/data/ets-2026-test-1-data.json").write_text(
+        Path("backend/src/main/resources/data/test-1-data.json").write_text(
             json_text + "\n", encoding="utf-8"
         )
         markdown = (
@@ -856,7 +896,7 @@ def main() -> None:
             f"{json_text}\n"
             "```\n"
         )
-        Path("output/ets-2026-test-1-data.md").write_text(markdown, encoding="utf-8")
+        Path("output/test-1-data.md").write_text(markdown, encoding="utf-8")
     print(f"Wrote draft with {len(issues)} validation issue(s)")
 
 

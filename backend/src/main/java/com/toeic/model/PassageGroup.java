@@ -14,6 +14,7 @@ public class PassageGroup {
     private Integer groupNumber;
     private String questionRange;
     private String passageType;
+    private List<String> imageUrls;
     private List<Passage> passages;
     private List<Question> questions;
 }

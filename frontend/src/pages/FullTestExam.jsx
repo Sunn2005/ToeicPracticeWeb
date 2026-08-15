@@ -81,6 +81,8 @@ function FullTestExam() {
   const submitInFlight = useRef(false);
   const hasSubmitted = useRef(false);
   const timeoutHandled = useRef(false);
+  const readingContentRef = useRef(null);
+  const readingQuestionsRef = useRef(null);
 
   useEffect(() => {
     let active = true;
@@ -151,6 +153,8 @@ function FullTestExam() {
 
   useEffect(() => {
     audioAdvanceInFlight.current = false;
+    readingContentRef.current?.scrollTo({ top: 0 });
+    readingQuestionsRef.current?.scrollTo({ top: 0 });
   }, [currentUnit?.key]);
 
   useEffect(() => {
@@ -434,6 +438,11 @@ function FullTestExam() {
     .filter((part) => part >= 5);
   const mediaImage = currentUnit.imageUrl;
   const mediaAudio = currentUnit.audioUrl;
+  const hasReadingMaterial = Boolean(
+    mediaImage
+    || currentUnit.imageUrls?.length
+    || currentUnit.passages?.length,
+  );
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900">
@@ -477,7 +486,7 @@ function FullTestExam() {
           </div>
         )}
 
-        <div className={isListening ? "mx-auto max-w-5xl" : "grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]"}>
+        <div className={isListening ? "mx-auto max-w-5xl" : "mx-auto max-w-[1500px]"}>
           <section className="min-w-0 space-y-5">
             <div className="flex flex-col justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center">
               <div>
@@ -496,51 +505,50 @@ function FullTestExam() {
               </div>
             </div>
 
-            {isListening && mediaAudio && (
-              <LockedExamAudio
-                key={currentUnit.key}
-                src={mediaAudio}
-                advancing={busy}
-                onEnded={advanceListeningAfterAudio}
-              />
-            )}
-
-            {isListening && !mediaAudio && (
-              <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
-                Câu hoặc group này chưa có audioUrl nên hệ thống không thể tự chuyển.
-              </div>
-            )}
-
-            {mediaImage && (
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm">
-                <img
-                  src={mediaImage}
-                  alt={`Hình minh họa câu ${currentUnit.start}`}
-                  className="mx-auto max-h-[520px] max-w-full rounded-xl object-contain"
-                />
-              </div>
-            )}
-
-            <PassagePanel passages={currentUnit.passages || []} />
-
-            <div className="space-y-4">
-              {currentUnit.questions.map((question) => (
-                <QuestionCard
-                  key={question.questionNumber}
-                  question={question}
-                  selectedAnswer={answers[String(question.questionNumber)] || null}
-                  onSelect={(answer) => {
-                    saveAnswer(question.questionNumber, answer).catch(() => undefined);
-                  }}
-                  disabled={isListening && busy}
-                  hideOptionContent={isListening && currentUnit.partNumber <= 2}
-                  isFocused={question.questionNumber === currentQuestion}
-                />
-              ))}
-            </div>
-
             {isListening ? (
-              <div className="pb-8 text-center">
+              <>
+                {mediaAudio ? (
+                  <LockedExamAudio
+                    key={currentUnit.key}
+                    src={mediaAudio}
+                    advancing={busy}
+                    onEnded={advanceListeningAfterAudio}
+                  />
+                ) : (
+                  <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+                    Câu hoặc group này chưa có audioUrl nên hệ thống không thể tự chuyển.
+                  </div>
+                )}
+
+                {mediaImage && (
+                  <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm">
+                    <img
+                      src={mediaImage}
+                      alt={`Hình minh họa câu ${currentUnit.start}`}
+                      className="mx-auto max-h-[520px] max-w-full rounded-xl object-contain"
+                    />
+                  </div>
+                )}
+
+                <PassagePanel passages={currentUnit.passages || []} />
+
+                <div className="space-y-4">
+                  {currentUnit.questions.map((question) => (
+                    <QuestionCard
+                      key={question.questionNumber}
+                      question={question}
+                      selectedAnswer={answers[String(question.questionNumber)] || null}
+                      onSelect={(answer) => {
+                        saveAnswer(question.questionNumber, answer).catch(() => undefined);
+                      }}
+                      disabled={busy}
+                      hideOptionContent={currentUnit.partNumber <= 2}
+                      isFocused={question.questionNumber === currentQuestion}
+                    />
+                  ))}
+                </div>
+
+                <div className="pb-8 text-center">
                 {audioAdvanceError ? (
                   <button
                     type="button"
@@ -561,97 +569,140 @@ function FullTestExam() {
                   </p>
                 )}
               </div>
+              </>
             ) : (
-              <div className="flex flex-wrap items-center justify-between gap-3 pb-8">
-                <button
-                  type="button"
-                  onClick={() => moveReading(previousReadingQuestion)}
-                  disabled={previousReadingQuestion === null || busy}
-                  className="rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40"
+              <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.08fr)_minmax(520px,0.92fr)]">
+                <section
+                  ref={readingContentRef}
+                  aria-label="Nội dung bài đọc"
+                  className="min-w-0 space-y-4 xl:sticky xl:top-24 xl:max-h-[calc(100vh-7rem)] xl:overflow-y-auto xl:pr-1"
                 >
-                  ← Câu trước
-                </button>
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setShowSubmit(true)}
-                    className="rounded-xl border border-red-200 bg-red-50 px-5 py-3 font-bold text-red-700 hover:bg-red-100"
-                  >
-                    Nộp bài
-                  </button>
-                  <button
-                  type="button"
-                  onClick={() => moveReading(nextReadingQuestion)}
-                  disabled={nextReadingQuestion === null || busy}
-                    className="rounded-xl bg-sky-500 px-5 py-3 font-bold text-white hover:bg-sky-600 disabled:opacity-40"
-                  >
-                    Câu tiếp →
-                  </button>
-                </div>
+                  <div className="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+                    <p className="text-xs font-bold uppercase tracking-widest text-violet-600">
+                      Nội dung bài đọc
+                    </p>
+                    <p className="mt-1 text-sm text-slate-500">
+                      Đọc nội dung bên trái và chọn đáp án ở cột bên phải.
+                    </p>
+                  </div>
+
+                  {mediaImage && (
+                    <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm">
+                      <img
+                        src={mediaImage}
+                        alt={`Nội dung câu ${currentUnit.start}`}
+                        className="mx-auto h-auto w-full rounded-xl object-contain"
+                      />
+                    </div>
+                  )}
+
+                  <PassagePanel
+                    passages={currentUnit.passages || []}
+                    imageUrls={currentUnit.imageUrls || []}
+                  />
+
+                  {!hasReadingMaterial && (
+                    <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm leading-6 text-slate-500">
+                      Part này không có đoạn văn riêng. Hãy chọn đáp án cho câu hỏi ở bên phải.
+                    </div>
+                  )}
+                </section>
+
+                <section
+                  ref={readingQuestionsRef}
+                  aria-label="Câu hỏi và đáp án"
+                  className="min-w-0 space-y-4 xl:max-h-[calc(100vh-7rem)] xl:overflow-y-auto xl:pl-1 xl:pr-1"
+                >
+                  <aside className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-widest text-sky-600">
+                          Câu hỏi & đáp án
+                        </p>
+                        <h2 className="mt-1 font-bold">
+                          {selectedReadingParts.map((part) => `Part ${part}`).join(" + ")}
+                        </h2>
+                      </div>
+                      <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-700">
+                        {Object.entries(answers).filter(
+                          ([number, value]) => Number(number) >= readingStart
+                            && Number(number) <= readingEnd
+                            && value,
+                        ).length}/{readingQuestionNumbers.length}
+                      </span>
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-8 gap-1.5 sm:grid-cols-10">
+                      {readingQuestionNumbers.map((number) => {
+                        const isAnswered = Boolean(answers[String(number)]);
+                        const isCurrent = number === currentQuestion;
+                        return (
+                          <button
+                            key={number}
+                            type="button"
+                            onClick={() => moveReading(number)}
+                            disabled={busy}
+                            aria-label={`Đến câu ${number}`}
+                            className={`aspect-square rounded-lg text-[11px] font-bold transition ${
+                              isCurrent
+                                ? "bg-sky-600 text-white ring-2 ring-sky-200"
+                                : isAnswered
+                                  ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                                  : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                            }`}
+                          >
+                            {number}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </aside>
+
+                  <div className="space-y-4">
+                    {currentUnit.questions.map((question) => (
+                      <QuestionCard
+                        key={question.questionNumber}
+                        question={question}
+                        selectedAnswer={answers[String(question.questionNumber)] || null}
+                        onSelect={(answer) => {
+                          saveAnswer(question.questionNumber, answer).catch(() => undefined);
+                        }}
+                        isFocused={question.questionNumber === currentQuestion}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-between gap-3 pb-8 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => moveReading(previousReadingQuestion)}
+                      disabled={previousReadingQuestion === null || busy}
+                      className="rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40"
+                    >
+                      ← Câu trước
+                    </button>
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setShowSubmit(true)}
+                        className="rounded-xl border border-red-200 bg-red-50 px-5 py-3 font-bold text-red-700 hover:bg-red-100"
+                      >
+                        Nộp bài
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveReading(nextReadingQuestion)}
+                        disabled={nextReadingQuestion === null || busy}
+                        className="rounded-xl bg-sky-500 px-5 py-3 font-bold text-white hover:bg-sky-600 disabled:opacity-40"
+                      >
+                        Câu tiếp →
+                      </button>
+                    </div>
+                  </div>
+                </section>
               </div>
             )}
           </section>
-
-          {!isListening && (
-            <aside className="h-fit rounded-2xl border border-slate-200 bg-white p-5 shadow-sm xl:sticky xl:top-24">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-widest text-violet-600">Bảng câu hỏi</p>
-                  <h2 className="mt-1 font-bold">
-                    {selectedReadingParts.map((part) => `Part ${part}`).join(" + ")}
-                  </h2>
-                </div>
-                <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-700">
-                  {Object.entries(answers).filter(
-                    ([number, value]) => Number(number) >= readingStart && Number(number) <= readingEnd && value,
-                  ).length}/{readingQuestionNumbers.length}
-                </span>
-              </div>
-
-              <div className="mt-5 grid grid-cols-10 gap-1.5 xl:grid-cols-5">
-                {readingQuestionNumbers.map((number) => {
-                  const isAnswered = Boolean(answers[String(number)]);
-                  const isCurrent = number === currentQuestion;
-                  return (
-                    <button
-                      key={number}
-                      type="button"
-                      onClick={() => moveReading(number)}
-                      disabled={busy}
-                      aria-label={`Đến câu ${number}`}
-                      className={`aspect-square rounded-lg text-[11px] font-bold transition ${
-                        isCurrent
-                          ? "bg-sky-600 text-white ring-2 ring-sky-200"
-                          : isAnswered
-                            ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
-                            : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                      }`}
-                    >
-                      {number}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="mt-5 flex gap-4 text-xs text-slate-500">
-                <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded bg-emerald-100" /> Đã trả lời</span>
-                <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded bg-slate-100" /> Chưa trả lời</span>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => {
-                  const firstUnanswered = readingQuestionNumbers.find(
-                    (number) => !answers[String(number)],
-                  );
-                  if (firstUnanswered) moveReading(firstUnanswered);
-                }}
-                className="mt-5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-              >
-                Đến câu chưa trả lời
-              </button>
-            </aside>
-          )}
         </div>
       </main>
 

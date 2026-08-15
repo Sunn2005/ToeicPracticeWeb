@@ -178,7 +178,10 @@ function FullTestReview() {
                 </div>
               )}
 
-              <PassagePanel passages={unit.passages || []} />
+              <PassagePanel
+                passages={unit.passages || []}
+                imageUrls={unit.imageUrls || []}
+              />
 
               {transcript && (
                 <details className="rounded-2xl border border-slate-200 bg-white p-5">
