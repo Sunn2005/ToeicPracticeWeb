@@ -1,3 +1,13 @@
+import { getReviewParagraphs } from "../utils/reviewContent";
+
+function ReviewContent({ children }) {
+  return getReviewParagraphs(children).map((paragraph, index) => (
+    <p key={`${index}-${paragraph.slice(0, 24)}`} className="whitespace-pre-line">
+      {paragraph}
+    </p>
+  ));
+}
+
 function QuestionCard({
   question,
   selectedAnswer,
@@ -35,11 +45,6 @@ function QuestionCard({
           <p className="text-xs font-bold uppercase tracking-widest text-sky-600">
             Câu {question.questionNumber}
           </p>
-          {question.description && (
-            <p className="mt-2 text-sm italic text-slate-500">
-              {question.description}
-            </p>
-          )}
           <h3 className="mt-2 text-base font-semibold leading-7 text-slate-900 sm:text-lg">
             {prompt}
           </h3>
@@ -103,7 +108,7 @@ function QuestionCard({
       </div>
 
       {review && (
-        <div className="mt-5 space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6">
+        <div className="mt-5 space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6">
           <p>
             <strong>Đáp án đúng:</strong> {question.correctAnswer}
             {question.selectedAnswer && (
@@ -112,10 +117,22 @@ function QuestionCard({
               </>
             )}
           </p>
-          <p className="text-slate-600">
-            <strong>Giải thích:</strong>{" "}
-            {question.explanation || "Chưa có lời giải chi tiết cho câu này."}
-          </p>
+          {question.translation && (
+            <section className="rounded-lg border border-sky-100 bg-white p-4">
+              <h4 className="font-bold text-sky-700">Bản dịch</h4>
+              <div className="mt-2 space-y-3 text-slate-700">
+                <ReviewContent>{question.translation}</ReviewContent>
+              </div>
+            </section>
+          )}
+          <section className="rounded-lg border border-violet-100 bg-white p-4">
+            <h4 className="font-bold text-violet-700">Giải thích</h4>
+            <div className="mt-2 space-y-3 text-slate-600">
+              <ReviewContent>
+                {question.explanation || "Chưa có lời giải chi tiết cho câu này."}
+              </ReviewContent>
+            </div>
+          </section>
         </div>
       )}
     </article>

@@ -28,7 +28,7 @@ class TestServiceTests {
 
         com.toeic.model.Test test;
         try (InputStream input = getClass().getResourceAsStream(
-                "/data/ets-2026-test-1-data.json"
+                "/data/test-1-data.json"
         )) {
             test = objectMapper.readValue(input, com.toeic.model.Test.class);
         }
@@ -56,6 +56,8 @@ class TestServiceTests {
         String serialized = new ObjectMapper().writeValueAsString(exam);
 
         assertFalse(serialized.contains("correctAnswer"));
+        assertFalse(serialized.contains("translation"));
+        assertFalse(serialized.contains("Bài giảng sẽ diễn ra"));
         assertFalse(serialized.contains("explanation"));
         assertFalse(serialized.contains("transcript"));
 
@@ -72,6 +74,8 @@ class TestServiceTests {
         String serialized = new ObjectMapper().writeValueAsString(review);
 
         assertTrue(serialized.contains("correctAnswer"));
+        assertTrue(serialized.contains("translation"));
+        assertTrue(serialized.contains("Bài giảng sẽ diễn ra"));
         assertTrue(serialized.contains("transcript"));
     }
 }

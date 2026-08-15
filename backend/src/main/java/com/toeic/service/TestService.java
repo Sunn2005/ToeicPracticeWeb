@@ -140,6 +140,7 @@ public class TestService {
     private void removeExamSecrets(Object value) {
         if (value instanceof Map<?, ?> map) {
             map.remove("correctAnswer");
+            map.remove("translation");
             map.remove("explanation");
             map.remove("transcript");
             for (Object child : map.values()) {
