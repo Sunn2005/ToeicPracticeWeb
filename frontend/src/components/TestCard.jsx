@@ -23,7 +23,7 @@ function TestCard({ test, onSelect }) {
       </div>
 
       <p className="mt-6 text-xs font-bold uppercase tracking-[0.16em] text-sky-600">
-        ETS {test.year} – {test.name}
+        {test.name}
       </p>
       <h4 className="mt-2 text-xl font-bold leading-7 text-slate-950">
         {test.title}

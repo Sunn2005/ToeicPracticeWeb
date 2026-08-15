@@ -101,7 +101,7 @@ function FullTestIntro() {
         <section className="overflow-hidden rounded-4xl border border-white bg-white/90 shadow-2xl shadow-sky-100/80">
           <div className="bg-linear-to-r from-sky-500 to-cyan-500 px-6 py-8 text-white sm:px-10 sm:py-10">
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-sky-100">
-              Full Test · ETS 2026
+              Full Test · Test 1
             </p>
             <h1 className="mt-3 max-w-3xl text-3xl font-bold tracking-tight sm:text-4xl">
               {test?.title || "TOEIC Listening & Reading – Test 1"}

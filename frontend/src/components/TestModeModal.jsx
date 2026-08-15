@@ -123,7 +123,7 @@ function TestModeModal({ test, onClose, onStart }) {
             <h2 id="test-mode-title" className="mt-1 text-2xl font-bold text-slate-950">
               {test.name}
             </h2>
-            <p className="mt-1 text-sm text-slate-500">ETS {test.year} · {test.title}</p>
+            <p className="mt-1 text-sm text-slate-500">{test.title}</p>
           </div>
           <button
             type="button"

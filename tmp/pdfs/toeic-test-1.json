@@ -1,6 +1,6 @@
 {
-  "testId": "ets-2026-test-1",
-  "title": "ETS 2026 TOEIC Listening & Reading - Test 1",
+  "testId": "test-1",
+  "title": "TOEIC Listening & Reading - Test 1",
   "description": null,
   "totalQuestions": 200,
   "parts": [

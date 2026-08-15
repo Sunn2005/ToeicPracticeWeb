@@ -3,6 +3,11 @@ from pathlib import Path
 import pdfplumber
 
 
+DOWNLOADS = Path("/Users/sunny/Downloads")
+LISTENING_PDF = next(DOWNLOADS.glob("*LISTENING TEST 1 (SCRIPT AND KEY).pdf"))
+READING_PDF = next(DOWNLOADS.glob("*READING TEST 1- KEY.pdf"))
+
+
 def extract(source: Path, destination: Path) -> None:
     chunks: list[str] = []
 
@@ -26,30 +31,30 @@ def extract_crop(source: Path, destination: Path, bbox: tuple[float, float, floa
 
 
 extract(
-    Path("/Users/sunny/Downloads/ETS 2026 LISTENING TEST 1 (SCRIPT AND KEY).pdf"),
+    LISTENING_PDF,
     Path("tmp/pdfs/listening.txt"),
 )
 extract_crop(
-    Path("/Users/sunny/Downloads/ETS 2026 LISTENING TEST 1 (SCRIPT AND KEY).pdf"),
+    LISTENING_PDF,
     Path("tmp/pdfs/listening-english.txt"),
     (20, 60, 290, 800),
 )
 extract_crop(
-    Path("/Users/sunny/Downloads/ETS 2026 LISTENING TEST 1 (SCRIPT AND KEY).pdf"),
+    LISTENING_PDF,
     Path("tmp/pdfs/listening-keys.txt"),
     (285, 60, 335, 800),
 )
 extract_crop(
-    Path("/Users/sunny/Downloads/ETS 2026 READING TEST 1- KEY.pdf"),
+    READING_PDF,
     Path("tmp/pdfs/reading-left.txt"),
     (30, 50, 306, 760),
 )
 extract_crop(
-    Path("/Users/sunny/Downloads/ETS 2026 READING TEST 1- KEY.pdf"),
+    READING_PDF,
     Path("tmp/pdfs/reading-right.txt"),
     (306, 50, 585, 760),
 )
 extract(
-    Path("/Users/sunny/Downloads/ETS 2026 READING TEST 1- KEY.pdf"),
+    READING_PDF,
     Path("tmp/pdfs/reading.txt"),
 )

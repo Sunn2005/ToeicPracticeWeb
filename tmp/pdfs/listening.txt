@@ -5,7 +5,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
                                                                                   
                                SCRIPT AND KEY LC TEST 1                           
@@ -71,7 +71,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
            5     (A) Painting supplies have been A (A) Các dụng cụ sơn đã được    
                  laid out on the floor.          bày ra trên sàn nhà.             
@@ -137,7 +137,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
            9     There's a nice park nearby, right? B Có một công viên đẹp ở gần đây,
                  (A) Did you order paper for the đúng không?                      
@@ -203,7 +203,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
            14    The sales team knows how to use C Nhóm bán hàng biết cách sử dụng
                  the tracking software, don't they? phần mềm theo dõi, đúng không?
@@ -269,7 +269,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
            20    Why aren't there any brochures in C Tại sao không có bất kỳ tập quảng
                  the lobby?                      cáo nào ở sảnh?                  
@@ -335,7 +335,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
            26    How are we going to fit the extra B Làm thế nào để chúng ta xếp thêm vật
                  supplies in that closet?        tư vào cái tủ đó?                
@@ -401,7 +401,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
            31    When are you going to choose a C Khi nào bạn định chọn quản lý dự án
                  new project manager?            mới?                             
@@ -467,7 +467,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
         32-    32. What type of food product does 32. 32. Công ty của những người nói bán
         34     the speakers' company sell? B     loại thực phẩm nào?              
@@ -533,7 +533,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
         35-    35. Why is the man calling? 35.   35. Tại sao người đàn ông gọi điện?
         37     (A) To sign up for lessons  C     (A) Để đăng ký các bài học       
@@ -599,7 +599,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
         38-    38. What event are the speakers 38. 38. Các diễn giả đang lên kế hoạch
         40     planning?                   A     cho sự kiện gì?                  
@@ -665,7 +665,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
         41 -   41. What event are the speakers 41. 41. Các diễn giả đang chuẩn bị cho sự
         43     preparing for?              C     kiện gì?                         
@@ -731,7 +731,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
         44-    W: Jamestown Recycling Facility.  Nữ: Cơ sở tái chế Jamestown xin  
         46     How can I help you?               nghe. Tôi có thể giúp gì cho ông?
@@ -797,7 +797,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
         47-    M: Zaina! What a surprise! I haven't Nam: Zaina! Thật bất ngờ quá! Tôi đã
         49     seen you since we took that class for không gặp cô kể từ khi chúng ta cùng
@@ -863,7 +863,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
         50-    W: Hi, Koji. I think our new video Nữ: Chào Koji. Tôi nghĩ trò chơi điện
         52     game is nearly ready to be released. tử mới của chúng ta gần như đã sẵn
@@ -929,7 +929,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
         53-    M: You've reached the maintenance Nam: Đây là văn phòng bảo trì tại khu
         55     office at Hillview Apartment      chung cư Hillview.               
@@ -995,7 +995,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
                (D) She would prefer to park near (D) Cô ấy muốn đỗ xe gần căn hộ của
                her apartment.                    mình hơn                         
@@ -1061,7 +1061,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
                                                  (D) Các hình thái thời tiết đã thay đổi.
                                                                                   
@@ -1127,7 +1127,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
                (A) A new policy should be        (A) Một chính sách mới nên được thiết
                established.                      lập.                             
@@ -1198,7 +1198,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
                (A) A colleague received a        (A) Một đồng nghiệp đã được thăng
                promotion.                        chức.                            
@@ -1264,7 +1264,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
                                            65.                                    
                                            D                                      
@@ -1330,7 +1330,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
         68-    M: Good news! We have finally     Nam: Tin tốt đây! Cuối cùng chúng ta
         70     received the go-ahead for our     đã nhận được sự đồng ý cho dự án 
@@ -1396,7 +1396,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
                (D) Near the overflow parking area (B) Gần khu vực đỗ xe dài hạn   
                                                  (C) Gần khu vực đỗ xe ngắn hạn   
@@ -1462,7 +1462,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
                71. What type of products does the 71. 71. Doanh nghiệp sửa chữa loại
                business repair?            B     sản phẩm nào?                    
@@ -1528,7 +1528,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
                74. Who most likely is the speaker? 74. 74. Người nói có khả năng cao là
                (A) A facilities manager    B     ai?                              
@@ -1594,7 +1594,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
                (A) It arrived later than expected. (A) Nó đến muộn hơn dự kiến.   
                (B) It was damaged during delivery. (B) Nó bị hỏng trong quá trình vận
@@ -1660,7 +1660,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
                82. What will happen at the next  (D) Phát triển một dòng sản phẩm 
                meeting?                          mới                              
@@ -1726,7 +1726,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
                (C) How to reserve tickets        (D) Nơi mua thức ăn              
                (D) Where to buy food                                              
@@ -1792,7 +1792,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
         89-91  I've scheduled this press conference 89. Tôi đã lên lịch cuộc họp báo này để
                to officially respond to your inquiries D phản hồi chính thức các thắc mắc của
@@ -1858,7 +1858,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
         92-94  I want to explore the use of a more 92. Tôi muốn tìm hiểu việc sử dụng hệ
                modernized payment system in our B thống thanh toán hiện đại hơn trong
@@ -1924,7 +1924,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
         95-97  The downtown Reston Office Tower is 95. Tòa tháp văn phòng Reston ở trung
                completed. The most extraordinary A tâm thành phố đã hoàn thành. Đặc
@@ -1990,7 +1990,7 @@
                                                                                   
                                                                                   
                                                                                   
-                                             ETS  2026 LISTENING    TEST          
+
                                                                                   
         98-10  Thank you for attending this meeting 98. Cảm ơn các bạn đã tham dự cuộc
         0      for prospective investors. ZZ Mining D họp này dành cho các nhà đầu tư

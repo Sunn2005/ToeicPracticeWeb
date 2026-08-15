@@ -9,8 +9,9 @@ from typing import Any
 import pdfplumber
 
 
-LISTENING_PDF = Path("/Users/sunny/Downloads/ETS 2026 LISTENING TEST 1 (SCRIPT AND KEY).pdf")
-READING_PDF = Path("/Users/sunny/Downloads/ETS 2026 READING TEST 1- KEY.pdf")
+DOWNLOADS = Path("/Users/sunny/Downloads")
+LISTENING_PDF = next(DOWNLOADS.glob("*LISTENING TEST 1 (SCRIPT AND KEY).pdf"))
+READING_PDF = next(DOWNLOADS.glob("*READING TEST 1- KEY.pdf"))
 OCR_PATH = Path("tmp/pdfs/reading-ocr.txt")
 SUPABASE_MEDIA_BASE_URL = (
     "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/"
@@ -884,7 +885,7 @@ def main() -> None:
             json_text + "\n", encoding="utf-8"
         )
         markdown = (
-            "# ETS 2026 TOEIC Listening & Reading – Test 1\n\n"
+            "# TOEIC Listening & Reading – Test 1\n\n"
             "Dữ liệu được trích từ hai PDF Listening và Reading do người dùng cung cấp.\n\n"
             "Các URL audio của Part 1-4 và URL ảnh của Part 1 trỏ đến bucket Supabase "
             "`toeic-media`. Các ảnh graphic của Part 3-4 chưa có trong bucket nên vẫn là "

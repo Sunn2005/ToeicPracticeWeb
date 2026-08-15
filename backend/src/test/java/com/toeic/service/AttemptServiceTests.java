@@ -24,14 +24,14 @@ class AttemptServiceTests {
         TestService testService = mock(TestService.class);
         AttemptService attemptService = new AttemptService(attemptDao, testService);
 
-        when(testService.getMetadata("ets-2026-test-1")).thenReturn(Map.of("testId", "ets-2026-test-1"));
+        when(testService.getMetadata("test-1")).thenReturn(Map.of("testId", "test-1"));
         when(attemptDao.findByUserId("user-1")).thenReturn(List.of());
         when(attemptDao.nextId()).thenReturn("attempt-1");
         when(attemptDao.findAnswers("attempt-1")).thenReturn(Map.of());
 
         Map<String, Object> response = attemptService.createOrResume(
                 "user-1",
-                "ets-2026-test-1",
+                "test-1",
                 "FULL",
                 null
         );
@@ -50,14 +50,14 @@ class AttemptServiceTests {
         TestService testService = mock(TestService.class);
         AttemptService attemptService = new AttemptService(attemptDao, testService);
 
-        when(testService.getMetadata("ets-2026-test-1")).thenReturn(Map.of("testId", "ets-2026-test-1"));
+        when(testService.getMetadata("test-1")).thenReturn(Map.of("testId", "test-1"));
         when(attemptDao.findByUserId("user-1")).thenReturn(List.of());
         when(attemptDao.nextId()).thenReturn("attempt-parts-5-6");
         when(attemptDao.findAnswers("attempt-parts-5-6")).thenReturn(Map.of());
 
         Map<String, Object> response = attemptService.createOrResume(
                 "user-1",
-                "ets-2026-test-1",
+                "test-1",
                 "PART",
                 null,
                 List.of(5, 6),
@@ -110,7 +110,7 @@ class AttemptServiceTests {
         }
         when(attemptDao.findById("attempt-5-7")).thenReturn(Optional.of(attempt));
         when(attemptDao.findAnswers("attempt-5-7")).thenReturn(Map.of(101, "A", 147, "A"));
-        when(testService.getAnswerKey("ets-2026-test-1")).thenReturn(answerKey);
+        when(testService.getAnswerKey("test-1")).thenReturn(answerKey);
 
         Map<String, Object> result = attemptService.submit("user-1", "attempt-5-7");
 
@@ -129,7 +129,7 @@ class AttemptServiceTests {
         Attempt attempt = new Attempt();
         attempt.setId(id);
         attempt.setUserId("user-1");
-        attempt.setTestId("ets-2026-test-1");
+        attempt.setTestId("test-1");
         attempt.setType("FULL_TEST");
         attempt.setMode("PART");
         attempt.setSelectedParts(selectedParts);

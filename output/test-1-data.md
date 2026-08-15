@@ -1,4 +1,4 @@
-# ETS 2026 TOEIC Listening & Reading – Test 1
+# TOEIC Listening & Reading – Test 1
 
 Dữ liệu được trích từ hai PDF Listening và Reading do người dùng cung cấp.
 
@@ -8,8 +8,8 @@ Các URL audio của Part 1-4 và URL ảnh của Part 1 trỏ đến bucket Sup
 
 ```json
 {
-  "testId": "ets-2026-test-1",
-  "title": "ETS 2026 TOEIC Listening & Reading - Test 1",
+  "testId": "test-1",
+  "title": "TOEIC Listening & Reading - Test 1",
   "description": null,
   "totalQuestions": 200,
   "parts": [

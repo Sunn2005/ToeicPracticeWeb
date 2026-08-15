@@ -33,7 +33,7 @@ function ExamHeader({
             TP
           </span>
           <div className="min-w-0">
-            <p className="truncate text-sm font-bold text-slate-950">ETS 2026 · Test 1 · {modeLabel}</p>
+            <p className="truncate text-sm font-bold text-slate-950">Test 1 · {modeLabel}</p>
             <p className="text-xs font-semibold uppercase tracking-wider text-sky-600">
               {section === "LISTENING" ? "Listening" : "Reading"} · Câu {firstQuestion}–{lastQuestion}
             </p>
