@@ -3,19 +3,17 @@ package com.toeic.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Map;
+import com.toeic.model.enums.UserRole;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 public class User {
-    private String id;
-    private String userId;
-    private String testId;
-    private String status;
-    private Long startedAt;
-    private Long submittedAt;
-    private Integer score;
-    private Map<String, String> answers;
+    private String uid;
+    private String email;
+    private String displayName;
+    private String photoUrl;
+    private UserRole role;
+    private Long createdAt;
+    private Long lastLoginAt;
 }

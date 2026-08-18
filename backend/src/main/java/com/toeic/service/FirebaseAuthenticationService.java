@@ -3,6 +3,7 @@ package com.toeic.service;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
+import com.toeic.model.FirebaseIdentity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -21,11 +22,21 @@ public class FirebaseAuthenticationService {
     }
 
     public String requireUid(String authorization) {
+        return requireIdentity(authorization).uid();
+    }
+
+    public FirebaseIdentity requireIdentity(String authorization) {
         String idToken = extractBearerToken(authorization);
 
         try {
             FirebaseToken decodedToken = firebaseAuth.verifyIdToken(idToken);
-            return decodedToken.getUid();
+            return new FirebaseIdentity(
+                    decodedToken.getUid(),
+                    claim(decodedToken, "email"),
+                    claim(decodedToken, "name"),
+                    claim(decodedToken, "picture"),
+                    claim(decodedToken, "role")
+            );
         } catch (FirebaseAuthException | IllegalArgumentException exception) {
             log.warn("Firebase ID token verification failed: {}", exception.getMessage());
             throw new ResponseStatusException(
@@ -34,6 +45,11 @@ public class FirebaseAuthenticationService {
                     exception
             );
         }
+    }
+
+    private String claim(FirebaseToken token, String name) {
+        Object value = token.getClaims().get(name);
+        return value == null ? null : String.valueOf(value);
     }
 
     private String extractBearerToken(String authorization) {

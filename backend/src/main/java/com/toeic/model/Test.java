@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import com.toeic.model.enums.TestStatus;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,6 +24,14 @@ public class Test {
     private Integer readingMinutes;
     private Integer totalMinutes;
     private List<TestPart> parts;
+    private TestStatus status;
+    private String createdBy;
+    private Long createdAt;
+    private Long updatedAt;
+    private Long submittedAt;
+    private String reviewedBy;
+    private Long reviewedAt;
+    private String rejectionReason;
 
     public Optional<TestPart> findPart(int partNumber) {
         if (parts == null) {

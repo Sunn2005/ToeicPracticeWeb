@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Comparator;
+import com.toeic.model.enums.TestStatus;
 
 @Service
 public class TestService {
@@ -30,6 +32,24 @@ public class TestService {
         Map<String, Object> response = toMap(test);
         response.remove("parts");
         return response;
+    }
+
+    public List<Map<String, Object>> listPublishedTests() throws Exception {
+        return testDao.findAllMetadata().stream()
+                .filter(test -> test.getStatus() == null || test.getStatus() == TestStatus.APPROVED)
+                .sorted(Comparator.comparing(
+                        Test::getUpdatedAt,
+                        Comparator.nullsLast(Comparator.reverseOrder())
+                ))
+                .map(test -> {
+                    Map<String, Object> metadata = toMap(test);
+                    metadata.remove("parts");
+                    if (metadata.get("status") == null) {
+                        metadata.put("status", TestStatus.APPROVED.name());
+                    }
+                    return metadata;
+                })
+                .toList();
     }
 
     public Map<String, Object> getExamTest(String testId) throws Exception {
@@ -95,6 +115,9 @@ public class TestService {
         Test test = testDao.findMetadataById(testId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy đề thi")
         );
+        if (test.getStatus() != null && test.getStatus() != TestStatus.APPROVED) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy đề thi");
+        }
         test.setTestId(testId);
         if (test.getType() == null) {
             test.setType("FULL_TEST");

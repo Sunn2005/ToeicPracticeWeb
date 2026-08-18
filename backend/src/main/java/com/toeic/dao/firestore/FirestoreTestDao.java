@@ -5,6 +5,7 @@ import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.SetOptions;
 import com.google.cloud.firestore.WriteBatch;
+import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.toeic.dao.TestDao;
 import com.toeic.model.Test;
 import com.toeic.model.TestPart;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Repository;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 public class FirestoreTestDao implements TestDao {
@@ -55,6 +58,25 @@ public class FirestoreTestDao implements TestDao {
     }
 
     @Override
+    public List<Test> findAllMetadata() throws Exception {
+        List<Test> tests = new ArrayList<>();
+        for (QueryDocumentSnapshot snapshot : firestore.collection("tests").get().get().getDocuments()) {
+            Test test = snapshot.toObject(Test.class);
+            if (test != null) {
+                test.setTestId(snapshot.getId());
+                test.setParts(null);
+                tests.add(test);
+            }
+        }
+        return tests;
+    }
+
+    @Override
+    public String nextId() {
+        return firestore.collection("tests").document().getId();
+    }
+
+    @Override
     public void save(Test test) throws Exception {
         DocumentReference testDocument = firestore.collection("tests").document(test.getTestId());
         WriteBatch batch = firestore.batch();
@@ -72,6 +94,17 @@ public class FirestoreTestDao implements TestDao {
         batch.commit().get();
     }
 
+    @Override
+    public void delete(String testId) throws Exception {
+        DocumentReference testDocument = firestore.collection("tests").document(testId);
+        WriteBatch batch = firestore.batch();
+        for (QueryDocumentSnapshot part : testDocument.collection("parts").get().get().getDocuments()) {
+            batch.delete(part.getReference());
+        }
+        batch.delete(testDocument);
+        batch.commit().get();
+    }
+
     private Map<String, Object> metadataDocument(Test test) {
         Map<String, Object> metadata = new LinkedHashMap<>();
         metadata.put("testId", test.getTestId());
@@ -82,6 +115,14 @@ public class FirestoreTestDao implements TestDao {
         putIfNotNull(metadata, "listeningMinutes", test.getListeningMinutes());
         putIfNotNull(metadata, "readingMinutes", test.getReadingMinutes());
         putIfNotNull(metadata, "totalMinutes", test.getTotalMinutes());
+        metadata.put("status", test.getStatus());
+        metadata.put("createdBy", test.getCreatedBy());
+        metadata.put("createdAt", test.getCreatedAt());
+        metadata.put("updatedAt", test.getUpdatedAt());
+        metadata.put("submittedAt", test.getSubmittedAt());
+        metadata.put("reviewedBy", test.getReviewedBy());
+        metadata.put("reviewedAt", test.getReviewedAt());
+        metadata.put("rejectionReason", test.getRejectionReason());
         return metadata;
     }
 

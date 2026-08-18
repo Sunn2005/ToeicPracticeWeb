@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import java.util.List;
 
 class TestServiceTests {
 
@@ -81,5 +82,21 @@ class TestServiceTests {
         assertTrue(serialized.contains("translation"));
         assertTrue(serialized.contains("Bài giảng sẽ diễn ra"));
         assertTrue(serialized.contains("transcript"));
+    }
+
+    @Test
+    void listsLegacyTestsAsApprovedForBackwardCompatibility() throws Exception {
+        TestDao testDao = mock(TestDao.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        com.toeic.model.Test legacyTest = new com.toeic.model.Test();
+        legacyTest.setTestId("legacy-test");
+        legacyTest.setTitle("Legacy test");
+        when(testDao.findAllMetadata()).thenReturn(List.of(legacyTest));
+
+        TestService service = new TestService(testDao, objectMapper);
+        List<Map<String, Object>> result = service.listPublishedTests();
+
+        assertEquals(1, result.size());
+        assertEquals("APPROVED", result.getFirst().get("status"));
     }
 }

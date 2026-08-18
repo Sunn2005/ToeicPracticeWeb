@@ -25,7 +25,8 @@ public class FirebaseConfig {
     @Bean
     public FirebaseApp firebaseApp(
             @Value("${firebase.project-id}") String configuredProjectId,
-            @Value("${firebase.service-account}") Resource serviceAccountResource
+            @Value("${firebase.service-account}") Resource serviceAccountResource,
+            @Value("${firebase.storage-bucket:}") String storageBucket
     ) throws IOException {
         if (!serviceAccountResource.exists()) {
             throw new IllegalStateException(
@@ -64,10 +65,13 @@ public class FirebaseConfig {
             return existingApp;
         }
 
-        FirebaseOptions options = FirebaseOptions.builder()
+        FirebaseOptions.Builder optionsBuilder = FirebaseOptions.builder()
                 .setCredentials(credentials)
-                .setProjectId(configuredProjectId)
-                .build();
+                .setProjectId(configuredProjectId);
+        if (storageBucket != null && !storageBucket.isBlank()) {
+            optionsBuilder.setStorageBucket(storageBucket);
+        }
+        FirebaseOptions options = optionsBuilder.build();
 
         FirebaseApp app = FirebaseApp.initializeApp(options);
         log.info("Initialized FirebaseApp name={}, projectId={}, serviceAccount={}",

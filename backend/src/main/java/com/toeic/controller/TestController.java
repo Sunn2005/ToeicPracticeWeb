@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/tests")
@@ -38,6 +39,11 @@ public class TestController {
         this.testService = testService;
         this.authenticationService = authenticationService;
         this.attemptService = attemptService;
+    }
+
+    @GetMapping
+    public List<Map<String, Object>> getPublishedTests() throws Exception {
+        return testService.listPublishedTests();
     }
 
     @GetMapping("/{testId}")
