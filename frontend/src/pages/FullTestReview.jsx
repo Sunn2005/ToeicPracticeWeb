@@ -73,6 +73,11 @@ function FullTestReview() {
   const unit = current?.unit;
   const question = current?.question;
   const imageUrl = unit?.imageUrl || question?.imageUrl;
+  const passagePanelImageUrls = new Set([
+    ...(unit?.imageUrls || []),
+    ...(unit?.passages || []).map((passage) => passage.imageUrl),
+  ].filter(Boolean));
+  const shouldRenderStandaloneImage = imageUrl && !passagePanelImageUrls.has(imageUrl);
   const audioUrl = unit?.audioUrl || question?.audioUrl;
   const transcript = unit?.transcript || question?.transcript;
   const questionsToDisplay = [3, 4].includes(unit?.partNumber)
@@ -172,7 +177,7 @@ function FullTestReview() {
                 </div>
               )}
 
-              {imageUrl && (
+              {shouldRenderStandaloneImage && (
                 <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center">
                   <img src={imageUrl} alt="Hình minh họa" className="mx-auto max-h-[520px] rounded-xl object-contain" />
                 </div>

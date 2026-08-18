@@ -438,6 +438,11 @@ function FullTestExam() {
     .filter((part) => part >= 5);
   const mediaImage = currentUnit.imageUrl;
   const mediaAudio = currentUnit.audioUrl;
+  const readingPanelImageUrls = new Set([
+    ...(currentUnit.imageUrls || []),
+    ...(currentUnit.passages || []).map((passage) => passage.imageUrl),
+  ].filter(Boolean));
+  const shouldRenderStandaloneReadingImage = mediaImage && !readingPanelImageUrls.has(mediaImage);
   const hasReadingMaterial = Boolean(
     mediaImage
     || currentUnit.imageUrls?.length
@@ -586,7 +591,7 @@ function FullTestExam() {
                     </p>
                   </div>
 
-                  {mediaImage && (
+                  {shouldRenderStandaloneReadingImage && (
                     <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm">
                       <img
                         src={mediaImage}

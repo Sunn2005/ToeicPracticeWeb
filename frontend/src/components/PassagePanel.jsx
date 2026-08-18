@@ -1,5 +1,5 @@
 function PassagePanel({ passages = [], imageUrls = [] }) {
-  const groupImages = imageUrls.filter(Boolean);
+  const groupImages = [...new Set(imageUrls.filter(Boolean))];
 
   if (!passages.length && !groupImages.length) {
     return null;
@@ -16,7 +16,7 @@ function PassagePanel({ passages = [], imageUrls = [] }) {
             <img
               src={imageUrl}
               alt={`Nội dung bài đọc ${index + 1}`}
-              className="mx-auto h-auto w-full rounded-xl object-contain"
+              className="mx-auto h-auto max-h-[72vh] w-auto max-w-full rounded-xl object-contain"
             />
           </article>
         ))}
