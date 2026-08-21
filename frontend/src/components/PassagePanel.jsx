@@ -7,7 +7,7 @@ function PassagePanel({ passages = [], imageUrls = [] }) {
 
   if (groupImages.length) {
     return (
-      <section className="space-y-4" aria-label="Nội dung bài đọc">
+      <section className="space-y-4" aria-label="Reading material">
         {groupImages.map((imageUrl, index) => (
           <article
             key={imageUrl}
@@ -15,7 +15,7 @@ function PassagePanel({ passages = [], imageUrls = [] }) {
           >
             <img
               src={imageUrl}
-              alt={`Nội dung bài đọc ${index + 1}`}
+              alt={`Reading material ${index + 1}`}
               className="mx-auto h-auto max-h-[72vh] w-auto max-w-full rounded-xl object-contain"
             />
           </article>
@@ -33,7 +33,7 @@ function PassagePanel({ passages = [], imageUrls = [] }) {
         >
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-xs font-bold uppercase tracking-widest text-violet-600">
-              {passage.type || passage.passageType || `Đoạn văn ${index + 1}`}
+              {passage.type || passage.passageType || `Passage ${index + 1}`}
             </p>
             {passage.title && (
               <p className="text-sm font-semibold text-slate-800">{passage.title}</p>
@@ -42,7 +42,7 @@ function PassagePanel({ passages = [], imageUrls = [] }) {
           {passage.imageUrl && (
             <img
               src={passage.imageUrl}
-              alt="Hình ảnh kèm đoạn đọc"
+              alt="Reading passage graphic"
               className="mx-auto mt-5 max-h-[520px] max-w-full rounded-xl object-contain"
             />
           )}

@@ -19,7 +19,7 @@ function LoadingScreen() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-sky-50">
       <p className="text-sm font-medium text-sky-700">
-        Đang kiểm tra phiên đăng nhập...
+        Checking your session...
       </p>
     </div>
   );

@@ -30,7 +30,7 @@ function PartGroup({ title, parts, selectedParts, onToggle }) {
                   Part {item.part}
                 </span>
               </span>
-              <span className="text-sm font-medium text-slate-500">{item.questions} câu</span>
+              <span className="text-sm font-medium text-slate-500">{item.questions} questions</span>
             </label>
           );
         })}
@@ -70,7 +70,7 @@ function TestModeModal({ test, onClose, onStart }) {
     try {
       await onStart(selection);
     } catch (requestError) {
-      setError(requestError.message || "Không thể bắt đầu bài thi.");
+      setError(requestError.message || "Unable to start the test.");
       setStartingKey("");
     }
   };
@@ -118,7 +118,7 @@ function TestModeModal({ test, onClose, onStart }) {
         <header className="sticky top-0 z-10 flex items-start justify-between gap-5 border-b border-slate-200 bg-white/95 px-5 py-5 backdrop-blur-xl sm:px-8">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-sky-600">
-              Chọn chế độ
+              Choose a mode
             </p>
             <h2 id="test-mode-title" className="mt-1 text-2xl font-bold text-slate-950">
               {test.name}
@@ -129,7 +129,7 @@ function TestModeModal({ test, onClose, onStart }) {
             type="button"
             onClick={onClose}
             disabled={Boolean(startingKey)}
-            aria-label="Đóng cửa sổ chọn chế độ"
+            aria-label="Close mode selection"
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-xl text-slate-500 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-40"
           >
             ×
@@ -145,7 +145,7 @@ function TestModeModal({ test, onClose, onStart }) {
                 activeTab === "exam" ? "bg-white text-sky-700 shadow-sm" : "text-slate-500"
               }`}
             >
-              Luyện thi
+              Test
             </button>
             <button
               type="button"
@@ -154,9 +154,9 @@ function TestModeModal({ test, onClose, onStart }) {
                 activeTab === "practice" ? "bg-white text-slate-700 shadow-sm" : "text-slate-500"
               }`}
             >
-              Luyện tập
+              Practice
               <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] text-amber-700">
-                Sắp phát triển
+                Coming soon
               </span>
             </button>
           </div>
@@ -172,9 +172,9 @@ function TestModeModal({ test, onClose, onStart }) {
               <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100 text-xl font-black text-amber-700">
                 P
               </span>
-              <h3 className="mt-4 text-xl font-bold text-slate-900">Chế độ Luyện tập đang được phát triển</h3>
+              <h3 className="mt-4 text-xl font-bold text-slate-900">Practice mode is under development</h3>
               <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-slate-500">
-                Hiện tại bạn có thể sử dụng đầy đủ các chế độ trong tab Luyện thi.
+                All test modes are currently available from the Test tab.
               </p>
             </div>
           ) : (
@@ -193,9 +193,9 @@ function TestModeModal({ test, onClose, onStart }) {
 
               <section className="mt-8 border-t border-slate-200 pt-7">
                 <div>
-                  <h3 className="text-xl font-bold text-slate-950">Thi theo Part</h3>
+                  <h3 className="text-xl font-bold text-slate-950">Test by Part</h3>
                   <p className="mt-1 text-sm text-slate-500">
-                    Chọn một hoặc nhiều Part, sau đó dùng thời gian đề xuất hoặc tự đặt.
+                    Select one or more Parts, then use the suggested time or set your own.
                   </p>
                 </div>
 
@@ -217,13 +217,13 @@ function TestModeModal({ test, onClose, onStart }) {
                 <div className="mt-6 rounded-3xl bg-slate-100 p-5 sm:p-6">
                   <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                     <div>
-                      <h4 className="font-bold text-slate-900">Thời gian làm bài</h4>
+                      <h4 className="font-bold text-slate-900">Test duration</h4>
                       {!customTimeEnabled && selectedParts.length > 0 && (
                         <p className="mt-3 text-sm text-slate-500">
                           <span className="mr-2 rounded-full border border-sky-200 bg-sky-50 px-3 py-1.5 font-bold text-sky-600">
-                            {suggestedMinutes} phút
+                            {suggestedMinutes} min
                           </span>
-                          Thời gian đề xuất
+                          Suggested time
                         </p>
                       )}
                     </div>
@@ -234,7 +234,7 @@ function TestModeModal({ test, onClose, onStart }) {
                       onClick={toggleCustomTime}
                       className="flex items-center gap-3 font-semibold text-slate-600"
                     >
-                      Tự đặt
+                      Custom time
                       <span className={`relative h-7 w-12 rounded-full transition ${
                         customTimeEnabled ? "bg-sky-500" : "bg-slate-300"
                       }`}>
@@ -247,7 +247,7 @@ function TestModeModal({ test, onClose, onStart }) {
 
                   {customTimeEnabled && (
                     <label className="mt-5 block max-w-xs">
-                      <span className="text-sm font-semibold text-slate-700">Số phút (1–180)</span>
+                      <span className="text-sm font-semibold text-slate-700">Minutes (1–180)</span>
                       <div className="mt-2 flex items-center rounded-xl border border-slate-200 bg-white px-4 focus-within:border-sky-400 focus-within:ring-4 focus-within:ring-sky-100">
                         <input
                           type="number"
@@ -258,11 +258,11 @@ function TestModeModal({ test, onClose, onStart }) {
                           onChange={(event) => setCustomMinutes(event.target.value)}
                           className="min-w-0 flex-1 bg-transparent py-3 font-bold text-slate-900 outline-none"
                         />
-                        <span className="text-sm text-slate-500">phút</span>
+                        <span className="text-sm text-slate-500">min</span>
                       </div>
                       {!validCustomTime && (
                         <span className="mt-2 block text-sm text-red-600">
-                          Vui lòng nhập số nguyên từ 1 đến 180.
+                          Enter a whole number from 1 to 180.
                         </span>
                       )}
                     </label>
@@ -272,9 +272,9 @@ function TestModeModal({ test, onClose, onStart }) {
                 <div className="mt-5 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                   <div className="flex flex-wrap items-center gap-3 text-sm font-semibold text-slate-500">
                     <span className="rounded-full bg-sky-50 px-3 py-2 text-sky-700">
-                      {selectedQuestionCount} câu
+                      {selectedQuestionCount} questions
                     </span>
-                    <span>Đã chọn {selectedParts.length} Part</span>
+                    <span>{selectedParts.length} Parts selected</span>
                   </div>
                   <button
                     type="button"
@@ -289,7 +289,7 @@ function TestModeModal({ test, onClose, onStart }) {
                     disabled={!selectedParts.length || !validCustomTime || Boolean(startingKey)}
                     className="w-full rounded-xl bg-sky-500 px-7 py-3.5 font-bold text-white shadow-lg shadow-sky-100 transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none sm:w-auto"
                   >
-                    {startingKey.startsWith("PART-") ? "Đang chuẩn bị..." : "Bắt đầu các Part đã chọn"}
+                    {startingKey.startsWith("PART-") ? "Preparing..." : "Start selected Parts"}
                   </button>
                 </div>
               </section>

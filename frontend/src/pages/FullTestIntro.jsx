@@ -62,7 +62,7 @@ function FullTestIntro() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 text-sky-700">
-        Đang tải thông tin đề thi...
+        Loading test information...
       </div>
     );
   }
@@ -86,7 +86,7 @@ function FullTestIntro() {
             onClick={() => navigate("/dashboard")}
             className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
           >
-            Về Dashboard
+            Back to dashboard
           </button>
         </div>
       </header>
@@ -107,54 +107,54 @@ function FullTestIntro() {
               {test?.title || "TOEIC Listening & Reading – Test 1"}
             </h1>
             <p className="mt-4 max-w-3xl leading-7 text-sky-50">
-              Mô phỏng bài thi TOEIC hoàn chỉnh với 200 câu, đồng hồ riêng cho
-              Listening và Reading, tự động lưu đáp án và khôi phục khi tải lại trang.
+              Take a complete 200-question TOEIC-style test with separate Listening
+              and Reading timers, automatic saving, and progress recovery after reloads.
             </p>
           </div>
 
           <div className="grid gap-8 p-6 sm:p-10 lg:grid-cols-[1fr_340px]">
             <div>
-              <h2 className="text-xl font-bold text-slate-950">Cấu trúc bài thi</h2>
+              <h2 className="text-xl font-bold text-slate-950">Test Structure</h2>
               <div className="mt-5 grid gap-4 sm:grid-cols-2">
                 <div className="rounded-2xl border border-sky-100 bg-sky-50 p-5">
                   <p className="text-xs font-bold uppercase tracking-wider text-sky-600">
                     Listening
                   </p>
-                  <p className="mt-2 text-2xl font-bold">100 câu · 45 phút</p>
+                  <p className="mt-2 text-2xl font-bold">100 questions · 45 minutes</p>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
-                    Part 1–4. Làm tuần tự, không quay lại câu trước. Audio phát theo câu hoặc nhóm câu.
+                    Parts 1–4. Questions advance in order and cannot be revisited. Audio plays by question or group.
                   </p>
                 </div>
                 <div className="rounded-2xl border border-violet-100 bg-violet-50 p-5">
                   <p className="text-xs font-bold uppercase tracking-wider text-violet-600">
                     Reading
                   </p>
-                  <p className="mt-2 text-2xl font-bold">100 câu · 75 phút</p>
+                  <p className="mt-2 text-2xl font-bold">100 questions · 75 minutes</p>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
-                    Part 5–7. Tự do chuyển câu, có bảng câu hỏi và nút tìm câu chưa trả lời.
+                    Parts 5–7. Move freely between questions and use the navigator to find unanswered questions.
                   </p>
                 </div>
               </div>
 
               <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5">
-                <h3 className="font-bold text-amber-900">Lưu ý trước khi bắt đầu</h3>
+                <h3 className="font-bold text-amber-900">Before You Start</h3>
                 <ul className="mt-3 space-y-2 text-sm leading-6 text-amber-900/80">
-                  <li>• Chuẩn bị tai nghe và giữ kết nối mạng ổn định.</li>
-                  <li>• Thời gian được tính ở backend nên tải lại trang không làm dừng đồng hồ.</li>
-                  <li>• Khi Listening hết giờ, hệ thống tự chuyển sang Reading.</li>
-                  <li>• Khi Reading hết giờ, bài được tự động nộp và khóa đáp án.</li>
+                  <li>• Use headphones and keep a stable internet connection.</li>
+                  <li>• Time is tracked by the server, so reloading does not pause the timer.</li>
+                  <li>• The test moves to Reading automatically when Listening ends.</li>
+                  <li>• The test is submitted and answers are locked when Reading ends.</li>
                 </ul>
               </div>
             </div>
 
             <aside className="h-fit rounded-3xl border border-slate-200 bg-slate-50 p-6">
-              <p className="text-sm font-semibold text-slate-500">Tổng quan</p>
+              <p className="text-sm font-semibold text-slate-500">Overview</p>
               <dl className="mt-5 space-y-4">
                 {[
-                  ["Số câu", `${test?.totalQuestions || 200}`],
-                  ["Tổng thời gian", `${test?.totalMinutes || 120} phút`],
-                  ["Hình thức", "Full Test"],
-                  ["Kết quả", "Chấm tự động"],
+                  ["Questions", `${test?.totalQuestions || 200}`],
+                  ["Total time", `${test?.totalMinutes || 120} minutes`],
+                  ["Format", "Full Test"],
+                  ["Results", "Automatically scored"],
                 ].map(([label, value]) => (
                   <div key={label} className="flex justify-between gap-4 border-b border-slate-200 pb-3">
                     <dt className="text-sm text-slate-500">{label}</dt>
@@ -165,7 +165,7 @@ function FullTestIntro() {
 
               {currentAttempt && (
                 <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
-                  Bạn có một bài đang làm ở phần {currentAttempt.currentSection}. Hệ thống sẽ tiếp tục đúng vị trí đã lưu.
+                  You have an active attempt in the {currentAttempt.currentSection} section. It will resume from your saved position.
                 </div>
               )}
 
@@ -176,10 +176,10 @@ function FullTestIntro() {
                 className="mt-6 w-full rounded-2xl bg-sky-500 px-5 py-4 font-bold text-white shadow-lg shadow-sky-200 transition hover:bg-sky-600 disabled:cursor-wait disabled:bg-sky-300"
               >
                 {starting
-                  ? "Đang chuẩn bị bài thi..."
+                  ? "Preparing your test..."
                   : currentAttempt
-                    ? "Tiếp tục bài đang làm"
-                    : "Bắt đầu làm bài"}
+                    ? "Resume test"
+                    : "Start test"}
               </button>
             </aside>
           </div>

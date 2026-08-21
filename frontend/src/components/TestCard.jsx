@@ -18,7 +18,7 @@ function TestCard({ test, onSelect }) {
               : "bg-slate-100 text-slate-500"
           }`}
         >
-          {test.available ? "Sẵn sàng" : "Sắp có"}
+          {test.available ? "Ready" : "Coming soon"}
         </span>
       </div>
 
@@ -30,10 +30,10 @@ function TestCard({ test, onSelect }) {
       </h4>
       <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-slate-600">
         <span className="rounded-full bg-white px-3 py-1.5 ring-1 ring-slate-200">
-          {test.totalQuestions} câu
+          {test.totalQuestions} questions
         </span>
         <span className="rounded-full bg-white px-3 py-1.5 ring-1 ring-slate-200">
-          {test.duration} phút
+          {test.duration} min
         </span>
         <span className="rounded-full bg-white px-3 py-1.5 ring-1 ring-slate-200">
           Part 1–7
@@ -46,7 +46,7 @@ function TestCard({ test, onSelect }) {
         disabled={!test.available}
         className="mt-6 inline-flex items-center gap-2 font-bold text-sky-600 transition group-hover:gap-3 disabled:cursor-not-allowed disabled:text-slate-400"
       >
-        {test.available ? "Chọn đề →" : "Chưa có dữ liệu"}
+        {test.available ? "Select test →" : "No data yet"}
       </button>
     </article>
   );

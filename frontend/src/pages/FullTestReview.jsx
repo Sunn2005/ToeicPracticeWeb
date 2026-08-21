@@ -6,10 +6,10 @@ import QuestionCard from "../components/QuestionCard";
 import { getAllQuestions } from "../utils/testData";
 
 const FILTERS = [
-  ["ALL", "Tất cả"],
-  ["CORRECT", "Câu đúng"],
-  ["INCORRECT", "Câu sai"],
-  ["UNANSWERED", "Bỏ trống"],
+  ["ALL", "All"],
+  ["CORRECT", "Correct"],
+  ["INCORRECT", "Incorrect"],
+  ["UNANSWERED", "Unanswered"],
 ];
 
 function FullTestReview() {
@@ -59,7 +59,7 @@ function FullTestReview() {
   const current = filteredQuestions[currentIndex];
 
   if (!data && !error) {
-    return <div className="flex min-h-screen items-center justify-center bg-slate-50">Đang tải bài review...</div>;
+    return <div className="flex min-h-screen items-center justify-center bg-slate-50">Loading review...</div>;
   }
 
   if (error) {
@@ -93,7 +93,7 @@ function FullTestReview() {
       ? "Full Test"
       : data.attempt.mode === "PART"
         ? `Part ${selectedParts.join(" + ")}`
-        : `Thi ${data.attempt.mode === "LISTENING" ? "Listening" : "Reading"}`;
+        : `${data.attempt.mode === "LISTENING" ? "Listening" : "Reading"} Test`;
   const hasListening = data.result.listeningTotalQuestions > 0;
   const hasReading = data.result.readingTotalQuestions > 0;
   const maxScore = data.attempt.mode === "FULL" || (hasListening && hasReading) ? 990 : 495;
@@ -104,7 +104,7 @@ function FullTestReview() {
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-sky-600">Review {modeTitle}</p>
-            <h1 className="mt-1 text-lg font-bold">Xem lại đáp án · {data.result.totalScore}/{maxScore}</h1>
+            <h1 className="mt-1 text-lg font-bold">Answer Review · {data.result.totalScore}/{maxScore}</h1>
           </div>
           <div className="flex gap-2">
             <button
@@ -112,7 +112,7 @@ function FullTestReview() {
               onClick={() => navigate(`/full-test/${attemptId}/result`)}
               className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
-              Kết quả
+              Results
             </button>
             <button
               type="button"
@@ -153,13 +153,13 @@ function FullTestReview() {
             })}
           </div>
           <p className="text-sm font-semibold text-slate-500">
-            {filteredQuestions.length ? `${currentIndex + 1}/${filteredQuestions.length}` : "0 câu"}
+            {filteredQuestions.length ? `${currentIndex + 1}/${filteredQuestions.length}` : "0 questions"}
           </p>
         </div>
 
         {!current ? (
           <div className="rounded-2xl bg-white p-10 text-center text-slate-500">
-            Không có câu hỏi thuộc bộ lọc này.
+            No questions match this filter.
           </div>
         ) : (
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">
@@ -172,14 +172,14 @@ function FullTestReview() {
 
               {audioUrl && (
                 <div className="rounded-2xl border border-sky-100 bg-sky-50 p-5">
-                  <p className="mb-3 text-sm font-semibold text-sky-800">Nghe lại audio</p>
+                  <p className="mb-3 text-sm font-semibold text-sky-800">Replay audio</p>
                   <audio key={audioUrl} src={audioUrl} controls className="w-full" />
                 </div>
               )}
 
               {shouldRenderStandaloneImage && (
                 <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center">
-                  <img src={imageUrl} alt="Hình minh họa" className="mx-auto max-h-[520px] rounded-xl object-contain" />
+                  <img src={imageUrl} alt="Question graphic" className="mx-auto max-h-[520px] rounded-xl object-contain" />
                 </div>
               )}
 
@@ -215,7 +215,7 @@ function FullTestReview() {
                   disabled={currentIndex === 0}
                   className="rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-700 disabled:opacity-40"
                 >
-                  ← Câu trước
+                  ← Previous
                 </button>
                 <button
                   type="button"
@@ -223,13 +223,13 @@ function FullTestReview() {
                   disabled={currentIndex >= filteredQuestions.length - 1}
                   className="rounded-xl bg-sky-500 px-5 py-3 font-semibold text-white disabled:opacity-40"
                 >
-                  Câu tiếp →
+                  Next →
                 </button>
               </div>
             </section>
 
             <aside className="h-fit rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:sticky lg:top-24">
-              <p className="px-1 text-sm font-bold">Danh sách đang lọc</p>
+              <p className="px-1 text-sm font-bold">Filtered Questions</p>
               <div className="mt-4 grid max-h-[70vh] grid-cols-5 gap-2 overflow-y-auto p-1">
                 {filteredQuestions.map(({ question: item }, index) => (
                   <button

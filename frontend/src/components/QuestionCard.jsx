@@ -34,10 +34,10 @@ function QuestionCard({
   const prompt =
     question.question ||
     (question.questionNumber <= 6
-      ? "Chọn phương án mô tả đúng nhất cho bức ảnh."
+      ? "Select the statement that best describes the picture."
       : question.questionNumber <= 31
-        ? "Chọn câu trả lời phù hợp nhất với câu hỏi bạn nghe."
-        : "Chọn đáp án đúng.");
+        ? "Select the best response to the question you hear."
+        : "Select the best answer.");
 
   return (
     <article
@@ -47,7 +47,7 @@ function QuestionCard({
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-sky-600">
-            Câu {question.questionNumber}
+            Question {question.questionNumber}
           </p>
           <h3 className="mt-2 text-base font-semibold leading-7 text-slate-900 sm:text-lg">
             {prompt}
@@ -64,10 +64,10 @@ function QuestionCard({
             }`}
           >
             {question.answerStatus === "CORRECT"
-              ? "Đúng"
+              ? "Correct"
               : question.answerStatus === "INCORRECT"
-                ? "Sai"
-                : "Bỏ trống"}
+                ? "Incorrect"
+                : "Unanswered"}
           </span>
         )}
       </div>
@@ -114,16 +114,16 @@ function QuestionCard({
       {review && (
         <div className="mt-5 space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6">
           <p>
-            <strong>Đáp án đúng:</strong> {question.correctAnswer}
+            <strong>Correct answer:</strong> {question.correctAnswer}
             {question.selectedAnswer && (
               <>
-                {" "}· <strong>Bạn chọn:</strong> {question.selectedAnswer}
+                {" "}· <strong>Your answer:</strong> {question.selectedAnswer}
               </>
             )}
           </p>
           {questionTranslation && (
             <section className="rounded-lg border border-sky-100 bg-white p-4">
-              <h4 className="font-bold text-sky-700">Dịch nghĩa câu hỏi</h4>
+              <h4 className="font-bold text-sky-700">Question Translation</h4>
               <div className="mt-2 space-y-3 text-slate-700">
                 <ReviewContent>{questionTranslation}</ReviewContent>
               </div>
@@ -131,17 +131,17 @@ function QuestionCard({
           )}
           {question.answerTranslation && (
             <section className="rounded-lg border border-emerald-100 bg-white p-4">
-              <h4 className="font-bold text-emerald-700">Dịch nghĩa đáp án</h4>
+              <h4 className="font-bold text-emerald-700">Answer Translation</h4>
               <div className="mt-2 space-y-3 text-slate-700">
                 <ReviewContent>{question.answerTranslation}</ReviewContent>
               </div>
             </section>
           )}
           <section className="rounded-lg border border-violet-100 bg-white p-4">
-            <h4 className="font-bold text-violet-700">Giải thích chi tiết</h4>
+            <h4 className="font-bold text-violet-700">Detailed Explanation</h4>
             <div className="mt-2 space-y-3 text-slate-600">
               <ReviewContent>
-                {detailedExplanation || "Chưa có lời giải chi tiết cho câu này."}
+                {detailedExplanation || "No detailed explanation is available for this question yet."}
               </ReviewContent>
             </div>
           </section>

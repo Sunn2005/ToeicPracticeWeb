@@ -59,13 +59,13 @@ function ResizableExamLayout({ left, right, leftLabel, rightLabel }) {
       <button
         type="button"
         className="exam-split-divider"
-        aria-label={`Kéo để thay đổi độ rộng giữa ${leftLabel} và ${rightLabel}`}
+        aria-label={`Resize ${leftLabel} and ${rightLabel}`}
         aria-orientation="vertical"
         aria-valuemin={MIN_LEFT_WIDTH}
         aria-valuemax={MAX_LEFT_WIDTH}
         aria-valuenow={Math.round(leftWidth)}
         role="separator"
-        title="Kéo sang trái hoặc phải để đổi độ rộng hai cột"
+        title="Drag left or right to resize the two panels"
         onDoubleClick={() => setLeftWidth(DEFAULT_LEFT_WIDTH)}
         onKeyDown={resizeWithKeyboard}
         onPointerDown={startDragging}

@@ -38,8 +38,8 @@ function ExamModeCard({ mode, starting, disabled, onStart }) {
       <h3 className="mt-5 text-lg font-bold text-slate-950">{mode.name}</h3>
       <p className="mt-1 text-sm text-slate-500">{mode.description}</p>
       <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-slate-600">
-        <span className="rounded-full bg-slate-100 px-3 py-1.5">{mode.duration} phút</span>
-        <span className="rounded-full bg-slate-100 px-3 py-1.5">{mode.questions} câu</span>
+        <span className="rounded-full bg-slate-100 px-3 py-1.5">{mode.duration} min</span>
+        <span className="rounded-full bg-slate-100 px-3 py-1.5">{mode.questions} questions</span>
       </div>
       <p className="mt-4 text-sm font-semibold text-sky-700">{mode.parts}</p>
       <button
@@ -48,7 +48,7 @@ function ExamModeCard({ mode, starting, disabled, onStart }) {
         disabled={disabled}
         className="mt-6 w-full rounded-xl bg-sky-500 px-4 py-3 font-bold text-white shadow-md shadow-sky-100 transition hover:bg-sky-600 disabled:cursor-wait disabled:bg-sky-300"
       >
-        {starting ? "Đang chuẩn bị..." : "Bắt đầu"}
+        {starting ? "Preparing..." : "Start"}
       </button>
     </article>
   );

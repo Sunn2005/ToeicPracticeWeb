@@ -55,10 +55,10 @@ function LockedExamAudio({ src, onEnded, advancing }) {
           </span>
           <div>
             <p className="font-bold text-sky-900">
-              {advancing ? "Đang lưu và chuyển câu..." : playing ? "Audio đang phát" : "Đang chuẩn bị audio"}
+              {advancing ? "Saving and advancing..." : playing ? "Audio is playing" : "Preparing audio"}
             </p>
             <p className="mt-1 text-xs leading-5 text-sky-700">
-              Chế độ thi thật: audio phát một lần, không tạm dừng, tua hoặc phát lại.
+              Test mode: audio plays once and cannot be paused, skipped, or replayed.
             </p>
           </div>
         </div>
@@ -69,7 +69,7 @@ function LockedExamAudio({ src, onEnded, advancing }) {
             onClick={startAfterBrowserBlock}
             className="shrink-0 rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-sky-700"
           >
-            Bắt đầu audio
+            Start audio
           </button>
         )}
       </div>

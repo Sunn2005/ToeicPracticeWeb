@@ -27,7 +27,7 @@ async function parseResponse(response) {
 async function request(path, options, forceRefresh) {
   const user = auth.currentUser;
   if (!user) {
-    throw new ApiError("Bạn cần đăng nhập để tiếp tục.", 401, null);
+    throw new ApiError("Please sign in to continue.", 401, null);
   }
 
   const idToken = await user.getIdToken(forceRefresh);
@@ -46,7 +46,7 @@ async function request(path, options, forceRefresh) {
       body?.detail ||
       body?.message ||
       body?.error ||
-      (typeof body === "string" ? body : `Yêu cầu thất bại (${response.status})`);
+      (typeof body === "string" ? body : `Request failed (${response.status})`);
     throw new ApiError(message, response.status, body);
   }
   return body;
@@ -71,7 +71,7 @@ export async function publicApiFetch(path) {
   const body = await parseResponse(response);
   if (!response.ok) {
     throw new ApiError(
-      body?.detail || body?.message || `Không tải được dữ liệu (${response.status})`,
+      body?.detail || body?.message || `Unable to load data (${response.status})`,
       response.status,
       body,
     );

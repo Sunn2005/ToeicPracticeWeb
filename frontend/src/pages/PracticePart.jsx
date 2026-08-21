@@ -19,7 +19,7 @@ function PracticePart() {
     fetch(`${API_BASE_URL}/api/tests/test_001/parts/part5`)
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Không lấy được dữ liệu");
+          throw new Error("Unable to load data");
         }
 
         return response.json();
@@ -39,7 +39,7 @@ function PracticePart() {
       const user = auth.currentUser;
 
       if (!user) {
-        alert("Bạn cần đăng nhập trước khi làm bài.");
+        alert("Please sign in before starting a test.");
         return;
       }
 
@@ -66,7 +66,7 @@ function PracticePart() {
         console.error("Backend error:", errorText);
 
         throw new Error(
-          `Không tạo được attempt - Status ${response.status}: ${errorText}`,
+          `Unable to create attempt - Status ${response.status}: ${errorText}`,
         );
       }
 
@@ -76,7 +76,7 @@ function PracticePart() {
 
       setAttemptId(data.id);
     } catch (error) {
-      console.error("Lỗi tạo attempt:", error);
+      console.error("Unable to create attempt:", error);
       alert(error.message);
     } finally {
       setStartingAttempt(false);
@@ -96,11 +96,11 @@ function PracticePart() {
   };
 
   if (loading) {
-    return <p>Đang tải...</p>;
+    return <p>Loading...</p>;
   }
 
   if (!part) {
-    return <p>Không có dữ liệu.</p>;
+    return <p>No data available.</p>;
   }
 
   return (
@@ -119,13 +119,13 @@ function PracticePart() {
             marginBottom: "30px",
           }}
         >
-          {startingAttempt ? "Đang bắt đầu..." : "Bắt đầu làm bài"}
+          {startingAttempt ? "Starting..." : "Start test"}
         </button>
       )}
 
       {attemptId && (
         <>
-          <p>Đã bắt đầu bài làm.</p>
+          <p>Your attempt has started.</p>
 
           {part.questions.map((question) => (
             <div
@@ -138,7 +138,7 @@ function PracticePart() {
               }}
             >
               <h3>
-                Câu {question.number}: {question.content}
+                Question {question.number}: {question.content}
               </h3>
 
               {question.options.map((option) => (
@@ -170,7 +170,7 @@ function PracticePart() {
               cursor: "pointer",
             }}
           >
-            Nộp bài
+            Submit
           </button>
         </>
       )}

@@ -26,15 +26,15 @@ function Login() {
 
       if (error.code === "auth/unauthorized-domain") {
         setErrorMessage(
-          "Firebase chưa cho phép tên miền hiện tại. Hãy thêm domain của website vào Authorized domains trong Firebase Console.",
+          "Firebase does not allow the current domain. Add this website domain to Authorized domains in Firebase Console.",
         );
       } else if (error.message?.includes("Database is closing/hidden")) {
         setErrorMessage(
-          "Trình duyệt không thể lưu phiên đăng nhập. Hãy tải lại trang và thử lại.",
+          "The browser could not save your session. Reload the page and try again.",
         );
       } else {
         setErrorMessage(
-          `Không đăng nhập được bằng Google. ${error.code || error.message}`,
+          `Unable to sign in with Google. ${error.code || error.message}`,
         );
       }
     } finally {
@@ -49,7 +49,7 @@ function Login() {
           <div className="space-y-8">
             <div className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white/70 px-4 py-2 text-sm font-medium text-sky-700 shadow-sm backdrop-blur">
               <span className="h-2 w-2 rounded-full bg-sky-400" />
-              Luyện TOEIC thông minh mỗi ngày
+              Smarter TOEIC practice every day
             </div>
 
             <div className="space-y-5">
@@ -57,8 +57,8 @@ function Login() {
                 TOEIC Practice
               </h1>
               <p className="max-w-xl text-lg leading-8 text-slate-600">
-                Xây nền tiếng Anh vững hơn với lộ trình luyện tập gọn gàng,
-                giao diện dễ tập trung và tiến độ học rõ ràng.
+                Build stronger English skills with focused practice, a clean
+                learning experience, and clear progress tracking.
               </p>
             </div>
 
@@ -66,7 +66,7 @@ function Login() {
               {[
                 ["Listening", "Part 1-4"],
                 ["Reading", "Part 5-7"],
-                ["Progress", "Theo dõi điểm"],
+                ["Progress", "Track your score"],
               ].map(([title, desc]) => (
                 <div
                   key={title}
@@ -83,9 +83,9 @@ function Login() {
             <div className="rounded-4xl border border-white/80 bg-white/85 p-7 shadow-2xl shadow-sky-200/70 backdrop-blur-xl sm:p-8">
               <div className="mb-8 flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-sky-600">Chào mừng bạn</p>
+                  <p className="text-sm font-medium text-sky-600">Welcome</p>
                   <h2 className="mt-2 text-2xl font-bold text-slate-950">
-                    Đăng nhập để bắt đầu
+                    Sign in to get started
                   </h2>
                 </div>
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-sky-100 text-xl font-bold text-sky-600 shadow-inner">
@@ -102,7 +102,7 @@ function Login() {
                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-sm font-bold text-sky-600">
                   G
                 </span>
-                {isLoading ? "Đang mở Google..." : "Đăng nhập bằng Google"}
+                {isLoading ? "Opening Google..." : "Continue with Google"}
               </button>
 
               {errorMessage && (
@@ -113,10 +113,10 @@ function Login() {
 
               <div className="mt-7 rounded-2xl bg-sky-50 p-5">
                 <p className="text-sm font-semibold text-slate-800">
-                  Hôm nay học gì?
+                  What will you practice today?
                 </p>
                 <div className="mt-4 space-y-3">
-                  {["Mini test 15 phút", "Ôn từ vựng theo chủ đề", "Xem lại lỗi sai"].map(
+                  {["15-minute mini test", "Topic-based vocabulary", "Review incorrect answers"].map(
                     (item) => (
                       <div key={item} className="flex items-center gap-3">
                         <span className="h-2.5 w-2.5 rounded-full bg-sky-400" />

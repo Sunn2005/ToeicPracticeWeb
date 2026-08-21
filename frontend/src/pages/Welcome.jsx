@@ -17,7 +17,7 @@ function UserAvatar({ user, displayName, size = "large" }) {
     return (
       <img
         src={user.photoURL}
-        alt={`Ảnh đại diện của ${displayName}`}
+        alt={`${displayName}'s avatar`}
         referrerPolicy="no-referrer"
         className={`${sizeClasses} shrink-0 border-2 border-white object-cover shadow-md`}
       />
@@ -40,7 +40,7 @@ function Welcome({ user }) {
   const [signOutError, setSignOutError] = useState("");
   const [selectedTest, setSelectedTest] = useState(null);
   const [tests, setTests] = useState(TOEIC_TESTS);
-  const displayName = user?.displayName || "bạn";
+  const displayName = user?.displayName || "Learner";
 
   useEffect(() => {
     let active = true;
@@ -76,8 +76,8 @@ function Welcome({ user }) {
       await signOut(auth);
       navigate("/login", { replace: true });
     } catch (error) {
-      console.error("Không thể đăng xuất:", error);
-      setSignOutError("Không thể đăng xuất lúc này. Vui lòng thử lại.");
+      console.error("Unable to sign out:", error);
+      setSignOutError("Unable to sign out right now. Please try again.");
       setIsSigningOut(false);
     }
   };
@@ -99,7 +99,7 @@ function Welcome({ user }) {
             type="button"
             onClick={() => navigate("/dashboard")}
             className="flex items-center gap-3 rounded-xl text-left focus:outline-none focus:ring-4 focus:ring-sky-100"
-            aria-label="Về trang tổng quan"
+            aria-label="Go to dashboard"
           >
             <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-500 font-bold text-white shadow-lg shadow-sky-200">
               TP
@@ -109,7 +109,7 @@ function Welcome({ user }) {
                 TOEIC Practice
               </span>
               <span className="hidden text-xs text-slate-500 sm:block">
-                Luyện tập thông minh mỗi ngày
+                Smarter practice every day
               </span>
             </span>
           </button>
@@ -130,7 +130,7 @@ function Welcome({ user }) {
               disabled={isSigningOut}
               className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isSigningOut ? "Đang đăng xuất..." : "Đăng xuất"}
+              {isSigningOut ? "Signing out..." : "Sign out"}
             </button>
           </div>
         </div>
@@ -150,33 +150,33 @@ function Welcome({ user }) {
           <aside className="space-y-6">
             <section className="overflow-hidden rounded-3xl bg-sky-500 p-6 text-white shadow-xl shadow-sky-200/70 sm:p-7">
               <UserAvatar user={user} displayName={displayName} />
-              <p className="mt-6 text-sm font-medium text-sky-100">Xin chào,</p>
+              <p className="mt-6 text-sm font-medium text-sky-100">Hello,</p>
               <h1 className="mt-1 break-words text-2xl font-bold">{displayName}</h1>
               <p className="mt-2 break-all text-sm text-sky-100">{user?.email}</p>
 
               <div className="mt-7 rounded-2xl bg-white/15 p-5 ring-1 ring-white/20">
-                <p className="text-sm font-medium text-sky-100">Mục tiêu tuần này</p>
-                <p className="mt-2 text-3xl font-bold">+60 điểm</p>
+                <p className="text-sm font-medium text-sky-100">This week's goal</p>
+                <p className="mt-2 text-3xl font-bold">+60 points</p>
                 <p className="mt-3 text-sm leading-6 text-sky-50">
-                  Duy trì nhịp học đều và xem lại lỗi sai sau mỗi phiên luyện tập.
+                  Keep a consistent study rhythm and review mistakes after each session.
                 </p>
               </div>
             </section>
 
             <section className="rounded-3xl border border-white bg-white/80 p-6 shadow-lg shadow-sky-100/70 backdrop-blur">
-              <p className="text-sm font-semibold text-slate-900">Gợi ý hôm nay</p>
+              <p className="text-sm font-semibold text-slate-900">Today's suggestions</p>
               <ul className="mt-4 space-y-3 text-sm text-slate-600">
                 <li className="flex gap-3">
                   <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-sky-400" />
-                  Làm một bài Part 5 ngắn
+                  Complete a short Part 5 test
                 </li>
                 <li className="flex gap-3">
                   <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-sky-400" />
-                  Ghi lại từ vựng chưa chắc
+                  Note unfamiliar vocabulary
                 </li>
                 <li className="flex gap-3">
                   <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-sky-400" />
-                  Xem lại câu trả lời sai
+                  Review incorrect answers
                 </li>
               </ul>
             </section>
@@ -187,26 +187,26 @@ function Welcome({ user }) {
               <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-start">
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-wider text-sky-600">
-                    Tổng quan học tập
+                    Learning Overview
                   </p>
                   <h2 className="mt-3 max-w-3xl text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-                    Sẵn sàng cho phiên luyện tập hôm nay
+                    Ready for today's practice session
                   </h2>
                   <p className="mt-3 max-w-2xl leading-7 text-slate-600">
-                    Chọn bài phù hợp, hoàn thành từng phần và theo dõi tiến độ của
-                    bạn qua mỗi lần luyện tập.
+                    Choose a suitable test, complete each section, and track your
+                    progress across practice sessions.
                   </p>
                 </div>
                 <span className="w-fit shrink-0 rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700">
-                  Đang hoạt động
+                  Active
                 </span>
               </div>
 
               <div className="mt-8 grid gap-4 md:grid-cols-3">
                 {[
-                  ["12", "Bài đã hoàn thành"],
-                  ["86%", "Độ chính xác"],
-                  ["5 ngày", "Chuỗi học tập"],
+                  ["12", "Tests completed"],
+                  ["86%", "Accuracy"],
+                  ["5 days", "Study streak"],
                 ].map(([value, label]) => (
                   <div
                     key={label}
@@ -223,17 +223,17 @@ function Welcome({ user }) {
               <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-wider text-sky-600">
-                    Bộ đề TOEIC
+                    TOEIC Test Sets
                   </p>
                   <h3 className="mt-2 text-2xl font-bold text-slate-950">
-                    Chọn Test để bắt đầu
+                    Choose a test to begin
                   </h3>
                   <p className="mt-2 text-sm text-slate-500">
-                    Chọn một bộ đề, sau đó chọn Full Test, Listening, Reading hoặc Part cụ thể.
+                    Select a test set, then choose Full Test, Listening, Reading, or specific Parts.
                   </p>
                 </div>
                 <span className="w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                  {tests.filter((test) => test.available).length} đề sẵn sàng
+                  {tests.filter((test) => test.available).length} tests ready
                 </span>
               </div>
 

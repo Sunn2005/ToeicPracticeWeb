@@ -1,7 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { buildListeningUnits, buildReadingUnits } from "./testData.js";
+import { buildListeningUnits, buildReadingUnits, formatClock } from "./testData.js";
+
+test("formats the countdown as hours, minutes, and seconds", () => {
+  assert.equal(formatClock(6_004), "01:40:04");
+  assert.equal(formatClock(9), "00:00:09");
+});
 
 test("keeps Supabase graphic URL on grouped Listening units", () => {
   const imageUrl = "https://example.supabase.co/T01-P3-62-64.png";

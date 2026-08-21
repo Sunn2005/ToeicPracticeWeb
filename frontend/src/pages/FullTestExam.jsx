@@ -5,6 +5,9 @@ import ExamHeader from "../components/ExamHeader";
 import LockedExamAudio from "../components/LockedExamAudio";
 import PassagePanel from "../components/PassagePanel";
 import QuestionCard from "../components/QuestionCard";
+import QuestionNavigatorDrawer, {
+  QuestionNavigatorButton,
+} from "../components/QuestionNavigatorDrawer";
 import ResizableExamLayout from "../components/ResizableExamLayout";
 import {
   TIMER_TYPES,
@@ -31,13 +34,13 @@ function SubmitDialog({ unansweredCount, submitting, onCancel, onConfirm }) {
         aria-labelledby="submit-title"
         className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl sm:p-8"
       >
-        <p className="text-xs font-bold uppercase tracking-widest text-sky-600">Xác nhận nộp bài</p>
+        <p className="text-xs font-bold uppercase tracking-widest text-sky-600">Submit confirmation</p>
         <h2 id="submit-title" className="mt-2 text-2xl font-bold text-slate-950">
-          Bạn chắc chắn muốn nộp?
+          Are you sure you want to submit?
         </h2>
         <p className="mt-4 leading-7 text-slate-600">
-          Bạn còn <strong className="text-amber-700">{unansweredCount} câu chưa trả lời</strong>.
-          Sau khi nộp, toàn bộ đáp án sẽ bị khóa và không thể thay đổi.
+          You still have <strong className="text-amber-700">{unansweredCount} unanswered questions</strong>.
+          Once submitted, all answers will be locked and cannot be changed.
         </p>
         <div className="mt-7 flex gap-3">
           <button
@@ -46,7 +49,7 @@ function SubmitDialog({ unansweredCount, submitting, onCancel, onConfirm }) {
             disabled={submitting}
             className="flex-1 rounded-xl border border-slate-200 px-4 py-3 font-semibold text-slate-700 hover:bg-slate-50"
           >
-            Tiếp tục làm
+            Continue test
           </button>
           <button
             type="button"
@@ -54,7 +57,7 @@ function SubmitDialog({ unansweredCount, submitting, onCancel, onConfirm }) {
             disabled={submitting}
             className="flex-1 rounded-xl bg-sky-500 px-4 py-3 font-semibold text-white hover:bg-sky-600 disabled:bg-sky-300"
           >
-            {submitting ? "Đang nộp..." : "Nộp bài"}
+            {submitting ? "Submitting..." : "Submit test"}
           </button>
         </div>
       </div>
@@ -71,9 +74,10 @@ function FullTestExam() {
   const [sectionRemainingSeconds, setSectionRemainingSeconds] = useState(null);
   const [clockSkew, setClockSkew] = useState(0);
   const [error, setError] = useState("");
-  const [saveState, setSaveState] = useState("Đã đồng bộ");
+  const [saveState, setSaveState] = useState("Synced");
   const [busy, setBusy] = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
+  const [showNavigator, setShowNavigator] = useState(false);
   const [sectionNotice, setSectionNotice] = useState(false);
   const [audioAdvanceError, setAudioAdvanceError] = useState("");
   const pendingSaves = useRef(new Map());
@@ -142,6 +146,21 @@ function FullTestExam() {
   const currentQuestion = attempt?.currentQuestionNumber || 1;
   const currentUnits = attempt?.currentSection === "LISTENING" ? listeningUnits : readingUnits;
   const currentUnit = findUnit(currentUnits, currentQuestion);
+  const navigatorGroups = useMemo(() => {
+    const grouped = new Map();
+    currentUnits.forEach((unit) => {
+      const questions = grouped.get(unit.partNumber) || [];
+      unit.questions.forEach((question) => {
+        if (!questions.includes(question.questionNumber)) questions.push(question.questionNumber);
+      });
+      grouped.set(unit.partNumber, questions);
+    });
+    return [...grouped.entries()].map(([partNumber, questions]) => ({
+      partNumber,
+      questions: questions.sort((left, right) => left - right),
+    }));
+  }, [currentUnits]);
+  const navigatorLastQuestion = navigatorGroups.at(-1)?.questions.at(-1) || scopeLast;
   const totalQuestions = attempt?.totalQuestions || scopeLast - scopeFirst + 1;
   const answeredCount = Object.entries(answers).filter(
     ([number, value]) => Number(number) >= scopeFirst && Number(number) <= scopeLast && value,
@@ -157,6 +176,13 @@ function FullTestExam() {
     readingContentRef.current?.scrollTo({ top: 0 });
     readingQuestionsRef.current?.scrollTo({ top: 0 });
   }, [currentUnit?.key]);
+
+  useEffect(() => {
+    if (attempt?.currentSection !== "READING") return;
+    readingQuestionsRef.current
+      ?.querySelector(`#question-${currentQuestion}`)
+      ?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [attempt?.currentSection, currentQuestion]);
 
   useEffect(() => {
     if (!attempt?.sectionEndAt) return undefined;
@@ -178,7 +204,7 @@ function FullTestExam() {
       [questionNumber]: selectedAnswer,
     };
     setAnswers((current) => ({ ...current, [questionNumber]: selectedAnswer }));
-    setSaveState("Đang lưu...");
+    setSaveState("Saving...");
 
     const previousSave = pendingSaves.current.get(questionNumber) || Promise.resolve();
     const savePromise = previousSave
@@ -188,7 +214,7 @@ function FullTestExam() {
         body: JSON.stringify({ questionNumber, selectedAnswer }),
       }))
       .then(() => {
-        setSaveState("Đã lưu tự động");
+        setSaveState("Autosaved");
       })
       .catch((requestError) => {
         setAnswers((current) =>
@@ -202,7 +228,7 @@ function FullTestExam() {
             [questionNumber]: previousAnswer,
           };
         }
-        setSaveState("Lưu thất bại");
+        setSaveState("Save failed");
         setError(requestError.message);
         throw requestError;
       })
@@ -221,10 +247,12 @@ function FullTestExam() {
     if (saves.length) await Promise.all(saves);
   }, []);
 
+  const closeNavigator = useCallback(() => setShowNavigator(false), []);
+
   const saveCurrentAnswers = useCallback(async () => {
     if (!currentUnit) return;
     await waitForPendingSaves();
-    setSaveState("Đang lưu...");
+    setSaveState("Saving...");
     await Promise.all(
       currentUnit.questions.map((question) =>
         apiFetch(`/api/attempts/${attemptId}/answers`, {
@@ -236,7 +264,7 @@ function FullTestExam() {
         }),
       ),
     );
-    setSaveState("Đã lưu tự động");
+    setSaveState("Autosaved");
   }, [attemptId, currentUnit, waitForPendingSaves]);
 
   const submitExamOnce = useCallback(async ({ saveCurrent = true } = {}) => {
@@ -336,7 +364,7 @@ function FullTestExam() {
         if (!submitted && !submitInFlight.current && !hasSubmitted.current) {
           audioAdvanceInFlight.current = false;
           setAudioAdvanceError(
-            "Đáp án đã được lưu nhưng chưa thể nộp bài. Hãy kiểm tra mạng rồi thử lại.",
+            "Your answers were saved, but the test could not be submitted. Check your connection and try again.",
           );
         }
         return;
@@ -358,12 +386,12 @@ function FullTestExam() {
       if (attempt.currentSection === "LISTENING" && nextAttempt.currentSection === "READING") {
         setSectionNotice(true);
       }
-      setSaveState("Đã lưu tự động");
+      setSaveState("Autosaved");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (requestError) {
       setError(requestError.message);
       setAudioAdvanceError(
-        "Không thể lưu để tự chuyển. Hãy kiểm tra mạng rồi thử lại.",
+        "Unable to save and advance automatically. Check your connection and try again.",
       );
       audioAdvanceInFlight.current = false;
     } finally {
@@ -394,7 +422,7 @@ function FullTestExam() {
 
   const exitExam = () => {
     const shouldExit = window.confirm(
-      "Đáp án đã lưu sẽ được giữ lại và đồng hồ vẫn tiếp tục chạy. Bạn muốn về Dashboard?",
+      "Your saved answers will be kept and the timer will continue running. Return to the dashboard?",
     );
     if (shouldExit) navigate("/dashboard");
   };
@@ -403,14 +431,14 @@ function FullTestExam() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
         <div className="max-w-lg rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700">
-          <p className="font-bold">Không mở được bài thi</p>
+          <p className="font-bold">Unable to open the test</p>
           <p className="mt-2 text-sm leading-6">{error}</p>
           <button
             type="button"
             onClick={() => navigate("/dashboard")}
             className="mt-5 rounded-xl bg-white px-4 py-2 font-semibold text-slate-700"
           >
-            Về Dashboard
+            Return to dashboard
           </button>
         </div>
       </div>
@@ -418,7 +446,7 @@ function FullTestExam() {
   }
 
   if (!payload || !currentUnit) {
-    return <div className="flex min-h-screen items-center justify-center bg-slate-50">Đang khôi phục bài thi...</div>;
+    return <div className="flex min-h-screen items-center justify-center bg-slate-50">Restoring your test...</div>;
   }
 
   const isListening = attempt.currentSection === "LISTENING";
@@ -468,23 +496,23 @@ function FullTestExam() {
 
       {sectionNotice && attempt.currentSection === "READING" && (
         <div className="fixed left-1/2 top-24 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-2xl border border-emerald-200 bg-white p-5 text-center shadow-2xl">
-          <p className="font-bold text-emerald-700">Listening đã kết thúc</p>
+          <p className="font-bold text-emerald-700">Listening has ended</p>
           <p className="mt-1 text-sm text-slate-600">
             {attempt.mode === "PART"
-              ? "Bắt đầu các Part Reading · đồng hồ chung tiếp tục đếm"
-              : "Bắt đầu phần Reading · 75 phút"}
+              ? "The selected Reading Parts are starting · the shared timer will continue"
+              : "The Reading section is starting · 75 minutes"}
           </p>
           <button
             type="button"
             onClick={() => setSectionNotice(false)}
             className="mt-4 rounded-xl bg-emerald-500 px-5 py-2 text-sm font-bold text-white hover:bg-emerald-600"
           >
-            Tiếp tục
+            Continue
           </button>
         </div>
       )}
 
-      <main className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 lg:px-8">
+      <main className="w-full px-3 py-4 sm:px-4 lg:px-6">
         {error && (
           <div className="mb-4 flex items-center justify-between gap-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             <span>{error}</span>
@@ -492,7 +520,7 @@ function FullTestExam() {
           </div>
         )}
 
-        <div className={isListening ? "mx-auto max-w-5xl" : "mx-auto max-w-[1500px]"}>
+        <div className="w-full">
           <section className="min-w-0 space-y-5">
             <div className="flex flex-col justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center">
               <div>
@@ -501,33 +529,33 @@ function FullTestExam() {
                 </p>
                 <h1 className="mt-1 text-xl font-bold">
                   {isListening
-                    ? `Câu ${currentUnit.start}${currentUnit.end !== currentUnit.start ? `–${currentUnit.end}` : ""}`
-                    : `Câu ${currentQuestion} · phạm vi ${scopeFirst}–${scopeLast}`}
+                    ? `Questions ${currentUnit.start}${currentUnit.end !== currentUnit.start ? `–${currentUnit.end}` : ""}`
+                    : `Question ${currentQuestion} · range ${scopeFirst}–${scopeLast}`}
                 </h1>
               </div>
               <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
-                <span className={`h-2.5 w-2.5 rounded-full ${saveState === "Lưu thất bại" ? "bg-red-500" : saveState === "Đang lưu..." ? "animate-pulse bg-amber-400" : "bg-emerald-500"}`} />
+                <span className={`h-2.5 w-2.5 rounded-full ${saveState === "Save failed" ? "bg-red-500" : saveState === "Saving..." ? "animate-pulse bg-amber-400" : "bg-emerald-500"}`} />
                 {saveState}
               </div>
             </div>
 
             <ResizableExamLayout
-              leftLabel={isListening ? "nội dung bài nghe" : "nội dung bài đọc"}
-              rightLabel="câu hỏi và đáp án"
+              leftLabel={isListening ? "listening content" : "reading content"}
+              rightLabel="questions and answers"
               left={(
                 <section
                   ref={readingContentRef}
-                  aria-label={isListening ? "Nội dung bài nghe" : "Nội dung bài đọc"}
+                  aria-label={isListening ? "Listening content" : "Reading content"}
                   className="min-w-0 space-y-4 xl:h-[calc(100dvh-14rem)] xl:overflow-y-auto xl:pr-1"
                 >
                   <div className="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
                     <p className="text-xs font-bold uppercase tracking-widest text-violet-600">
-                      {isListening ? "Nội dung bài nghe" : "Nội dung bài đọc"}
+                      {isListening ? "Listening Content" : "Reading Content"}
                     </p>
                     <p className="mt-1 text-sm text-slate-500">
                       {isListening
-                        ? "Nghe audio, xem hình minh họa (nếu có) và chọn đáp án ở cột bên phải."
-                        : "Đọc nội dung bên trái và chọn đáp án ở cột bên phải."}
+                        ? "Listen to the audio, review the graphic when provided, and answer on the right."
+                        : "Read the material on the left and answer the questions on the right."}
                     </p>
                   </div>
 
@@ -542,7 +570,7 @@ function FullTestExam() {
                         />
                       ) : (
                         <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
-                          Câu hoặc group này chưa có audioUrl nên hệ thống không thể tự chuyển.
+                          This question group has no audio URL, so it cannot advance automatically.
                         </div>
                       )}
 
@@ -550,7 +578,7 @@ function FullTestExam() {
                         <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm">
                           <img
                             src={mediaImage}
-                            alt={`Hình minh họa cho câu ${currentUnit.start} đến ${currentUnit.end}`}
+                            alt={`Graphic for questions ${currentUnit.start} to ${currentUnit.end}`}
                             className="mx-auto h-auto max-h-[65vh] max-w-full rounded-xl object-contain"
                           />
                         </div>
@@ -564,7 +592,7 @@ function FullTestExam() {
                         <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm">
                           <img
                             src={mediaImage}
-                            alt={`Nội dung câu ${currentUnit.start}`}
+                            alt={`Material for question ${currentUnit.start}`}
                             className="mx-auto h-auto w-full rounded-xl object-contain"
                           />
                         </div>
@@ -577,7 +605,7 @@ function FullTestExam() {
 
                       {!hasReadingMaterial && (
                         <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm leading-6 text-slate-500">
-                          Part này không có đoạn văn riêng. Hãy chọn đáp án cho câu hỏi ở bên phải.
+                          This Part has no separate reading passage. Answer the question on the right.
                         </div>
                       )}
                     </>
@@ -586,7 +614,7 @@ function FullTestExam() {
               )}
               right={(
                 <section
-                  aria-label="Câu hỏi và đáp án"
+                  aria-label="Questions and answers"
                   className="min-w-0 xl:flex xl:h-[calc(100dvh-14rem)] xl:flex-col xl:pl-1"
                 >
                   <div
@@ -597,11 +625,11 @@ function FullTestExam() {
                       <div className="flex items-center justify-between gap-3">
                         <div>
                           <p className="text-xs font-bold uppercase tracking-widest text-sky-600">
-                            Câu hỏi & đáp án
+                            Questions & Answers
                           </p>
                           <h2 className="mt-1 font-bold">
                             {isListening
-                              ? `Part ${currentUnit.partNumber} · Câu ${currentUnit.start}–${currentUnit.end}`
+                              ? `Part ${currentUnit.partNumber} · Questions ${currentUnit.start}–${currentUnit.end}`
                               : selectedReadingParts.map((part) => `Part ${part}`).join(" + ")}
                           </h2>
                         </div>
@@ -616,32 +644,6 @@ function FullTestExam() {
                         )}
                       </div>
 
-                      {!isListening && (
-                        <div className="mt-4 grid grid-cols-8 gap-1.5 sm:grid-cols-10">
-                          {readingQuestionNumbers.map((number) => {
-                            const isAnswered = Boolean(answers[String(number)]);
-                            const isCurrent = number === currentQuestion;
-                            return (
-                              <button
-                                key={number}
-                                type="button"
-                                onClick={() => moveReading(number)}
-                                disabled={busy}
-                                aria-label={`Đến câu ${number}`}
-                                className={`aspect-square rounded-lg text-[11px] font-bold transition ${
-                                  isCurrent
-                                    ? "bg-sky-600 text-white ring-2 ring-sky-200"
-                                    : isAnswered
-                                      ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
-                                      : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                                }`}
-                              >
-                                {number}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
                     </aside>
 
                     <div className="space-y-4 pb-4">
@@ -663,26 +665,33 @@ function FullTestExam() {
 
                   <footer className="sticky bottom-3 z-10 mt-4 shrink-0 rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur">
                     {isListening ? (
-                      <div className="text-center">
-                        {audioAdvanceError ? (
-                          <button
-                            type="button"
-                            onClick={advanceListeningAfterAudio}
-                            disabled={busy}
-                            className="rounded-xl border border-red-200 bg-red-50 px-5 py-3 text-sm font-bold text-red-700 hover:bg-red-100 disabled:opacity-50"
-                          >
-                            {shouldSubmitAfterListeningAudio(attempt, currentUnit, listeningUnits)
-                              ? "Thử lưu và nộp lại"
-                              : "Thử lưu và tự chuyển lại"}
-                          </button>
-                        ) : (
-                          <p className="text-sm font-medium text-slate-500">
-                            Audio kết thúc sẽ tự động lưu {currentUnit.questions.length > 1 ? "cả group" : "đáp án"}
-                            {shouldSubmitAfterListeningAudio(attempt, currentUnit, listeningUnits)
-                              ? " và nộp bài."
-                              : " và chuyển tiếp."}
-                          </p>
-                        )}
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <QuestionNavigatorButton
+                          currentQuestion={currentQuestion}
+                          lastQuestion={navigatorLastQuestion}
+                          onClick={() => setShowNavigator(true)}
+                        />
+                        <div className="flex-1 text-center sm:text-right">
+                          {audioAdvanceError ? (
+                            <button
+                              type="button"
+                              onClick={advanceListeningAfterAudio}
+                              disabled={busy}
+                              className="rounded-xl border border-red-200 bg-red-50 px-5 py-3 text-sm font-bold text-red-700 hover:bg-red-100 disabled:opacity-50"
+                            >
+                              {shouldSubmitAfterListeningAudio(attempt, currentUnit, listeningUnits)
+                                ? "Retry save and submit"
+                                : "Retry save and auto-advance"}
+                            </button>
+                          ) : (
+                            <p className="text-sm font-medium text-slate-500">
+                              The audio will automatically save {currentUnit.questions.length > 1 ? "this group" : "your answer"}
+                              {shouldSubmitAfterListeningAudio(attempt, currentUnit, listeningUnits)
+                                ? " and submit the test when it ends."
+                                : " and advance when it ends."}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     ) : (
                       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -692,15 +701,20 @@ function FullTestExam() {
                           disabled={previousReadingQuestion === null || busy}
                           className="rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40"
                         >
-                          ← Câu trước
+                          ← Previous
                         </button>
+                        <QuestionNavigatorButton
+                          currentQuestion={currentQuestion}
+                          lastQuestion={navigatorLastQuestion}
+                          onClick={() => setShowNavigator(true)}
+                        />
                         <div className="flex gap-3">
                           <button
                             type="button"
                             onClick={() => setShowSubmit(true)}
                             className="rounded-xl border border-red-200 bg-red-50 px-5 py-3 font-bold text-red-700 hover:bg-red-100"
                           >
-                            Nộp bài
+                            Submit
                           </button>
                           <button
                             type="button"
@@ -708,7 +722,7 @@ function FullTestExam() {
                             disabled={nextReadingQuestion === null || busy}
                             className="rounded-xl bg-sky-500 px-5 py-3 font-bold text-white hover:bg-sky-600 disabled:opacity-40"
                           >
-                            Câu tiếp →
+                            Next →
                           </button>
                         </div>
                       </div>
@@ -729,6 +743,16 @@ function FullTestExam() {
           onConfirm={() => submitExamOnce()}
         />
       )}
+
+      <QuestionNavigatorDrawer
+        open={showNavigator}
+        onClose={closeNavigator}
+        groups={navigatorGroups}
+        currentQuestion={currentQuestion}
+        answers={answers}
+        navigationLocked={isListening}
+        onSelect={isListening ? null : moveReading}
+      />
     </div>
   );
 }
