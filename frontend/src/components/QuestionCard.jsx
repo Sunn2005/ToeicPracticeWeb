@@ -17,6 +17,10 @@ function QuestionCard({
   isFocused = false,
   review = false,
 }) {
+  const questionTranslation =
+    question.questionTranslation || question.translation;
+  const detailedExplanation =
+    question.detailedExplanation || question.explanation;
   const statusClass = review
     ? question.answerStatus === "CORRECT"
       ? "border-emerald-300 bg-emerald-50/50"
@@ -117,19 +121,27 @@ function QuestionCard({
               </>
             )}
           </p>
-          {question.translation && (
+          {questionTranslation && (
             <section className="rounded-lg border border-sky-100 bg-white p-4">
-              <h4 className="font-bold text-sky-700">Bản dịch</h4>
+              <h4 className="font-bold text-sky-700">Dịch nghĩa câu hỏi</h4>
               <div className="mt-2 space-y-3 text-slate-700">
-                <ReviewContent>{question.translation}</ReviewContent>
+                <ReviewContent>{questionTranslation}</ReviewContent>
+              </div>
+            </section>
+          )}
+          {question.answerTranslation && (
+            <section className="rounded-lg border border-emerald-100 bg-white p-4">
+              <h4 className="font-bold text-emerald-700">Dịch nghĩa đáp án</h4>
+              <div className="mt-2 space-y-3 text-slate-700">
+                <ReviewContent>{question.answerTranslation}</ReviewContent>
               </div>
             </section>
           )}
           <section className="rounded-lg border border-violet-100 bg-white p-4">
-            <h4 className="font-bold text-violet-700">Giải thích</h4>
+            <h4 className="font-bold text-violet-700">Giải thích chi tiết</h4>
             <div className="mt-2 space-y-3 text-slate-600">
               <ReviewContent>
-                {question.explanation || "Chưa có lời giải chi tiết cho câu này."}
+                {detailedExplanation || "Chưa có lời giải chi tiết cho câu này."}
               </ReviewContent>
             </div>
           </section>

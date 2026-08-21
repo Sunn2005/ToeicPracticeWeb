@@ -12,7 +12,6 @@
           "questionNumber": 1,
           "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/picture/T01-01.png",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-01.mp3",
-          "description": null,
           "question": null,
           "answers": [
             {
@@ -33,14 +32,15 @@
             }
           ],
           "correctAnswer": "B",
-          "explanation": null,
-          "transcript": "(A) The woman is carrying a tray of food. (B) The woman is wearing a jacket. (C) The woman is tying up her hair. (D) The woman is removing her hat."
+          "transcript": "(A) The woman is carrying a tray of food. (B) The woman is wearing a jacket. (C) The woman is tying up her hair. (D) The woman is removing her hat.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         },
         {
           "questionNumber": 2,
           "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/picture/T01-02.png",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-02.mp3",
-          "description": null,
           "question": null,
           "answers": [
             {
@@ -61,14 +61,15 @@
             }
           ],
           "correctAnswer": "D",
-          "explanation": null,
-          "transcript": "(A) Some people are standing next to a filing cabinet. (B) Some people are searching through a desk. (C) Some people are watching a presentation. (D) Some people are looking at a book."
+          "transcript": "(A) Some people are standing next to a filing cabinet. (B) Some people are searching through a desk. (C) Some people are watching a presentation. (D) Some people are looking at a book.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         },
         {
           "questionNumber": 3,
           "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/picture/T01-03.png",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-03.mp3",
-          "description": null,
           "question": null,
           "answers": [
             {
@@ -89,14 +90,15 @@
             }
           ],
           "correctAnswer": "C",
-          "explanation": null,
-          "transcript": "(A) A woman is holding a phone up to her ear. (B) A woman is pouring a beverage into a glass. (C) Some light fixtures are hanging from the ceiling. (D) Some tiles are being installed in a hallway."
+          "transcript": "(A) A woman is holding a phone up to her ear. (B) A woman is pouring a beverage into a glass. (C) Some light fixtures are hanging from the ceiling. (D) Some tiles are being installed in a hallway.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         },
         {
           "questionNumber": 4,
           "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/picture/T01-04.png",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-04.mp3",
-          "description": null,
           "question": null,
           "answers": [
             {
@@ -117,14 +119,15 @@
             }
           ],
           "correctAnswer": "A",
-          "explanation": null,
-          "transcript": "(A) A wooden crate is filled with vegetables. (B) One of the men is putting vegetables into a shopping bag. (C) A backpack has been set on the ground. (D) One of the men is reaching into a bucket."
+          "transcript": "(A) A wooden crate is filled with vegetables. (B) One of the men is putting vegetables into a shopping bag. (C) A backpack has been set on the ground. (D) One of the men is reaching into a bucket.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         },
         {
           "questionNumber": 5,
           "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/picture/T01-05.png",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-05.mp3",
-          "description": null,
           "question": null,
           "answers": [
             {
@@ -145,14 +148,15 @@
             }
           ],
           "correctAnswer": "A",
-          "explanation": null,
-          "transcript": "(A) Painting supplies have been laid out on the floor. (B) He's laying a brush down on a windowsill. (C) He's lifting a can of paint by its handle. (D) Cans of paint have been placed on a step stool."
+          "transcript": "(A) Painting supplies have been laid out on the floor. (B) He's laying a brush down on a windowsill. (C) He's lifting a can of paint by its handle. (D) Cans of paint have been placed on a step stool.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         },
         {
           "questionNumber": 6,
           "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/picture/T01-06.png",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-06.mp3",
-          "description": null,
           "question": null,
           "answers": [
             {
@@ -173,8 +177,10 @@
             }
           ],
           "correctAnswer": "C",
-          "explanation": null,
-          "transcript": "(A) A path is covered with fallen branches. (B) A tree is lying across a grassy area. (C) Some water has pooled on a path. (D) Some cyclists are riding through a field."
+          "transcript": "(A) A path is covered with fallen branches. (B) A tree is lying across a grassy area. (C) Some water has pooled on a path. (D) Some cyclists are riding through a field.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         }
       ]
     },
@@ -185,7 +191,6 @@
         {
           "questionNumber": 7,
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-07.mp3",
-          "description": null,
           "question": "Where is the conference being held?",
           "answers": [
             {
@@ -202,13 +207,14 @@
             }
           ],
           "correctAnswer": "B",
-          "explanation": null,
-          "transcript": "Where is the conference being held? (A) A three-day vacation. (B) At the Riverview Hotel. (C) In the supply cabinet."
+          "transcript": "Where is the conference being held? (A) A three-day vacation. (B) At the Riverview Hotel. (C) In the supply cabinet.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         },
         {
           "questionNumber": 8,
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-08.mp3",
-          "description": null,
           "question": "When does the warehouse manager arrive?",
           "answers": [
             {
@@ -225,13 +231,14 @@
             }
           ],
           "correctAnswer": "C",
-          "explanation": null,
-          "transcript": "When does the warehouse manager arrive? (A) Sure, no problem. (B) About twelve shipping boxes. (C) Not until this afternoon."
+          "transcript": "When does the warehouse manager arrive? (A) Sure, no problem. (B) About twelve shipping boxes. (C) Not until this afternoon.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         },
         {
           "questionNumber": 9,
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-09.mp3",
-          "description": null,
           "question": "There's a nice park nearby, right?",
           "answers": [
             {
@@ -248,13 +255,14 @@
             }
           ],
           "correctAnswer": "B",
-          "explanation": null,
-          "transcript": "There's a nice park nearby, right? (A) Did you order paper for the copier? (B) Yes-it's next to Greendale Lake. (C) They're in the parking garage."
+          "transcript": "There's a nice park nearby, right? (A) Did you order paper for the copier? (B) Yes-it's next to Greendale Lake. (C) They're in the parking garage.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         },
         {
           "questionNumber": 10,
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-10.mp3",
-          "description": null,
           "question": "Who sent the meeting minutes to the accounting department?",
           "answers": [
             {
@@ -271,13 +279,14 @@
             }
           ],
           "correctAnswer": "A",
-          "explanation": null,
-          "transcript": "Who sent the meeting minutes to the accounting department? (A) Our office assistant. (B) They have a savings account. (C) Cash and credit cards."
+          "transcript": "Who sent the meeting minutes to the accounting department? (A) Our office assistant. (B) They have a savings account. (C) Cash and credit cards.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         },
         {
           "questionNumber": 11,
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-11.mp3",
-          "description": null,
           "question": "I'd like to know what you think of our new finance analyst.",
           "answers": [
             {
@@ -294,13 +303,14 @@
             }
           ],
           "correctAnswer": "B",
-          "explanation": null,
-          "transcript": "I'd like to know what you think of our new finance analyst. (A) I've prepared the decorations for tomorrow. (B) He seems very competent. (C) It's finally stopped raining."
+          "transcript": "I'd like to know what you think of our new finance analyst. (A) I've prepared the decorations for tomorrow. (B) He seems very competent. (C) It's finally stopped raining.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         },
         {
           "questionNumber": 12,
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-12.mp3",
-          "description": null,
           "question": "Let's go on the company retreat.",
           "answers": [
             {
@@ -317,13 +327,14 @@
             }
           ],
           "correctAnswer": "B",
-          "explanation": null,
-          "transcript": "Let's go on the company retreat. (A) Oh, did he? (B) Yes, that's a good idea. (C) He tried to solve that problem."
+          "transcript": "Let's go on the company retreat. (A) Oh, did he? (B) Yes, that's a good idea. (C) He tried to solve that problem.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         },
         {
           "questionNumber": 13,
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-13.mp3",
-          "description": null,
           "question": "What time can I pick up my glasses?",
           "answers": [
             {
@@ -340,13 +351,14 @@
             }
           ],
           "correctAnswer": "C",
-          "explanation": null,
-          "transcript": "What time can I pick up my glasses? (A) No, it's not very heavy. (B) About twenty meters. (C) We close at six o'clock."
+          "transcript": "What time can I pick up my glasses? (A) No, it's not very heavy. (B) About twenty meters. (C) We close at six o'clock.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         },
         {
           "questionNumber": 14,
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-14.mp3",
-          "description": null,
           "question": "The sales team knows how to use the tracking software, don't they?",
           "answers": [
             {
@@ -363,13 +375,14 @@
             }
           ],
           "correctAnswer": "C",
-          "explanation": null,
-          "transcript": "The sales team knows how to use the tracking software, don't they? (A) It's on the lower shelf. (B) A twelve-thirty departure. (C) I haven't seen them using it yet."
+          "transcript": "The sales team knows how to use the tracking software, don't they? (A) It's on the lower shelf. (B) A twelve-thirty departure. (C) I haven't seen them using it yet.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         },
         {
           "questionNumber": 15,
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-15.mp3",
-          "description": null,
           "question": "Are you going to the hardware store on Mill Street?",
           "answers": [
             {
@@ -386,13 +399,14 @@
             }
           ],
           "correctAnswer": "A",
-          "explanation": null,
-          "transcript": "Are you going to the hardware store on Mill Street? (A) That store hasn't opened yet. (B) The blue package you sent me. (C) Some nails and a hammer."
+          "transcript": "Are you going to the hardware store on Mill Street? (A) That store hasn't opened yet. (B) The blue package you sent me. (C) Some nails and a hammer.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         },
         {
           "questionNumber": 16,
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-16.mp3",
-          "description": null,
           "question": "Would you be able to write the introduction for the workshop?",
           "answers": [
             {
@@ -409,13 +423,14 @@
             }
           ],
           "correctAnswer": "B",
-          "explanation": null,
-          "transcript": "Would you be able to write the introduction for the workshop? (A) That was a great book. (B) OK, I'd be happy to. (C) He doesn't have any more."
+          "transcript": "Would you be able to write the introduction for the workshop? (A) That was a great book. (B) OK, I'd be happy to. (C) He doesn't have any more.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         },
         {
           "questionNumber": 17,
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-17.mp3",
-          "description": null,
           "question": "I picked up some flowers for Tunji's retirement party.",
           "answers": [
             {
@@ -432,13 +447,14 @@
             }
           ],
           "correctAnswer": "B",
-          "explanation": null,
-          "transcript": "I picked up some flowers for Tunji's retirement party. (A) No, pick any day. (B) That was thoughtful. (C) A delivery driver."
+          "transcript": "I picked up some flowers for Tunji's retirement party. (A) No, pick any day. (B) That was thoughtful. (C) A delivery driver.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         },
         {
           "questionNumber": 18,
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-18.mp3",
-          "description": null,
           "question": "Which meeting room did you tell the interns to go to?",
           "answers": [
             {
@@ -455,13 +471,14 @@
             }
           ],
           "correctAnswer": "A",
-          "explanation": null,
-          "transcript": "Which meeting room did you tell the interns to go to? (A) The Jefferson Room. (B) The meeting was fun, thanks. (C) Yes, it's a conference call."
+          "transcript": "Which meeting room did you tell the interns to go to? (A) The Jefferson Room. (B) The meeting was fun, thanks. (C) Yes, it's a conference call.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         },
         {
           "questionNumber": 19,
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-19.mp3",
-          "description": null,
           "question": "Is your dental appointment next Tuesday?",
           "answers": [
             {
@@ -478,13 +495,14 @@
             }
           ],
           "correctAnswer": "B",
-          "explanation": null,
-          "transcript": "Is your dental appointment next Tuesday? (A) You can borrow mine. (B) I'll have to check my calendar. (C) Yes, it was a good meeting."
+          "transcript": "Is your dental appointment next Tuesday? (A) You can borrow mine. (B) I'll have to check my calendar. (C) Yes, it was a good meeting.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         },
         {
           "questionNumber": 20,
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-20.mp3",
-          "description": null,
           "question": "Why aren't there any brochures in the lobby?",
           "answers": [
             {
@@ -501,13 +519,14 @@
             }
           ],
           "correctAnswer": "C",
-          "explanation": null,
-          "transcript": "Why aren't there any brochures in the lobby? (A) No, I haven't received my confirmation e-mail yet. (B) My winter coat. (C) Because someone just took the last one."
+          "transcript": "Why aren't there any brochures in the lobby? (A) No, I haven't received my confirmation e-mail yet. (B) My winter coat. (C) Because someone just took the last one.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         },
         {
           "questionNumber": 21,
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-21.mp3",
-          "description": null,
           "question": "What's the process for submitting my expense report?",
           "answers": [
             {
@@ -524,13 +543,14 @@
             }
           ],
           "correctAnswer": "A",
-          "explanation": null,
-          "transcript": "What's the process for submitting my expense report? (A) You send it to the finance department. (B) The end of the day. (C) That's correct."
+          "transcript": "What's the process for submitting my expense report? (A) You send it to the finance department. (B) The end of the day. (C) That's correct.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         },
         {
           "questionNumber": 22,
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-22.mp3",
-          "description": null,
           "question": "Do you sell your products online or in stores?",
           "answers": [
             {
@@ -547,13 +567,14 @@
             }
           ],
           "correctAnswer": "C",
-          "explanation": null,
-          "transcript": "Do you sell your products online or in stores? (A) About twenty percent off. (B) A product demonstration. (C) Only online."
+          "transcript": "Do you sell your products online or in stores? (A) About twenty percent off. (B) A product demonstration. (C) Only online.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         },
         {
           "questionNumber": 23,
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-23.mp3",
-          "description": null,
           "question": "How often do you charge this device?",
           "answers": [
             {
@@ -570,13 +591,14 @@
             }
           ],
           "correctAnswer": "A",
-          "explanation": null,
-          "transcript": "How often do you charge this device? (A) Whenever the light turns red. (B) A wireless one. (C) At the hardware store."
+          "transcript": "How often do you charge this device? (A) Whenever the light turns red. (B) A wireless one. (C) At the hardware store.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         },
         {
           "questionNumber": 24,
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-24.mp3",
-          "description": null,
           "question": "The tickets to Friday night's concert cost ten dollars each.",
           "answers": [
             {
@@ -593,13 +615,14 @@
             }
           ],
           "correctAnswer": "A",
-          "explanation": null,
-          "transcript": "The tickets to Friday night's concert cost ten dollars each. (A) Actually, they're fifteen. (B) No, I can't play the guitar. (C) It's in aisle five."
+          "transcript": "The tickets to Friday night's concert cost ten dollars each. (A) Actually, they're fifteen. (B) No, I can't play the guitar. (C) It's in aisle five.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         },
         {
           "questionNumber": 25,
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-25.mp3",
-          "description": null,
           "question": "Can't you update the database today?",
           "answers": [
             {
@@ -616,13 +639,14 @@
             }
           ],
           "correctAnswer": "A",
-          "explanation": null,
-          "transcript": "Can't you update the database today? (A) I did it yesterday. (B) That's an interesting movie. (C) No, just me."
+          "transcript": "Can't you update the database today? (A) I did it yesterday. (B) That's an interesting movie. (C) No, just me.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         },
         {
           "questionNumber": 26,
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-26.mp3",
-          "description": null,
           "question": "How are we going to fit the extra supplies in that closet?",
           "answers": [
             {
@@ -639,13 +663,14 @@
             }
           ],
           "correctAnswer": "B",
-          "explanation": null,
-          "transcript": "How are we going to fit the extra supplies in that closet? (A) I've already read them. (B) Natalie's in charge of supplies. (C) It's the door at the end of the hallway."
+          "transcript": "How are we going to fit the extra supplies in that closet? (A) I've already read them. (B) Natalie's in charge of supplies. (C) It's the door at the end of the hallway.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         },
         {
           "questionNumber": 27,
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-27.mp3",
-          "description": null,
           "question": "Have all the new windows been installed?",
           "answers": [
             {
@@ -662,13 +687,14 @@
             }
           ],
           "correctAnswer": "B",
-          "explanation": null,
-          "transcript": "Have all the new windows been installed? (A) Sure, I'll close the blinds. (B) The construction crew is almost finished. (C) This isn't the tallest ladder available."
+          "transcript": "Have all the new windows been installed? (A) Sure, I'll close the blinds. (B) The construction crew is almost finished. (C) This isn't the tallest ladder available.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         },
         {
           "questionNumber": 28,
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-28.mp3",
-          "description": null,
           "question": "Would you rather go to lunch now or at noon?",
           "answers": [
             {
@@ -685,13 +711,14 @@
             }
           ],
           "correctAnswer": "A",
-          "explanation": null,
-          "transcript": "Would you rather go to lunch now or at noon? (A) I'm taking a client to lunch. (B) On the corner of Fourth and Main. (C) The daily special is soup and a sandwich."
+          "transcript": "Would you rather go to lunch now or at noon? (A) I'm taking a client to lunch. (B) On the corner of Fourth and Main. (C) The daily special is soup and a sandwich.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         },
         {
           "questionNumber": 29,
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-29.mp3",
-          "description": null,
           "question": "You're taking the training in the afternoon, aren't you?",
           "answers": [
             {
@@ -708,13 +735,14 @@
             }
           ],
           "correctAnswer": "C",
-          "explanation": null,
-          "transcript": "You're taking the training in the afternoon, aren't you? (A) The new head of the accounting department. (B) No, I take my coffee black. (C) Well, it depends on my schedule."
+          "transcript": "You're taking the training in the afternoon, aren't you? (A) The new head of the accounting department. (B) No, I take my coffee black. (C) Well, it depends on my schedule.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         },
         {
           "questionNumber": 30,
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-30.mp3",
-          "description": null,
           "question": "Shouldn't Ms. Ishida look over the financial projections?",
           "answers": [
             {
@@ -731,13 +759,14 @@
             }
           ],
           "correctAnswer": "C",
-          "explanation": null,
-          "transcript": "Shouldn't Ms. Ishida look over the financial projections? (A) I just got this monitor. (B) To the south entrance. (C) I'm meeting with her at ten."
+          "transcript": "Shouldn't Ms. Ishida look over the financial projections? (A) I just got this monitor. (B) To the south entrance. (C) I'm meeting with her at ten.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         },
         {
           "questionNumber": 31,
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-31.mp3",
-          "description": null,
           "question": "When are you going to choose a new project manager?",
           "answers": [
             {
@@ -754,8 +783,10 @@
             }
           ],
           "correctAnswer": "C",
-          "explanation": null,
-          "transcript": "When are you going to choose a new project manager? (A) The projector's not working correctly. (B) Next to the front entrance. (C) I'm really busy this week."
+          "transcript": "When are you going to choose a new project manager? (A) The projector's not working correctly. (B) Next to the front entrance. (C) I'm really busy this week.",
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": null
         }
       ]
     },
@@ -772,7 +803,6 @@
           "questions": [
             {
               "questionNumber": 32,
-              "description": null,
               "question": "What type of food product does the speakers' company sell?",
               "answers": [
                 {
@@ -793,11 +823,12 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 33,
-              "description": null,
               "question": "What does the man suggest?",
               "answers": [
                 {
@@ -818,11 +849,12 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 34,
-              "description": null,
               "question": "What does the woman say she will do?",
               "answers": [
                 {
@@ -843,7 +875,9 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             }
           ]
         },
@@ -856,7 +890,6 @@
           "questions": [
             {
               "questionNumber": 35,
-              "description": null,
               "question": "Why is the man calling?",
               "answers": [
                 {
@@ -877,11 +910,12 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 36,
-              "description": null,
               "question": "What did Ife Rotimi do last month?",
               "answers": [
                 {
@@ -902,11 +936,12 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 37,
-              "description": null,
               "question": "What does the woman say is required?",
               "answers": [
                 {
@@ -927,7 +962,9 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             }
           ]
         },
@@ -940,7 +977,6 @@
           "questions": [
             {
               "questionNumber": 38,
-              "description": null,
               "question": "What event are the speakers planning?",
               "answers": [
                 {
@@ -961,11 +997,12 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 39,
-              "description": null,
               "question": "What task does the woman ask the man to help with?",
               "answers": [
                 {
@@ -986,11 +1023,12 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 40,
-              "description": null,
               "question": "What does the woman say she will do?",
               "answers": [
                 {
@@ -1011,7 +1049,9 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             }
           ]
         },
@@ -1024,7 +1064,6 @@
           "questions": [
             {
               "questionNumber": 41,
-              "description": null,
               "question": "What event are the speakers preparing for?",
               "answers": [
                 {
@@ -1045,11 +1084,12 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 42,
-              "description": null,
               "question": "What is mentioned about some pens?",
               "answers": [
                 {
@@ -1070,11 +1110,12 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 43,
-              "description": null,
               "question": "What does the woman offer to do?",
               "answers": [
                 {
@@ -1095,7 +1136,9 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             }
           ]
         },
@@ -1108,7 +1151,6 @@
           "questions": [
             {
               "questionNumber": 44,
-              "description": null,
               "question": "Where does the woman work?",
               "answers": [
                 {
@@ -1129,11 +1171,12 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 45,
-              "description": null,
               "question": "What does the man want to dispose of?",
               "answers": [
                 {
@@ -1154,11 +1197,12 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 46,
-              "description": null,
               "question": "What does the woman say can be found on a Web site?",
               "answers": [
                 {
@@ -1179,7 +1223,9 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             }
           ]
         },
@@ -1192,7 +1238,6 @@
           "questions": [
             {
               "questionNumber": 47,
-              "description": null,
               "question": "How do the speakers know each other?",
               "answers": [
                 {
@@ -1213,11 +1258,12 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 48,
-              "description": null,
               "question": "What type of business does the man most likely own?",
               "answers": [
                 {
@@ -1238,11 +1284,12 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 49,
-              "description": null,
               "question": "What advantage does the woman point out about a rental space?",
               "answers": [
                 {
@@ -1263,7 +1310,9 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             }
           ]
         },
@@ -1276,7 +1325,6 @@
           "questions": [
             {
               "questionNumber": 50,
-              "description": null,
               "question": "Who most likely are the speakers?",
               "answers": [
                 {
@@ -1297,11 +1345,12 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 51,
-              "description": null,
               "question": "What did the man recently do?",
               "answers": [
                 {
@@ -1322,11 +1371,12 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 52,
-              "description": null,
               "question": "What does the woman suggest?",
               "answers": [
                 {
@@ -1347,7 +1397,9 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             }
           ]
         },
@@ -1360,7 +1412,6 @@
           "questions": [
             {
               "questionNumber": 53,
-              "description": null,
               "question": "Who most likely is the man?",
               "answers": [
                 {
@@ -1381,11 +1432,12 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 54,
-              "description": null,
               "question": "What problem does the woman describe?",
               "answers": [
                 {
@@ -1406,11 +1458,12 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 55,
-              "description": null,
               "question": "What does the woman mean when she says, \"it's supposed to be below freezing tonight\"?",
               "answers": [
                 {
@@ -1431,7 +1484,9 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             }
           ]
         },
@@ -1444,7 +1499,6 @@
           "questions": [
             {
               "questionNumber": 56,
-              "description": null,
               "question": "Why do the men want to speak to the woman?",
               "answers": [
                 {
@@ -1465,11 +1519,12 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 57,
-              "description": null,
               "question": "What type of business do the men own?",
               "answers": [
                 {
@@ -1490,11 +1545,12 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 58,
-              "description": null,
               "question": "According to the men, what has changed recently?",
               "answers": [
                 {
@@ -1515,7 +1571,9 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             }
           ]
         },
@@ -1528,7 +1586,6 @@
           "questions": [
             {
               "questionNumber": 59,
-              "description": null,
               "question": "What does the man want to do?",
               "answers": [
                 {
@@ -1549,11 +1606,12 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 60,
-              "description": null,
               "question": "What is the woman concerned about?",
               "answers": [
                 {
@@ -1574,11 +1632,12 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 61,
-              "description": null,
               "question": "What does the man mean when he says, \"High-quality video can be recorded and edited with a smartphone\"?",
               "answers": [
                 {
@@ -1599,7 +1658,9 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             }
           ]
         },
@@ -1607,12 +1668,11 @@
           "groupNumber": 11,
           "questionRange": "62-64",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-62-64.mp3",
-          "imageUrl": null,
+          "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/picture/T01-P3-62-64.png",
           "transcript": "W: Hi, Suresh, I'm at the airport waiting for my flight. I want to meet with a potential investor while I'm in Chicago. Her name's Marta Gomez. M: OK. Which day would you prefer to meet with her? W: How about right after my meeting with the Chicago staff? M: OK. By the way, did you see that our company won an award for our contributions to the community? It was just announced this morning.",
           "questions": [
             {
               "questionNumber": 62,
-              "description": null,
               "question": "Where is the woman?",
               "answers": [
                 {
@@ -1633,11 +1693,12 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 63,
-              "description": null,
               "question": "Look at the graphic. When does the woman prefer to meet with an investor?",
               "answers": [
                 {
@@ -1658,11 +1719,12 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 64,
-              "description": null,
               "question": "What good news does the man share?",
               "answers": [
                 {
@@ -1683,7 +1745,9 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             }
           ]
         },
@@ -1691,12 +1755,11 @@
           "groupNumber": 12,
           "questionRange": "65-67",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-65-67.mp3",
-          "imageUrl": null,
+          "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/picture/T01-P3-65-67.png",
           "transcript": "M: Marion, we keep getting calls from people who want to visit the botanical garden but can't find parking information. Isn't it on our Web site? W: It is, but you have to click on the \"About Us\" page and scroll to the bottom of that page. Maybe people don't see it. M: Oh, I think we should move that information from the \"About Us\" page and make a separate page for directions and parking information. W: I'd be happy to make that change. But we're in the middle of updating our software, so it'll have to wait until Monday.",
           "questions": [
             {
               "questionNumber": 65,
-              "description": null,
               "question": "Where do the speakers work?",
               "answers": [
                 {
@@ -1717,11 +1780,12 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 66,
-              "description": null,
               "question": "Look at the graphic. Which page on the Web site does the man want to change?",
               "answers": [
                 {
@@ -1742,11 +1806,12 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 67,
-              "description": null,
               "question": "Why does the woman say she cannot complete a task until Monday?",
               "answers": [
                 {
@@ -1767,7 +1832,9 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             }
           ]
         },
@@ -1775,12 +1842,11 @@
           "groupNumber": 13,
           "questionRange": "68-70",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-68-70.mp3",
-          "imageUrl": null,
+          "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/picture/T01-P3-68-70.png",
           "transcript": "M: Good news! We have finally received the go-ahead for our department's project to install bicycle racks at the train station downtown. W: At last! So, now we need to decide where to place the racks. How about by the station entrance? M: Hmm. If we asked riders, I bet they'd say that the most convenient spot is as close to the platform as possible. W: Let's do that. I'll contact some companies for estimates.",
           "questions": [
             {
               "questionNumber": 68,
-              "description": null,
               "question": "What news does the man share?",
               "answers": [
                 {
@@ -1801,11 +1867,12 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 69,
-              "description": null,
               "question": "Look at the graphic. Where do the speakers decide to install some bicycle racks?",
               "answers": [
                 {
@@ -1826,11 +1893,12 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 70,
-              "description": null,
               "question": "Why does the woman say she will contact some companies?",
               "answers": [
                 {
@@ -1851,7 +1919,9 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             }
           ]
         }
@@ -1870,7 +1940,6 @@
           "questions": [
             {
               "questionNumber": 71,
-              "description": null,
               "question": "What type of products does the business repair?",
               "answers": [
                 {
@@ -1891,11 +1960,12 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 72,
-              "description": null,
               "question": "What special benefit does the speaker mention?",
               "answers": [
                 {
@@ -1916,11 +1986,12 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 73,
-              "description": null,
               "question": "Why will a business close on Friday?",
               "answers": [
                 {
@@ -1941,7 +2012,9 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             }
           ]
         },
@@ -1954,7 +2027,6 @@
           "questions": [
             {
               "questionNumber": 74,
-              "description": null,
               "question": "Who most likely is the speaker?",
               "answers": [
                 {
@@ -1975,11 +2047,12 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 75,
-              "description": null,
               "question": "According to the speaker, what will the listeners find in a binder?",
               "answers": [
                 {
@@ -2000,11 +2073,12 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 76,
-              "description": null,
               "question": "What does the speaker say about department files?",
               "answers": [
                 {
@@ -2025,7 +2099,9 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             }
           ]
         },
@@ -2038,7 +2114,6 @@
           "questions": [
             {
               "questionNumber": 77,
-              "description": null,
               "question": "Where does the speaker work?",
               "answers": [
                 {
@@ -2059,11 +2134,12 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 78,
-              "description": null,
               "question": "What does the speaker say about an item she ordered a month ago?",
               "answers": [
                 {
@@ -2084,11 +2160,12 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 79,
-              "description": null,
               "question": "What does the speaker ask the listener to confirm?",
               "answers": [
                 {
@@ -2109,7 +2186,9 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             }
           ]
         },
@@ -2122,7 +2201,6 @@
           "questions": [
             {
               "questionNumber": 80,
-              "description": null,
               "question": "What type of product does the speaker's company make?",
               "answers": [
                 {
@@ -2143,11 +2221,12 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 81,
-              "description": null,
               "question": "What does the speaker recommend doing?",
               "answers": [
                 {
@@ -2168,11 +2247,12 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 82,
-              "description": null,
               "question": "What will happen at the next meeting?",
               "answers": [
                 {
@@ -2193,7 +2273,9 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             }
           ]
         },
@@ -2206,7 +2288,6 @@
           "questions": [
             {
               "questionNumber": 83,
-              "description": null,
               "question": "What is the announcement mainly about?",
               "answers": [
                 {
@@ -2227,11 +2308,12 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 84,
-              "description": null,
               "question": "Why does the speaker say, \"A bus will be departing for that destination in fifteen minutes\"?",
               "answers": [
                 {
@@ -2252,11 +2334,12 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 85,
-              "description": null,
               "question": "What does the speaker remind the listeners about?",
               "answers": [
                 {
@@ -2277,7 +2360,9 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             }
           ]
         },
@@ -2290,7 +2375,6 @@
           "questions": [
             {
               "questionNumber": 86,
-              "description": null,
               "question": "Where does the speaker most likely work?",
               "answers": [
                 {
@@ -2311,11 +2395,12 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 87,
-              "description": null,
               "question": "What did the listener receive by e-mail?",
               "answers": [
                 {
@@ -2336,11 +2421,12 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 88,
-              "description": null,
               "question": "Why is the speaker unavailable next week?",
               "answers": [
                 {
@@ -2361,7 +2447,9 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             }
           ]
         },
@@ -2374,7 +2462,6 @@
           "questions": [
             {
               "questionNumber": 89,
-              "description": null,
               "question": "Who most likely are the listeners?",
               "answers": [
                 {
@@ -2395,11 +2482,12 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 90,
-              "description": null,
               "question": "What does the speaker mean when she says, \"All of ours are at least ten years old\"?",
               "answers": [
                 {
@@ -2420,11 +2508,12 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 91,
-              "description": null,
               "question": "According to the speaker, what can be requested by e-mail?",
               "answers": [
                 {
@@ -2445,7 +2534,9 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             }
           ]
         },
@@ -2458,7 +2549,6 @@
           "questions": [
             {
               "questionNumber": 92,
-              "description": null,
               "question": "What does the speaker want to do?",
               "answers": [
                 {
@@ -2479,11 +2569,12 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 93,
-              "description": null,
               "question": "According to the speaker, what is the customers' main complaint?",
               "answers": [
                 {
@@ -2504,11 +2595,12 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 94,
-              "description": null,
               "question": "Why does the speaker say, \"that's our busiest location\"?",
               "answers": [
                 {
@@ -2529,7 +2621,9 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             }
           ]
         },
@@ -2537,12 +2631,11 @@
           "groupNumber": 9,
           "questionRange": "95-97",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-95-97.mp3",
-          "imageUrl": null,
+          "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/picture/T01-P4-95-97.png",
           "transcript": "The downtown Reston Office Tower is completed. The most extraordinary feature of the building is its beautiful garden, located in the lobby. We interviewed the CEO of Barnum Financial Services about its new offices. He said he and his team are excited to move in in January. A recording of the full interview is available on our Web site.",
           "questions": [
             {
               "questionNumber": 95,
-              "description": null,
               "question": "According to the speaker, what is special about the Reston Office Tower?",
               "answers": [
                 {
@@ -2563,11 +2656,12 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 96,
-              "description": null,
               "question": "Look at the graphic. Which floors will be occupied in January?",
               "answers": [
                 {
@@ -2588,11 +2682,12 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 97,
-              "description": null,
               "question": "What does the speaker say is available on a Web site?",
               "answers": [
                 {
@@ -2613,7 +2708,9 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             }
           ]
         },
@@ -2621,12 +2718,11 @@
           "groupNumber": 10,
           "questionRange": "98-100",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-98-100.mp3",
-          "imageUrl": null,
+          "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/picture/T01-P4-98-100.png",
           "transcript": "Thank you for attending this meeting for prospective investors. ZZ Mining has been planning to expand our operations by opening an additional silver mine. The site with 390 grams per ton has a larger deposit, so that's where we'll build the new mine. Our next step is to apply for the necessary permits. We'll do that next week.",
           "questions": [
             {
               "questionNumber": 98,
-              "description": null,
               "question": "Who most likely are the listeners?",
               "answers": [
                 {
@@ -2647,11 +2743,12 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 99,
-              "description": null,
               "question": "Look at the graphic. Where will a new mine be built?",
               "answers": [
                 {
@@ -2672,11 +2769,12 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             },
             {
               "questionNumber": 100,
-              "description": null,
               "question": "What does the speaker say is the next step?",
               "answers": [
                 {
@@ -2697,7 +2795,9 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": null
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": null
             }
           ]
         }
@@ -2709,7 +2809,6 @@
       "questions": [
         {
           "questionNumber": 101,
-          "description": null,
           "question": "The lecture will take place at 6:00 P.M., _____ which attendees may ask questions.",
           "answers": [
             {
@@ -2730,12 +2829,13 @@
             }
           ],
           "correctAnswer": "B",
-          "explanation": "Ta thấy Dấu phẩy + which → đây là mệnh đề quan hệ không xác định. Phía trước có 6 PM là thời gian nên cần giới từ chỉ thời gian, KHÔNG phải giới từ vị trí. => Chọn (B). Cụm \"after which\" là một cấu trúc mệnh đề quan hệ trạng từ, có nghĩa là \"sau thời điểm đó/sau sự kiện đó\" Dịch: Bài giảng sẽ diễn ra vào lúc 6 giờ tối, sau đó người tham dự có thể đặt câu hỏi.",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Ta thấy Dấu phẩy + which → đây là mệnh đề quan hệ không xác định. Phía trước có 6 PM là thời gian nên cần giới từ chỉ thời gian, KHÔNG phải giới từ vị trí. => Chọn (B). Cụm \"after which\" là một cấu trúc mệnh đề quan hệ trạng từ, có nghĩa là \"sau thời điểm đó/sau sự kiện đó\" Dịch: Bài giảng sẽ diễn ra vào lúc 6 giờ tối, sau đó người tham dự có thể đặt câu hỏi."
         },
         {
           "questionNumber": 102,
-          "description": null,
           "question": "The_____ antique shop in Pepper Valley will close down next month.",
           "answers": [
             {
@@ -2756,12 +2856,13 @@
             }
           ],
           "correctAnswer": "A",
-          "explanation": "Chọn (A). (A) last (Tính từ): cuối cùng / duy nhất còn lại. (B) lasts (Động từ chia số ít): kéo dài. (C) lasted (Động từ quá khứ): đã kéo dài. (D) lasting (Tính từ): bền vững, lâu dài. Chỗ trống nằm giữa mạo từ \"The\" và cụm danh từ \"antique shop\". Vị trí này chỉ có thể điền một Tính từ để bổ nghĩa cho danh từ phía sau. \"The last antique shop\" có nghĩa là \"Cửa hàng đồ cổ cuối cùng/duy nhất còn lại\", rất phù hợp với ngữ cảnh là nó sắp đóng cửa (\"close down\"). Dịch: Cửa hàng đồ cổ cuối cùng ở Thung lũng Pepper sẽ đóng cửa vào tháng tới.",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Chọn (A). (A) last (Tính từ): cuối cùng / duy nhất còn lại. (B) lasts (Động từ chia số ít): kéo dài. (C) lasted (Động từ quá khứ): đã kéo dài. (D) lasting (Tính từ): bền vững, lâu dài. Chỗ trống nằm giữa mạo từ \"The\" và cụm danh từ \"antique shop\". Vị trí này chỉ có thể điền một Tính từ để bổ nghĩa cho danh từ phía sau. \"The last antique shop\" có nghĩa là \"Cửa hàng đồ cổ cuối cùng/duy nhất còn lại\", rất phù hợp với ngữ cảnh là nó sắp đóng cửa (\"close down\"). Dịch: Cửa hàng đồ cổ cuối cùng ở Thung lũng Pepper sẽ đóng cửa vào tháng tới."
         },
         {
           "questionNumber": 103,
-          "description": null,
           "question": "Merryville residents will receive an online status _____ about the ongoing bridge construction project.",
           "answers": [
             {
@@ -2782,12 +2883,13 @@
             }
           ],
           "correctAnswer": "A",
-          "explanation": "Chọn (A). Câu hỏi về từ vựng. (A) update (n) bản cập nhật (B) change (n) sự thay đổi (C) payment (n) thanh toán (D) request (n) yêu cầu “status” thường đi với update. Cụm từ \"status update\" (cập nhật trạng thái/tình hình) là một \"collocation\" phổ biến trong môi trường làm việc và đề TOEIC.",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Chọn (A). Câu hỏi về từ vựng. (A) update (n) bản cập nhật (B) change (n) sự thay đổi (C) payment (n) thanh toán (D) request (n) yêu cầu “status” thường đi với update. Cụm từ \"status update\" (cập nhật trạng thái/tình hình) là một \"collocation\" phổ biến trong môi trường làm việc và đề TOEIC."
         },
         {
           "questionNumber": 104,
-          "description": null,
           "question": "As a result of _____ many years leading media organizations, Ms. Ayo was selected for the Dowel Journalism Prize.",
           "answers": [
             {
@@ -2808,12 +2910,13 @@
             }
           ],
           "correctAnswer": "B",
-          "explanation": "Chọn (B). (A) she (Đại từ nhân xưng): cô ấy (làm chủ ngữ). (B) her (Tính từ sở hữu/Tân ngữ): của cô ấy/cô ấy. (C) hers (Đại từ sở hữu): cái của cô ấy (D) herself (Đại từ phản thân): chính cô ấy. Đằng sau chỗ trống là một cụm danh từ bắt đầu bằng V-ing (many years leading media organizations) => Chúng ta cần một tính từ sở hữu để bổ nghĩa cho danh từ đó. Useful Structures: As a result of + N/V-ing Dịch: Kết quả của nhiều năm dẫn dắt các tổ chức truyền thông, bà Ayo đã được chọn cho Giải thưởng Báo chí Dowel.",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Chọn (B). (A) she (Đại từ nhân xưng): cô ấy (làm chủ ngữ). (B) her (Tính từ sở hữu/Tân ngữ): của cô ấy/cô ấy. (C) hers (Đại từ sở hữu): cái của cô ấy (D) herself (Đại từ phản thân): chính cô ấy. Đằng sau chỗ trống là một cụm danh từ bắt đầu bằng V-ing (many years leading media organizations) => Chúng ta cần một tính từ sở hữu để bổ nghĩa cho danh từ đó. Useful Structures: As a result of + N/V-ing Dịch: Kết quả của nhiều năm dẫn dắt các tổ chức truyền thông, bà Ayo đã được chọn cho Giải thưởng Báo chí Dowel."
         },
         {
           "questionNumber": 105,
-          "description": null,
           "question": "To stop the _____ of computer viruses, do not open suspicious e-mails.",
           "answers": [
             {
@@ -2834,12 +2937,13 @@
             }
           ],
           "correctAnswer": "B",
-          "explanation": "Chọn (B). (A) break (Danh từ): sự gãy vỡ, giờ nghỉ. (B) spread (Danh từ): sự lan truyền, sự phổ biến. (C) balance (Danh từ/Động từ): sự cân bằng, số dư tài khoản. (D) surface (Danh từ): bề mặt. Danh từ \"spread\" thường đi với virus, tin tức hoặc dịch bệnh. Useful Structures: the spread of + N (thường gặp trong các bài thông báo về an ninh mạng hoặc y tế) Dịch: Để ngăn chặn sự lây lan của virus máy tính, đừng mở các email đáng ngờ.",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Chọn (B). (A) break (Danh từ): sự gãy vỡ, giờ nghỉ. (B) spread (Danh từ): sự lan truyền, sự phổ biến. (C) balance (Danh từ/Động từ): sự cân bằng, số dư tài khoản. (D) surface (Danh từ): bề mặt. Danh từ \"spread\" thường đi với virus, tin tức hoặc dịch bệnh. Useful Structures: the spread of + N (thường gặp trong các bài thông báo về an ninh mạng hoặc y tế) Dịch: Để ngăn chặn sự lây lan của virus máy tính, đừng mở các email đáng ngờ."
         },
         {
           "questionNumber": 106,
-          "description": null,
           "question": "The hiring manager _____ considered each applicant's résumé and qualifications.",
           "answers": [
             {
@@ -2860,12 +2964,13 @@
             }
           ],
           "correctAnswer": "C",
-          "explanation": "Chọn (C). (A) caring (Tính từ/Danh động từ): chu đáo, sự quan tâm. (B) careful (Tính từ): cẩn thận (bổ nghĩa cho danh từ). (C) carefully (Trạng từ): một cách cẩn thận. (D) carefulness (Danh từ): sự cẩn thận. Chọn trạng từ cho chỗ trống để bổ nghĩa cho động từ \"considered\" (xem xét). (A), (B) tính từ không bổ nghĩa cho động từ thường; (D) danh từ không phù hợp cấu trúc. Useful Structures: consider + n/ Ving : cân nhắc/ xem xét cái gì, làm gì. Dịch: Quản lý tuyển dụng đã xem xét hồ sơ và năng lực của từng ứng viên một cách cẩn thận.",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Chọn (C). (A) caring (Tính từ/Danh động từ): chu đáo, sự quan tâm. (B) careful (Tính từ): cẩn thận (bổ nghĩa cho danh từ). (C) carefully (Trạng từ): một cách cẩn thận. (D) carefulness (Danh từ): sự cẩn thận. Chọn trạng từ cho chỗ trống để bổ nghĩa cho động từ \"considered\" (xem xét). (A), (B) tính từ không bổ nghĩa cho động từ thường; (D) danh từ không phù hợp cấu trúc. Useful Structures: consider + n/ Ving : cân nhắc/ xem xét cái gì, làm gì. Dịch: Quản lý tuyển dụng đã xem xét hồ sơ và năng lực của từng ứng viên một cách cẩn thận."
         },
         {
           "questionNumber": 107,
-          "description": null,
           "question": "In October, Mr. Sakamoto will leave for New Zealand _____ will oversee the opening of the new Auckland branch.",
           "answers": [
             {
@@ -2886,12 +2991,13 @@
             }
           ],
           "correctAnswer": "C",
-          "explanation": "Chọn (C). Câu này có hai mệnh đề: (1) Mr. Sakamoto sẽ đi NZ và (2) [ông ấy] sẽ giám sát... Vì chủ ngữ \"Mr. Sakamoto\" được lược bỏ ở vế sau, ta dùng and để nối hai hành động của cùng một chủ ngữ. (A) because (Liên từ): bởi vì (theo sau là một mệnh đề S+V). (B) in addition (Trạng từ liên kết): ngoài ra (thường đứng đầu câu, có dấu phẩy). (C) and (Liên từ): và. (D) prior to (Giới từ): trước khi (theo sau là Danh từ/V-ing). Useful Structures: because / in addition là bẫy thói quen của TOEIC. Dịch: Vào tháng 10, ông Sakamoto sẽ đến New Zealand và sẽ giám sát việc khai trương chi nhánh mới tại Auckland.",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Chọn (C). Câu này có hai mệnh đề: (1) Mr. Sakamoto sẽ đi NZ và (2) [ông ấy] sẽ giám sát... Vì chủ ngữ \"Mr. Sakamoto\" được lược bỏ ở vế sau, ta dùng and để nối hai hành động của cùng một chủ ngữ. (A) because (Liên từ): bởi vì (theo sau là một mệnh đề S+V). (B) in addition (Trạng từ liên kết): ngoài ra (thường đứng đầu câu, có dấu phẩy). (C) and (Liên từ): và. (D) prior to (Giới từ): trước khi (theo sau là Danh từ/V-ing). Useful Structures: because / in addition là bẫy thói quen của TOEIC. Dịch: Vào tháng 10, ông Sakamoto sẽ đến New Zealand và sẽ giám sát việc khai trương chi nhánh mới tại Auckland."
         },
         {
           "questionNumber": 108,
-          "description": null,
           "question": "Tarateer Pharmaceuticals is varying its product _____ to include over-the-counter medications.",
           "answers": [
             {
@@ -2912,12 +3018,13 @@
             }
           ],
           "correctAnswer": "D",
-          "explanation": "Chọn (D). Cụm danh từ ghép \"product line\" (dòng sản phẩm) là từ vựng cực kỳ \"kinh điển\" trong TOEIC (A) to line (Động từ nguyên mẫu có 'to'): để xếp hàng. (B) lining (Danh từ/V-ing): lớp vải lót, việc lót. (C) lined (Tính từ/V-ed): có kẻ hàng, được lót. (D) line (Danh từ): dòng, hàng. Useful phrases: product line: dòng sản phẩm over-the-counter (OTC) medications: thuốc không kê đơn Dịch: Dược phẩm Tarateer Pharmaceuticals đang đa dạng hóa dòng sản phẩm để bao gồm cả thuốc không kê đơn.",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Chọn (D). Cụm danh từ ghép \"product line\" (dòng sản phẩm) là từ vựng cực kỳ \"kinh điển\" trong TOEIC (A) to line (Động từ nguyên mẫu có 'to'): để xếp hàng. (B) lining (Danh từ/V-ing): lớp vải lót, việc lót. (C) lined (Tính từ/V-ed): có kẻ hàng, được lót. (D) line (Danh từ): dòng, hàng. Useful phrases: product line: dòng sản phẩm over-the-counter (OTC) medications: thuốc không kê đơn Dịch: Dược phẩm Tarateer Pharmaceuticals đang đa dạng hóa dòng sản phẩm để bao gồm cả thuốc không kê đơn."
         },
         {
           "questionNumber": 109,
-          "description": null,
           "question": "Dynart, Inc., continuously _____ new ways to reduce its use of plastics.",
           "answers": [
             {
@@ -2938,12 +3045,13 @@
             }
           ],
           "correctAnswer": "A",
-          "explanation": "Chọn (A). (A) seeks (Động từ chia số ít): tìm kiếm. (B) seeker (Danh từ): người tìm kiếm. (C) to seek (Động từ nguyên mẫu có 'to'): để tìm kiếm. (D) seeking (Phân từ/Danh động từ): đang tìm kiếm/việc tìm kiếm. Câu đã có chủ ngữ (Dynart, Inc.) và trạng từ (continuously), đang thiếu một động từ chính được chia thì (Finite Verb). Vì chủ ngữ số ít, ta chọn \"seeks\". Dịch: Tập đoàn Dynart liên tục tìm kiếm những cách mới để giảm thiểu việc sử dụng nhựa của mình.",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Chọn (A). (A) seeks (Động từ chia số ít): tìm kiếm. (B) seeker (Danh từ): người tìm kiếm. (C) to seek (Động từ nguyên mẫu có 'to'): để tìm kiếm. (D) seeking (Phân từ/Danh động từ): đang tìm kiếm/việc tìm kiếm. Câu đã có chủ ngữ (Dynart, Inc.) và trạng từ (continuously), đang thiếu một động từ chính được chia thì (Finite Verb). Vì chủ ngữ số ít, ta chọn \"seeks\". Dịch: Tập đoàn Dynart liên tục tìm kiếm những cách mới để giảm thiểu việc sử dụng nhựa của mình."
         },
         {
           "questionNumber": 110,
-          "description": null,
           "question": "The cash registers at Pirkle Books automatically _____ the remaining inventory of books available.",
           "answers": [
             {
@@ -2964,12 +3072,13 @@
             }
           ],
           "correctAnswer": "A",
-          "explanation": "Chọn (A). (A) calculate (Động từ nguyên thể): tính toán. (B) calculator (Danh từ): máy tính cầm tay (dụng cụ). (C) calculating (Phân từ/Danh động từ): đang tính toán/việc tính toán. (D) calculation (Danh từ): sự tính toán/phép tính. Chủ ngữ là \"The cash registers\" (số nhiều). Trạng từ \"automatically\" bổ nghĩa cho động từ chính. Ta cần một động từ nguyên thể phù hợp với chủ ngữ số nhiều. Useful phrases: Inventory (hàng tồn kho) thường đi với các động từ: calculate, monitor, track, take. Dịch: Các máy tính tiền tại Pirkle Books tự động tính toán lượng sách tồn kho còn lại hiện có.",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Chọn (A). (A) calculate (Động từ nguyên thể): tính toán. (B) calculator (Danh từ): máy tính cầm tay (dụng cụ). (C) calculating (Phân từ/Danh động từ): đang tính toán/việc tính toán. (D) calculation (Danh từ): sự tính toán/phép tính. Chủ ngữ là \"The cash registers\" (số nhiều). Trạng từ \"automatically\" bổ nghĩa cho động từ chính. Ta cần một động từ nguyên thể phù hợp với chủ ngữ số nhiều. Useful phrases: Inventory (hàng tồn kho) thường đi với các động từ: calculate, monitor, track, take. Dịch: Các máy tính tiền tại Pirkle Books tự động tính toán lượng sách tồn kho còn lại hiện có."
         },
         {
           "questionNumber": 111,
-          "description": null,
           "question": "The product team is designing mapping software that can _____ locate underground minerals.",
           "answers": [
             {
@@ -2990,12 +3099,13 @@
             }
           ],
           "correctAnswer": "C",
-          "explanation": "Chọn (C). (A) infinitely (adv): vô tận, không giới hạn. (B) sincerely (adv): một cách chân thành (thường dùng kết thư). (C) precisely (adv): một cách chính xác. (D) greatly (adv): rất nhiều, tuyệt vời. Cần tìm 1 trạng từ, và trạng từ này bổ nghĩa cho động từ \"locate\" (xác định vị trí). Trong kỹ thuật và phần mềm “software” việc xác định vị trí khoáng sản cần sự \"chính xác\". Useful phrases: \"precisely locate/identify\" (xác định vị trí/danh tính một cách chính xác) Dịch: Nhóm sản phẩm đang thiết kế phần mềm lập bản đồ có thể xác định vị trí các khoáng sản dưới lòng đất một cách chính xác.",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Chọn (C). (A) infinitely (adv): vô tận, không giới hạn. (B) sincerely (adv): một cách chân thành (thường dùng kết thư). (C) precisely (adv): một cách chính xác. (D) greatly (adv): rất nhiều, tuyệt vời. Cần tìm 1 trạng từ, và trạng từ này bổ nghĩa cho động từ \"locate\" (xác định vị trí). Trong kỹ thuật và phần mềm “software” việc xác định vị trí khoáng sản cần sự \"chính xác\". Useful phrases: \"precisely locate/identify\" (xác định vị trí/danh tính một cách chính xác) Dịch: Nhóm sản phẩm đang thiết kế phần mềm lập bản đồ có thể xác định vị trí các khoáng sản dưới lòng đất một cách chính xác."
         },
         {
           "questionNumber": 112,
-          "description": null,
           "question": "According to CEO Mayu Yamada, it would not be _____ responsible to expand the warehouse at this time.",
           "answers": [
             {
@@ -3016,12 +3126,13 @@
             }
           ],
           "correctAnswer": "C",
-          "explanation": "Chọn (C). (A) finance (n/v): tài chính/cấp vốn. (B) financials (n): báo cáo tài chính. (C) financially (adv): về mặt tài chính. (D) financing (n/v-ing): sự cấp vốn/việc cấp vốn. Chỗ trống đứng trước tính từ \"responsible\" (có trách nhiệm). Theo quy tắc: Adv + Adj. Ta chọn 1 Trạng từ bổ nghĩa cho tính từ để chỉ rõ trách",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Chọn (C). (A) finance (n/v): tài chính/cấp vốn. (B) financials (n): báo cáo tài chính. (C) financially (adv): về mặt tài chính. (D) financing (n/v-ing): sự cấp vốn/việc cấp vốn. Chỗ trống đứng trước tính từ \"responsible\" (có trách nhiệm). Theo quy tắc: Adv + Adj. Ta chọn 1 Trạng từ bổ nghĩa cho tính từ để chỉ rõ trách"
         },
         {
           "questionNumber": 113,
-          "description": null,
           "question": "Analysts cannot say with any _____ what the regional demand for electric trucks will be.",
           "answers": [
             {
@@ -3042,12 +3153,13 @@
             }
           ],
           "correctAnswer": "A",
-          "explanation": "Chọn (A) (A) certainty (n): sự chắc chắn. (B) justice (n): sự công bằng, tư pháp. (C) excellence (n): sự xuất sắc. (D) denial (n): sự phủ nhận. Cụm từ \"with certainty\" (một cách chắc chắn) là một cụm cố định. Kết hợp với \"cannot say\", câu này diễn tả việc các nhà phân tích không dám khẳng định chắc chắn về nhu cầu thị trường. Dịch: Các nhà phân tích không thể khẳng định chắc chắn nhu cầu của khu vực đối với xe tải điện sẽ là bao nhiêu.",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Chọn (A) (A) certainty (n): sự chắc chắn. (B) justice (n): sự công bằng, tư pháp. (C) excellence (n): sự xuất sắc. (D) denial (n): sự phủ nhận. Cụm từ \"with certainty\" (một cách chắc chắn) là một cụm cố định. Kết hợp với \"cannot say\", câu này diễn tả việc các nhà phân tích không dám khẳng định chắc chắn về nhu cầu thị trường. Dịch: Các nhà phân tích không thể khẳng định chắc chắn nhu cầu của khu vực đối với xe tải điện sẽ là bao nhiêu."
         },
         {
           "questionNumber": 114,
-          "description": null,
           "question": "As part of its marketing campaign, Elegancia Dishware is _____ soliciting feedback from customers.",
           "answers": [
             {
@@ -3068,12 +3180,13 @@
             }
           ],
           "correctAnswer": "C",
-          "explanation": "Chọn C (A) lightly (adv): nhẹ nhàng, sơ sài. (B) loyally (adv): một cách trung thành. (C) actively (adv): một cách chủ động/tích cực. (D) cleanly (adv): một cách sạch sẽ. Động từ \"solicit\" nghĩa là khẩn khoản, nài ép hoặc thu thập (ý kiến/vốn). Trong marketing, người ta thường \"chủ động thu thập\" (actively solicit) phản hồi khách hàng Useful phrases: \"Actively\" thường đi với các động từ hành động như: seek, recruit, solicit, participate. Dịch: Như một phần của chiến dịch tiếp thị, Elegancia Dishware đang chủ động thu thập phản hồi từ khách hàng.",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Chọn C (A) lightly (adv): nhẹ nhàng, sơ sài. (B) loyally (adv): một cách trung thành. (C) actively (adv): một cách chủ động/tích cực. (D) cleanly (adv): một cách sạch sẽ. Động từ \"solicit\" nghĩa là khẩn khoản, nài ép hoặc thu thập (ý kiến/vốn). Trong marketing, người ta thường \"chủ động thu thập\" (actively solicit) phản hồi khách hàng Useful phrases: \"Actively\" thường đi với các động từ hành động như: seek, recruit, solicit, participate. Dịch: Như một phần của chiến dịch tiếp thị, Elegancia Dishware đang chủ động thu thập phản hồi từ khách hàng."
         },
         {
           "questionNumber": 115,
-          "description": null,
           "question": "Rain gardens are intended to _____ water to prevent flooding of local roads.",
           "answers": [
             {
@@ -3094,12 +3207,13 @@
             }
           ],
           "correctAnswer": "C",
-          "explanation": "Chọn (C) (A) engage (v): thuê, thu hút, tham gia. (B) undergo (v): trải qua (kiểm tra/phẫu thuật). (C) absorb (v): hấp thụ, hút (nước/kiến thức). (D) overwhelm (v): áp đảo, lấn át. Dựa vào ngữ cảnh \"vườn mưa\" (rain gardens) và \"ngăn chặn ngập lụt\" (prevent flooding) , động từ phù hợp nhất với tân ngữ \"water\" là \"hấp thụ/hút nước\" absorb Dịch: Các vườn mưa được thiết kế để hấp thụ nước nhằm ngăn chặn tình trạng ngập lụt các tuyến đường địa phương.",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Chọn (C) (A) engage (v): thuê, thu hút, tham gia. (B) undergo (v): trải qua (kiểm tra/phẫu thuật). (C) absorb (v): hấp thụ, hút (nước/kiến thức). (D) overwhelm (v): áp đảo, lấn át. Dựa vào ngữ cảnh \"vườn mưa\" (rain gardens) và \"ngăn chặn ngập lụt\" (prevent flooding) , động từ phù hợp nhất với tân ngữ \"water\" là \"hấp thụ/hút nước\" absorb Dịch: Các vườn mưa được thiết kế để hấp thụ nước nhằm ngăn chặn tình trạng ngập lụt các tuyến đường địa phương."
         },
         {
           "questionNumber": 116,
-          "description": null,
           "question": "Theta Industries' training program aims to increase the _____ of its manufacturing systems.",
           "answers": [
             {
@@ -3120,12 +3234,13 @@
             }
           ],
           "correctAnswer": "D",
-          "explanation": "Chọn (D). (A) producer (n - chỉ người): nhà sản xuất. (B) produced (v-ed): đã sản xuất. (C) productive (adj): có năng suất. (D) productivity (n - chỉ sự vật): năng suất, hiệu suất. Sau mạo từ \"the\" và trước giới từ \"of\" phải là một danh từ. Xét về nghĩa, tăng cường \"năng suất\" của hệ thống sản xuất là hợp lý nhất. (A) là người sản xuất, không thể là năng suất của hệ thống; (C) là tính từ; (B) là động từ. Dịch: Chương trình đào tạo của Theta Industries nhằm mục đích tăng năng suất của các hệ thống sản xuất của mình.",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Chọn (D). (A) producer (n - chỉ người): nhà sản xuất. (B) produced (v-ed): đã sản xuất. (C) productive (adj): có năng suất. (D) productivity (n - chỉ sự vật): năng suất, hiệu suất. Sau mạo từ \"the\" và trước giới từ \"of\" phải là một danh từ. Xét về nghĩa, tăng cường \"năng suất\" của hệ thống sản xuất là hợp lý nhất. (A) là người sản xuất, không thể là năng suất của hệ thống; (C) là tính từ; (B) là động từ. Dịch: Chương trình đào tạo của Theta Industries nhằm mục đích tăng năng suất của các hệ thống sản xuất của mình."
         },
         {
           "questionNumber": 117,
-          "description": null,
           "question": "The board of directors has voted to award Mr. Mitrakos a bonus for his role _____ obtaining the international contract.",
           "answers": [
             {
@@ -3146,12 +3261,13 @@
             }
           ],
           "correctAnswer": "A",
-          "explanation": "Chọn (A) (A) in (prep): trong. (B) at (prep): tại. (C) except (prep): ngoại trừ. (D) apart (adv): tách biệt. Cấu trúc: \"one's role in doing something\" (vai trò của ai đó trong việc làm gì). Đây là cách dùng giới từ cố định sau danh từ \"role\". Useful phrases: Bonus for (tiền thưởng cho cái gì) Role in (vai trò trong việc gì) Dịch: Ban giám đốc đã bỏ phiếu thưởng cho ông Mitrakos vì vai trò của ông trong việc giành được hợp đồng quốc tế.",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Chọn (A) (A) in (prep): trong. (B) at (prep): tại. (C) except (prep): ngoại trừ. (D) apart (adv): tách biệt. Cấu trúc: \"one's role in doing something\" (vai trò của ai đó trong việc làm gì). Đây là cách dùng giới từ cố định sau danh từ \"role\". Useful phrases: Bonus for (tiền thưởng cho cái gì) Role in (vai trò trong việc gì) Dịch: Ban giám đốc đã bỏ phiếu thưởng cho ông Mitrakos vì vai trò của ông trong việc giành được hợp đồng quốc tế."
         },
         {
           "questionNumber": 118,
-          "description": null,
           "question": "The finance director gave his approval _____ the project can move forward.",
           "answers": [
             {
@@ -3172,12 +3288,13 @@
             }
           ],
           "correctAnswer": "D",
-          "explanation": "Chọn (D) (A) along (prep): dọc theo. (B) furthermore (adv): hơn nữa (dùng nối câu, sau có dấu phẩy). (C) cautiously (adv): một cách thận trọng. (D) so that (conj): để cho, nhằm mục đích. Phía sau chỗ trống là một mệnh đề hoàn chỉnh (S + V). \"So that\" đóng vai trò liên từ chỉ mục đích. Giám đốc phê duyệt \"để\" dự án có thể tiến triển. Useful phrases: Move forward\" (tiến triển/tiến về phía trước) Dịch: Giám đốc tài chính đã đưa ra sự chấp thuận để dự án có thể tiếp tục triển khai.",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Chọn (D) (A) along (prep): dọc theo. (B) furthermore (adv): hơn nữa (dùng nối câu, sau có dấu phẩy). (C) cautiously (adv): một cách thận trọng. (D) so that (conj): để cho, nhằm mục đích. Phía sau chỗ trống là một mệnh đề hoàn chỉnh (S + V). \"So that\" đóng vai trò liên từ chỉ mục đích. Giám đốc phê duyệt \"để\" dự án có thể tiến triển. Useful phrases: Move forward\" (tiến triển/tiến về phía trước) Dịch: Giám đốc tài chính đã đưa ra sự chấp thuận để dự án có thể tiếp tục triển khai."
         },
         {
           "questionNumber": 119,
-          "description": null,
           "question": "The newspaper article describes ways job seekers can _____ for having little workplace experience.",
           "answers": [
             {
@@ -3198,12 +3315,13 @@
             }
           ],
           "correctAnswer": "C",
-          "explanation": "Chọn (C). (A) reply (v): phản hồi (thường đi với 'to'). (B) capture (v): bắt giữ, chiếm lĩnh. (C) compensate (v): đền bù, bù đắp. (D) accumulate (v): tích lũy (kinh nghiệm/tiền bạc). Động từ compensate đi với giới từ for. Cấu trúc: \"compensate for something\" (bù đắp cho cái gì đó). Người tìm việc bù đắp cho việc thiếu kinh nghiệm bằng những cách thức khác. Câu D Mặc dù \"accumulate\" đi với experience nhưng ở đây experience là tân ngữ của \"having\", không phải tân ngữ của động từ chính. Dịch: ài báo mô tả những cách mà người tìm việc có thể bù đắp cho việc có ít kinh nghiệm làm việc.",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Chọn (C). (A) reply (v): phản hồi (thường đi với 'to'). (B) capture (v): bắt giữ, chiếm lĩnh. (C) compensate (v): đền bù, bù đắp. (D) accumulate (v): tích lũy (kinh nghiệm/tiền bạc). Động từ compensate đi với giới từ for. Cấu trúc: \"compensate for something\" (bù đắp cho cái gì đó). Người tìm việc bù đắp cho việc thiếu kinh nghiệm bằng những cách thức khác. Câu D Mặc dù \"accumulate\" đi với experience nhưng ở đây experience là tân ngữ của \"having\", không phải tân ngữ của động từ chính. Dịch: ài báo mô tả những cách mà người tìm việc có thể bù đắp cho việc có ít kinh nghiệm làm việc."
         },
         {
           "questionNumber": 120,
-          "description": null,
           "question": "Mr. Ellis and Ms. Barnes were both highly qualified, but _____ got the job.",
           "answers": [
             {
@@ -3224,12 +3342,13 @@
             }
           ],
           "correctAnswer": "B",
-          "explanation": "Chọn (B). (A) myself (Đại từ phản thân): chính tôi. (B) neither (Đại từ): không ai trong cả hai. (C) anybody (Đại từ bất định): bất cứ ai (thường dùng trong câu phủ định/nghi vấn). (D) whoever (Đại từ quan hệ): bất cứ ai người mà. Liên từ \"but\" nối hai sự đối lập. Mặc dù cả hai (both) đều đủ năng lực, nhưng \"không ai\" trong số họ nhận được công việc. \"Neither\" dùng cho 2 đối tượng. Useful phrases: Phân biệt \"Neither\" (không ai trong 2), \"None\" (không ai trong 3 trở lên) và \"Either\" (1 trong 2) Dịch: Ông Ellis và bà Barnes đều rất có năng lực, nhưng không ai trong hai người nhận được công việc.",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Chọn (B). (A) myself (Đại từ phản thân): chính tôi. (B) neither (Đại từ): không ai trong cả hai. (C) anybody (Đại từ bất định): bất cứ ai (thường dùng trong câu phủ định/nghi vấn). (D) whoever (Đại từ quan hệ): bất cứ ai người mà. Liên từ \"but\" nối hai sự đối lập. Mặc dù cả hai (both) đều đủ năng lực, nhưng \"không ai\" trong số họ nhận được công việc. \"Neither\" dùng cho 2 đối tượng. Useful phrases: Phân biệt \"Neither\" (không ai trong 2), \"None\" (không ai trong 3 trở lên) và \"Either\" (1 trong 2) Dịch: Ông Ellis và bà Barnes đều rất có năng lực, nhưng không ai trong hai người nhận được công việc."
         },
         {
           "questionNumber": 121,
-          "description": null,
           "question": "Ennis Photography purchased all new lighting equipment _____ the high cost.",
           "answers": [
             {
@@ -3250,12 +3369,13 @@
             }
           ],
           "correctAnswer": "D",
-          "explanation": "Chọn (D) despite (A) even though (Liên từ): Mặc dù (+ Mệnh đề S+V). (B) however (Trạng từ liên kết): Tuy nhiên (Thường đứng đầu câu hoặc giữa 2 dấu phẩy). (C) until (Giới từ/Liên từ): Cho đến khi. (D) despite (Giới từ): Mặc dù (+ Cụm danh từ/V-ing). Sau chỗ trống là \"the high cost\" (cụm danh từ). Even though (+ mệnh đề) và Despite (+ cụm danh từ) đều nghĩa là \"mặc dù\". Do đó chỉ có despite là đúng ngữ pháp. Useful phrases: Purchase equipment (Mua sắm thiết bị) Dịch: Ennis Photography đã mua toàn bộ thiết bị chiếu sáng mới mặc dù chi phí cao.",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Chọn (D) despite (A) even though (Liên từ): Mặc dù (+ Mệnh đề S+V). (B) however (Trạng từ liên kết): Tuy nhiên (Thường đứng đầu câu hoặc giữa 2 dấu phẩy). (C) until (Giới từ/Liên từ): Cho đến khi. (D) despite (Giới từ): Mặc dù (+ Cụm danh từ/V-ing). Sau chỗ trống là \"the high cost\" (cụm danh từ). Even though (+ mệnh đề) và Despite (+ cụm danh từ) đều nghĩa là \"mặc dù\". Do đó chỉ có despite là đúng ngữ pháp. Useful phrases: Purchase equipment (Mua sắm thiết bị) Dịch: Ennis Photography đã mua toàn bộ thiết bị chiếu sáng mới mặc dù chi phí cao."
         },
         {
           "questionNumber": 122,
-          "description": null,
           "question": "Marburton residents who wish to _____ a home should contact the award-winning team at Kwan Real Estate.",
           "answers": [
             {
@@ -3276,12 +3396,13 @@
             }
           ],
           "correctAnswer": "C",
-          "explanation": "Chọn (C) sell (A) seller (Danh từ): Người bán. (B) sold (Động từ V2/V3): Đã bán. (C) sell (Động từ nguyên mẫu): Bán. (D) selling (V-ing): Việc bán/đang bán Cấu trúc \"wish to + V-bare\" (muốn làm gì). Sau \"to\" là một động từ nguyên mẫu. để đóng vai trò hành động chính trong mệnh đề quan hệ. Useful phrases: Award-winning team (Đội ngũ từng đạt giải thưởng) Real Estate (Bất động sản) Dịch: Cư dân Marburton, những người muốn bán nhà, nên liên hệ với đội ngũ chuyên nghiệp tại Bất động sản Kwan.",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Chọn (C) sell (A) seller (Danh từ): Người bán. (B) sold (Động từ V2/V3): Đã bán. (C) sell (Động từ nguyên mẫu): Bán. (D) selling (V-ing): Việc bán/đang bán Cấu trúc \"wish to + V-bare\" (muốn làm gì). Sau \"to\" là một động từ nguyên mẫu. để đóng vai trò hành động chính trong mệnh đề quan hệ. Useful phrases: Award-winning team (Đội ngũ từng đạt giải thưởng) Real Estate (Bất động sản) Dịch: Cư dân Marburton, những người muốn bán nhà, nên liên hệ với đội ngũ chuyên nghiệp tại Bất động sản Kwan."
         },
         {
           "questionNumber": 123,
-          "description": null,
           "question": "Maswa Bistro began a _____ agreement with local farmers to purchase a set amount of produce each week.",
           "answers": [
             {
@@ -3302,12 +3423,13 @@
             }
           ],
           "correctAnswer": "B",
-          "explanation": "Chọn (B) cooperative (A) disruptive (Tính từ): Gây gián đoạn, phiền phức. (B) cooperative (Tính từ): Có tính hợp tác. (C) grateful (Tính từ): Biết ơn. (D) concerned (Tính từ): Lo lắng, quan tâm. Đây là câu hỏi từ vựng. Chỗ trống bổ nghĩa cho danh từ \"agreement\" (thỏa thuận). Việc nhà hàng mua nông sản từ nông dân là một hành động hợp tác. Cụm \"cooperative agreement\" (thỏa thuận hợp tác) là một thuật ngữ phổ biến trong kinh doanh. Useful phrases: A set amount of produce (Một lượng nông sản cố định). Lưu ý: \"Produce\" ở đây là danh từ không đếm được nghĩa là nông sản, không phải động từ \"sản xuất\" Dịch: Maswa Bistro đã bắt đầu một thỏa thuận hợp tác với các nông dân địa phương.",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Chọn (B) cooperative (A) disruptive (Tính từ): Gây gián đoạn, phiền phức. (B) cooperative (Tính từ): Có tính hợp tác. (C) grateful (Tính từ): Biết ơn. (D) concerned (Tính từ): Lo lắng, quan tâm. Đây là câu hỏi từ vựng. Chỗ trống bổ nghĩa cho danh từ \"agreement\" (thỏa thuận). Việc nhà hàng mua nông sản từ nông dân là một hành động hợp tác. Cụm \"cooperative agreement\" (thỏa thuận hợp tác) là một thuật ngữ phổ biến trong kinh doanh. Useful phrases: A set amount of produce (Một lượng nông sản cố định). Lưu ý: \"Produce\" ở đây là danh từ không đếm được nghĩa là nông sản, không phải động từ \"sản xuất\" Dịch: Maswa Bistro đã bắt đầu một thỏa thuận hợp tác với các nông dân địa phương."
         },
         {
           "questionNumber": 124,
-          "description": null,
           "question": "The City of Doyle's new downtown parking _____ have been met with opposition by residents and visitors.",
           "answers": [
             {
@@ -3328,12 +3450,13 @@
             }
           ],
           "correctAnswer": "C",
-          "explanation": "Chọn (C) restrictions (A) restricts (Động từ số ít): Hạn chế. (B) restricted (V-ed/Tính từ): Bị hạn chế. (C) restrictions (Danh từ số nhiều): Sự hạn chế/quy định hạn chế. (D) restricting (V-ing): Việc hạn chế. Chỗ trống đóng vai trò là Chủ ngữ chính của câu, Động từ chính của câu là \"have been\" (số nhiều). Vì vậy, chủ ngữ của câu phải là một danh từ số nhiều -> restrictions. Useful phrases: Meet with opposition (Vấp phải sự phản đối) Dịch: Những quy định hạn chế đậu xe mới ở trung tâm thành phố Doyle đã vấp phải sự phản đối của cư dân.",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Chọn (C) restrictions (A) restricts (Động từ số ít): Hạn chế. (B) restricted (V-ed/Tính từ): Bị hạn chế. (C) restrictions (Danh từ số nhiều): Sự hạn chế/quy định hạn chế. (D) restricting (V-ing): Việc hạn chế. Chỗ trống đóng vai trò là Chủ ngữ chính của câu, Động từ chính của câu là \"have been\" (số nhiều). Vì vậy, chủ ngữ của câu phải là một danh từ số nhiều -> restrictions. Useful phrases: Meet with opposition (Vấp phải sự phản đối) Dịch: Những quy định hạn chế đậu xe mới ở trung tâm thành phố Doyle đã vấp phải sự phản đối của cư dân."
         },
         {
           "questionNumber": 125,
-          "description": null,
           "question": "The plumbing position requires extensive training, even for those who studied _____ in technical school.",
           "answers": [
             {
@@ -3354,12 +3477,13 @@
             }
           ],
           "correctAnswer": "A",
-          "explanation": "Chọn (A) diligently (A) diligently (Trạng từ): Một cách chăm chỉ, cần mẫn. (B) scientifically (Trạng từ): Một cách khoa học. (C) objectively (Trạng từ): Một cách khách quan. (D) decidedly (Trạng từ): Một cách dứt khoát, rõ rệt. Trạng từ bổ nghĩa cho động từ \"studied\" (học tập). Trong giáo dục, ta dùng \"study diligently\" để chỉ việc học tập cần mẫn. Useful phrases: Extensive training (Đào tạo chuyên sâu/rộng rãi) Dịch: Vị trí thợ ống nước yêu cầu đào tạo chuyên sâu, ngay cả với những người đã học tập chăm chỉ ở trường kỹ thuật.",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Chọn (A) diligently (A) diligently (Trạng từ): Một cách chăm chỉ, cần mẫn. (B) scientifically (Trạng từ): Một cách khoa học. (C) objectively (Trạng từ): Một cách khách quan. (D) decidedly (Trạng từ): Một cách dứt khoát, rõ rệt. Trạng từ bổ nghĩa cho động từ \"studied\" (học tập). Trong giáo dục, ta dùng \"study diligently\" để chỉ việc học tập cần mẫn. Useful phrases: Extensive training (Đào tạo chuyên sâu/rộng rãi) Dịch: Vị trí thợ ống nước yêu cầu đào tạo chuyên sâu, ngay cả với những người đã học tập chăm chỉ ở trường kỹ thuật."
         },
         {
           "questionNumber": 126,
-          "description": null,
           "question": "With its fixed price _____, Omega Cellular guarantees no phone bill increases for three years.",
           "answers": [
             {
@@ -3380,12 +3504,13 @@
             }
           ],
           "correctAnswer": "A",
-          "explanation": "Chọn (A) assurance (A) assurance (Danh từ): Sự đảm bảo, sự cam đoan. (B) assuredly (Trạng từ): Một cách chắc chắn. (C) assuring (V-ing/Tính từ): Đảm bảo. (D) assures (Động từ): Cam đoan. Sau \"fixed price\" (giá cố định) cần một danh từ để tạo thành cụm danh từ làm tân ngữ sau giới từ \"With\". \"Price assurance\" (Sự đảm bảo về giá) là một cụm danh từ hoàn chỉnh về nghĩa. Useful phrases: Fixed price (Giá cố định) Phone bill increases (Sự tăng hóa đơn điện thoại) Dịch: Với sự đảm bảo về mức giá cố định, Omega Cellular cam kết không tăng hóa đơn điện thoại trong vòng ba năm.",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Chọn (A) assurance (A) assurance (Danh từ): Sự đảm bảo, sự cam đoan. (B) assuredly (Trạng từ): Một cách chắc chắn. (C) assuring (V-ing/Tính từ): Đảm bảo. (D) assures (Động từ): Cam đoan. Sau \"fixed price\" (giá cố định) cần một danh từ để tạo thành cụm danh từ làm tân ngữ sau giới từ \"With\". \"Price assurance\" (Sự đảm bảo về giá) là một cụm danh từ hoàn chỉnh về nghĩa. Useful phrases: Fixed price (Giá cố định) Phone bill increases (Sự tăng hóa đơn điện thoại) Dịch: Với sự đảm bảo về mức giá cố định, Omega Cellular cam kết không tăng hóa đơn điện thoại trong vòng ba năm."
         },
         {
           "questionNumber": 127,
-          "description": null,
           "question": "As chief analytics officer, Mr. Ko has worked at Lochston Ltd. with great _____ for more than twenty years.",
           "answers": [
             {
@@ -3406,12 +3531,13 @@
             }
           ],
           "correctAnswer": "D",
-          "explanation": "Chọn (D) dedication (A) deduction (Danh từ): Sự khấu trừ/sự suy luận. (B) duplication (Danh từ): Sự sao chép, nhân bản. (C) declaration (Danh từ): Sự tuyên bố, tờ khai. (D) dedication (Danh từ): Sự tận tụy, cống hiến. Câu hỏi từ vựng. Dấu hiệu là cụm \"for more than twenty years\" (hơn 20 năm) -> thể hiện sự cống hiến/tận tụy (dedication) lâu dài. Useful phrases: Chief analytics officer (Giám đốc phân tích dữ liệu) Dịch: Với tư cách là giám đốc phân tích, ông Ko đã làm việc tại Lochston Ltd. với sự tận tụy to lớn trong hơn hai mươi năm.",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Chọn (D) dedication (A) deduction (Danh từ): Sự khấu trừ/sự suy luận. (B) duplication (Danh từ): Sự sao chép, nhân bản. (C) declaration (Danh từ): Sự tuyên bố, tờ khai. (D) dedication (Danh từ): Sự tận tụy, cống hiến. Câu hỏi từ vựng. Dấu hiệu là cụm \"for more than twenty years\" (hơn 20 năm) -> thể hiện sự cống hiến/tận tụy (dedication) lâu dài. Useful phrases: Chief analytics officer (Giám đốc phân tích dữ liệu) Dịch: Với tư cách là giám đốc phân tích, ông Ko đã làm việc tại Lochston Ltd. với sự tận tụy to lớn trong hơn hai mươi năm."
         },
         {
           "questionNumber": 128,
-          "description": null,
           "question": "Milltown Hospital's cafeteria serves lunch seven days a week _____ only on weekdays.",
           "answers": [
             {
@@ -3432,12 +3558,13 @@
             }
           ],
           "correctAnswer": "D",
-          "explanation": "Chọn (D) rather than (A) up to (Giới từ): Lên đến. (B) as though (Liên từ): Như thể là. (C) each time (Trạng từ): Mỗi lần. (D) rather than (Liên từ/Giới từ): Thay vì. Câu này so sánh sự ưu tiên/lựa chọn. \"7 ngày một tuần\" đối lập với \"chỉ ngày thường\" -> dùng rather than (thay vì) để nhấn mạnh sự thay đổi. Useful phrases: Weekdays (Ngày trong tuần - từ thứ 2 đến thứ 6 Dịch: Nhà ăn phục vụ bữa trưa 7 ngày một tuần thay vì chỉ vào các ngày trong tuần.",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Chọn (D) rather than (A) up to (Giới từ): Lên đến. (B) as though (Liên từ): Như thể là. (C) each time (Trạng từ): Mỗi lần. (D) rather than (Liên từ/Giới từ): Thay vì. Câu này so sánh sự ưu tiên/lựa chọn. \"7 ngày một tuần\" đối lập với \"chỉ ngày thường\" -> dùng rather than (thay vì) để nhấn mạnh sự thay đổi. Useful phrases: Weekdays (Ngày trong tuần - từ thứ 2 đến thứ 6 Dịch: Nhà ăn phục vụ bữa trưa 7 ngày một tuần thay vì chỉ vào các ngày trong tuần."
         },
         {
           "questionNumber": 129,
-          "description": null,
           "question": "The store's entire inventory of lumber comes from a nearby _____ supplier.",
           "answers": [
             {
@@ -3458,12 +3585,13 @@
             }
           ],
           "correctAnswer": "D",
-          "explanation": "Chọn (D) commercial (A) financial (Tính từ): Thuộc về tài chính. (B) promotional (Tính từ): Thuộc về quảng cáo/khuyến mãi. (C) chemical (Tính từ): Thuộc về hóa học. (D) commercial (Tính từ): Thuộc về thương mại. \"Lumber\" (gỗ xẻ) là hàng hóa được mua bán số lượng lớn. \"Commercial supplier\" (nhà cung cấp thương mại) là cụm từ chỉ đơn vị cung ứng hàng hóa cho doanh nghiệp. Useful phrases: Entire inventory (Toàn bộ hàng tồn kho) Dịch: Toàn bộ kho gỗ của cửa hàng đến từ một nhà cung cấp thương mại gần đó.",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Chọn (D) commercial (A) financial (Tính từ): Thuộc về tài chính. (B) promotional (Tính từ): Thuộc về quảng cáo/khuyến mãi. (C) chemical (Tính từ): Thuộc về hóa học. (D) commercial (Tính từ): Thuộc về thương mại. \"Lumber\" (gỗ xẻ) là hàng hóa được mua bán số lượng lớn. \"Commercial supplier\" (nhà cung cấp thương mại) là cụm từ chỉ đơn vị cung ứng hàng hóa cho doanh nghiệp. Useful phrases: Entire inventory (Toàn bộ hàng tồn kho) Dịch: Toàn bộ kho gỗ của cửa hàng đến từ một nhà cung cấp thương mại gần đó."
         },
         {
           "questionNumber": 130,
-          "description": null,
           "question": "For a $95 _____ fee, our mechanics will determine what repairs are needed.",
           "answers": [
             {
@@ -3484,8 +3612,10 @@
             }
           ],
           "correctAnswer": "B",
-          "explanation": "Chọn (B) diagnostic (A) diagnosed (V-ed): Đã được chẩn đoán. (B) diagnostic (Tính từ): Có tính chẩn đoán. (C) diagnosable (Tính từ): Có thể chẩn đoán được. (D) diagnose (Động từ): Chẩn đoán.",
-          "grammarTopic": null
+          "grammarTopic": null,
+          "questionTranslation": null,
+          "answerTranslation": null,
+          "detailedExplanation": "Chọn (B) diagnostic (A) diagnosed (V-ed): Đã được chẩn đoán. (B) diagnostic (Tính từ): Có tính chẩn đoán. (C) diagnosable (Tính từ): Có thể chẩn đoán được. (D) diagnose (Động từ): Chẩn đoán."
         }
       ]
     },
@@ -3502,7 +3632,6 @@
           "questions": [
             {
               "questionNumber": 131,
-              "description": null,
               "question": null,
               "answers": [
                 {
@@ -3523,11 +3652,12 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": "Chọn D Trước chỗ trống: nói về lắng nghe & đưa ra gợi ý, Sau chỗ trống: chuyển sang giới thiệu dịch vụ cụ thể → Cần 1 câu kết nối, nói rõ mục tiêu của công ty -> Chọn D: → Tổng kết ý trước, dẫn sang phần giới thiệu dịch vụ A) Các nhân viên đã viết bài cho báo địa phương. -> Lạc đề, không liên quan làm vườn (B) Việc lắp đèn có thể làm tăng hiệu quả của một khu vườn được thiết kế tốt. -> Quá chi tiết, chưa được dẫn dắt (C) Các đối thủ địa phương không thể cạnh tranh được với mức giá của chúng tôi. -> Quảng cáo giá – không phù hợp mạch (D) Mục tiêu của Riessler Landscaping là biến tầm nhìn của bạn thành hiện thực. → Tổng kết ý trước, dẫn sang phần giới thiệu dịch vụ Dịch:... Chúng tôi sẽ lắng nghe ý tưởng của bạn và đưa ra những gợi ý phù hợp với mong muốn làm vườn của bạn. Mục tiêu của Riessler Landscaping là biến tầm nhìn của bạn thành hiện thực…."
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "Chọn D Trước chỗ trống: nói về lắng nghe & đưa ra gợi ý, Sau chỗ trống: chuyển sang giới thiệu dịch vụ cụ thể → Cần 1 câu kết nối, nói rõ mục tiêu của công ty -> Chọn D: → Tổng kết ý trước, dẫn sang phần giới thiệu dịch vụ A) Các nhân viên đã viết bài cho báo địa phương. -> Lạc đề, không liên quan làm vườn (B) Việc lắp đèn có thể làm tăng hiệu quả của một khu vườn được thiết kế tốt. -> Quá chi tiết, chưa được dẫn dắt (C) Các đối thủ địa phương không thể cạnh tranh được với mức giá của chúng tôi. -> Quảng cáo giá – không phù hợp mạch (D) Mục tiêu của Riessler Landscaping là biến tầm nhìn của bạn thành hiện thực. → Tổng kết ý trước, dẫn sang phần giới thiệu dịch vụ Dịch:... Chúng tôi sẽ lắng nghe ý tưởng của bạn và đưa ra những gợi ý phù hợp với mong muốn làm vườn của bạn. Mục tiêu của Riessler Landscaping là biến tầm nhìn của bạn thành hiện thực…."
             },
             {
               "questionNumber": 132,
-              "description": null,
               "question": null,
               "answers": [
                 {
@@ -3548,11 +3678,12 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": "Chọn C Cấu trúc add + NOUN + to Ngữ cảnh ở trước có những từ như “ eye-catching colors” màu sắc bắt mắt, “plants”cây cối, “year-round” đẹp quanh năm -> chọn C là phù hợp ngữ nghĩa nhất. (A) years (n) năm (B) space (n) không gian (C) beauty (n) vẻ đẹp (D) moisture (n) độ ẩm Dịch: Bạn chắc chắn sẽ tìm được thứ gì đó có"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "Chọn C Cấu trúc add + NOUN + to Ngữ cảnh ở trước có những từ như “ eye-catching colors” màu sắc bắt mắt, “plants”cây cối, “year-round” đẹp quanh năm -> chọn C là phù hợp ngữ nghĩa nhất. (A) years (n) năm (B) space (n) không gian (C) beauty (n) vẻ đẹp (D) moisture (n) độ ẩm Dịch: Bạn chắc chắn sẽ tìm được thứ gì đó có"
             },
             {
               "questionNumber": 133,
-              "description": null,
               "question": null,
               "answers": [
                 {
@@ -3573,11 +3704,12 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": "Chọn A Cần một trạng từ bổ nghĩa cho equipped với nghĩa là “ngoài ra / thêm nữa” để tiếp nối nói về những lợi ích mà dịch vụ cung cấp. (A) also (adv) cũng (B) rarely (adv) hiếm khi (C) somehow (adv) bằng cách nào đó (D) nevertheless ((adv liên kết) tuy nhiên Useful Structures: also equipped to + V Dịch: Chúng tôi cũng được trang bị đầy đủ để xây dựng các hồ nước nhỏ hoặc các hạng mục cảnh quan liên quan đến nước khác."
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "Chọn A Cần một trạng từ bổ nghĩa cho equipped với nghĩa là “ngoài ra / thêm nữa” để tiếp nối nói về những lợi ích mà dịch vụ cung cấp. (A) also (adv) cũng (B) rarely (adv) hiếm khi (C) somehow (adv) bằng cách nào đó (D) nevertheless ((adv liên kết) tuy nhiên Useful Structures: also equipped to + V Dịch: Chúng tôi cũng được trang bị đầy đủ để xây dựng các hồ nước nhỏ hoặc các hạng mục cảnh quan liên quan đến nước khác."
             },
             {
               "questionNumber": 134,
-              "description": null,
               "question": null,
               "answers": [
                 {
@@ -3598,7 +3730,9 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": "Chọn B Phía sau chỗ trống là Danh từ expertise, do vậy cần 1 tính từ đứng ở chỗ ô trống. -> chọn our. Dịch: Với hơn 40 năm hoạt động trong lĩnh vực thiết kế cảnh quan, chuyên môn của chúng tôi là vô song."
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "Chọn B Phía sau chỗ trống là Danh từ expertise, do vậy cần 1 tính từ đứng ở chỗ ô trống. -> chọn our. Dịch: Với hơn 40 năm hoạt động trong lĩnh vực thiết kế cảnh quan, chuyên môn của chúng tôi là vô song."
             }
           ]
         },
@@ -3611,7 +3745,6 @@
           "questions": [
             {
               "questionNumber": 135,
-              "description": null,
               "question": null,
               "answers": [
                 {
@@ -3632,11 +3765,12 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": "Chọn D (A) Chúng tôi đặc biệt coi trọng những khách hàng lâu năm. (B) Vui lòng tham gia lễ kỷ niệm ngày lễ của chúng tôi. (C) Báo cáo thường niên của chúng tôi sẽ sớm được phát hành. (D) Bạn đã là một thành viên quý giá của đội ngũ chúng tôi. Câu trước đó nói về việc kỷ niệm 30 năm làm việc của bà Mulligan tại công ty. Câu sau đó khen ngợi sự tận tụy và làm việc chăm chỉ của bà. Đáp án (D) kết nối hoàn hảo giữa việc chúc mừng thâm niên làm việc và việc khen ngợi đóng góp cá nhân. Các đáp án A, B, C đều lạc đề (nói về khách hàng, ngày lễ hoặc báo cáo). Useful structures: Be delighted to do something: Rất vui mừng/hân hạnh được làm gì."
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "Chọn D (A) Chúng tôi đặc biệt coi trọng những khách hàng lâu năm. (B) Vui lòng tham gia lễ kỷ niệm ngày lễ của chúng tôi. (C) Báo cáo thường niên của chúng tôi sẽ sớm được phát hành. (D) Bạn đã là một thành viên quý giá của đội ngũ chúng tôi. Câu trước đó nói về việc kỷ niệm 30 năm làm việc của bà Mulligan tại công ty. Câu sau đó khen ngợi sự tận tụy và làm việc chăm chỉ của bà. Đáp án (D) kết nối hoàn hảo giữa việc chúc mừng thâm niên làm việc và việc khen ngợi đóng góp cá nhân. Các đáp án A, B, C đều lạc đề (nói về khách hàng, ngày lễ hoặc báo cáo). Useful structures: Be delighted to do something: Rất vui mừng/hân hạnh được làm gì."
             },
             {
               "questionNumber": 136,
-              "description": null,
               "question": null,
               "answers": [
                 {
@@ -3657,11 +3791,12 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": "Chọn C (A) will show: sẽ cho thấy (Thì tương lai đơn) (B) must show: phải cho thấy (Động từ khuyết thiếu) (C) have shown: đã cho thấy (Thì hiện tại hoàn thành) (D) are showing: đang cho thấy (Thì hiện tại tiếp diễn) Cụm từ \"Over the years\" (Trong suốt những năm qua) là dấu hiệu kinh điển của thì Hiện tại hoàn thành, diễn tả một hành động kéo"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "Chọn C (A) will show: sẽ cho thấy (Thì tương lai đơn) (B) must show: phải cho thấy (Động từ khuyết thiếu) (C) have shown: đã cho thấy (Thì hiện tại hoàn thành) (D) are showing: đang cho thấy (Thì hiện tại tiếp diễn) Cụm từ \"Over the years\" (Trong suốt những năm qua) là dấu hiệu kinh điển của thì Hiện tại hoàn thành, diễn tả một hành động kéo"
             },
             {
               "questionNumber": 137,
-              "description": null,
               "question": null,
               "answers": [
                 {
@@ -3682,11 +3817,12 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": "Chọn B (A) then: sau đó (B) soon: sớm (C) instead: thay vào đó (D) likewise: tương tự như vậy Ngữ cảnh ta có \"You will _____ be receiving...\" (Bạn sẽ _____ nhận được một tấm kỷ niệm chương qua đường bưu điện).-> chọn B \"Will soon be receiving\" là một cấu trúc rất phổ biến trong thư từ thương mại để thông báo một việc sắp xảy ra trong tương lai gần. Useful structures: Commemorative plaque: Tấm kỷ niệm chương. Token of gratitude: Vật (quà) để bày tỏ lòng biết ơn."
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "Chọn B (A) then: sau đó (B) soon: sớm (C) instead: thay vào đó (D) likewise: tương tự như vậy Ngữ cảnh ta có \"You will _____ be receiving...\" (Bạn sẽ _____ nhận được một tấm kỷ niệm chương qua đường bưu điện).-> chọn B \"Will soon be receiving\" là một cấu trúc rất phổ biến trong thư từ thương mại để thông báo một việc sắp xảy ra trong tương lai gần. Useful structures: Commemorative plaque: Tấm kỷ niệm chương. Token of gratitude: Vật (quà) để bày tỏ lòng biết ơn."
             },
             {
               "questionNumber": 138,
-              "description": null,
               "question": null,
               "answers": [
                 {
@@ -3707,7 +3843,9 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": "Chọn A (A) milestone: cột mốc quan trọng (B) consensus: sự đồng thuận (C) destination: điểm đến (D) understanding: sự thấu hiểu/hiểu biết Ta có \"Congratulations on reaching this _____\" (Chúc mừng bạn đã đạt được _____ này).=>"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "Chọn A (A) milestone: cột mốc quan trọng (B) consensus: sự đồng thuận (C) destination: điểm đến (D) understanding: sự thấu hiểu/hiểu biết Ta có \"Congratulations on reaching this _____\" (Chúc mừng bạn đã đạt được _____ này).=>"
             }
           ]
         },
@@ -3720,7 +3858,6 @@
           "questions": [
             {
               "questionNumber": 139,
-              "description": null,
               "question": null,
               "answers": [
                 {
@@ -3741,11 +3878,12 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": "Chọn A (A) finalizing: đang hoàn thiện (V-ing) (B) finalize: hoàn thiện (V nguyên thể) (C) finalized: đã hoàn thiện (V-ed) (D) finalizes: hoàn thiện (V-s) Cụm từ cố định \"in the process of + V-ing\" (trong quá trình làm việc gì đó). Đằng sau giới từ \"of\" chúng ta luôn cần một danh động từ (Gerund). -> Chọn A: Chỉ có \"finalizing\" phù hợp với cấu trúc ngữ pháp này. Useful structures: In the process of doing something: Đang trong quá trình thực hiện điều gì."
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "Chọn A (A) finalizing: đang hoàn thiện (V-ing) (B) finalize: hoàn thiện (V nguyên thể) (C) finalized: đã hoàn thiện (V-ed) (D) finalizes: hoàn thiện (V-s) Cụm từ cố định \"in the process of + V-ing\" (trong quá trình làm việc gì đó). Đằng sau giới từ \"of\" chúng ta luôn cần một danh động từ (Gerund). -> Chọn A: Chỉ có \"finalizing\" phù hợp với cấu trúc ngữ pháp này. Useful structures: In the process of doing something: Đang trong quá trình thực hiện điều gì."
             },
             {
               "questionNumber": 140,
-              "description": null,
               "question": null,
               "answers": [
                 {
@@ -3766,11 +3904,12 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": "Chọn C (A) organizations: các tổ chức (B) schedules: các lịch trình (C) colors: các màu sắc (D) times: các thời điểm Câu trước đó đề cập đến: \"I have chosen different paints for the walls and borders\" (Tôi đã chọn các loại sơn khác nhau cho tường và viền). -> Trong thiết kế nội thất, khi nói đến sơn (paint), chúng ta đang nói về màu sắc (colors). \"Those new colors\" dùng để thay thế cho cụm \"different paints\" ở câu trước -> C là hợp lý nhất. Useful structures: Based on our last conversation: Dựa trên cuộc trò chuyện gần nhất của chúng ta (Cách dẫn dắt chuyên nghiệp)."
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "Chọn C (A) organizations: các tổ chức (B) schedules: các lịch trình (C) colors: các màu sắc (D) times: các thời điểm Câu trước đó đề cập đến: \"I have chosen different paints for the walls and borders\" (Tôi đã chọn các loại sơn khác nhau cho tường và viền). -> Trong thiết kế nội thất, khi nói đến sơn (paint), chúng ta đang nói về màu sắc (colors). \"Those new colors\" dùng để thay thế cho cụm \"different paints\" ở câu trước -> C là hợp lý nhất. Useful structures: Based on our last conversation: Dựa trên cuộc trò chuyện gần nhất của chúng ta (Cách dẫn dắt chuyên nghiệp)."
             },
             {
               "questionNumber": 141,
-              "description": null,
               "question": null,
               "answers": [
                 {
@@ -3791,11 +3930,12 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": "Chọn B (A) Tôi đã bắt đầu lập kế hoạch cho nhà bếp của bạn. (B) Chúng tôi chưa có kế hoạch bắt đầu công việc trong hai tuần tới. (C) Phòng khách của bạn đặc biệt rộng rãi và thoáng đãng. (D) Chúng tôi vẫn chưa nhận được khoản thanh toán hiện tại của bạn. Câu ngay sau chỗ trống là: \"Your review will help us refine the design before we start\" (Sự xem xét của bạn sẽ giúp chúng tôi tinh chỉnh thiết kế trước khi chúng tôi bắt đầu). -> Câu (B) tạo ra sự logic về thời gian. Vì họ chưa định bắt đầu làm việc ngay (trong 2 tuần tới) nên khách hàng vẫn còn thời gian để xem xét và thay đổi thiết kế. Đáp án (A) lạc đề sang \"nhà bếp\", (C) khen phòng khách không liên quan đến việc \"tinh chỉnh thiết kế\", (D) nhắc đến thanh toán quá đột ngột. Useful structures: Refine the design: Tinh chỉnh/cải thiện thiết kế. Review the attached file: Xem xét tệp đính kèm (Xuất hiện liên tục trong Part 6 & 7)"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "Chọn B (A) Tôi đã bắt đầu lập kế hoạch cho nhà bếp của bạn. (B) Chúng tôi chưa có kế hoạch bắt đầu công việc trong hai tuần tới. (C) Phòng khách của bạn đặc biệt rộng rãi và thoáng đãng. (D) Chúng tôi vẫn chưa nhận được khoản thanh toán hiện tại của bạn. Câu ngay sau chỗ trống là: \"Your review will help us refine the design before we start\" (Sự xem xét của bạn sẽ giúp chúng tôi tinh chỉnh thiết kế trước khi chúng tôi bắt đầu). -> Câu (B) tạo ra sự logic về thời gian. Vì họ chưa định bắt đầu làm việc ngay (trong 2 tuần tới) nên khách hàng vẫn còn thời gian để xem xét và thay đổi thiết kế. Đáp án (A) lạc đề sang \"nhà bếp\", (C) khen phòng khách không liên quan đến việc \"tinh chỉnh thiết kế\", (D) nhắc đến thanh toán quá đột ngột. Useful structures: Refine the design: Tinh chỉnh/cải thiện thiết kế. Review the attached file: Xem xét tệp đính kèm (Xuất hiện liên tục trong Part 6 & 7)"
             },
             {
               "questionNumber": 142,
-              "description": null,
               "question": null,
               "answers": [
                 {
@@ -3816,7 +3956,9 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": "Chọn D (A) them: họ/chúng (tân ngữ số nhiều) (B) ours: của chúng tôi (đại từ sở hữu) (C) his: của anh ấy (tính từ/đại từ sở hữu) (D) me: tôi (tân ngữ số ít) Chọn me là phù hợp ngữ pháp và ý nghĩa nhất. Cấu trúc \"Please let me know\" (Vui lòng cho tôi biết) là một câu kết email cực kỳ kinh điển. Người viết đang yêu cầu khách hàng phản hồi trực tiếp cho mình."
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "Chọn D (A) them: họ/chúng (tân ngữ số nhiều) (B) ours: của chúng tôi (đại từ sở hữu) (C) his: của anh ấy (tính từ/đại từ sở hữu) (D) me: tôi (tân ngữ số ít) Chọn me là phù hợp ngữ pháp và ý nghĩa nhất. Cấu trúc \"Please let me know\" (Vui lòng cho tôi biết) là một câu kết email cực kỳ kinh điển. Người viết đang yêu cầu khách hàng phản hồi trực tiếp cho mình."
             }
           ]
         },
@@ -3829,7 +3971,6 @@
           "questions": [
             {
               "questionNumber": 143,
-              "description": null,
               "question": null,
               "answers": [
                 {
@@ -3850,11 +3991,12 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": "Chọn C (A) satisfied (adj/V-ed): cảm thấy hài lòng (thường dùng cho người). (B) satisfaction (noun): sự hài lòng. (C) satisfactory (adj): thỏa đáng, vừa ý (dùng để miêu tả tính chất sự vật/dịch vụ). (D) satisfactorily (adv): một cách thỏa đáng. Ta có \"found our services + [Adj]\". Sau động từ \"find\" cộng tân ngữ, chúng ta cần một tính từ để bổ nghĩa cho tân ngữ \"services\" đó. => \"Satisfactory\" miêu tả chất lượng của dịch vụ là tốt, vừa ý. Đáp án (A) sai vì"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "Chọn C (A) satisfied (adj/V-ed): cảm thấy hài lòng (thường dùng cho người). (B) satisfaction (noun): sự hài lòng. (C) satisfactory (adj): thỏa đáng, vừa ý (dùng để miêu tả tính chất sự vật/dịch vụ). (D) satisfactorily (adv): một cách thỏa đáng. Ta có \"found our services + [Adj]\". Sau động từ \"find\" cộng tân ngữ, chúng ta cần một tính từ để bổ nghĩa cho tân ngữ \"services\" đó. => \"Satisfactory\" miêu tả chất lượng của dịch vụ là tốt, vừa ý. Đáp án (A) sai vì"
             },
             {
               "questionNumber": 144,
-              "description": null,
               "question": null,
               "answers": [
                 {
@@ -3875,11 +4017,12 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": "Chọn C (A) photo (noun): bức ảnh. (B) lecture (noun): bài giảng. (C) summary (noun): bản tóm tắt. (D) schedule (noun): lịch trình. Ngữ cảnh có \"We have posted a _____ of your consultation on our portal.\" (Chúng tôi đã đăng một _____ về buổi tư vấn của bạn lên cổng thông tin của chúng tôi) -> Chọn C vì trong y tế, sau khi khám (consultation), phòng khám thường cung cấp một \"bản tóm tắt\" nội dung buổi khám để bệnh nhân theo dõi. Các từ như ảnh, bài giảng hay lịch trình đều không phù hợp logic trong ngữ cảnh này."
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "Chọn C (A) photo (noun): bức ảnh. (B) lecture (noun): bài giảng. (C) summary (noun): bản tóm tắt. (D) schedule (noun): lịch trình. Ngữ cảnh có \"We have posted a _____ of your consultation on our portal.\" (Chúng tôi đã đăng một _____ về buổi tư vấn của bạn lên cổng thông tin của chúng tôi) -> Chọn C vì trong y tế, sau khi khám (consultation), phòng khám thường cung cấp một \"bản tóm tắt\" nội dung buổi khám để bệnh nhân theo dõi. Các từ như ảnh, bài giảng hay lịch trình đều không phù hợp logic trong ngữ cảnh này."
             },
             {
               "questionNumber": 145,
-              "description": null,
               "question": null,
               "answers": [
                 {
@@ -3900,11 +4043,12 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": "Chọn B (A) To repeat: để nhắc lại. (B) For instance: ví dụ như. (C) Otherwise: nếu không thì. (D) Consequently: hệ quả là. Ta thấy Câu trước nói về việc portal có \"various activities\" (nhiều hoạt động khác nhau). Vế sau liệt kê các hoạt động cụ thể như đặt lịch hẹn, thanh toán, xem lịch sử y tế… -> Chọn B \"For instance\" dùng để đưa ra các ví dụ cụ thể cho cụm \"various activities\" đã nêu trước đó. Useful phrases: Medical history: Lịch sử y tế/tiền sử bệnh án. Medication refills: Việc cấp thêm thuốc theo đơn cũ."
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "Chọn B (A) To repeat: để nhắc lại. (B) For instance: ví dụ như. (C) Otherwise: nếu không thì. (D) Consequently: hệ quả là. Ta thấy Câu trước nói về việc portal có \"various activities\" (nhiều hoạt động khác nhau). Vế sau liệt kê các hoạt động cụ thể như đặt lịch hẹn, thanh toán, xem lịch sử y tế… -> Chọn B \"For instance\" dùng để đưa ra các ví dụ cụ thể cho cụm \"various activities\" đã nêu trước đó. Useful phrases: Medical history: Lịch sử y tế/tiền sử bệnh án. Medication refills: Việc cấp thêm thuốc theo đơn cũ."
             },
             {
               "questionNumber": 146,
-              "description": null,
               "question": null,
               "answers": [
                 {
@@ -3925,7 +4069,9 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": "Chọn A (A) Chúng tôi hy vọng bạn sẽ sử dụng nguồn tài nguyên này để quản lý các nhu cầu chăm sóc sức khỏe của mình. (B) Nhân viên sẽ đóng cửa văn phòng sớm vào chiều thứ Sáu. (C) Hãy nhớ đến văn phòng của chúng tôi trước 15 phút. (D) Chúng tôi xin lỗi vì bất kỳ sự nhầm lẫn nào về thời gian hẹn của bạn. Ta thấy ngữ cảnh Cả đoạn văn đang giới thiệu về các tính năng của \"portal\" (cổng thông tin trực tuyến). Câu ngay sau chỗ trống là lời cam đoan về bảo mật thông tin cá nhân. -> Câu (A) tóm gọn lại mục đích của việc sử dụng portal (nguồn tài nguyên này) là để giúp bệnh nhân quản lý sức khỏe, rất phù hợp với mạch văn Useful structures: Rest assured that...: Hãy yên tâm rằng..."
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "Chọn A (A) Chúng tôi hy vọng bạn sẽ sử dụng nguồn tài nguyên này để quản lý các nhu cầu chăm sóc sức khỏe của mình. (B) Nhân viên sẽ đóng cửa văn phòng sớm vào chiều thứ Sáu. (C) Hãy nhớ đến văn phòng của chúng tôi trước 15 phút. (D) Chúng tôi xin lỗi vì bất kỳ sự nhầm lẫn nào về thời gian hẹn của bạn. Ta thấy ngữ cảnh Cả đoạn văn đang giới thiệu về các tính năng của \"portal\" (cổng thông tin trực tuyến). Câu ngay sau chỗ trống là lời cam đoan về bảo mật thông tin cá nhân. -> Câu (A) tóm gọn lại mục đích của việc sử dụng portal (nguồn tài nguyên này) là để giúp bệnh nhân quản lý sức khỏe, rất phù hợp với mạch văn Useful structures: Rest assured that...: Hãy yên tâm rằng..."
             }
           ]
         }
@@ -3951,7 +4097,6 @@
           "questions": [
             {
               "questionNumber": 147,
-              "description": null,
               "question": "What is the purpose of the notice?",
               "answers": [
                 {
@@ -3972,11 +4117,12 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": "C Mục đích của thông báo là gì? (A) Mời cư dân tham dự một cuộc họp vào ngày 3 tháng 5 (B) Yêu cầu ý kiến phản hồi về khu vực đỗ xe (C) Thông báo cho cư dân về một dự án sắp diễn ra (D) Thông báo việc tăng phí đỗ xe"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "C Mục đích của thông báo là gì? (A) Mời cư dân tham dự một cuộc họp vào ngày 3 tháng 5 (B) Yêu cầu ý kiến phản hồi về khu vực đỗ xe (C) Thông báo cho cư dân về một dự án sắp diễn ra (D) Thông báo việc tăng phí đỗ xe"
             },
             {
               "questionNumber": 148,
-              "description": null,
               "question": "What is suggested about High View Apartments?",
               "answers": [
                 {
@@ -3997,7 +4143,9 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": "D Điều gì được gợi ý về High View Apartments? (A) Nơi này thu phí bảo trì hàng tháng từ cư dân (B) Gần đây đã thuê một người quản lý tòa nhà mới (C) Khu vực đỗ xe được trải nhựa lại hằng năm (D) Mỗi cư dân được phân công chỗ đỗ xe riêng"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "D Điều gì được gợi ý về High View Apartments? (A) Nơi này thu phí bảo trì hàng tháng từ cư dân (B) Gần đây đã thuê một người quản lý tòa nhà mới (C) Khu vực đỗ xe được trải nhựa lại hằng năm (D) Mỗi cư dân được phân công chỗ đỗ xe riêng"
             }
           ]
         },
@@ -4017,7 +4165,6 @@
           "questions": [
             {
               "questionNumber": 149,
-              "description": null,
               "question": "What most likely is Ms. Seang's job?",
               "answers": [
                 {
@@ -4038,11 +4185,12 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": "B Công việc của cô Seang có khả năng cao nhất là gì? (A) Thợ làm đồ thủy tinh (B) Giảng viên nghệ thuật (C) Nhân viên cứu hộ bãi biển (D) Điều phối viên chương trình"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "B Công việc của cô Seang có khả năng cao nhất là gì? (A) Thợ làm đồ thủy tinh (B) Giảng viên nghệ thuật (C) Nhân viên cứu hộ bãi biển (D) Điều phối viên chương trình"
             },
             {
               "questionNumber": 150,
-              "description": null,
               "question": "At 11:23 A.M., what does Ms. Seang imply when she writes, \"I have plenty to go around\"?",
               "answers": [
                 {
@@ -4063,7 +4211,9 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": "Vào lúc 11:23 sáng, khi cô Seang viết “I have plenty to go around” (Tôi có rất nhiều để chia sẻ), cô ấy ngụ ý điều gì? (A) Cô ấy dự định tạo ra một bức tranh khảm cỡ rất lớn. (B) Cô ấy đã sưu tầm thủy tinh biển trong nhiều năm. (C) Cô ấy có thể chia sẻ thủy tinh biển của mình với tất cả những người tham gia hội thảo. (D) Cô ấy nghĩ rằng mình sẽ không sử dụng nhiều thủy tinh biển."
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "Vào lúc 11:23 sáng, khi cô Seang viết “I have plenty to go around” (Tôi có rất nhiều để chia sẻ), cô ấy ngụ ý điều gì? (A) Cô ấy dự định tạo ra một bức tranh khảm cỡ rất lớn. (B) Cô ấy đã sưu tầm thủy tinh biển trong nhiều năm. (C) Cô ấy có thể chia sẻ thủy tinh biển của mình với tất cả những người tham gia hội thảo. (D) Cô ấy nghĩ rằng mình sẽ không sử dụng nhiều thủy tinh biển."
             }
           ]
         },
@@ -4083,7 +4233,6 @@
           "questions": [
             {
               "questionNumber": 151,
-              "description": null,
               "question": "What is mentioned about Mr. Norton?",
               "answers": [
                 {
@@ -4104,11 +4253,12 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": "Điều gì được đề cập về ông Norton? (A) Ông ấy sẽ tham dự một hội nghị bán hàng. (B) Ông ấy đã gửi cho cô Correa một yêu cầu về vật dụng văn phòng. (C) Ông ấy đã viết một bài báo trong bản tin tháng Chín. (D) Ông ấy sẽ chuyển đến làm việc tại một chi nhánh khác của công ty."
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "Điều gì được đề cập về ông Norton? (A) Ông ấy sẽ tham dự một hội nghị bán hàng. (B) Ông ấy đã gửi cho cô Correa một yêu cầu về vật dụng văn phòng. (C) Ông ấy đã viết một bài báo trong bản tin tháng Chín. (D) Ông ấy sẽ chuyển đến làm việc tại một chi nhánh khác của công ty."
             },
             {
               "questionNumber": 152,
-              "description": null,
               "question": "What does Ms. Correa ask members of the sales team to do?",
               "answers": [
                 {
@@ -4129,7 +4279,9 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": "C Cô Correa yêu cầu các thành viên trong nhóm bán hàng làm gì? (A) Gửi cho cô ấy các câu chuyện/bài viết cho bản tin (B) Cung cấp cho cô ấy tên của những ứng viên tiềm năng (C) Thông báo cho cô ấy kế hoạch tham dự một sự kiện (D) Giúp cô ấy trang trí văn phòng"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "C Cô Correa yêu cầu các thành viên trong nhóm bán hàng làm gì? (A) Gửi cho cô ấy các câu chuyện/bài viết cho bản tin (B) Cung cấp cho cô ấy tên của những ứng viên tiềm năng (C) Thông báo cho cô ấy kế hoạch tham dự một sự kiện (D) Giúp cô ấy trang trí văn phòng"
             }
           ]
         },
@@ -4149,7 +4301,6 @@
           "questions": [
             {
               "questionNumber": 153,
-              "description": null,
               "question": "What is the purpose of the article?",
               "answers": [
                 {
@@ -4170,11 +4321,12 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": "B Mục đích của bài báo là gì? (A) Báo cáo về tình trạng bãi biển (B) Thông báo việc một doanh nghiệp mở cửa trở lại (C) Quảng bá buổi ra mắt một bộ phim (D) Quảng cáo một nhà hàng mới"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "B Mục đích của bài báo là gì? (A) Báo cáo về tình trạng bãi biển (B) Thông báo việc một doanh nghiệp mở cửa trở lại (C) Quảng bá buổi ra mắt một bộ phim (D) Quảng cáo một nhà hàng mới"
             },
             {
               "questionNumber": 154,
-              "description": null,
               "question": "Who is Ms. Flanagan?",
               "answers": [
                 {
@@ -4195,7 +4347,9 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": "C Bà Flanagan là ai? (A) Một thành viên hội đồng thị trấn (B) Một điều phối viên sự kiện (C) Đối tác kinh doanh của bà Lafferty (D) Tác giả của bài viết"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "C Bà Flanagan là ai? (A) Một thành viên hội đồng thị trấn (B) Một điều phối viên sự kiện (C) Đối tác kinh doanh của bà Lafferty (D) Tác giả của bài viết"
             }
           ]
         },
@@ -4215,7 +4369,6 @@
           "questions": [
             {
               "questionNumber": 155,
-              "description": null,
               "question": "What is the purpose of the e-mail?",
               "answers": [
                 {
@@ -4236,11 +4389,12 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": "D Mục đích của email là gì? (A) Yêu cầu thanh toán (B) Cung cấp hướng dẫn sử dụng (C) Quảng cáo một sản phẩm mới (D) Đề nghị một sản phẩm thay thế"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "D Mục đích của email là gì? (A) Yêu cầu thanh toán (B) Cung cấp hướng dẫn sử dụng (C) Quảng cáo một sản phẩm mới (D) Đề nghị một sản phẩm thay thế"
             },
             {
               "questionNumber": 156,
-              "description": null,
               "question": "What is mentioned about the Belter BTR-1483 telescope?",
               "answers": [
                 {
@@ -4261,11 +4415,12 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": "C Điều gì được đề cập về kính thiên văn Belter BTR-1483? (A) Chỉ có thể đặt mua trực tuyến. (B) Sẽ được vận chuyển trực tiếp từ nhà sản xuất. (C) Có kèm theo hộp bảo vệ. (D) Là kính thiên văn đắt nhất trong cùng loại."
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "C Điều gì được đề cập về kính thiên văn Belter BTR-1483? (A) Chỉ có thể đặt mua trực tuyến. (B) Sẽ được vận chuyển trực tiếp từ nhà sản xuất. (C) Có kèm theo hộp bảo vệ. (D) Là kính thiên văn đắt nhất trong cùng loại."
             },
             {
               "questionNumber": 157,
-              "description": null,
               "question": "In which of the positions marked [1], [2], [3], and [4] does the following sentence best belong? \"You can see a full list of specifications on our Web site.\"",
               "answers": [
                 {
@@ -4286,7 +4441,9 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": "B 157. Câu sau đây nên được đặt ở vị trí nào trong các vị trí [1], [2], [3], [4]? \"Bạn có thể xem danh sách đầy đủ các thông số kỹ thuật trên trang web của chúng tôi.\" (A) [1] (B) [2] (C) [3] (D) [4]"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "B 157. Câu sau đây nên được đặt ở vị trí nào trong các vị trí [1], [2], [3], [4]? \"Bạn có thể xem danh sách đầy đủ các thông số kỹ thuật trên trang web của chúng tôi.\" (A) [1] (B) [2] (C) [3] (D) [4]"
             }
           ]
         },
@@ -4306,7 +4463,6 @@
           "questions": [
             {
               "questionNumber": 158,
-              "description": null,
               "question": "What is one purpose of the e-mail?",
               "answers": [
                 {
@@ -4327,11 +4483,12 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": "D Mục đích của email là gì? (A) Giải thích cách sử dụng một phần mềm (B) Yêu cầu cô Myo hỗ trợ một dự án (C) Giới thiệu một nhân viên mới (D) Thông báo rằng ông Delpit đang vắng mặt khỏi văn phòng"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "D Mục đích của email là gì? (A) Giải thích cách sử dụng một phần mềm (B) Yêu cầu cô Myo hỗ trợ một dự án (C) Giới thiệu một nhân viên mới (D) Thông báo rằng ông Delpit đang vắng mặt khỏi văn phòng"
             },
             {
               "questionNumber": 159,
-              "description": null,
               "question": "What will happen on April 2?",
               "answers": [
                 {
@@ -4352,11 +4509,12 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": "B Điều gì sẽ xảy ra vào ngày 2 tháng 4? (A) Một vị trí công việc sẽ được tuyển dụng (B) Một sản phẩm sẽ được ra mắt (C) Một cuộc họp với khách hàng sẽ diễn ra (D) Việc thiết kế lại trang web sẽ bắt đầu"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "B Điều gì sẽ xảy ra vào ngày 2 tháng 4? (A) Một vị trí công việc sẽ được tuyển dụng (B) Một sản phẩm sẽ được ra mắt (C) Một cuộc họp với khách hàng sẽ diễn ra (D) Việc thiết kế lại trang web sẽ bắt đầu"
             },
             {
               "questionNumber": 160,
-              "description": null,
               "question": "How can people subscribe to a newsletter?",
               "answers": [
                 {
@@ -4377,7 +4535,9 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": "C Mọi người có thể đăng ký nhận bản tin bằng cách nào? (A) Gọi điện cho cô Viswan (B) Trả lời email của ông Delpit (C) Truy cập trang web của Hamerkoptech (D) Liên hệ bộ phận chăm sóc khách hàng"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "C Mọi người có thể đăng ký nhận bản tin bằng cách nào? (A) Gọi điện cho cô Viswan (B) Trả lời email của ông Delpit (C) Truy cập trang web của Hamerkoptech (D) Liên hệ bộ phận chăm sóc khách hàng"
             }
           ]
         },
@@ -4397,7 +4557,6 @@
           "questions": [
             {
               "questionNumber": 161,
-              "description": null,
               "question": "What is one purpose of the article?",
               "answers": [
                 {
@@ -4418,11 +4577,12 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": "C Mục đích của bài viết là gì? (A) Thảo luận về một kỹ thuật nấu ăn (B) Báo cáo về một vụ sáp nhập doanh nghiệp (C) Thông báo về một dòng sản phẩm mới (D) Giới thiệu một giám đốc điều hành mới được tuyển dụng"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "C Mục đích của bài viết là gì? (A) Thảo luận về một kỹ thuật nấu ăn (B) Báo cáo về một vụ sáp nhập doanh nghiệp (C) Thông báo về một dòng sản phẩm mới (D) Giới thiệu một giám đốc điều hành mới được tuyển dụng"
             },
             {
               "questionNumber": 162,
-              "description": null,
               "question": "The word \"just\" in paragraph 1, line 8, is closest in meaning to",
               "answers": [
                 {
@@ -4443,11 +4603,12 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": "D Từ “just” ở đoạn 1, dòng 8, gần nghĩa nhất với từ nào? (A) Gần đây (B) Chính xác (C) Hơi / một chút (D) Chỉ"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "D Từ “just” ở đoạn 1, dòng 8, gần nghĩa nhất với từ nào? (A) Gần đây (B) Chính xác (C) Hơi / một chút (D) Chỉ"
             },
             {
               "questionNumber": 163,
-              "description": null,
               "question": "What does Ms. Martens suggest about flash-frozen food?",
               "answers": [
                 {
@@ -4468,7 +4629,9 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": "B Bà Martens gợi ý điều gì về thực phẩm đông lạnh nhanh? (A) Rẻ hơn thực phẩm tươi (B) Có giá trị dinh dưỡng tương đương thực phẩm tươi (C) Dễ vận chuyển như thực phẩm tươi (D) Ít hương vị hơn thực phẩm tươi"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "B Bà Martens gợi ý điều gì về thực phẩm đông lạnh nhanh? (A) Rẻ hơn thực phẩm tươi (B) Có giá trị dinh dưỡng tương đương thực phẩm tươi (C) Dễ vận chuyển như thực phẩm tươi (D) Ít hương vị hơn thực phẩm tươi"
             }
           ]
         },
@@ -4488,7 +4651,6 @@
           "questions": [
             {
               "questionNumber": 164,
-              "description": null,
               "question": "According to the advertisement, who most likely is Ms. Navani?",
               "answers": [
                 {
@@ -4509,11 +4671,12 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": "B Theo quảng cáo, bà Navani có khả năng cao là ai? (A) Một khách hàng của Karning Creative Designs (B) Một chủ doanh nghiệp (C) Một nhiếp ảnh gia (D) Một nhân viên môi giới bất động sản"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "B Theo quảng cáo, bà Navani có khả năng cao là ai? (A) Một khách hàng của Karning Creative Designs (B) Một chủ doanh nghiệp (C) Một nhiếp ảnh gia (D) Một nhân viên môi giới bất động sản"
             },
             {
               "questionNumber": 165,
-              "description": null,
               "question": "What is indicated about Karning Creative Designs?",
               "answers": [
                 {
@@ -4534,11 +4697,12 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": "B Điều gì được đề cập về Karning Creative Designs? (A) Trọng tâm chính của công ty là thiết kế web (B) Ban đầu công ty có hai nhân viên (C) Công ty được thành lập bởi ông Tomassin (D) Nhân viên được phép làm việc tại nhà"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "B Điều gì được đề cập về Karning Creative Designs? (A) Trọng tâm chính của công ty là thiết kế web (B) Ban đầu công ty có hai nhân viên (C) Công ty được thành lập bởi ông Tomassin (D) Nhân viên được phép làm việc tại nhà"
             },
             {
               "questionNumber": 166,
-              "description": null,
               "question": "What is required of job applicants?",
               "answers": [
                 {
@@ -4559,11 +4723,12 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": "A Ứng viên xin việc cần đáp ứng yêu cầu gì? (A) Có kỹ năng làm việc nhóm (B) Có kinh nghiệm thiết kế trước đó (C) Sẵn sàng làm việc vào cuối tuần (D) Có khả năng sử dụng một số phần mềm nhất định"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "A Ứng viên xin việc cần đáp ứng yêu cầu gì? (A) Có kỹ năng làm việc nhóm (B) Có kinh nghiệm thiết kế trước đó (C) Sẵn sàng làm việc vào cuối tuần (D) Có khả năng sử dụng một số phần mềm nhất định"
             },
             {
               "questionNumber": 167,
-              "description": null,
               "question": "What will happen on March 31?",
               "answers": [
                 {
@@ -4584,7 +4749,9 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": "B Điều gì sẽ xảy ra vào ngày 31 tháng 3? (A) Một dự án sẽ bắt đầu (B) Một hạn chót sẽ diễn ra (C) Một nhà thiết kế đồ họa sẽ chuyển nơi làm việc (D) Mẫu đơn đăng ký sẽ được công bố"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "B Điều gì sẽ xảy ra vào ngày 31 tháng 3? (A) Một dự án sẽ bắt đầu (B) Một hạn chót sẽ diễn ra (C) Một nhà thiết kế đồ họa sẽ chuyển nơi làm việc (D) Mẫu đơn đăng ký sẽ được công bố"
             }
           ]
         },
@@ -4604,7 +4771,6 @@
           "questions": [
             {
               "questionNumber": 168,
-              "description": null,
               "question": "What does the article mention about Marco's Italian Restaurant?",
               "answers": [
                 {
@@ -4625,11 +4791,12 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": "C Bài viết đề cập điều gì về Nhà hàng Ý Marco? (A) Đây là nhà hàng lâu đời nhất ở New Haven. (B) Nhà hàng đang tìm một đầu bếp có thể nấu các món truyền thống. (C) Nhà hàng đã cần được cải tạo lớn. (D) Nhà hàng đã mở tại một địa điểm mới."
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "C Bài viết đề cập điều gì về Nhà hàng Ý Marco? (A) Đây là nhà hàng lâu đời nhất ở New Haven. (B) Nhà hàng đang tìm một đầu bếp có thể nấu các món truyền thống. (C) Nhà hàng đã cần được cải tạo lớn. (D) Nhà hàng đã mở tại một địa điểm mới."
             },
             {
               "questionNumber": 169,
-              "description": null,
               "question": "What is indicated about Marco's Italian Market?",
               "answers": [
                 {
@@ -4650,11 +4817,12 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": "B Điều gì được cho biết về Marco’s Italian Market? (A) Cung cấp nguyên liệu cho Nhà hàng Ý Marco. (B) Thỉnh thoảng thuê nhân viên thời vụ. (C) Dự kiến sẽ đóng cửa trong ba tháng tới. (D) Nằm ngay cạnh Nhà hàng Ý Marco."
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "B Điều gì được cho biết về Marco’s Italian Market? (A) Cung cấp nguyên liệu cho Nhà hàng Ý Marco. (B) Thỉnh thoảng thuê nhân viên thời vụ. (C) Dự kiến sẽ đóng cửa trong ba tháng tới. (D) Nằm ngay cạnh Nhà hàng Ý Marco."
             },
             {
               "questionNumber": 170,
-              "description": null,
               "question": "What will happen during the event on June 25?",
               "answers": [
                 {
@@ -4675,11 +4843,12 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": "B Điều gì sẽ diễn ra trong sự kiện vào ngày 25 tháng 6? (A) Nhà hàng sẽ giảm giá thực đơn. (B) Nhà hàng sẽ giới thiệu các món ăn đặc biệt. (C) Ông Marco sẽ tổ chức lễ nghỉ hưu. (D) Cộng đồng doanh nghiệp New Haven sẽ vinh danh ông Marco."
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "B Điều gì sẽ diễn ra trong sự kiện vào ngày 25 tháng 6? (A) Nhà hàng sẽ giảm giá thực đơn. (B) Nhà hàng sẽ giới thiệu các món ăn đặc biệt. (C) Ông Marco sẽ tổ chức lễ nghỉ hưu. (D) Cộng đồng doanh nghiệp New Haven sẽ vinh danh ông Marco."
             },
             {
               "questionNumber": 171,
-              "description": null,
               "question": "In which of the positions marked [1], [2], [3], and [4] does the following sentence best belong? \"During repairs, some additional dining space was added.\"",
               "answers": [
                 {
@@ -4700,7 +4869,9 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": "A Câu sau nên được đặt ở vị trí nào trong các vị trí [1], [2], [3], và [4]? \"Trong quá trình sửa chữa, một số không gian ăn uống bổ sung đã được thêm vào.\" (A) [1] (B) [2] (C) [3] (D) [4]"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "A Câu sau nên được đặt ở vị trí nào trong các vị trí [1], [2], [3], và [4]? \"Trong quá trình sửa chữa, một số không gian ăn uống bổ sung đã được thêm vào.\" (A) [1] (B) [2] (C) [3] (D) [4]"
             }
           ]
         },
@@ -4720,7 +4891,6 @@
           "questions": [
             {
               "questionNumber": 172,
-              "description": null,
               "question": "Why did Ms. Barry begin an online chat with Mr. Kubelski?",
               "answers": [
                 {
@@ -4741,11 +4911,12 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": "D Vì sao cô Barry bắt đầu cuộc trò chuyện trực tuyến với ông Kubelski? (A) Để giới thiệu ông ấy sang một bộ phận khác (B) Để từ chối một lời mời (C) Để đưa ra lời xin lỗi (D) Để hỏi rõ hơn về một yêu cầu"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "D Vì sao cô Barry bắt đầu cuộc trò chuyện trực tuyến với ông Kubelski? (A) Để giới thiệu ông ấy sang một bộ phận khác (B) Để từ chối một lời mời (C) Để đưa ra lời xin lỗi (D) Để hỏi rõ hơn về một yêu cầu"
             },
             {
               "questionNumber": 173,
-              "description": null,
               "question": "Who will receive an e-mail from Mr. Kubelski?",
               "answers": [
                 {
@@ -4766,11 +4937,12 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": "A Ai sẽ nhận được email từ ông Kubelski? (A) Những người có tài khoản trong cùng một nhóm tuổi (B) Các thành viên của nhóm phân tích dữ liệu (C) Các chuyên viên tư vấn tài chính"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "A Ai sẽ nhận được email từ ông Kubelski? (A) Những người có tài khoản trong cùng một nhóm tuổi (B) Các thành viên của nhóm phân tích dữ liệu (C) Các chuyên viên tư vấn tài chính"
             },
             {
               "questionNumber": 174,
-              "description": null,
               "question": "What does Ms. Choi offer to do?",
               "answers": [
                 {
@@ -4791,11 +4963,12 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": "B Cô Choi đề nghị làm gì? (A) Viết một email (B) Chỉnh sửa một biểu mẫu (C) Mở một tài khoản (D) Sửa đổi một chính sách"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "B Cô Choi đề nghị làm gì? (A) Viết một email (B) Chỉnh sửa một biểu mẫu (C) Mở một tài khoản (D) Sửa đổi một chính sách"
             },
             {
               "questionNumber": 175,
-              "description": null,
               "question": "At 10:22 A.M., what does Ms. Barry most likely mean when she writes, \"There are several projects ahead of yours\"?",
               "answers": [
                 {
@@ -4816,7 +4989,9 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": "C Vào lúc 10:22 sáng, khi cô Barry viết “There are several projects ahead of yours” (Có một vài dự án đang xếp trước của bạn), cô ấy có ý gì? (A) Cô Barry sẽ đưa yêu cầu của ông Kubelski xuống cuối danh sách xử lý (B) Cô Barry sẽ không thể gửi lời mời thay cho ông Kubelski (C) Yêu cầu của ông Kubelski sẽ không phải là công việc đầu tiên cô Barry thực hiện (D) Ông Kubelski sẽ cần hỗ trợ các dự án khác trước"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "C Vào lúc 10:22 sáng, khi cô Barry viết “There are several projects ahead of yours” (Có một vài dự án đang xếp trước của bạn), cô ấy có ý gì? (A) Cô Barry sẽ đưa yêu cầu của ông Kubelski xuống cuối danh sách xử lý (B) Cô Barry sẽ không thể gửi lời mời thay cho ông Kubelski (C) Yêu cầu của ông Kubelski sẽ không phải là công việc đầu tiên cô Barry thực hiện (D) Ông Kubelski sẽ cần hỗ trợ các dự án khác trước"
             }
           ]
         },
@@ -4843,7 +5018,6 @@
           "questions": [
             {
               "questionNumber": 176,
-              "description": null,
               "question": "According to the article, what is one way that food truck owners traditionally attract customers?",
               "answers": [
                 {
@@ -4864,11 +5038,12 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": "A 176. Theo bài viết, một cách truyền thống mà các chủ xe bán đồ ăn thu hút khách hàng là gì? (A) Truyền miệng (B) Qua bảng quảng cáo trên đường cao tốc (C) Thông qua quảng cáo trên báo (D) Từ các biển hiệu tại lễ hội ẩm thực"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "A 176. Theo bài viết, một cách truyền thống mà các chủ xe bán đồ ăn thu hút khách hàng là gì? (A) Truyền miệng (B) Qua bảng quảng cáo trên đường cao tốc (C) Thông qua quảng cáo trên báo (D) Từ các biển hiệu tại lễ hội ẩm thực"
             },
             {
               "questionNumber": 177,
-              "description": null,
               "question": "According to the article, what information does not need to appear on the Home page?",
               "answers": [
                 {
@@ -4889,11 +5064,12 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": "D 177. Theo bài viết, thông tin nào không cần xuất hiện trên trang chủ? (A) Địa điểm của xe bán đồ ăn (B) Giờ hoạt động (C) Tên công ty (D) Các món ăn theo mùa"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "D 177. Theo bài viết, thông tin nào không cần xuất hiện trên trang chủ? (A) Địa điểm của xe bán đồ ăn (B) Giờ hoạt động (C) Tên công ty (D) Các món ăn theo mùa"
             },
             {
               "questionNumber": 178,
-              "description": null,
               "question": "In what field does Mr. Abruzzo most likely work?",
               "answers": [
                 {
@@ -4914,11 +5090,12 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": "C Ông Abruzzo có khả năng làm việc trong lĩnh vực nào? (A) Nghiên cứu thị trường (B) Dịch vụ ăn uống (C) Thiết kế website (D) Giao hàng"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "C Ông Abruzzo có khả năng làm việc trong lĩnh vực nào? (A) Nghiên cứu thị trường (B) Dịch vụ ăn uống (C) Thiết kế website (D) Giao hàng"
             },
             {
               "questionNumber": 179,
-              "description": null,
               "question": "In which section of the Web site will information most likely be added?",
               "answers": [
                 {
@@ -4939,11 +5116,12 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": "D Thông tin nhiều khả năng sẽ được thêm vào phần nào của trang web? (A) Trang chủ (B) Trang thực đơn (C) Trang Giới thiệu (D) Trang Tin tức"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "D Thông tin nhiều khả năng sẽ được thêm vào phần nào của trang web? (A) Trang chủ (B) Trang thực đơn (C) Trang Giới thiệu (D) Trang Tin tức"
             },
             {
               "questionNumber": 180,
-              "description": null,
               "question": "According to the e-mail, when will the Web site launch?",
               "answers": [
                 {
@@ -4964,7 +5142,9 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": "C Theo email, khi nào trang web sẽ được ra mắt? (A) Ngày 28 tháng 3 (B) Ngày 29 tháng 3 (C) Ngày 5 tháng 4 (D) Ngày 15 tháng 4"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "C Theo email, khi nào trang web sẽ được ra mắt? (A) Ngày 28 tháng 3 (B) Ngày 29 tháng 3 (C) Ngày 5 tháng 4 (D) Ngày 15 tháng 4"
             }
           ]
         },
@@ -4991,7 +5171,6 @@
           "questions": [
             {
               "questionNumber": 181,
-              "description": null,
               "question": "What is indicated about the Net Zero Initiative?",
               "answers": [
                 {
@@ -5012,11 +5191,12 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": "D Điều gì được đề cập về Sáng kiến Net Zero? (A) Dự án được tài trợ bởi Hiệp hội Doanh nghiệp Red Hills. (B) Dự án được lấy cảm hứng từ các sáng kiến tương tự ở những thành phố khác. (C) Dự án sẽ sử dụng năng lượng địa nhiệt để cung cấp điện cho cả thành phố. (D) Dự án sẽ thay đổi cách một tổ chức làm nóng các tòa nhà của mình."
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "D Điều gì được đề cập về Sáng kiến Net Zero? (A) Dự án được tài trợ bởi Hiệp hội Doanh nghiệp Red Hills. (B) Dự án được lấy cảm hứng từ các sáng kiến tương tự ở những thành phố khác. (C) Dự án sẽ sử dụng năng lượng địa nhiệt để cung cấp điện cho cả thành phố. (D) Dự án sẽ thay đổi cách một tổ chức làm nóng các tòa nhà của mình."
             },
             {
               "questionNumber": 182,
-              "description": null,
               "question": "In the e-mail, the word \"conduct\" in paragraph 2, line 1, is closest in meaning to",
               "answers": [
                 {
@@ -5037,11 +5217,12 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": "D Trong email, từ “conduct” ở đoạn 2, dòng 1, gần nghĩa nhất với từ nào? (A) Cư xử (B) Đi cùng (C) Truyền tải (D) Tiến hành / thực hiện"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "D Trong email, từ “conduct” ở đoạn 2, dòng 1, gần nghĩa nhất với từ nào? (A) Cư xử (B) Đi cùng (C) Truyền tải (D) Tiến hành / thực hiện"
             },
             {
               "questionNumber": 183,
-              "description": null,
               "question": "What can be concluded about the Red Hills Business District?",
               "answers": [
                 {
@@ -5062,11 +5243,12 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": "A Có thể kết luận điều gì về Khu Thương mại Red Hills? (A) Nằm gần khuôn viên trường đại học (B) Tổ chức một lễ hội nghệ thuật vào mỗi tháng 7 (C) Bao gồm khu căn hộ Oak Street (D) Là nơi đặt văn phòng của tờ Daily Gazette"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "A Có thể kết luận điều gì về Khu Thương mại Red Hills? (A) Nằm gần khuôn viên trường đại học (B) Tổ chức một lễ hội nghệ thuật vào mỗi tháng 7 (C) Bao gồm khu căn hộ Oak Street (D) Là nơi đặt văn phòng của tờ Daily Gazette"
             },
             {
               "questionNumber": 184,
-              "description": null,
               "question": "Why most likely did the Red Hills Business Association change the dates of its concert series?",
               "answers": [
                 {
@@ -5087,11 +5269,12 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": "C Vì sao Hiệp hội Doanh nghiệp Red Hills nhiều khả năng đã thay đổi ngày tổ chức chuỗi hòa nhạc? (A) Để tận dụng một nguồn năng lượng mới (B) Để phù hợp với lịch học của sinh viên (C) Để tránh tiếng ồn từ công trình xây dựng gần đó (D) Để tránh trùng với một sự kiện tương tự"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "C Vì sao Hiệp hội Doanh nghiệp Red Hills nhiều khả năng đã thay đổi ngày tổ chức chuỗi hòa nhạc? (A) Để tận dụng một nguồn năng lượng mới (B) Để phù hợp với lịch học của sinh viên (C) Để tránh tiếng ồn từ công trình xây dựng gần đó (D) Để tránh trùng với một sự kiện tương tự"
             },
             {
               "questionNumber": 185,
-              "description": null,
               "question": "What is mentioned in the press release about the Cultural Center?",
               "answers": [
                 {
@@ -5112,7 +5295,9 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": "B Thông cáo báo chí đề cập điều gì về Trung tâm Văn hóa? (A) Sẽ cung cấp bữa trưa cho các nhạc sĩ (B) Sẽ có các tác phẩm nghệ thuật được bày bán tại khuôn viên (C) Sẽ tổ chức các lớp học thủ công – mỹ thuật (D) Sẽ cung cấp sân khấu cho các nghệ sĩ biểu diễn"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "B Thông cáo báo chí đề cập điều gì về Trung tâm Văn hóa? (A) Sẽ cung cấp bữa trưa cho các nhạc sĩ (B) Sẽ có các tác phẩm nghệ thuật được bày bán tại khuôn viên (C) Sẽ tổ chức các lớp học thủ công – mỹ thuật (D) Sẽ cung cấp sân khấu cho các nghệ sĩ biểu diễn"
             }
           ]
         },
@@ -5146,7 +5331,6 @@
           "questions": [
             {
               "questionNumber": 186,
-              "description": null,
               "question": "According to the advertisement, what is one type of work performed by Lawal Home Service?",
               "answers": [
                 {
@@ -5167,11 +5351,12 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": "B Theo quảng cáo, một trong những dịch vụ mà Lawal Home Service cung cấp là gì? (A) Trồng cây (B) Sửa chữa máng xối (C) Xây thêm phần mở rộng cho ngôi nhà (D) Thay thế hệ thống sưởi"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "B Theo quảng cáo, một trong những dịch vụ mà Lawal Home Service cung cấp là gì? (A) Trồng cây (B) Sửa chữa máng xối (C) Xây thêm phần mở rộng cho ngôi nhà (D) Thay thế hệ thống sưởi"
             },
             {
               "questionNumber": 187,
-              "description": null,
               "question": "What does Mr. Gerson indicate on the form about his roof?",
               "answers": [
                 {
@@ -5192,11 +5377,12 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": "A Ông Gerson cho biết điều gì về mái nhà của mình trong biểu mẫu? (A) Mái nhà đã bị dột (B) Mái nhà mới được thay gần đây (C) Việc lắp đặt không tốn kém (D) Mái nhà được bảo hành trong 30 năm"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "A Ông Gerson cho biết điều gì về mái nhà của mình trong biểu mẫu? (A) Mái nhà đã bị dột (B) Mái nhà mới được thay gần đây (C) Việc lắp đặt không tốn kém (D) Mái nhà được bảo hành trong 30 năm"
             },
             {
               "questionNumber": 188,
-              "description": null,
               "question": "When did Lawal Home Service inspect Mr. Gerson's roof?",
               "answers": [
                 {
@@ -5217,11 +5403,12 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": "B Lawal Home Service đã kiểm tra mái nhà của ông Gerson vào ngày nào? (A) Ngày 12 tháng 12 (B) Ngày 13 tháng 12 (C) Ngày 19 tháng 12 (D) Ngày 20 tháng 12"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "B Lawal Home Service đã kiểm tra mái nhà của ông Gerson vào ngày nào? (A) Ngày 12 tháng 12 (B) Ngày 13 tháng 12 (C) Ngày 19 tháng 12 (D) Ngày 20 tháng 12"
             },
             {
               "questionNumber": 189,
-              "description": null,
               "question": "Who most likely is Ms. Perez?",
               "answers": [
                 {
@@ -5242,11 +5429,12 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": "A Bà Perez nhiều khả năng là ai? (A) Giám sát dự án (B) Nhân viên ước tính chi phí sửa mái nhà (C) Nhà thiết kế nội thất (D) Nhân viên đặt lịch / điều phối lịch hẹn"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "A Bà Perez nhiều khả năng là ai? (A) Giám sát dự án (B) Nhân viên ước tính chi phí sửa mái nhà (C) Nhà thiết kế nội thất (D) Nhân viên đặt lịch / điều phối lịch hẹn"
             },
             {
               "questionNumber": 190,
-              "description": null,
               "question": "According to the review, what surprised Mr. Gerson about the crew from Lawal Home Service?",
               "answers": [
                 {
@@ -5267,7 +5455,9 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": "D Theo bài đánh giá, điều gì khiến ông Gerson ngạc nhiên về đội ngũ của Lawal Home Service? (A) Mức giá họ đưa ra (B) Chế độ bảo hành mà họ cung cấp (C) Chất lượng vật liệu họ sử dụng (D) Những công cụ họ dùng để làm việc"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "D Theo bài đánh giá, điều gì khiến ông Gerson ngạc nhiên về đội ngũ của Lawal Home Service? (A) Mức giá họ đưa ra (B) Chế độ bảo hành mà họ cung cấp (C) Chất lượng vật liệu họ sử dụng (D) Những công cụ họ dùng để làm việc"
             }
           ]
         },
@@ -5301,7 +5491,6 @@
           "questions": [
             {
               "questionNumber": 191,
-              "description": null,
               "question": "What is one service that Darboury Company most likely provides?",
               "answers": [
                 {
@@ -5322,11 +5511,12 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": "D Darboury Company có khả năng cung cấp dịch vụ nào? (A) Đặt vé du lịch (B) Xuất bản sách giáo khoa (C) Giao hoa (D) Thiết kế đồ họa"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "D Darboury Company có khả năng cung cấp dịch vụ nào? (A) Đặt vé du lịch (B) Xuất bản sách giáo khoa (C) Giao hoa (D) Thiết kế đồ họa"
             },
             {
               "questionNumber": 192,
-              "description": null,
               "question": "What sample was delayed?",
               "answers": [
                 {
@@ -5347,11 +5537,12 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": "B Mẫu nào đã bị giao trễ? (A) Great Thoughts (B) World Suitcase (C) Lavender Bouquet (D) Sail Away"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "B Mẫu nào đã bị giao trễ? (A) Great Thoughts (B) World Suitcase (C) Lavender Bouquet (D) Sail Away"
             },
             {
               "questionNumber": 193,
-              "description": null,
               "question": "When is the deadline for Ms. Pereira to approve samples?",
               "answers": [
                 {
@@ -5372,11 +5563,12 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": "B Hạn chót để cô Pereira phê duyệt các mẫu là khi nào? (A) Ngày 25 tháng 5 (B) Ngày 11 tháng 6 (C) Ngày 20 tháng 7 (D) Ngày 1 tháng 8"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "B Hạn chót để cô Pereira phê duyệt các mẫu là khi nào? (A) Ngày 25 tháng 5 (B) Ngày 11 tháng 6 (C) Ngày 20 tháng 7 (D) Ngày 1 tháng 8"
             },
             {
               "questionNumber": 194,
-              "description": null,
               "question": "What does the form indicate about the Bun Bun Books order?",
               "answers": [
                 {
@@ -5397,11 +5589,12 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": "A Biểu mẫu cho biết điều gì về đơn hàng của Bun Bun Books? (A) Sẽ bao gồm một kệ trưng bày (B) Sẽ được giao trong ngày hôm sau (C) Sẽ được thanh toán khi nhận hàng (D) Sẽ bị giao trễ"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "A Biểu mẫu cho biết điều gì về đơn hàng của Bun Bun Books? (A) Sẽ bao gồm một kệ trưng bày (B) Sẽ được giao trong ngày hôm sau (C) Sẽ được thanh toán khi nhận hàng (D) Sẽ bị giao trễ"
             },
             {
               "questionNumber": 195,
-              "description": null,
               "question": "What is the background color on the cover of item N3-GT?",
               "answers": [
                 {
@@ -5422,7 +5615,9 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": "A Màu nền trên bìa của sản phẩm N3-GT là gì? (A) Màu xanh dương (B) Màu đen (C) Màu vàng (D) Màu trắng"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "A Màu nền trên bìa của sản phẩm N3-GT là gì? (A) Màu xanh dương (B) Màu đen (C) Màu vàng (D) Màu trắng"
             }
           ]
         },
@@ -5456,7 +5651,6 @@
           "questions": [
             {
               "questionNumber": 196,
-              "description": null,
               "question": "What is the purpose of the e-mail?",
               "answers": [
                 {
@@ -5477,11 +5671,12 @@
                 }
               ],
               "correctAnswer": "B",
-              "explanation": "B Mục đích của email là gì? (A) Chia sẻ danh sách các ứng viên xin việc (B) Xin ý kiến từ các quản lý (C) Tóm tắt một cuộc họp của các quản lý (D) Đề cử một quản lý cho một giải thưởng"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "B Mục đích của email là gì? (A) Chia sẻ danh sách các ứng viên xin việc (B) Xin ý kiến từ các quản lý (C) Tóm tắt một cuộc họp của các quản lý (D) Đề cử một quản lý cho một giải thưởng"
             },
             {
               "questionNumber": 197,
-              "description": null,
               "question": "According to the e-mail, who identified a technical problem?",
               "answers": [
                 {
@@ -5502,11 +5697,12 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": "A Theo email, ai là người phát hiện ra một vấn đề kỹ thuật? (A) Ông Salehi (B) Bà Almahdi (C) Ông Rhodes (D) Bà Black"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "A Theo email, ai là người phát hiện ra một vấn đề kỹ thuật? (A) Ông Salehi (B) Bà Almahdi (C) Ông Rhodes (D) Bà Black"
             },
             {
               "questionNumber": 198,
-              "description": null,
               "question": "What can be concluded about Mr. Riggs?",
               "answers": [
                 {
@@ -5527,11 +5723,12 @@
                 }
               ],
               "correctAnswer": "D",
-              "explanation": "D Có thể kết luận điều gì về ông Riggs? (A) Chiếc xe trước đây của ông là xe hiệu Excelera (B) Ông là hàng xóm của bà Boyd (C) Ông đã từng mua xe từ Wilson Autos trước đây (D) Ông đã thương lượng với bà Black để được giảm giá"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "D Có thể kết luận điều gì về ông Riggs? (A) Chiếc xe trước đây của ông là xe hiệu Excelera (B) Ông là hàng xóm của bà Boyd (C) Ông đã từng mua xe từ Wilson Autos trước đây (D) Ông đã thương lượng với bà Black để được giảm giá"
             },
             {
               "questionNumber": 199,
-              "description": null,
               "question": "What is indicated in the notice about Ms. Boyd?",
               "answers": [
                 {
@@ -5552,11 +5749,12 @@
                 }
               ],
               "correctAnswer": "C",
-              "explanation": "C Thông báo cho biết điều gì về bà Boyd? (A) Bà ấy thường xuyên ăn tại nhà hàng Alonzo’s (B) Bà ấy quản lý các trang mạng xã hội cho Wilson Autos (C) Bà ấy chịu trách nhiệm cho sự gia tăng phản hồi của khách hàng (D) Bà ấy vừa hoàn thành một khóa đào tạo bán hàng"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "C Thông báo cho biết điều gì về bà Boyd? (A) Bà ấy thường xuyên ăn tại nhà hàng Alonzo’s (B) Bà ấy quản lý các trang mạng xã hội cho Wilson Autos (C) Bà ấy chịu trách nhiệm cho sự gia tăng phản hồi của khách hàng (D) Bà ấy vừa hoàn thành một khóa đào tạo bán hàng"
             },
             {
               "questionNumber": 200,
-              "description": null,
               "question": "What is most likely true about Ms. Boyd?",
               "answers": [
                 {
@@ -5577,7 +5775,9 @@
                 }
               ],
               "correctAnswer": "A",
-              "explanation": "A Điều gì có khả năng đúng nhất về bà Boyd? (A) Bà ấy nhận được phiếu bầu từ ít nhất ba quản lý (B) Bà ấy là nhân viên bán hàng xuất sắc nhất trong tháng Tám (C) Bà ấy có nhiều năm kinh nghiệm trong ngành ô tô (D) Bà ấy được Wilson Autos tuyển dụng vào tháng Tư"
+              "questionTranslation": null,
+              "answerTranslation": null,
+              "detailedExplanation": "A Điều gì có khả năng đúng nhất về bà Boyd? (A) Bà ấy nhận được phiếu bầu từ ít nhất ba quản lý (B) Bà ấy là nhân viên bán hàng xuất sắc nhất trong tháng Tám (C) Bà ấy có nhiều năm kinh nghiệm trong ngành ô tô (D) Bà ấy được Wilson Autos tuyển dụng vào tháng Tư"
             }
           ]
         }

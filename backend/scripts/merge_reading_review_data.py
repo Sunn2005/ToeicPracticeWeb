@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Merge Reading translations and explanations into the TOEIC test JSON."""
+"""Merge Reading review content into the TOEIC test JSON."""
 
 from __future__ import annotations
 
@@ -54,9 +54,25 @@ def iter_questions(value: Any) -> Iterator[dict[str, Any]]:
             yield from iter_questions(child)
 
 
-def normalize_translation(value: str) -> str:
+def normalize_question_translation(value: str) -> str:
     lines = [line.strip() for line in value.replace("\r\n", "\n").split("\n")]
     return "\n".join(lines).strip()
+
+
+def split_translation(question_number: int, value: str) -> tuple[str | None, str | None]:
+    translation = normalize_question_translation(value)
+    if 101 <= question_number <= 146:
+        return None, translation
+
+    choices_match = re.match(r"(?s)^(.*?)\n(\(A\).*)$", translation)
+    if choices_match:
+        return choices_match.group(1).strip(), choices_match.group(2).strip()
+
+    answer_match = re.match(r"^(.*?)\s+Đáp án:\s+(.*)$", translation)
+    if answer_match:
+        return answer_match.group(1).strip(), answer_match.group(2).strip()
+
+    return translation, None
 
 
 def format_explanation(value: str) -> str:
@@ -83,9 +99,14 @@ def merge(source: Path, target: Path) -> int:
         raise ValueError(f"File đề phải có 200 câu, hiện có {len(all_questions)}")
 
     for question in all_questions:
+        legacy_translation = question.pop("translation", None)
+        legacy_explanation = question.pop("explanation", None)
         previous_description = question.pop("description", None)
-        if "translation" not in question:
-            question["translation"] = previous_description
+        if "questionTranslation" not in question:
+            question["questionTranslation"] = legacy_translation or previous_description
+        question.setdefault("answerTranslation", None)
+        if "detailedExplanation" not in question:
+            question["detailedExplanation"] = legacy_explanation
 
     questions = {
         question["questionNumber"]: question
@@ -98,8 +119,12 @@ def merge(source: Path, target: Path) -> int:
 
     for item in items:
         question = questions[item["questionNumber"]]
-        question["translation"] = normalize_translation(item["translation"])
-        question["explanation"] = format_explanation(item["explanation"])
+        question_translation, answer_translation = split_translation(
+            item["questionNumber"], item["translation"]
+        )
+        question["questionTranslation"] = question_translation
+        question["answerTranslation"] = answer_translation
+        question["detailedExplanation"] = format_explanation(item["explanation"])
 
     target.write_text(
         json.dumps(test_data, ensure_ascii=False, indent=2) + "\n",

@@ -151,22 +151,24 @@ def make_listening_independent_questions() -> tuple[list[dict[str, Any]], list[d
                 "questionNumber": number,
                 "imageUrl": None,
                 "audioUrl": None,
-                "description": None,
                 "question": None,
                 "answers": answers,
                 "correctAnswer": LISTENING_KEYS[number],
-                "explanation": None,
+                "questionTranslation": None,
+                "answerTranslation": None,
+                "detailedExplanation": None,
                 "transcript": compact(" ".join(transcript_parts)),
             })
         else:
             part2.append({
                 "questionNumber": number,
                 "audioUrl": None,
-                "description": None,
                 "question": question_text,
                 "answers": answers,
                 "correctAnswer": LISTENING_KEYS[number],
-                "explanation": None,
+                "questionTranslation": None,
+                "answerTranslation": None,
+                "detailedExplanation": None,
                 "transcript": compact(" ".join(transcript_parts)),
             })
     return part1, part2
@@ -214,11 +216,12 @@ def make_listening_groups(start: int, end: int) -> list[dict[str, Any]]:
             if not question_match:
                 questions.append({
                     "questionNumber": number,
-                    "description": None,
                     "question": None,
                     "answers": [],
                     "correctAnswer": LISTENING_KEYS[number],
-                    "explanation": None,
+                    "questionTranslation": None,
+                    "answerTranslation": None,
+                    "detailedExplanation": None,
                 })
                 continue
             next_match = None
@@ -233,11 +236,12 @@ def make_listening_groups(start: int, end: int) -> list[dict[str, Any]]:
             question_text, answers = parse_answer_choices(raw_question, ("A", "B", "C", "D"))
             questions.append({
                 "questionNumber": number,
-                "description": None,
                 "question": question_text or None,
                 "answers": answers,
                 "correctAnswer": LISTENING_KEYS[number],
-                "explanation": None,
+                "questionTranslation": None,
+                "answerTranslation": None,
+                "detailedExplanation": None,
             })
 
         groups.append({
@@ -436,11 +440,12 @@ def make_reading_questions() -> dict[int, dict[str, Any]]:
             explanation = clean_row_text(right)
             results[number] = {
                 "questionNumber": number,
-                "description": None,
                 "question": question_text or None,
                 "answers": answers,
                 "correctAnswer": extract_correct_answer(explanation) or bold_answer,
-                "explanation": explanation or None,
+                "questionTranslation": None,
+                "answerTranslation": None,
+                "detailedExplanation": explanation or None,
             }
     return results
 
@@ -889,8 +894,8 @@ def main() -> None:
             "Dữ liệu được trích từ hai PDF Listening và Reading do người dùng cung cấp.\n\n"
             "Các URL audio của Part 1-4 và URL ảnh của Part 1 trỏ đến bucket Supabase "
             "`toeic-media`. Các ảnh graphic của Part 3-4 chưa có trong bucket nên vẫn là "
-            "`null`. Một số description, grammarTopic và explanation cũng được giữ là "
-            "`null`. Với Part 6, vị trí cần điền "
+            "`null`. Một số questionTranslation, answerTranslation, grammarTopic và "
+            "detailedExplanation cũng được giữ là `null`. Với Part 6, vị trí cần điền "
             "đã nằm trong `content`, vì vậy trường `question` của từng câu được giữ là `null`.\n\n"
             "## JSON\n\n"
             "```json\n"

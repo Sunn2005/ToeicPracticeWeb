@@ -59,9 +59,10 @@ class TestServiceTests {
         String serialized = new ObjectMapper().writeValueAsString(exam);
 
         assertFalse(serialized.contains("correctAnswer"));
-        assertFalse(serialized.contains("translation"));
+        assertFalse(serialized.contains("questionTranslation"));
+        assertFalse(serialized.contains("answerTranslation"));
         assertFalse(serialized.contains("Bài giảng sẽ diễn ra"));
-        assertFalse(serialized.contains("explanation"));
+        assertFalse(serialized.contains("detailedExplanation"));
         assertFalse(serialized.contains("transcript"));
         assertTrue(serialized.contains("T01-P6-131-134.png"));
         assertTrue(serialized.contains("T01-P7-196-200-3.png"));
@@ -79,9 +80,13 @@ class TestServiceTests {
         String serialized = new ObjectMapper().writeValueAsString(review);
 
         assertTrue(serialized.contains("correctAnswer"));
-        assertTrue(serialized.contains("translation"));
+        assertTrue(serialized.contains("questionTranslation"));
+        assertTrue(serialized.contains("answerTranslation"));
+        assertTrue(serialized.contains("detailedExplanation"));
         assertTrue(serialized.contains("Bài giảng sẽ diễn ra"));
         assertTrue(serialized.contains("transcript"));
+        assertFalse(serialized.contains("\"translation\""));
+        assertFalse(serialized.contains("\"explanation\""));
     }
 
     @Test

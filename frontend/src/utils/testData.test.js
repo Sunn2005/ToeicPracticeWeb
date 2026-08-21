@@ -1,7 +1,35 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { buildReadingUnits } from "./testData.js";
+import { buildListeningUnits, buildReadingUnits } from "./testData.js";
+
+test("keeps Supabase graphic URL on grouped Listening units", () => {
+  const imageUrl = "https://example.supabase.co/T01-P3-62-64.png";
+  const testData = {
+    parts: [
+      {
+        partNumber: 3,
+        name: "Conversations",
+        groups: [
+          {
+            questionRange: "62-64",
+            imageUrl,
+            questions: [
+              { questionNumber: 62 },
+              { questionNumber: 64 },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+
+  const [unit] = buildListeningUnits(testData);
+
+  assert.equal(unit.imageUrl, imageUrl);
+  assert.equal(unit.start, 62);
+  assert.equal(unit.end, 64);
+});
 
 test("keeps group image URLs on Part 7 reading units", () => {
   const imageUrls = ["https://example.com/passage-1.png", "https://example.com/passage-2.png"];

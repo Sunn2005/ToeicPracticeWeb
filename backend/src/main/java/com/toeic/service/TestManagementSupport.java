@@ -50,6 +50,7 @@ public class TestManagementSupport {
                 new TypeReference<Map<String, Object>>() {
                 }
         );
+        ReviewFieldNormalizer.normalize(response);
         if (!includeParts) {
             response.remove("parts");
         }

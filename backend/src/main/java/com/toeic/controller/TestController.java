@@ -71,7 +71,7 @@ public class TestController {
     }
 
     // Endpoint tương thích để các trang luyện Part cũ vẫn lấy được dữ liệu,
-    // nhưng response đã được lọc correctAnswer/explanation/transcript.
+    // nhưng response đã được lọc đáp án, bản dịch, lời giải và transcript.
     @GetMapping("/{testId}/parts/{partId}")
     public Map<String, Object> getPart(
             @PathVariable String testId,

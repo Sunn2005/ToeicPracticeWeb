@@ -5,6 +5,7 @@ import ExamHeader from "../components/ExamHeader";
 import LockedExamAudio from "../components/LockedExamAudio";
 import PassagePanel from "../components/PassagePanel";
 import QuestionCard from "../components/QuestionCard";
+import ResizableExamLayout from "../components/ResizableExamLayout";
 import {
   TIMER_TYPES,
   getTimerSeconds,
@@ -510,203 +511,212 @@ function FullTestExam() {
               </div>
             </div>
 
-            {isListening ? (
-              <>
-                {mediaAudio ? (
-                  <LockedExamAudio
-                    key={currentUnit.key}
-                    src={mediaAudio}
-                    advancing={busy}
-                    onEnded={advanceListeningAfterAudio}
-                  />
-                ) : (
-                  <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
-                    Câu hoặc group này chưa có audioUrl nên hệ thống không thể tự chuyển.
-                  </div>
-                )}
-
-                {mediaImage && (
-                  <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm">
-                    <img
-                      src={mediaImage}
-                      alt={`Hình minh họa câu ${currentUnit.start}`}
-                      className="mx-auto max-h-[520px] max-w-full rounded-xl object-contain"
-                    />
-                  </div>
-                )}
-
-                <PassagePanel passages={currentUnit.passages || []} />
-
-                <div className="space-y-4">
-                  {currentUnit.questions.map((question) => (
-                    <QuestionCard
-                      key={question.questionNumber}
-                      question={question}
-                      selectedAnswer={answers[String(question.questionNumber)] || null}
-                      onSelect={(answer) => {
-                        saveAnswer(question.questionNumber, answer).catch(() => undefined);
-                      }}
-                      disabled={busy}
-                      hideOptionContent={currentUnit.partNumber <= 2}
-                      isFocused={question.questionNumber === currentQuestion}
-                    />
-                  ))}
-                </div>
-
-                <div className="pb-8 text-center">
-                {audioAdvanceError ? (
-                  <button
-                    type="button"
-                    onClick={advanceListeningAfterAudio}
-                    disabled={busy}
-                    className="rounded-xl border border-red-200 bg-red-50 px-5 py-3 text-sm font-bold text-red-700 hover:bg-red-100 disabled:opacity-50"
-                  >
-                    {shouldSubmitAfterListeningAudio(attempt, currentUnit, listeningUnits)
-                      ? "Thử lưu và nộp lại"
-                      : "Thử lưu và tự chuyển lại"}
-                  </button>
-                ) : (
-                  <p className="text-sm font-medium text-slate-500">
-                    Audio kết thúc sẽ tự động lưu {currentUnit.questions.length > 1 ? "cả group" : "đáp án"}
-                    {shouldSubmitAfterListeningAudio(attempt, currentUnit, listeningUnits)
-                      ? " và nộp bài."
-                      : " và chuyển tiếp."}
-                  </p>
-                )}
-              </div>
-              </>
-            ) : (
-              <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.08fr)_minmax(520px,0.92fr)]">
+            <ResizableExamLayout
+              leftLabel={isListening ? "nội dung bài nghe" : "nội dung bài đọc"}
+              rightLabel="câu hỏi và đáp án"
+              left={(
                 <section
                   ref={readingContentRef}
-                  aria-label="Nội dung bài đọc"
-                  className="min-w-0 space-y-4 xl:sticky xl:top-24 xl:max-h-[calc(100vh-7rem)] xl:overflow-y-auto xl:pr-1"
+                  aria-label={isListening ? "Nội dung bài nghe" : "Nội dung bài đọc"}
+                  className="min-w-0 space-y-4 xl:h-[calc(100dvh-14rem)] xl:overflow-y-auto xl:pr-1"
                 >
                   <div className="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
                     <p className="text-xs font-bold uppercase tracking-widest text-violet-600">
-                      Nội dung bài đọc
+                      {isListening ? "Nội dung bài nghe" : "Nội dung bài đọc"}
                     </p>
                     <p className="mt-1 text-sm text-slate-500">
-                      Đọc nội dung bên trái và chọn đáp án ở cột bên phải.
+                      {isListening
+                        ? "Nghe audio, xem hình minh họa (nếu có) và chọn đáp án ở cột bên phải."
+                        : "Đọc nội dung bên trái và chọn đáp án ở cột bên phải."}
                     </p>
                   </div>
 
-                  {shouldRenderStandaloneReadingImage && (
-                    <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm">
-                      <img
-                        src={mediaImage}
-                        alt={`Nội dung câu ${currentUnit.start}`}
-                        className="mx-auto h-auto w-full rounded-xl object-contain"
+                  {isListening ? (
+                    <>
+                      {mediaAudio ? (
+                        <LockedExamAudio
+                          key={currentUnit.key}
+                          src={mediaAudio}
+                          advancing={busy}
+                          onEnded={advanceListeningAfterAudio}
+                        />
+                      ) : (
+                        <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+                          Câu hoặc group này chưa có audioUrl nên hệ thống không thể tự chuyển.
+                        </div>
+                      )}
+
+                      {mediaImage && (
+                        <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm">
+                          <img
+                            src={mediaImage}
+                            alt={`Hình minh họa cho câu ${currentUnit.start} đến ${currentUnit.end}`}
+                            className="mx-auto h-auto max-h-[65vh] max-w-full rounded-xl object-contain"
+                          />
+                        </div>
+                      )}
+
+                      <PassagePanel passages={currentUnit.passages || []} />
+                    </>
+                  ) : (
+                    <>
+                      {shouldRenderStandaloneReadingImage && (
+                        <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm">
+                          <img
+                            src={mediaImage}
+                            alt={`Nội dung câu ${currentUnit.start}`}
+                            className="mx-auto h-auto w-full rounded-xl object-contain"
+                          />
+                        </div>
+                      )}
+
+                      <PassagePanel
+                        passages={currentUnit.passages || []}
+                        imageUrls={currentUnit.imageUrls || []}
                       />
-                    </div>
-                  )}
 
-                  <PassagePanel
-                    passages={currentUnit.passages || []}
-                    imageUrls={currentUnit.imageUrls || []}
-                  />
-
-                  {!hasReadingMaterial && (
-                    <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm leading-6 text-slate-500">
-                      Part này không có đoạn văn riêng. Hãy chọn đáp án cho câu hỏi ở bên phải.
-                    </div>
+                      {!hasReadingMaterial && (
+                        <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm leading-6 text-slate-500">
+                          Part này không có đoạn văn riêng. Hãy chọn đáp án cho câu hỏi ở bên phải.
+                        </div>
+                      )}
+                    </>
                   )}
                 </section>
-
+              )}
+              right={(
                 <section
-                  ref={readingQuestionsRef}
                   aria-label="Câu hỏi và đáp án"
-                  className="min-w-0 space-y-4 xl:max-h-[calc(100vh-7rem)] xl:overflow-y-auto xl:pl-1 xl:pr-1"
+                  className="min-w-0 xl:flex xl:h-[calc(100dvh-14rem)] xl:flex-col xl:pl-1"
                 >
-                  <aside className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-xs font-bold uppercase tracking-widest text-sky-600">
-                          Câu hỏi & đáp án
-                        </p>
-                        <h2 className="mt-1 font-bold">
-                          {selectedReadingParts.map((part) => `Part ${part}`).join(" + ")}
-                        </h2>
+                  <div
+                    ref={readingQuestionsRef}
+                    className="min-w-0 space-y-4 xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:pr-1"
+                  >
+                    <aside className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-xs font-bold uppercase tracking-widest text-sky-600">
+                            Câu hỏi & đáp án
+                          </p>
+                          <h2 className="mt-1 font-bold">
+                            {isListening
+                              ? `Part ${currentUnit.partNumber} · Câu ${currentUnit.start}–${currentUnit.end}`
+                              : selectedReadingParts.map((part) => `Part ${part}`).join(" + ")}
+                          </h2>
+                        </div>
+                        {!isListening && (
+                          <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-700">
+                            {Object.entries(answers).filter(
+                              ([number, value]) => Number(number) >= readingStart
+                                && Number(number) <= readingEnd
+                                && value,
+                            ).length}/{readingQuestionNumbers.length}
+                          </span>
+                        )}
                       </div>
-                      <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-700">
-                        {Object.entries(answers).filter(
-                          ([number, value]) => Number(number) >= readingStart
-                            && Number(number) <= readingEnd
-                            && value,
-                        ).length}/{readingQuestionNumbers.length}
-                      </span>
-                    </div>
 
-                    <div className="mt-4 grid grid-cols-8 gap-1.5 sm:grid-cols-10">
-                      {readingQuestionNumbers.map((number) => {
-                        const isAnswered = Boolean(answers[String(number)]);
-                        const isCurrent = number === currentQuestion;
-                        return (
+                      {!isListening && (
+                        <div className="mt-4 grid grid-cols-8 gap-1.5 sm:grid-cols-10">
+                          {readingQuestionNumbers.map((number) => {
+                            const isAnswered = Boolean(answers[String(number)]);
+                            const isCurrent = number === currentQuestion;
+                            return (
+                              <button
+                                key={number}
+                                type="button"
+                                onClick={() => moveReading(number)}
+                                disabled={busy}
+                                aria-label={`Đến câu ${number}`}
+                                className={`aspect-square rounded-lg text-[11px] font-bold transition ${
+                                  isCurrent
+                                    ? "bg-sky-600 text-white ring-2 ring-sky-200"
+                                    : isAnswered
+                                      ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                                      : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                                }`}
+                              >
+                                {number}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </aside>
+
+                    <div className="space-y-4 pb-4">
+                      {currentUnit.questions.map((question) => (
+                        <QuestionCard
+                          key={question.questionNumber}
+                          question={question}
+                          selectedAnswer={answers[String(question.questionNumber)] || null}
+                          onSelect={(answer) => {
+                            saveAnswer(question.questionNumber, answer).catch(() => undefined);
+                          }}
+                          disabled={isListening && busy}
+                          hideOptionContent={isListening && currentUnit.partNumber <= 2}
+                          isFocused={question.questionNumber === currentQuestion}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <footer className="sticky bottom-3 z-10 mt-4 shrink-0 rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur">
+                    {isListening ? (
+                      <div className="text-center">
+                        {audioAdvanceError ? (
                           <button
-                            key={number}
                             type="button"
-                            onClick={() => moveReading(number)}
+                            onClick={advanceListeningAfterAudio}
                             disabled={busy}
-                            aria-label={`Đến câu ${number}`}
-                            className={`aspect-square rounded-lg text-[11px] font-bold transition ${
-                              isCurrent
-                                ? "bg-sky-600 text-white ring-2 ring-sky-200"
-                                : isAnswered
-                                  ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
-                                  : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                            }`}
+                            className="rounded-xl border border-red-200 bg-red-50 px-5 py-3 text-sm font-bold text-red-700 hover:bg-red-100 disabled:opacity-50"
                           >
-                            {number}
+                            {shouldSubmitAfterListeningAudio(attempt, currentUnit, listeningUnits)
+                              ? "Thử lưu và nộp lại"
+                              : "Thử lưu và tự chuyển lại"}
                           </button>
-                        );
-                      })}
-                    </div>
-                  </aside>
-
-                  <div className="space-y-4">
-                    {currentUnit.questions.map((question) => (
-                      <QuestionCard
-                        key={question.questionNumber}
-                        question={question}
-                        selectedAnswer={answers[String(question.questionNumber)] || null}
-                        onSelect={(answer) => {
-                          saveAnswer(question.questionNumber, answer).catch(() => undefined);
-                        }}
-                        isFocused={question.questionNumber === currentQuestion}
-                      />
-                    ))}
-                  </div>
-
-                  <div className="flex flex-wrap items-center justify-between gap-3 pb-8 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => moveReading(previousReadingQuestion)}
-                      disabled={previousReadingQuestion === null || busy}
-                      className="rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40"
-                    >
-                      ← Câu trước
-                    </button>
-                    <div className="flex gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setShowSubmit(true)}
-                        className="rounded-xl border border-red-200 bg-red-50 px-5 py-3 font-bold text-red-700 hover:bg-red-100"
-                      >
-                        Nộp bài
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => moveReading(nextReadingQuestion)}
-                        disabled={nextReadingQuestion === null || busy}
-                        className="rounded-xl bg-sky-500 px-5 py-3 font-bold text-white hover:bg-sky-600 disabled:opacity-40"
-                      >
-                        Câu tiếp →
-                      </button>
-                    </div>
-                  </div>
+                        ) : (
+                          <p className="text-sm font-medium text-slate-500">
+                            Audio kết thúc sẽ tự động lưu {currentUnit.questions.length > 1 ? "cả group" : "đáp án"}
+                            {shouldSubmitAfterListeningAudio(attempt, currentUnit, listeningUnits)
+                              ? " và nộp bài."
+                              : " và chuyển tiếp."}
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <button
+                          type="button"
+                          onClick={() => moveReading(previousReadingQuestion)}
+                          disabled={previousReadingQuestion === null || busy}
+                          className="rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40"
+                        >
+                          ← Câu trước
+                        </button>
+                        <div className="flex gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setShowSubmit(true)}
+                            className="rounded-xl border border-red-200 bg-red-50 px-5 py-3 font-bold text-red-700 hover:bg-red-100"
+                          >
+                            Nộp bài
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => moveReading(nextReadingQuestion)}
+                            disabled={nextReadingQuestion === null || busy}
+                            className="rounded-xl bg-sky-500 px-5 py-3 font-bold text-white hover:bg-sky-600 disabled:opacity-40"
+                          >
+                            Câu tiếp →
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </footer>
                 </section>
-              </div>
-            )}
+              )}
+            />
           </section>
         </div>
       </main>

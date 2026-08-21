@@ -136,6 +136,7 @@ public class TestService {
 
     private Map<String, Object> toResponse(Test test, boolean examSafe) {
         Map<String, Object> response = toMap(test);
+        ReviewFieldNormalizer.normalize(response);
         if (examSafe) {
             removeExamSecrets(response);
             Object partsValue = response.get("parts");
@@ -163,6 +164,9 @@ public class TestService {
     private void removeExamSecrets(Object value) {
         if (value instanceof Map<?, ?> map) {
             map.remove("correctAnswer");
+            map.remove("questionTranslation");
+            map.remove("answerTranslation");
+            map.remove("detailedExplanation");
             map.remove("translation");
             map.remove("explanation");
             map.remove("transcript");
