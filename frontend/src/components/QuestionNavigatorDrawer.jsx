@@ -1,30 +1,5 @@
 import { useEffect } from "react";
 
-function GridIcon({ className = "h-5 w-5" }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="2" />
-      <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="2" />
-      <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="2" />
-      <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="2" />
-    </svg>
-  );
-}
-
-function QuestionNavigatorButton({ currentQuestion, lastQuestion, onClick }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="inline-flex items-center gap-2 rounded-xl bg-sky-500 px-4 py-3 font-bold text-white shadow-sm transition hover:bg-sky-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
-      aria-label="Open question navigator"
-    >
-      <GridIcon />
-      <span>{currentQuestion}/{lastQuestion}</span>
-    </button>
-  );
-}
-
 function LegendItem({ className, label }) {
   return (
     <div className="flex items-center gap-2 text-sm font-medium text-slate-600">
@@ -63,7 +38,7 @@ function QuestionNavigatorDrawer({
     <div className="fixed inset-0 z-50" role="presentation">
       <button
         type="button"
-        className="absolute inset-0 h-full w-full cursor-default bg-slate-950/60 backdrop-blur-[1px]"
+        className="absolute inset-0 h-full w-full cursor-default bg-slate-950/45"
         onClick={onClose}
         aria-label="Close question navigator"
       />
@@ -71,36 +46,36 @@ function QuestionNavigatorDrawer({
         role="dialog"
         aria-modal="true"
         aria-labelledby="question-navigator-title"
-        className="absolute inset-y-0 right-0 flex w-full flex-col bg-slate-50 shadow-2xl sm:w-[min(86vw,720px)] xl:w-[30vw] xl:min-w-[560px] xl:max-w-[920px]"
+        className="absolute inset-y-0 right-0 flex w-full flex-col bg-white shadow-2xl sm:w-[min(86vw,680px)] xl:w-[30vw] xl:min-w-[520px] xl:max-w-[760px]"
       >
-        <header className="flex items-center justify-between bg-sky-900 px-6 py-6 text-white sm:px-8">
-          <h2 id="question-navigator-title" className="text-2xl font-bold">
+        <header className="flex items-center justify-between border-b border-slate-200 px-5 py-4 sm:px-6">
+          <h2 id="question-navigator-title" className="text-xl font-bold text-slate-950">
             Question Navigator
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-full text-3xl font-light text-sky-100 transition hover:bg-white/10 hover:text-white"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-2xl font-light text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
             aria-label="Close question navigator"
           >
             ×
           </button>
         </header>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6 sm:px-8">
-          <div className="flex flex-wrap gap-x-6 gap-y-3 border-b border-slate-200 pb-6">
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6">
+          <div className="flex flex-wrap gap-x-5 gap-y-3 border-b border-slate-200 pb-5">
             <LegendItem className="border-sky-500 bg-sky-500" label="Current" />
             <LegendItem className="border-slate-300 bg-white" label="Unanswered" />
             <LegendItem className="border-emerald-400 bg-emerald-50" label="Answered" />
           </div>
 
           {navigationLocked && (
-            <p className="mt-5 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm leading-6 text-sky-800">
+            <p className="mt-4 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 text-sm leading-6 text-sky-800">
               Listening questions are shown for progress tracking. They advance automatically when the audio ends.
             </p>
           )}
 
-          <div className="mt-6 space-y-8">
+          <div className="mt-5 space-y-7">
             {groups.map((group) => (
               <section key={group.partNumber}>
                 <h3 className="text-lg font-bold text-slate-800">
@@ -143,5 +118,4 @@ function QuestionNavigatorDrawer({
   );
 }
 
-export { QuestionNavigatorButton };
 export default QuestionNavigatorDrawer;

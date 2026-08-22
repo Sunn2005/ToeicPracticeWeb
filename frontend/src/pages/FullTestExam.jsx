@@ -2,12 +2,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ApiError, apiFetch } from "../api/client";
 import ExamHeader from "../components/ExamHeader";
+import ExamNavigationBar from "../components/ExamNavigationBar";
 import LockedExamAudio from "../components/LockedExamAudio";
 import PassagePanel from "../components/PassagePanel";
 import QuestionCard from "../components/QuestionCard";
-import QuestionNavigatorDrawer, {
-  QuestionNavigatorButton,
-} from "../components/QuestionNavigatorDrawer";
+import QuestionNavigatorDrawer from "../components/QuestionNavigatorDrawer";
 import ResizableExamLayout from "../components/ResizableExamLayout";
 import {
   TIMER_TYPES,
@@ -19,6 +18,7 @@ import {
   buildListeningUnits,
   buildReadingUnits,
   findUnit,
+  formatQuestionProgress,
 } from "../utils/testData";
 
 function secondsUntil(endAt, serverNow) {
@@ -26,21 +26,32 @@ function secondsUntil(endAt, serverNow) {
 }
 
 function SubmitDialog({ unansweredCount, submitting, onCancel, onConfirm }) {
+  const hasUnansweredQuestions = unansweredCount > 0;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-5 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-5">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="submit-title"
-        className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl sm:p-8"
+        className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl sm:p-7"
       >
-        <p className="text-xs font-bold uppercase tracking-widest text-sky-600">Submit confirmation</p>
-        <h2 id="submit-title" className="mt-2 text-2xl font-bold text-slate-950">
-          Are you sure you want to submit?
+        <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">Submit test</p>
+        <h2 id="submit-title" className="mt-2 text-xl font-bold text-slate-950 sm:text-2xl">
+          Submit your answers now?
         </h2>
         <p className="mt-4 leading-7 text-slate-600">
-          You still have <strong className="text-amber-700">{unansweredCount} unanswered questions</strong>.
-          Once submitted, all answers will be locked and cannot be changed.
+          {hasUnansweredQuestions ? (
+            <>
+              You still have <strong className="text-amber-700">{unansweredCount} unanswered questions</strong>.
+              You can still submit, but unanswered questions will not receive a score.
+            </>
+          ) : (
+            "You have answered every question in this test."
+          )}
+        </p>
+        <p className="mt-2 text-sm leading-6 text-slate-500">
+          After submission, your answers will be locked and the result will be shown.
         </p>
         <div className="mt-7 flex gap-3">
           <button
@@ -55,7 +66,7 @@ function SubmitDialog({ unansweredCount, submitting, onCancel, onConfirm }) {
             type="button"
             onClick={onConfirm}
             disabled={submitting}
-            className="flex-1 rounded-xl bg-sky-500 px-4 py-3 font-semibold text-white hover:bg-sky-600 disabled:bg-sky-300"
+            className="flex-1 rounded-xl bg-emerald-600 px-4 py-3 font-semibold text-white hover:bg-emerald-700 disabled:bg-emerald-300"
           >
             {submitting ? "Submitting..." : "Submit test"}
           </button>
@@ -160,8 +171,20 @@ function FullTestExam() {
       questions: questions.sort((left, right) => left - right),
     }));
   }, [currentUnits]);
-  const navigatorLastQuestion = navigatorGroups.at(-1)?.questions.at(-1) || scopeLast;
-  const totalQuestions = attempt?.totalQuestions || scopeLast - scopeFirst + 1;
+  const scopeQuestionNumbers = useMemo(() => [...new Set(
+    [...listeningUnits, ...readingUnits]
+      .flatMap((unit) => unit.questions.map((question) => question.questionNumber)),
+  )].sort((left, right) => left - right), [listeningUnits, readingUnits]);
+  const totalQuestions = attempt?.totalQuestions
+    || scopeQuestionNumbers.length
+    || scopeLast - scopeFirst + 1;
+  const progressLabel = formatQuestionProgress(
+    scopeQuestionNumbers,
+    attempt?.currentSection === "LISTENING"
+      ? (currentUnit?.questions || []).map((question) => question.questionNumber)
+      : [currentQuestion],
+    totalQuestions,
+  );
   const answeredCount = Object.entries(answers).filter(
     ([number, value]) => Number(number) >= scopeFirst && Number(number) <= scopeLast && value,
   ).length;
@@ -450,8 +473,6 @@ function FullTestExam() {
   }
 
   const isListening = attempt.currentSection === "LISTENING";
-  const readingStart = Math.max(101, scopeFirst);
-  const readingEnd = scopeLast;
   const readingQuestionNumbers = [...new Set(
     readingUnits.flatMap((unit) => unit.questions.map((question) => question.questionNumber)),
   )].sort((left, right) => left - right);
@@ -463,8 +484,6 @@ function FullTestExam() {
     && currentReadingIndex < readingQuestionNumbers.length - 1
     ? readingQuestionNumbers[currentReadingIndex + 1]
     : null;
-  const selectedReadingParts = (selectedParts || [5, 6, 7])
-    .filter((part) => part >= 5);
   const mediaImage = currentUnit.imageUrl;
   const mediaAudio = currentUnit.audioUrl;
   const readingPanelImageUrls = new Set([
@@ -479,7 +498,7 @@ function FullTestExam() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900">
+    <div className="min-h-screen bg-slate-50 text-slate-900">
       <ExamHeader
         section={attempt.currentSection}
         mode={attempt.mode}
@@ -489,8 +508,6 @@ function FullTestExam() {
         lastQuestion={scopeLast}
         remainingSeconds={remainingSeconds ?? 0}
         timerType={timerType}
-        answeredCount={answeredCount}
-        totalQuestions={totalQuestions}
         onExit={exitExam}
       />
 
@@ -512,7 +529,7 @@ function FullTestExam() {
         </div>
       )}
 
-      <main className="w-full px-3 py-4 sm:px-4 lg:px-6">
+      <main className="w-full px-3 py-3 pb-28 sm:px-5 lg:px-6 xl:pb-5">
         {error && (
           <div className="mb-4 flex items-center justify-between gap-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             <span>{error}</span>
@@ -521,19 +538,19 @@ function FullTestExam() {
         )}
 
         <div className="w-full">
-          <section className="min-w-0 space-y-5">
-            <div className="flex flex-col justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center">
+          <section className="min-w-0 space-y-3">
+            <div className="flex items-center justify-between gap-4 border-b border-slate-200 pb-3">
               <div>
-                <p className="text-xs font-bold uppercase tracking-widest text-sky-600">
-                  Part {currentUnit.partNumber} · {currentUnit.partName}
-                </p>
-                <h1 className="mt-1 text-xl font-bold">
+                <h1 className="text-base font-bold text-slate-950 sm:text-lg">
                   {isListening
                     ? `Questions ${currentUnit.start}${currentUnit.end !== currentUnit.start ? `–${currentUnit.end}` : ""}`
                     : `Question ${currentQuestion} · range ${scopeFirst}–${scopeLast}`}
                 </h1>
+                <p className="mt-0.5 text-xs font-semibold text-sky-700">
+                  Part {currentUnit.partNumber} · {currentUnit.partName}
+                </p>
               </div>
-              <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+              <div className="flex shrink-0 items-center gap-2 text-xs font-medium text-slate-500">
                 <span className={`h-2.5 w-2.5 rounded-full ${saveState === "Save failed" ? "bg-red-500" : saveState === "Saving..." ? "animate-pulse bg-amber-400" : "bg-emerald-500"}`} />
                 {saveState}
               </div>
@@ -546,19 +563,8 @@ function FullTestExam() {
                 <section
                   ref={readingContentRef}
                   aria-label={isListening ? "Listening content" : "Reading content"}
-                  className="min-w-0 space-y-4 xl:h-[calc(100dvh-14rem)] xl:overflow-y-auto xl:pr-1"
+                  className="min-w-0 space-y-3 xl:h-[calc(100dvh-12rem)] xl:overflow-y-auto xl:pr-1"
                 >
-                  <div className="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
-                    <p className="text-xs font-bold uppercase tracking-widest text-violet-600">
-                      {isListening ? "Listening Content" : "Reading Content"}
-                    </p>
-                    <p className="mt-1 text-sm text-slate-500">
-                      {isListening
-                        ? "Listen to the audio, review the graphic when provided, and answer on the right."
-                        : "Read the material on the left and answer the questions on the right."}
-                    </p>
-                  </div>
-
                   {isListening ? (
                     <>
                       {mediaAudio ? (
@@ -566,16 +572,17 @@ function FullTestExam() {
                           key={currentUnit.key}
                           src={mediaAudio}
                           advancing={busy}
+                          paused={showSubmit}
                           onEnded={advanceListeningAfterAudio}
                         />
                       ) : (
-                        <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+                        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
                           This question group has no audio URL, so it cannot advance automatically.
                         </div>
                       )}
 
                       {mediaImage && (
-                        <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm">
+                        <div className="rounded-xl border border-slate-200 bg-white p-3 text-center">
                           <img
                             src={mediaImage}
                             alt={`Graphic for questions ${currentUnit.start} to ${currentUnit.end}`}
@@ -584,12 +591,12 @@ function FullTestExam() {
                         </div>
                       )}
 
-                      <PassagePanel passages={currentUnit.passages || []} />
+                      <PassagePanel compact passages={currentUnit.passages || []} />
                     </>
                   ) : (
                     <>
                       {shouldRenderStandaloneReadingImage && (
-                        <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm">
+                        <div className="rounded-xl border border-slate-200 bg-white p-3 text-center">
                           <img
                             src={mediaImage}
                             alt={`Material for question ${currentUnit.start}`}
@@ -599,12 +606,13 @@ function FullTestExam() {
                       )}
 
                       <PassagePanel
+                        compact
                         passages={currentUnit.passages || []}
                         imageUrls={currentUnit.imageUrls || []}
                       />
 
                       {!hasReadingMaterial && (
-                        <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm leading-6 text-slate-500">
+                        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm leading-6 text-slate-500">
                           This Part has no separate reading passage. Answer the question on the right.
                         </div>
                       )}
@@ -615,38 +623,13 @@ function FullTestExam() {
               right={(
                 <section
                   aria-label="Questions and answers"
-                  className="min-w-0 xl:flex xl:h-[calc(100dvh-14rem)] xl:flex-col xl:pl-1"
+                  className="min-w-0 xl:flex xl:h-[calc(100dvh-12rem)] xl:flex-col xl:pl-1"
                 >
                   <div
                     ref={readingQuestionsRef}
-                    className="min-w-0 space-y-4 xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:pr-1"
+                    className="min-w-0 space-y-3 pb-2 xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:pr-1"
                   >
-                    <aside className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                      <div className="flex items-center justify-between gap-3">
-                        <div>
-                          <p className="text-xs font-bold uppercase tracking-widest text-sky-600">
-                            Questions & Answers
-                          </p>
-                          <h2 className="mt-1 font-bold">
-                            {isListening
-                              ? `Part ${currentUnit.partNumber} · Questions ${currentUnit.start}–${currentUnit.end}`
-                              : selectedReadingParts.map((part) => `Part ${part}`).join(" + ")}
-                          </h2>
-                        </div>
-                        {!isListening && (
-                          <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-700">
-                            {Object.entries(answers).filter(
-                              ([number, value]) => Number(number) >= readingStart
-                                && Number(number) <= readingEnd
-                                && value,
-                            ).length}/{readingQuestionNumbers.length}
-                          </span>
-                        )}
-                      </div>
-
-                    </aside>
-
-                    <div className="space-y-4 pb-4">
+                    <div className="space-y-3 pb-4">
                       {currentUnit.questions.map((question) => (
                         <QuestionCard
                           key={question.questionNumber}
@@ -658,76 +641,41 @@ function FullTestExam() {
                           disabled={isListening && busy}
                           hideOptionContent={isListening && currentUnit.partNumber <= 2}
                           isFocused={question.questionNumber === currentQuestion}
+                          compact
                         />
                       ))}
                     </div>
                   </div>
 
-                  <footer className="sticky bottom-3 z-10 mt-4 shrink-0 rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur">
-                    {isListening ? (
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <QuestionNavigatorButton
-                          currentQuestion={currentQuestion}
-                          lastQuestion={navigatorLastQuestion}
-                          onClick={() => setShowNavigator(true)}
-                        />
-                        <div className="flex-1 text-center sm:text-right">
-                          {audioAdvanceError ? (
-                            <button
-                              type="button"
-                              onClick={advanceListeningAfterAudio}
-                              disabled={busy}
-                              className="rounded-xl border border-red-200 bg-red-50 px-5 py-3 text-sm font-bold text-red-700 hover:bg-red-100 disabled:opacity-50"
-                            >
-                              {shouldSubmitAfterListeningAudio(attempt, currentUnit, listeningUnits)
-                                ? "Retry save and submit"
-                                : "Retry save and auto-advance"}
-                            </button>
-                          ) : (
-                            <p className="text-sm font-medium text-slate-500">
-                              The audio will automatically save {currentUnit.questions.length > 1 ? "this group" : "your answer"}
-                              {shouldSubmitAfterListeningAudio(attempt, currentUnit, listeningUnits)
-                                ? " and submit the test when it ends."
-                                : " and advance when it ends."}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <button
-                          type="button"
-                          onClick={() => moveReading(previousReadingQuestion)}
-                          disabled={previousReadingQuestion === null || busy}
-                          className="rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40"
-                        >
-                          ← Previous
-                        </button>
-                        <QuestionNavigatorButton
-                          currentQuestion={currentQuestion}
-                          lastQuestion={navigatorLastQuestion}
-                          onClick={() => setShowNavigator(true)}
-                        />
-                        <div className="flex gap-3">
-                          <button
-                            type="button"
-                            onClick={() => setShowSubmit(true)}
-                            className="rounded-xl border border-red-200 bg-red-50 px-5 py-3 font-bold text-red-700 hover:bg-red-100"
-                          >
-                            Submit
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => moveReading(nextReadingQuestion)}
-                            disabled={nextReadingQuestion === null || busy}
-                            className="rounded-xl bg-sky-500 px-5 py-3 font-bold text-white hover:bg-sky-600 disabled:opacity-40"
-                          >
-                            Next →
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </footer>
+                  <ExamNavigationBar
+                    progressLabel={progressLabel}
+                    onOpenNavigator={() => setShowNavigator(true)}
+                    onPrevious={isListening
+                      ? undefined
+                      : () => moveReading(previousReadingQuestion)}
+                    onNext={isListening
+                      ? advanceListeningAfterAudio
+                      : () => moveReading(nextReadingQuestion)}
+                    onSubmit={() => setShowSubmit(true)}
+                    previousDisabled={isListening || previousReadingQuestion === null || busy}
+                    nextDisabled={isListening
+                      ? busy || (Boolean(mediaAudio) && !audioAdvanceError)
+                      : nextReadingQuestion === null || busy}
+                    submitDisabled={busy}
+                    previousTitle={isListening
+                      ? "Listening questions are locked after the audio advances."
+                      : undefined}
+                    nextTitle={isListening && mediaAudio && !audioAdvanceError
+                      ? "The next group opens automatically when the audio ends."
+                      : undefined}
+                    statusMessage={isListening
+                      ? audioAdvanceError
+                        ? "The audio ended, but the next group did not open. Select Next to retry."
+                        : mediaAudio
+                          ? "The next Listening group opens automatically when the audio ends."
+                          : "Audio is unavailable for this group. Select Next to continue or Submit to finish."
+                      : undefined}
+                  />
                 </section>
               )}
             />

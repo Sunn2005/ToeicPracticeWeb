@@ -77,6 +77,17 @@ export function findUnit(units, questionNumber) {
   );
 }
 
+export function formatQuestionProgress(questionNumbers, currentQuestionNumbers, totalQuestions) {
+  const orderedQuestions = [...new Set(questionNumbers)].sort((left, right) => left - right);
+  const positions = currentQuestionNumbers
+    .map((questionNumber) => orderedQuestions.indexOf(questionNumber) + 1)
+    .filter((position) => position > 0);
+  const start = positions[0] || 1;
+  const end = positions.at(-1) || start;
+  const total = totalQuestions || orderedQuestions.length || 1;
+  return end > start ? `${start}–${end}/${total}` : `${start}/${total}`;
+}
+
 export function getAllQuestions(test) {
   return buildAllUnits(test)
     .flatMap((unit) =>

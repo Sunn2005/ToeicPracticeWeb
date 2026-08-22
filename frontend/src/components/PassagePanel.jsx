@@ -1,4 +1,4 @@
-function PassagePanel({ passages = [], imageUrls = [] }) {
+function PassagePanel({ passages = [], imageUrls = [], compact = false }) {
   const groupImages = [...new Set(imageUrls.filter(Boolean))];
 
   if (!passages.length && !groupImages.length) {
@@ -11,7 +11,7 @@ function PassagePanel({ passages = [], imageUrls = [] }) {
         {groupImages.map((imageUrl, index) => (
           <article
             key={imageUrl}
-            className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4"
+            className={`overflow-hidden border border-slate-200 bg-white ${compact ? "rounded-xl p-2 sm:p-3" : "rounded-2xl p-3 shadow-sm sm:p-4"}`}
           >
             <img
               src={imageUrl}
@@ -29,7 +29,7 @@ function PassagePanel({ passages = [], imageUrls = [] }) {
       {passages.map((passage, index) => (
         <article
           key={`${passage.passageNumber || index}-${passage.title || "passage"}`}
-          className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+          className={`border border-slate-200 bg-white ${compact ? "rounded-xl p-4 sm:p-5" : "rounded-2xl p-5 shadow-sm sm:p-6"}`}
         >
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-xs font-bold uppercase tracking-widest text-violet-600">

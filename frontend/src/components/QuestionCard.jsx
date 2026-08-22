@@ -15,6 +15,7 @@ function QuestionCard({
   disabled = false,
   hideOptionContent = false,
   isFocused = false,
+  compact = false,
   review = false,
 }) {
   const questionTranslation =
@@ -42,14 +43,14 @@ function QuestionCard({
   return (
     <article
       id={`question-${question.questionNumber}`}
-      className={`rounded-2xl border bg-white p-5 shadow-sm transition sm:p-6 ${statusClass}`}
+      className={`${compact ? "rounded-xl border bg-white p-4 transition sm:p-5" : "rounded-2xl border bg-white p-5 shadow-sm transition sm:p-6"} ${statusClass}`}
     >
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-sky-600">
             Question {question.questionNumber}
           </p>
-          <h3 className="mt-2 text-base font-semibold leading-7 text-slate-900 sm:text-lg">
+          <h3 className={`${compact ? "mt-1.5 text-base leading-6" : "mt-2 text-base leading-7 sm:text-lg"} font-semibold text-slate-900`}>
             {prompt}
           </h3>
         </div>
@@ -72,7 +73,7 @@ function QuestionCard({
         )}
       </div>
 
-      <div className="mt-5 grid gap-3">
+      <div className={`${compact ? "mt-4 gap-2" : "mt-5 gap-3"} grid`}>
         {(question.answers || []).map((answer) => {
           const isSelected = selectedAnswer === answer.label;
           const isCorrect = review && question.correctAnswer === answer.label;
@@ -89,7 +90,7 @@ function QuestionCard({
           return (
             <label
               key={answer.label}
-              className={`flex items-start gap-3 rounded-xl border px-4 py-3 text-sm leading-6 transition ${optionClass} ${
+              className={`flex items-start gap-3 rounded-lg border px-4 py-3 text-sm leading-6 transition ${optionClass} ${
                 disabled ? "cursor-default" : "cursor-pointer"
               }`}
             >

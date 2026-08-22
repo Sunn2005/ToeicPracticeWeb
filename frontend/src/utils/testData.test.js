@@ -1,11 +1,35 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { buildListeningUnits, buildReadingUnits, formatClock } from "./testData.js";
+import {
+  buildListeningUnits,
+  buildReadingUnits,
+  formatClock,
+  formatQuestionProgress,
+} from "./testData.js";
 
 test("formats the countdown as hours, minutes, and seconds", () => {
   assert.equal(formatClock(6_004), "01:40:04");
   assert.equal(formatClock(9), "00:00:09");
+});
+
+test("formats question progress for a single question and a Listening group", () => {
+  assert.equal(
+    formatQuestionProgress(
+      Array.from({ length: 200 }, (_, index) => index + 1),
+      [101],
+      200,
+    ),
+    "101/200",
+  );
+  assert.equal(
+    formatQuestionProgress(
+      Array.from({ length: 39 }, (_, index) => index + 32),
+      [32, 33, 34],
+      39,
+    ),
+    "1–3/39",
+  );
 });
 
 test("keeps Supabase graphic URL on grouped Listening units", () => {
