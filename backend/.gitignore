@@ -35,3 +35,5 @@ build/
 ### Local secrets ###
 .env
 src/main/resources/firebase/*.json
+.DS_Store
+**/.DS_Store
