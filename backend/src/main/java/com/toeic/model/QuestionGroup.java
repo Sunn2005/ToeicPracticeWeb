@@ -16,5 +16,6 @@ public class QuestionGroup {
     private String audioUrl;
     private String imageUrl;
     private String transcript;
+    private String transcriptTranslation;
     private List<Question> questions;
 }

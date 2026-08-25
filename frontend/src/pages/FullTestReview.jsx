@@ -80,6 +80,8 @@ function FullTestReview() {
   const shouldRenderStandaloneImage = imageUrl && !passagePanelImageUrls.has(imageUrl);
   const audioUrl = unit?.audioUrl || question?.audioUrl;
   const transcript = unit?.transcript || question?.transcript;
+  const transcriptTranslation =
+    unit?.transcriptTranslation || question?.transcriptTranslation;
   const questionsToDisplay = [3, 4].includes(unit?.partNumber)
     ? unit.questions
     : [question];
@@ -192,6 +194,15 @@ function FullTestReview() {
                 <details className="rounded-2xl border border-slate-200 bg-white p-5">
                   <summary className="cursor-pointer font-bold text-slate-800">Transcript</summary>
                   <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-slate-600">{transcript}</p>
+                </details>
+              )}
+
+              {transcriptTranslation && (
+                <details className="rounded-2xl border border-sky-100 bg-sky-50 p-5">
+                  <summary className="cursor-pointer font-bold text-sky-800">Transcript Translation</summary>
+                  <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-slate-700">
+                    {transcriptTranslation}
+                  </p>
                 </details>
               )}
 

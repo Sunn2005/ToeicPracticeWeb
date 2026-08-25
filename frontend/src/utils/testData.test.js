@@ -34,6 +34,7 @@ test("formats question progress for a single question and a Listening group", ()
 
 test("keeps Supabase graphic URL on grouped Listening units", () => {
   const imageUrl = "https://example.supabase.co/T01-P3-62-64.png";
+  const transcriptTranslation = "Bản dịch transcript";
   const testData = {
     parts: [
       {
@@ -43,6 +44,7 @@ test("keeps Supabase graphic URL on grouped Listening units", () => {
           {
             questionRange: "62-64",
             imageUrl,
+            transcriptTranslation,
             questions: [
               { questionNumber: 62 },
               { questionNumber: 64 },
@@ -56,6 +58,7 @@ test("keeps Supabase graphic URL on grouped Listening units", () => {
   const [unit] = buildListeningUnits(testData);
 
   assert.equal(unit.imageUrl, imageUrl);
+  assert.equal(unit.transcriptTranslation, transcriptTranslation);
   assert.equal(unit.start, 62);
   assert.equal(unit.end, 64);
 });

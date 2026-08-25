@@ -170,6 +170,7 @@ public class TestService {
             map.remove("translation");
             map.remove("explanation");
             map.remove("transcript");
+            map.remove("transcriptTranslation");
             for (Object child : map.values()) {
                 removeExamSecrets(child);
             }

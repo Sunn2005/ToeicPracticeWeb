@@ -1,11 +1,12 @@
 package com.toeic.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Keeps review responses on the current schema while accepting tests saved
- * before the review fields were renamed.
+ * Keeps review responses on the established API schema while accepting both
+ * legacy strings and the structured translation objects used by imported data.
  */
 final class ReviewFieldNormalizer {
 
@@ -15,7 +16,7 @@ final class ReviewFieldNormalizer {
     static void normalize(Object value) {
         if (value instanceof Map<?, ?> map) {
             if (map.containsKey("questionNumber")) {
-                normalizeLegacyTranslation(map);
+                normalizeTranslation(map);
                 copyLegacyValue(map, "detailedExplanation", "explanation");
                 map.remove("translation");
                 map.remove("explanation");
@@ -30,8 +31,12 @@ final class ReviewFieldNormalizer {
         }
     }
 
-    private static void normalizeLegacyTranslation(Map<?, ?> map) {
+    private static void normalizeTranslation(Map<?, ?> map) {
         Object legacyValue = map.get("translation");
+        if (legacyValue instanceof Map<?, ?> structuredTranslation) {
+            normalizeStructuredTranslation(map, structuredTranslation);
+            return;
+        }
         if (!(legacyValue instanceof String legacyTranslation)
                 || legacyTranslation.isBlank()) {
             return;
@@ -78,6 +83,46 @@ final class ReviewFieldNormalizer {
         }
 
         copyValueIfMissing(map, "questionTranslation", legacyTranslation);
+    }
+
+    private static void normalizeStructuredTranslation(
+            Map<?, ?> question,
+            Map<?, ?> translation
+    ) {
+        Object translatedQuestion = translation.get("question");
+        if (translatedQuestion instanceof String value && !value.isBlank()) {
+            copyValueIfMissing(question, "questionTranslation", value.trim());
+        }
+
+        String translatedAnswers = formatTranslatedAnswers(translation.get("answer"));
+        if (!translatedAnswers.isBlank()) {
+            copyValueIfMissing(question, "answerTranslation", translatedAnswers);
+        }
+    }
+
+    private static String formatTranslatedAnswers(Object value) {
+        if (value instanceof String text) {
+            return text.trim();
+        }
+        if (!(value instanceof List<?> answers)) {
+            return "";
+        }
+
+        List<String> lines = new ArrayList<>();
+        for (Object item : answers) {
+            if (!(item instanceof Map<?, ?> answer)) {
+                continue;
+            }
+            Object labelValue = answer.get("label");
+            Object contentValue = answer.get("content");
+            if (contentValue == null || String.valueOf(contentValue).isBlank()) {
+                continue;
+            }
+            String label = labelValue == null ? "" : String.valueOf(labelValue).trim();
+            String content = String.valueOf(contentValue).trim();
+            lines.add(label.isBlank() ? content : "(" + label + ") " + content);
+        }
+        return String.join("\n", lines);
     }
 
     private static void copyLegacyValue(

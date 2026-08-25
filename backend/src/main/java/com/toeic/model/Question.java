@@ -22,11 +22,12 @@ public class Question {
     private String detailedExplanation;
 
     /**
-     * Legacy field kept only so existing Firestore documents can still be read.
-     * API responses expose {@code questionTranslation} instead.
+     * Source data can contain either the legacy translation string or the
+     * current object with {@code question} and {@code answer} fields. API
+     * responses normalize both representations to {@code questionTranslation}
+     * and {@code answerTranslation}.
      */
-    @Deprecated
-    private String translation;
+    private Object translation;
 
     /**
      * Legacy field kept only so existing Firestore documents can still be read.

@@ -14,6 +14,7 @@ export function buildListeningUnits(test) {
           audioUrl: question.audioUrl,
           imageUrl: question.imageUrl,
           transcript: question.transcript,
+          transcriptTranslation: question.transcriptTranslation,
         }));
       }
 

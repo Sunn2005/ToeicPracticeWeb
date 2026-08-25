@@ -64,6 +64,8 @@ class TestServiceTests {
         assertFalse(serialized.contains("Bài giảng sẽ diễn ra"));
         assertFalse(serialized.contains("detailedExplanation"));
         assertFalse(serialized.contains("transcript"));
+        assertFalse(serialized.contains("transcriptTranslation"));
+        assertFalse(serialized.contains("Nữ: Này Oliver"));
         assertTrue(serialized.contains("T01-P6-131-134.png"));
         assertTrue(serialized.contains("T01-P7-196-200-3.png"));
 
@@ -82,9 +84,12 @@ class TestServiceTests {
         assertTrue(serialized.contains("correctAnswer"));
         assertTrue(serialized.contains("questionTranslation"));
         assertTrue(serialized.contains("answerTranslation"));
+        assertTrue(serialized.contains("(A) băng qua"));
         assertTrue(serialized.contains("detailedExplanation"));
         assertTrue(serialized.contains("Bài giảng sẽ diễn ra"));
         assertTrue(serialized.contains("transcript"));
+        assertTrue(serialized.contains("transcriptTranslation"));
+        assertTrue(serialized.contains("Nữ: Này Oliver"));
         assertFalse(serialized.contains("\"translation\""));
         assertFalse(serialized.contains("\"explanation\""));
     }

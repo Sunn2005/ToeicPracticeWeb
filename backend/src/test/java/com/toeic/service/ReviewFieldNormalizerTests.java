@@ -3,6 +3,7 @@ package com.toeic.service;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -55,5 +56,27 @@ class ReviewFieldNormalizerTests {
 
         assertEquals("Bản dịch mới", question.get("questionTranslation"));
         assertEquals("Lời giải mới", question.get("detailedExplanation"));
+    }
+
+    @Test
+    void mapsStructuredTranslationsToTheExistingReviewApi() {
+        Map<String, Object> question = new LinkedHashMap<>();
+        question.put("questionNumber", 101);
+        question.put("translation", Map.of(
+                "question", "Câu hỏi tiếng Việt?",
+                "answer", List.of(
+                        Map.of("label", "A", "content", "Lựa chọn A"),
+                        Map.of("label", "B", "content", "Lựa chọn B")
+                )
+        ));
+
+        ReviewFieldNormalizer.normalize(question);
+
+        assertEquals("Câu hỏi tiếng Việt?", question.get("questionTranslation"));
+        assertEquals(
+                "(A) Lựa chọn A\n(B) Lựa chọn B",
+                question.get("answerTranslation")
+        );
+        assertFalse(question.containsKey("translation"));
     }
 }
