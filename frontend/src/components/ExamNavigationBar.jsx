@@ -30,6 +30,8 @@ function ExamNavigationBar({
   previousTitle,
   nextTitle,
   statusMessage,
+  submitLabel = "Submit",
+  submitVariant = "submit",
 }) {
   return (
     <footer className="fixed inset-x-3 bottom-3 z-30 rounded-xl border border-slate-200 bg-white/95 p-2.5 shadow-lg shadow-slate-900/10 backdrop-blur sm:inset-x-4 xl:sticky xl:inset-x-auto xl:bottom-3 xl:mt-3 xl:shrink-0 xl:shadow-sm">
@@ -62,11 +64,11 @@ function ExamNavigationBar({
 
         <div className="sm:ml-auto">
           <NavigationButton
-            variant="submit"
+            variant={submitVariant}
             onClick={onSubmit}
             disabled={submitDisabled}
           >
-            Submit
+            {submitLabel}
           </NavigationButton>
         </div>
       </div>

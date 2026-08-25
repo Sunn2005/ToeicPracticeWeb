@@ -1,11 +1,34 @@
 import { getReviewParagraphs } from "../utils/reviewContent";
+import ReviewTogglePanel from "./ReviewTogglePanel";
 
 function ReviewContent({ children }) {
+  if (typeof children !== "string") return null;
   return getReviewParagraphs(children).map((paragraph, index) => (
     <p key={`${index}-${paragraph.slice(0, 24)}`} className="whitespace-pre-line">
       {paragraph}
     </p>
   ));
+}
+
+function AnswerTranslationContent({ value, correctAnswer }) {
+  if (typeof value !== "string") return null;
+
+  return value
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line, index) => {
+      const label = line.match(/^\(([A-D])\)/i)?.[1]?.toUpperCase();
+      const isCorrect = label === correctAnswer?.toUpperCase();
+      return (
+        <p
+          key={`${index}-${line.slice(0, 20)}`}
+          className={isCorrect ? "font-bold text-emerald-700" : "text-slate-700"}
+        >
+          {line}
+        </p>
+      );
+    });
 }
 
 function QuestionCard({
@@ -19,7 +42,8 @@ function QuestionCard({
   review = false,
 }) {
   const questionTranslation =
-    question.questionTranslation || question.translation;
+    question.questionTranslation
+    || (typeof question.translation === "string" ? question.translation : null);
   const detailedExplanation =
     question.detailedExplanation || question.explanation;
   const statusClass = review
@@ -29,8 +53,9 @@ function QuestionCard({
         ? "border-red-300 bg-red-50/40"
         : "border-amber-300 bg-amber-50/40"
     : isFocused
-      ? "border-sky-400 ring-4 ring-sky-100"
+      ? "border-sky-400"
       : "border-slate-200";
+  const focusClass = isFocused ? "ring-4 ring-sky-100" : "";
 
   const prompt =
     question.question ||
@@ -43,7 +68,7 @@ function QuestionCard({
   return (
     <article
       id={`question-${question.questionNumber}`}
-      className={`${compact ? "rounded-xl border bg-white p-4 transition sm:p-5" : "rounded-2xl border bg-white p-5 shadow-sm transition sm:p-6"} ${statusClass}`}
+      className={`${compact ? "rounded-xl border bg-white p-4 transition sm:p-5" : "rounded-2xl border bg-white p-5 shadow-sm transition sm:p-6"} ${statusClass} ${focusClass}`}
     >
       <div className="flex items-start justify-between gap-4">
         <div>
@@ -113,8 +138,8 @@ function QuestionCard({
       </div>
 
       {review && (
-        <div className="mt-5 space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6">
-          <p>
+        <div className="mt-5 space-y-3">
+          <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6">
             <strong>Correct answer:</strong> {question.correctAnswer}
             {question.selectedAnswer && (
               <>
@@ -123,29 +148,29 @@ function QuestionCard({
             )}
           </p>
           {questionTranslation && (
-            <section className="rounded-lg border border-sky-100 bg-white p-4">
-              <h4 className="font-bold text-sky-700">Question Translation</h4>
-              <div className="mt-2 space-y-3 text-slate-700">
+            <ReviewTogglePanel title="Dịch câu hỏi" icon="文" tone="sky">
+              <div className="space-y-3">
                 <ReviewContent>{questionTranslation}</ReviewContent>
               </div>
-            </section>
+            </ReviewTogglePanel>
           )}
           {question.answerTranslation && (
-            <section className="rounded-lg border border-emerald-100 bg-white p-4">
-              <h4 className="font-bold text-emerald-700">Answer Translation</h4>
-              <div className="mt-2 space-y-3 text-slate-700">
-                <ReviewContent>{question.answerTranslation}</ReviewContent>
+            <ReviewTogglePanel title="Dịch nghĩa đáp án" icon="☷" tone="emerald">
+              <div className="space-y-1.5">
+                <AnswerTranslationContent
+                  value={question.answerTranslation}
+                  correctAnswer={question.correctAnswer}
+                />
               </div>
-            </section>
+            </ReviewTogglePanel>
           )}
-          <section className="rounded-lg border border-violet-100 bg-white p-4">
-            <h4 className="font-bold text-violet-700">Detailed Explanation</h4>
-            <div className="mt-2 space-y-3 text-slate-600">
+          <ReviewTogglePanel title="Giải thích chi tiết" icon="✦" tone="violet">
+            <div className="space-y-3 text-slate-700">
               <ReviewContent>
                 {detailedExplanation || "No detailed explanation is available for this question yet."}
               </ReviewContent>
             </div>
-          </section>
+          </ReviewTogglePanel>
         </div>
       )}
     </article>

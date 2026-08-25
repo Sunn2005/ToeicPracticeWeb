@@ -1,8 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { apiFetch } from "../api/client";
+import ExamNavigationBar from "../components/ExamNavigationBar";
 import PassagePanel from "../components/PassagePanel";
 import QuestionCard from "../components/QuestionCard";
+import QuestionNavigatorDrawer from "../components/QuestionNavigatorDrawer";
+import ResizableExamLayout from "../components/ResizableExamLayout";
+import ReviewTogglePanel from "../components/ReviewTogglePanel";
 import { getAllQuestions } from "../utils/testData";
 
 const FILTERS = [
@@ -12,13 +16,89 @@ const FILTERS = [
   ["UNANSWERED", "Unanswered"],
 ];
 
+function modeLabel(attempt) {
+  const selectedParts = attempt.selectedParts?.length
+    ? attempt.selectedParts
+    : attempt.selectedPart
+      ? [attempt.selectedPart]
+      : [];
+
+  if (attempt.mode === "FULL") return "Full Test";
+  if (attempt.mode === "PART") return `Part ${selectedParts.join(" + ")}`;
+  return attempt.mode === "LISTENING" ? "Listening Test" : "Reading Test";
+}
+
+function ReviewHeader({ data, currentPart, maxScore, onResults, onDashboard }) {
+  return (
+    <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
+      <div className="flex w-full items-center justify-between gap-3 px-3 py-2.5 sm:px-5 lg:px-6">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-bold text-slate-950">
+            {data.test.title || "Test 1"} · Review {modeLabel(data.attempt)}
+          </p>
+          <p className="truncate text-xs font-medium text-slate-500">
+            Answer review{currentPart ? ` · Part ${currentPart}` : ""}
+          </p>
+        </div>
+
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          <div className="rounded-lg bg-emerald-50 px-3 py-1.5 text-center text-emerald-800 ring-1 ring-emerald-200 sm:px-4">
+            <p className="hidden text-[9px] font-semibold uppercase tracking-widest opacity-70 sm:block">
+              Score
+            </p>
+            <p className="text-sm font-bold tabular-nums sm:text-base">
+              {data.result.totalScore}/{maxScore}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onResults}
+            className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 sm:px-4 sm:text-sm"
+          >
+            Results
+          </button>
+          <button
+            type="button"
+            onClick={onDashboard}
+            className="hidden rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-700 sm:block sm:px-4 sm:text-sm"
+          >
+            Dashboard
+          </button>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function ReviewAudio({ src }) {
+  return (
+    <section className="rounded-xl border border-sky-100 bg-sky-50 px-4 py-3.5">
+      <div className="mb-3 flex items-center gap-3">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-600 text-white">
+          ♫
+        </span>
+        <div>
+          <p className="text-sm font-bold text-sky-900">Replay audio</p>
+          <p className="mt-0.5 text-xs leading-5 text-sky-700">
+            Review mode allows pausing and replaying the recording.
+          </p>
+        </div>
+      </div>
+      <audio key={src} src={src} controls preload="metadata" className="w-full" />
+    </section>
+  );
+}
+
 function FullTestReview() {
   const { attemptId } = useParams();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [filter, setFilter] = useState("ALL");
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [showNavigator, setShowNavigator] = useState(false);
   const [error, setError] = useState("");
+  const questionPanelRef = useRef(null);
+  const mediaPanelRef = useRef(null);
 
   useEffect(() => {
     let active = true;
@@ -42,21 +122,57 @@ function FullTestReview() {
       : data?.attempt?.selectedPart
         ? [data.attempt.selectedPart]
         : null;
+
     return getAllQuestions(data?.test).filter(
       ({ question, partNumber }) => question.questionNumber >= first
         && question.questionNumber <= last
         && (!selectedParts || selectedParts.includes(partNumber)),
     );
   }, [data]);
+
   const filteredQuestions = useMemo(
-    () =>
-      filter === "ALL"
-        ? allQuestions
-        : allQuestions.filter(({ question }) => question.answerStatus === filter),
+    () => filter === "ALL"
+      ? allQuestions
+      : allQuestions.filter(({ question }) => question.answerStatus === filter),
     [allQuestions, filter],
   );
 
   const current = filteredQuestions[currentIndex];
+  const currentQuestionNumber = current?.question.questionNumber;
+  const currentUnitKey = current?.unit.key;
+
+  useEffect(() => {
+    mediaPanelRef.current?.scrollTo({ top: 0 });
+  }, [currentUnitKey]);
+
+  useEffect(() => {
+    if (!currentQuestionNumber) return;
+    questionPanelRef.current
+      ?.querySelector(`#question-${currentQuestionNumber}`)
+      ?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [currentQuestionNumber]);
+
+  const navigatorGroups = useMemo(() => {
+    const groups = new Map();
+    filteredQuestions.forEach(({ partNumber, unit, question }) => {
+      const group = groups.get(partNumber) || {
+        partNumber,
+        partName: unit.partName,
+        questions: [],
+      };
+      group.questions.push(question.questionNumber);
+      groups.set(partNumber, group);
+    });
+    return [...groups.values()];
+  }, [filteredQuestions]);
+
+  const questionStatuses = useMemo(() => Object.fromEntries(
+    allQuestions.map(({ question }) => [question.questionNumber, question.answerStatus]),
+  ), [allQuestions]);
+
+  const selectedAnswers = useMemo(() => Object.fromEntries(
+    allQuestions.map(({ question }) => [question.questionNumber, question.selectedAnswer]),
+  ), [allQuestions]);
 
   if (!data && !error) {
     return <div className="flex min-h-screen items-center justify-center bg-slate-50">Loading review...</div>;
@@ -65,206 +181,211 @@ function FullTestReview() {
   if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700">{error}</div>
+        <div className="max-w-lg rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700">
+          <p className="font-bold">Unable to open the review</p>
+          <p className="mt-2 text-sm leading-6">{error}</p>
+          <button
+            type="button"
+            onClick={() => navigate("/dashboard")}
+            className="mt-5 rounded-xl bg-white px-4 py-2 font-semibold text-slate-700"
+          >
+            Return to dashboard
+          </button>
+        </div>
       </div>
     );
   }
 
+  const hasListening = data.result.listeningTotalQuestions > 0;
+  const hasReading = data.result.readingTotalQuestions > 0;
+  const maxScore = data.attempt.mode === "FULL" || (hasListening && hasReading) ? 990 : 495;
   const unit = current?.unit;
   const question = current?.question;
+  const questionsToDisplay = [3, 4].includes(unit?.partNumber)
+    ? unit.questions
+    : question
+      ? [question]
+      : [];
   const imageUrl = unit?.imageUrl || question?.imageUrl;
+  const audioUrl = unit?.audioUrl || question?.audioUrl;
   const passagePanelImageUrls = new Set([
     ...(unit?.imageUrls || []),
     ...(unit?.passages || []).map((passage) => passage.imageUrl),
   ].filter(Boolean));
   const shouldRenderStandaloneImage = imageUrl && !passagePanelImageUrls.has(imageUrl);
-  const audioUrl = unit?.audioUrl || question?.audioUrl;
-  const transcript = unit?.transcript || question?.transcript;
-  const transcriptTranslation =
-    unit?.transcriptTranslation || question?.transcriptTranslation;
-  const questionsToDisplay = [3, 4].includes(unit?.partNumber)
-    ? unit.questions
-    : [question];
-  const selectedParts = data.attempt.selectedParts?.length
-    ? data.attempt.selectedParts
-    : data.attempt.selectedPart
-      ? [data.attempt.selectedPart]
-      : [];
-  const modeTitle =
-    data.attempt.mode === "FULL"
-      ? "Full Test"
-      : data.attempt.mode === "PART"
-        ? `Part ${selectedParts.join(" + ")}`
-        : `${data.attempt.mode === "LISTENING" ? "Listening" : "Reading"} Test`;
-  const hasListening = data.result.listeningTotalQuestions > 0;
-  const hasReading = data.result.readingTotalQuestions > 0;
-  const maxScore = data.attempt.mode === "FULL" || (hasListening && hasReading) ? 990 : 495;
+  const showListeningReview = [3, 4].includes(unit?.partNumber);
+  const transcript = showListeningReview ? unit?.transcript : null;
+  const transcriptTranslation = showListeningReview ? unit?.transcriptTranslation : null;
+  const hasMedia = Boolean(
+    audioUrl
+    || imageUrl
+    || unit?.imageUrls?.length
+    || unit?.passages?.length
+    || transcript
+    || transcriptTranslation,
+  );
+  const filterLabel = FILTERS.find(([value]) => value === filter)?.[1] || "All";
+
+  const selectQuestion = (questionNumber) => {
+    const index = filteredQuestions.findIndex(
+      ({ question: item }) => item.questionNumber === questionNumber,
+    );
+    if (index >= 0) setCurrentIndex(index);
+  };
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900">
-      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-sky-600">Review {modeTitle}</p>
-            <h1 className="mt-1 text-lg font-bold">Answer Review · {data.result.totalScore}/{maxScore}</h1>
-          </div>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => navigate(`/full-test/${attemptId}/result`)}
-              className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-            >
-              Results
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate("/dashboard")}
-              className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
-            >
-              Dashboard
-            </button>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-slate-50 text-slate-900">
+      <ReviewHeader
+        data={data}
+        currentPart={unit?.partNumber}
+        maxScore={maxScore}
+        onResults={() => navigate(`/full-test/${attemptId}/result`)}
+        onDashboard={() => navigate("/dashboard")}
+      />
 
-      <main className="mx-auto max-w-7xl px-5 py-6 sm:px-8">
-        <div className="mb-5 flex flex-col justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center">
-          <div className="flex flex-wrap gap-2">
-            {FILTERS.map(([value, label]) => {
-              const count =
-                value === "ALL"
-                  ? allQuestions.length
-                  : allQuestions.filter(({ question: item }) => item.answerStatus === value).length;
-              return (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => {
-                    setFilter(value);
-                    setCurrentIndex(0);
-                  }}
-                  className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                    filter === value
-                      ? "bg-sky-500 text-white"
-                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                  }`}
-                >
-                  {label} ({count})
-                </button>
-              );
-            })}
-          </div>
-          <p className="text-sm font-semibold text-slate-500">
-            {filteredQuestions.length ? `${currentIndex + 1}/${filteredQuestions.length}` : "0 questions"}
-          </p>
-        </div>
-
-        {!current ? (
-          <div className="rounded-2xl bg-white p-10 text-center text-slate-500">
-            No questions match this filter.
-          </div>
-        ) : (
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">
-            <section className="min-w-0 space-y-5">
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <p className="text-xs font-bold uppercase tracking-widest text-violet-600">
+      <main className="w-full px-3 py-3 pb-28 sm:px-5 lg:px-6 xl:pb-5">
+        <section className="min-w-0 space-y-3">
+          <div className="flex flex-col justify-between gap-3 border-b border-slate-200 pb-3 sm:flex-row sm:items-center">
+            <div>
+              <h1 className="text-base font-bold text-slate-950 sm:text-lg">
+                {unit
+                  ? `Question${unit.start === unit.end ? "" : "s"} ${unit.start}${unit.end !== unit.start ? `–${unit.end}` : ""}`
+                  : "Answer Review"}
+              </h1>
+              {unit && (
+                <p className="mt-0.5 text-xs font-semibold text-sky-700">
                   Part {unit.partNumber} · {unit.partName}
                 </p>
-              </div>
-
-              {audioUrl && (
-                <div className="rounded-2xl border border-sky-100 bg-sky-50 p-5">
-                  <p className="mb-3 text-sm font-semibold text-sky-800">Replay audio</p>
-                  <audio key={audioUrl} src={audioUrl} controls className="w-full" />
-                </div>
               )}
+            </div>
 
-              {shouldRenderStandaloneImage && (
-                <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center">
-                  <img src={imageUrl} alt="Question graphic" className="mx-auto max-h-[520px] rounded-xl object-contain" />
-                </div>
-              )}
-
-              <PassagePanel
-                passages={unit.passages || []}
-                imageUrls={unit.imageUrls || []}
-              />
-
-              {transcript && (
-                <details className="rounded-2xl border border-slate-200 bg-white p-5">
-                  <summary className="cursor-pointer font-bold text-slate-800">Transcript</summary>
-                  <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-slate-600">{transcript}</p>
-                </details>
-              )}
-
-              {transcriptTranslation && (
-                <details className="rounded-2xl border border-sky-100 bg-sky-50 p-5">
-                  <summary className="cursor-pointer font-bold text-sky-800">Transcript Translation</summary>
-                  <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-slate-700">
-                    {transcriptTranslation}
-                  </p>
-                </details>
-              )}
-
-              <div className="space-y-4">
-                {questionsToDisplay.map((item) => (
-                  <QuestionCard
-                    key={item.questionNumber}
-                    question={item}
-                    selectedAnswer={item.selectedAnswer}
-                    disabled
-                    review
-                    isFocused={item.questionNumber === question.questionNumber}
-                  />
-                ))}
-              </div>
-
-              <div className="flex justify-between pb-8">
-                <button
-                  type="button"
-                  onClick={() => setCurrentIndex((index) => Math.max(0, index - 1))}
-                  disabled={currentIndex === 0}
-                  className="rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-700 disabled:opacity-40"
-                >
-                  ← Previous
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCurrentIndex((index) => Math.min(filteredQuestions.length - 1, index + 1))}
-                  disabled={currentIndex >= filteredQuestions.length - 1}
-                  className="rounded-xl bg-sky-500 px-5 py-3 font-semibold text-white disabled:opacity-40"
-                >
-                  Next →
-                </button>
-              </div>
-            </section>
-
-            <aside className="h-fit rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:sticky lg:top-24">
-              <p className="px-1 text-sm font-bold">Filtered Questions</p>
-              <div className="mt-4 grid max-h-[70vh] grid-cols-5 gap-2 overflow-y-auto p-1">
-                {filteredQuestions.map(({ question: item }, index) => (
+            <div className="flex flex-wrap gap-2">
+              {FILTERS.map(([value, label]) => {
+                const count = value === "ALL"
+                  ? allQuestions.length
+                  : allQuestions.filter(({ question: item }) => item.answerStatus === value).length;
+                return (
                   <button
-                    key={item.questionNumber}
+                    key={value}
                     type="button"
-                    onClick={() => setCurrentIndex(index)}
-                    className={`aspect-square rounded-lg text-xs font-bold ${
-                      index === currentIndex
-                        ? "bg-sky-600 text-white ring-2 ring-sky-200"
-                        : item.answerStatus === "CORRECT"
-                          ? "bg-emerald-100 text-emerald-700"
-                          : item.answerStatus === "INCORRECT"
-                            ? "bg-red-100 text-red-700"
-                            : "bg-amber-100 text-amber-700"
+                    onClick={() => {
+                      setFilter(value);
+                      setCurrentIndex(0);
+                    }}
+                    className={`rounded-full px-3 py-1.5 text-xs font-bold transition sm:text-sm ${
+                      filter === value
+                        ? "bg-sky-600 text-white"
+                        : "border border-slate-200 bg-white text-slate-600 hover:border-sky-300 hover:bg-sky-50"
                     }`}
                   >
-                    {item.questionNumber}
+                    {label} ({count})
                   </button>
-                ))}
-              </div>
-            </aside>
+                );
+              })}
+            </div>
           </div>
-        )}
+
+          {!current ? (
+            <div className="rounded-xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
+              No questions match the {filterLabel.toLowerCase()} filter.
+            </div>
+          ) : (
+            <ResizableExamLayout
+              leftLabel="questions, translations, and explanations"
+              rightLabel="audio, passages, and transcripts"
+              left={(
+                <section className="min-w-0 xl:flex xl:h-[calc(100dvh-10.5rem)] xl:flex-col xl:pr-1">
+                  <div
+                    ref={questionPanelRef}
+                    aria-label="Questions, translations, and explanations"
+                    className="min-w-0 space-y-3 pb-2 xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:pr-1"
+                  >
+                    {questionsToDisplay.map((item) => (
+                      <QuestionCard
+                        key={item.questionNumber}
+                        question={item}
+                        selectedAnswer={item.selectedAnswer}
+                        disabled
+                        review
+                        compact
+                        isFocused={item.questionNumber === question.questionNumber}
+                      />
+                    ))}
+                  </div>
+
+                  <ExamNavigationBar
+                    progressLabel={`${currentIndex + 1}/${filteredQuestions.length}`}
+                    onOpenNavigator={() => setShowNavigator(true)}
+                    onPrevious={() => setCurrentIndex((index) => Math.max(0, index - 1))}
+                    onNext={() => setCurrentIndex((index) => Math.min(filteredQuestions.length - 1, index + 1))}
+                    onSubmit={() => navigate(`/full-test/${attemptId}/result`)}
+                    previousDisabled={currentIndex === 0}
+                    nextDisabled={currentIndex >= filteredQuestions.length - 1}
+                    submitLabel="Results"
+                    submitVariant="secondary"
+                    statusMessage={`Showing ${filterLabel.toLowerCase()} questions · Part ${unit.partNumber}`}
+                  />
+                </section>
+              )}
+              right={(
+                <section
+                  ref={mediaPanelRef}
+                  aria-label="Audio, passages, and transcripts"
+                  className="min-w-0 space-y-3 xl:h-[calc(100dvh-10.5rem)] xl:overflow-y-auto xl:pl-1 xl:pr-1"
+                >
+                  {audioUrl && <ReviewAudio src={audioUrl} />}
+
+                  {shouldRenderStandaloneImage && (
+                    <div className="rounded-xl border border-slate-200 bg-white p-3 text-center">
+                      <img
+                        src={imageUrl}
+                        alt={`Material for questions ${unit.start} to ${unit.end}`}
+                        className="mx-auto h-auto max-h-[65vh] max-w-full rounded-xl object-contain"
+                      />
+                    </div>
+                  )}
+
+                  <PassagePanel
+                    compact
+                    passages={unit.passages || []}
+                    imageUrls={unit.imageUrls || []}
+                  />
+
+                  {transcript && (
+                    <ReviewTogglePanel title="Transcript" icon="▤" tone="sky">
+                      <p className="whitespace-pre-wrap">{transcript}</p>
+                    </ReviewTogglePanel>
+                  )}
+
+                  {transcriptTranslation && (
+                    <ReviewTogglePanel title="Dịch nghĩa Transcript" icon="文" tone="sky">
+                      <p className="whitespace-pre-wrap">{transcriptTranslation}</p>
+                    </ReviewTogglePanel>
+                  )}
+
+                  {!hasMedia && (
+                    <div className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm leading-6 text-slate-500">
+                      This Part has no separate audio or reading material. Review the question on the left.
+                    </div>
+                  )}
+                </section>
+              )}
+            />
+          )}
+        </section>
       </main>
+
+      <QuestionNavigatorDrawer
+        open={showNavigator}
+        onClose={() => setShowNavigator(false)}
+        groups={navigatorGroups}
+        currentQuestion={currentQuestionNumber}
+        answers={selectedAnswers}
+        questionStatuses={questionStatuses}
+        reviewMode
+        title={`Question Navigator · ${filterLabel}`}
+        onSelect={selectQuestion}
+      />
     </div>
   );
 }

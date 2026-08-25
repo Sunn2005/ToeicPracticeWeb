@@ -17,6 +17,9 @@ function QuestionNavigatorDrawer({
   answers,
   onSelect,
   navigationLocked = false,
+  questionStatuses,
+  reviewMode = false,
+  title = "Question Navigator",
 }) {
   useEffect(() => {
     if (!open) return undefined;
@@ -50,7 +53,7 @@ function QuestionNavigatorDrawer({
       >
         <header className="flex items-center justify-between border-b border-slate-200 px-5 py-4 sm:px-6">
           <h2 id="question-navigator-title" className="text-xl font-bold text-slate-950">
-            Question Navigator
+            {title}
           </h2>
           <button
             type="button"
@@ -63,11 +66,20 @@ function QuestionNavigatorDrawer({
         </header>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6">
-          <div className="flex flex-wrap gap-x-5 gap-y-3 border-b border-slate-200 pb-5">
-            <LegendItem className="border-sky-500 bg-sky-500" label="Current" />
-            <LegendItem className="border-slate-300 bg-white" label="Unanswered" />
-            <LegendItem className="border-emerald-400 bg-emerald-50" label="Answered" />
-          </div>
+          {reviewMode ? (
+            <div className="flex flex-wrap gap-x-5 gap-y-3 border-b border-slate-200 pb-5">
+              <LegendItem className="border-sky-500 bg-sky-500" label="Current" />
+              <LegendItem className="border-emerald-400 bg-emerald-50" label="Correct" />
+              <LegendItem className="border-red-400 bg-red-50" label="Incorrect" />
+              <LegendItem className="border-amber-300 bg-amber-50" label="Unanswered" />
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-x-5 gap-y-3 border-b border-slate-200 pb-5">
+              <LegendItem className="border-sky-500 bg-sky-500" label="Current" />
+              <LegendItem className="border-slate-300 bg-white" label="Unanswered" />
+              <LegendItem className="border-emerald-400 bg-emerald-50" label="Answered" />
+            </div>
+          )}
 
           {navigationLocked && (
             <p className="mt-4 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 text-sm leading-6 text-sky-800">
@@ -79,12 +91,24 @@ function QuestionNavigatorDrawer({
             {groups.map((group) => (
               <section key={group.partNumber}>
                 <h3 className="text-lg font-bold text-slate-800">
-                  Part {group.partNumber} <span className="text-slate-500">({group.questions.length} questions)</span>
+                  Part {group.partNumber}
+                  {group.partName && <span className="text-slate-500"> · {group.partName}</span>}
+                  <span className="text-slate-500"> ({group.questions.length} questions)</span>
                 </h3>
                 <div className="mt-4 grid grid-cols-5 gap-2.5 sm:grid-cols-6">
                   {group.questions.map((number) => {
                     const isCurrent = number === currentQuestion;
                     const isAnswered = Boolean(answers[String(number)]);
+                    const reviewStatus = questionStatuses?.[String(number)];
+                    const statusClass = reviewMode
+                      ? reviewStatus === "CORRECT"
+                        ? "border-emerald-400 bg-emerald-50 text-emerald-700"
+                        : reviewStatus === "INCORRECT"
+                          ? "border-red-400 bg-red-50 text-red-700"
+                          : "border-amber-300 bg-amber-50 text-amber-700"
+                      : isAnswered
+                        ? "border-emerald-400 bg-emerald-50 text-emerald-700"
+                        : "border-slate-300 bg-white text-slate-600";
                     return (
                       <button
                         key={number}
@@ -99,9 +123,7 @@ function QuestionNavigatorDrawer({
                         className={`aspect-square rounded-xl border-2 text-sm font-bold transition sm:text-base ${
                           isCurrent
                             ? "border-sky-500 bg-sky-500 text-white ring-2 ring-sky-200"
-                            : isAnswered
-                              ? "border-emerald-400 bg-emerald-50 text-emerald-700"
-                              : "border-slate-300 bg-white text-slate-600"
+                            : statusClass
                         } ${navigationLocked ? "cursor-default" : "hover:border-sky-400 hover:bg-sky-50"}`}
                       >
                         {number}
