@@ -1,4 +1,7 @@
+import { useLanguage } from "../i18n/LanguageContext";
+
 function PassagePanel({ passages = [], imageUrls = [], compact = false }) {
+  const { t } = useLanguage();
   const groupImages = [...new Set(imageUrls.filter(Boolean))];
 
   if (!passages.length && !groupImages.length) {
@@ -7,7 +10,7 @@ function PassagePanel({ passages = [], imageUrls = [], compact = false }) {
 
   if (groupImages.length) {
     return (
-      <section className="space-y-4" aria-label="Reading material">
+      <section className="space-y-4" aria-label={t("readingMaterial")}>
         {groupImages.map((imageUrl, index) => (
           <article
             key={imageUrl}
@@ -15,7 +18,7 @@ function PassagePanel({ passages = [], imageUrls = [], compact = false }) {
           >
             <img
               src={imageUrl}
-              alt={`Reading material ${index + 1}`}
+              alt={`${t("readingMaterial")} ${index + 1}`}
               className="mx-auto h-auto max-h-[72vh] w-auto max-w-full rounded-xl object-contain"
             />
           </article>
@@ -33,7 +36,7 @@ function PassagePanel({ passages = [], imageUrls = [], compact = false }) {
         >
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-xs font-bold uppercase tracking-widest text-violet-600">
-              {passage.type || passage.passageType || `Passage ${index + 1}`}
+              {passage.type || passage.passageType || `${t("passage")} ${index + 1}`}
             </p>
             {passage.title && (
               <p className="text-sm font-semibold text-slate-800">{passage.title}</p>
@@ -42,7 +45,7 @@ function PassagePanel({ passages = [], imageUrls = [], compact = false }) {
           {passage.imageUrl && (
             <img
               src={passage.imageUrl}
-              alt="Reading passage graphic"
+              alt={t("readingPassageGraphic")}
               className="mx-auto mt-5 max-h-[520px] max-w-full rounded-xl object-contain"
             />
           )}

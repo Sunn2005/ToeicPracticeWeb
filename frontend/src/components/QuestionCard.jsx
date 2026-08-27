@@ -1,5 +1,6 @@
 import { getReviewParagraphs } from "../utils/reviewContent";
 import ReviewTogglePanel from "./ReviewTogglePanel";
+import { useLanguage } from "../i18n/LanguageContext";
 
 function ReviewContent({ children }) {
   if (typeof children !== "string") return null;
@@ -41,6 +42,7 @@ function QuestionCard({
   compact = false,
   review = false,
 }) {
+  const { t } = useLanguage();
   const questionTranslation =
     question.questionTranslation
     || (typeof question.translation === "string" ? question.translation : null);
@@ -73,7 +75,7 @@ function QuestionCard({
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-sky-600">
-            Question {question.questionNumber}
+            {t("question")} {question.questionNumber}
           </p>
           <h3 className={`${compact ? "mt-1.5 text-base leading-6" : "mt-2 text-base leading-7 sm:text-lg"} font-semibold text-slate-900`}>
             {prompt}
@@ -90,10 +92,10 @@ function QuestionCard({
             }`}
           >
             {question.answerStatus === "CORRECT"
-              ? "Correct"
+              ? t("correct")
               : question.answerStatus === "INCORRECT"
-                ? "Incorrect"
-                : "Unanswered"}
+                ? t("incorrect")
+                : t("unanswered")}
           </span>
         )}
       </div>
@@ -140,22 +142,22 @@ function QuestionCard({
       {review && (
         <div className="mt-5 space-y-3">
           <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6">
-            <strong>Correct answer:</strong> {question.correctAnswer}
+            <strong>{t("correctAnswer")}</strong> {question.correctAnswer}
             {question.selectedAnswer && (
               <>
-                {" "}· <strong>Your answer:</strong> {question.selectedAnswer}
+                {" "}· <strong>{t("yourAnswer")}</strong> {question.selectedAnswer}
               </>
             )}
           </p>
           {questionTranslation && (
-            <ReviewTogglePanel title="Dịch câu hỏi" icon="文" tone="sky">
+            <ReviewTogglePanel title={t("questionTranslation")} icon="文" tone="sky">
               <div className="space-y-3">
                 <ReviewContent>{questionTranslation}</ReviewContent>
               </div>
             </ReviewTogglePanel>
           )}
           {question.answerTranslation && (
-            <ReviewTogglePanel title="Dịch nghĩa đáp án" icon="☷" tone="emerald">
+            <ReviewTogglePanel title={t("answerTranslation")} icon="☷" tone="emerald">
               <div className="space-y-1.5">
                 <AnswerTranslationContent
                   value={question.answerTranslation}
@@ -164,10 +166,10 @@ function QuestionCard({
               </div>
             </ReviewTogglePanel>
           )}
-          <ReviewTogglePanel title="Giải thích chi tiết" icon="✦" tone="violet">
+          <ReviewTogglePanel title={t("detailedExplanation")} icon="✦" tone="violet">
             <div className="space-y-3 text-slate-700">
               <ReviewContent>
-                {detailedExplanation || "No detailed explanation is available for this question yet."}
+                {detailedExplanation || t("noExplanation")}
               </ReviewContent>
             </div>
           </ReviewTogglePanel>

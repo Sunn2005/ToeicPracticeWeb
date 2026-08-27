@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useLanguage } from "../i18n/LanguageContext";
 
 function LegendItem({ className, label }) {
   return (
@@ -21,6 +22,8 @@ function QuestionNavigatorDrawer({
   reviewMode = false,
   title = "Question Navigator",
 }) {
+  const { t } = useLanguage();
+  const drawerTitle = title === "Question Navigator" ? t("questionNavigator") : title;
   useEffect(() => {
     if (!open) return undefined;
     const previousOverflow = document.body.style.overflow;
@@ -43,7 +46,7 @@ function QuestionNavigatorDrawer({
         type="button"
         className="absolute inset-0 h-full w-full cursor-default bg-slate-950/45"
         onClick={onClose}
-        aria-label="Close question navigator"
+        aria-label={t("closeQuestionNavigator")}
       />
       <aside
         role="dialog"
@@ -53,13 +56,13 @@ function QuestionNavigatorDrawer({
       >
         <header className="flex items-center justify-between border-b border-slate-200 px-5 py-4 sm:px-6">
           <h2 id="question-navigator-title" className="text-xl font-bold text-slate-950">
-            {title}
+            {drawerTitle}
           </h2>
           <button
             type="button"
             onClick={onClose}
             className="flex h-9 w-9 items-center justify-center rounded-lg text-2xl font-light text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
-            aria-label="Close question navigator"
+            aria-label={t("closeQuestionNavigator")}
           >
             ×
           </button>
@@ -68,22 +71,22 @@ function QuestionNavigatorDrawer({
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6">
           {reviewMode ? (
             <div className="flex flex-wrap gap-x-5 gap-y-3 border-b border-slate-200 pb-5">
-              <LegendItem className="border-sky-500 bg-sky-500" label="Current" />
-              <LegendItem className="border-emerald-400 bg-emerald-50" label="Correct" />
-              <LegendItem className="border-red-400 bg-red-50" label="Incorrect" />
-              <LegendItem className="border-amber-300 bg-amber-50" label="Unanswered" />
+              <LegendItem className="border-sky-500 bg-sky-500" label={t("current")} />
+              <LegendItem className="border-emerald-400 bg-emerald-50" label={t("correct")} />
+              <LegendItem className="border-red-400 bg-red-50" label={t("incorrect")} />
+              <LegendItem className="border-amber-300 bg-amber-50" label={t("unanswered")} />
             </div>
           ) : (
             <div className="flex flex-wrap gap-x-5 gap-y-3 border-b border-slate-200 pb-5">
-              <LegendItem className="border-sky-500 bg-sky-500" label="Current" />
-              <LegendItem className="border-slate-300 bg-white" label="Unanswered" />
-              <LegendItem className="border-emerald-400 bg-emerald-50" label="Answered" />
+              <LegendItem className="border-sky-500 bg-sky-500" label={t("current")} />
+              <LegendItem className="border-slate-300 bg-white" label={t("unanswered")} />
+              <LegendItem className="border-emerald-400 bg-emerald-50" label={t("answered")} />
             </div>
           )}
 
           {navigationLocked && (
             <p className="mt-4 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 text-sm leading-6 text-sky-800">
-              Listening questions are shown for progress tracking. They advance automatically when the audio ends.
+              {t("listeningNavigatorNote")}
             </p>
           )}
 
@@ -91,9 +94,9 @@ function QuestionNavigatorDrawer({
             {groups.map((group) => (
               <section key={group.partNumber}>
                 <h3 className="text-lg font-bold text-slate-800">
-                  Part {group.partNumber}
+                  {t("part")} {group.partNumber}
                   {group.partName && <span className="text-slate-500"> · {group.partName}</span>}
-                  <span className="text-slate-500"> ({group.questions.length} questions)</span>
+                  <span className="text-slate-500"> ({group.questions.length} {t("questions")})</span>
                 </h3>
                 <div className="mt-4 grid grid-cols-5 gap-2.5 sm:grid-cols-6">
                   {group.questions.map((number) => {
@@ -119,7 +122,7 @@ function QuestionNavigatorDrawer({
                           onClose();
                         }}
                         aria-current={isCurrent ? "step" : undefined}
-                        aria-label={`Go to question ${number}`}
+                        aria-label={`${t("goToQuestion")} ${number}`}
                         className={`aspect-square rounded-xl border-2 text-sm font-bold transition sm:text-base ${
                           isCurrent
                             ? "border-sky-500 bg-sky-500 text-white ring-2 ring-sky-200"

@@ -20,12 +20,14 @@ import {
   findUnit,
   formatQuestionProgress,
 } from "../utils/testData";
+import { useLanguage } from "../i18n/LanguageContext";
 
 function secondsUntil(endAt, serverNow) {
   return Math.max(0, Math.ceil((endAt - serverNow) / 1000));
 }
 
 function SubmitDialog({ unansweredCount, submitting, onCancel, onConfirm }) {
+  const { t } = useLanguage();
   const hasUnansweredQuestions = unansweredCount > 0;
 
   return (
@@ -36,22 +38,21 @@ function SubmitDialog({ unansweredCount, submitting, onCancel, onConfirm }) {
         aria-labelledby="submit-title"
         className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl sm:p-7"
       >
-        <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">Submit test</p>
+        <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">{t("submitTest")}</p>
         <h2 id="submit-title" className="mt-2 text-xl font-bold text-slate-950 sm:text-2xl">
-          Submit your answers now?
+          {t("submitAnswersNow")}
         </h2>
         <p className="mt-4 leading-7 text-slate-600">
           {hasUnansweredQuestions ? (
             <>
-              You still have <strong className="text-amber-700">{unansweredCount} unanswered questions</strong>.
-              You can still submit, but unanswered questions will not receive a score.
+              {t("unansweredWarningPrefix")} <strong className="text-amber-700">{unansweredCount} {t("unanswered").toLowerCase()}</strong>. {t("unansweredWarningSuffix")}
             </>
           ) : (
-            "You have answered every question in this test."
+            t("allAnswered")
           )}
         </p>
         <p className="mt-2 text-sm leading-6 text-slate-500">
-          After submission, your answers will be locked and the result will be shown.
+          {t("answersLockedAfterSubmit")}
         </p>
         <div className="mt-7 flex gap-3">
           <button
@@ -60,7 +61,7 @@ function SubmitDialog({ unansweredCount, submitting, onCancel, onConfirm }) {
             disabled={submitting}
             className="flex-1 rounded-xl border border-slate-200 px-4 py-3 font-semibold text-slate-700 hover:bg-slate-50"
           >
-            Continue test
+            {t("continueTest")}
           </button>
           <button
             type="button"
@@ -68,7 +69,7 @@ function SubmitDialog({ unansweredCount, submitting, onCancel, onConfirm }) {
             disabled={submitting}
             className="flex-1 rounded-xl bg-emerald-600 px-4 py-3 font-semibold text-white hover:bg-emerald-700 disabled:bg-emerald-300"
           >
-            {submitting ? "Submitting..." : "Submit test"}
+            {submitting ? t("saving") : t("submitTest")}
           </button>
         </div>
       </div>
@@ -77,6 +78,7 @@ function SubmitDialog({ unansweredCount, submitting, onCancel, onConfirm }) {
 }
 
 function FullTestExam() {
+  const { t } = useLanguage();
   const { attemptId } = useParams();
   const navigate = useNavigate();
   const [payload, setPayload] = useState(null);
@@ -387,7 +389,7 @@ function FullTestExam() {
         if (!submitted && !submitInFlight.current && !hasSubmitted.current) {
           audioAdvanceInFlight.current = false;
           setAudioAdvanceError(
-            "Your answers were saved, but the test could not be submitted. Check your connection and try again.",
+            t("submitFailedAfterSave"),
           );
         }
         return;
@@ -414,7 +416,7 @@ function FullTestExam() {
     } catch (requestError) {
       setError(requestError.message);
       setAudioAdvanceError(
-        "Unable to save and advance automatically. Check your connection and try again.",
+        t("autoAdvanceFailed"),
       );
       audioAdvanceInFlight.current = false;
     } finally {
@@ -445,7 +447,7 @@ function FullTestExam() {
 
   const exitExam = () => {
     const shouldExit = window.confirm(
-      "Your saved answers will be kept and the timer will continue running. Return to the dashboard?",
+      t("exitConfirm"),
     );
     if (shouldExit) navigate("/dashboard");
   };
@@ -454,14 +456,14 @@ function FullTestExam() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
         <div className="max-w-lg rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700">
-          <p className="font-bold">Unable to open the test</p>
+          <p className="font-bold">{t("unableOpenTest")}</p>
           <p className="mt-2 text-sm leading-6">{error}</p>
           <button
             type="button"
             onClick={() => navigate("/dashboard")}
             className="mt-5 rounded-xl bg-white px-4 py-2 font-semibold text-slate-700"
           >
-            Return to dashboard
+            {t("returnToDashboard")}
           </button>
         </div>
       </div>
@@ -469,7 +471,7 @@ function FullTestExam() {
   }
 
   if (!payload || !currentUnit) {
-    return <div className="flex min-h-screen items-center justify-center bg-slate-50">Restoring your test...</div>;
+    return <div className="flex min-h-screen items-center justify-center bg-slate-50">{t("restoringTest")}</div>;
   }
 
   const isListening = attempt.currentSection === "LISTENING";
@@ -513,18 +515,18 @@ function FullTestExam() {
 
       {sectionNotice && attempt.currentSection === "READING" && (
         <div className="fixed left-1/2 top-24 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-2xl border border-emerald-200 bg-white p-5 text-center shadow-2xl">
-          <p className="font-bold text-emerald-700">Listening has ended</p>
+          <p className="font-bold text-emerald-700">{t("listeningEnded")}</p>
           <p className="mt-1 text-sm text-slate-600">
             {attempt.mode === "PART"
-              ? "The selected Reading Parts are starting · the shared timer will continue"
-              : "The Reading section is starting · 75 minutes"}
+              ? t("selectedReadingStarting")
+              : t("readingStarting")}
           </p>
           <button
             type="button"
             onClick={() => setSectionNotice(false)}
             className="mt-4 rounded-xl bg-emerald-500 px-5 py-2 text-sm font-bold text-white hover:bg-emerald-600"
           >
-            Continue
+            {t("continue")}
           </button>
         </div>
       )}
@@ -543,26 +545,26 @@ function FullTestExam() {
               <div>
                 <h1 className="text-base font-bold text-slate-950 sm:text-lg">
                   {isListening
-                    ? `Questions ${currentUnit.start}${currentUnit.end !== currentUnit.start ? `–${currentUnit.end}` : ""}`
-                    : `Question ${currentQuestion} · range ${scopeFirst}–${scopeLast}`}
+                    ? `${t("questions")} ${currentUnit.start}${currentUnit.end !== currentUnit.start ? `–${currentUnit.end}` : ""}`
+                    : `${t("question")} ${currentQuestion} · ${t("range")} ${scopeFirst}–${scopeLast}`}
                 </h1>
                 <p className="mt-0.5 text-xs font-semibold text-sky-700">
-                  Part {currentUnit.partNumber} · {currentUnit.partName}
+                  {t("part")} {currentUnit.partNumber} · {currentUnit.partName}
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-2 text-xs font-medium text-slate-500">
                 <span className={`h-2.5 w-2.5 rounded-full ${saveState === "Save failed" ? "bg-red-500" : saveState === "Saving..." ? "animate-pulse bg-amber-400" : "bg-emerald-500"}`} />
-                {saveState}
+                {saveState === "Save failed" ? t("saveFailed") : saveState === "Saving..." ? t("saving") : saveState === "Synced" ? t("synced") : t("autosaved")}
               </div>
             </div>
 
             <ResizableExamLayout
-              leftLabel={isListening ? "listening content" : "reading content"}
-              rightLabel="questions and answers"
+              leftLabel={isListening ? t("listeningContent") : t("readingContent")}
+              rightLabel={t("questionsAnswers")}
               left={(
                 <section
                   ref={readingContentRef}
-                  aria-label={isListening ? "Listening content" : "Reading content"}
+                  aria-label={isListening ? t("listeningContent") : t("readingContent")}
                   className="min-w-0 space-y-3 xl:h-[calc(100dvh-12rem)] xl:overflow-y-auto xl:pr-1"
                 >
                   {isListening ? (
@@ -577,7 +579,7 @@ function FullTestExam() {
                         />
                       ) : (
                         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-                          This question group has no audio URL, so it cannot advance automatically.
+                          {t("missingAudio")}
                         </div>
                       )}
 
@@ -613,7 +615,7 @@ function FullTestExam() {
 
                       {!hasReadingMaterial && (
                         <div className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm leading-6 text-slate-500">
-                          This Part has no separate reading passage. Answer the question on the right.
+                          {t("missingReading")}
                         </div>
                       )}
                     </>
@@ -622,7 +624,7 @@ function FullTestExam() {
               )}
               right={(
                 <section
-                  aria-label="Questions and answers"
+                  aria-label={t("questionsAnswers")}
                   className="min-w-0 xl:flex xl:h-[calc(100dvh-12rem)] xl:flex-col xl:pl-1"
                 >
                   <div
@@ -663,17 +665,17 @@ function FullTestExam() {
                       : nextReadingQuestion === null || busy}
                     submitDisabled={busy}
                     previousTitle={isListening
-                      ? "Listening questions are locked after the audio advances."
+                      ? t("listeningLocked")
                       : undefined}
                     nextTitle={isListening && mediaAudio && !audioAdvanceError
-                      ? "The next group opens automatically when the audio ends."
+                      ? t("nextGroupAuto")
                       : undefined}
                     statusMessage={isListening
                       ? audioAdvanceError
-                        ? "The audio ended, but the next group did not open. Select Next to retry."
+                        ? t("nextGroupRetry")
                         : mediaAudio
-                          ? "The next Listening group opens automatically when the audio ends."
-                          : "Audio is unavailable for this group. Select Next to continue or Submit to finish."
+                          ? t("nextListeningAuto")
+                          : t("audioUnavailable")
                       : undefined}
                   />
                 </section>

@@ -1,5 +1,7 @@
 import { formatClock } from "../utils/testData";
 import { TIMER_TYPES } from "../config/examTiming";
+import LanguageSwitcher from "./LanguageSwitcher";
+import { useLanguage } from "../i18n/LanguageContext";
 
 function ExamHeader({
   section,
@@ -12,16 +14,17 @@ function ExamHeader({
   timerType,
   onExit,
 }) {
+  const { t } = useLanguage();
   const isElapsed = timerType === TIMER_TYPES.ELAPSED;
   const isUrgent = !isElapsed && remainingSeconds <= 300;
   const modeLabel =
     mode === "FULL"
-      ? "Full Test"
+      ? t("fullTest")
       : mode === "PART"
-        ? `Part ${(selectedParts?.length ? selectedParts : [selectedPart]).filter(Boolean).join(" + ")}`
+        ? `${t("part")} ${(selectedParts?.length ? selectedParts : [selectedPart]).filter(Boolean).join(" + ")}`
         : mode === "LISTENING"
-          ? "Listening Test"
-          : "Reading Test";
+          ? t("listeningTest")
+          : t("readingTest");
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
@@ -29,18 +32,19 @@ function ExamHeader({
         <div className="min-w-0">
           <p className="truncate text-sm font-bold text-slate-950">Test 1 · {modeLabel}</p>
           <p className="truncate text-xs font-medium text-slate-500">
-            {section === "LISTENING" ? "Listening" : "Reading"} · Questions {firstQuestion}–{lastQuestion}
+            {section === "LISTENING" ? t("listening") : t("reading")} · {t("questions")} {firstQuestion}–{lastQuestion}
           </p>
         </div>
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          <LanguageSwitcher />
           <div
             className={`rounded-lg px-3 py-1.5 text-center sm:px-4 ${
               isUrgent ? "bg-red-50 text-red-700 ring-1 ring-red-200" : "bg-sky-100 text-sky-800 ring-1 ring-sky-200"
             }`}
           >
             <p className="hidden text-[9px] font-semibold uppercase tracking-widest opacity-70 sm:block">
-              {isElapsed ? "Elapsed" : "Remaining"}
+              {isElapsed ? t("elapsed") : t("remaining")}
             </p>
             <p className="font-mono text-sm font-bold tabular-nums sm:text-base">
               {formatClock(remainingSeconds)}
@@ -51,7 +55,7 @@ function ExamHeader({
             onClick={onExit}
             className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 sm:px-4 sm:text-sm"
           >
-            Exit
+            {t("exit")}
           </button>
         </div>
       </div>

@@ -1,3 +1,5 @@
+import { useLanguage } from "../i18n/LanguageContext";
+
 const TONES = {
   sky: "bg-sky-100 text-sky-700",
   cyan: "bg-cyan-100 text-cyan-700",
@@ -30,16 +32,27 @@ function ModeIcon({ mode }) {
 }
 
 function ExamModeCard({ mode, starting, disabled, onStart }) {
+  const { t } = useLanguage();
+  const translatedName = mode.id === "FULL"
+    ? t("fullTest")
+    : mode.id === "LISTENING"
+      ? t("listeningTest")
+      : t("readingTest");
+  const translatedDescription = mode.id === "FULL"
+    ? t("completeTestDescription")
+    : mode.id === "LISTENING"
+      ? t("listeningOnlyDescription")
+      : t("readingOnlyDescription");
   return (
     <article className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-sky-300 hover:shadow-lg">
       <span className={`flex h-12 w-12 items-center justify-center rounded-2xl text-sm font-black ${TONES[mode.tone]}`}>
         <ModeIcon mode={mode} />
       </span>
-      <h3 className="mt-5 text-lg font-bold text-slate-950">{mode.name}</h3>
-      <p className="mt-1 text-sm text-slate-500">{mode.description}</p>
+      <h3 className="mt-5 text-lg font-bold text-slate-950">{translatedName}</h3>
+      <p className="mt-1 text-sm text-slate-500">{translatedDescription}</p>
       <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-slate-600">
-        <span className="rounded-full bg-slate-100 px-3 py-1.5">{mode.duration} min</span>
-        <span className="rounded-full bg-slate-100 px-3 py-1.5">{mode.questions} questions</span>
+        <span className="rounded-full bg-slate-100 px-3 py-1.5">{mode.duration} {t("minuteShort")}</span>
+        <span className="rounded-full bg-slate-100 px-3 py-1.5">{mode.questions} {t("questions")}</span>
       </div>
       <p className="mt-4 text-sm font-semibold text-sky-700">{mode.parts}</p>
       <button
@@ -48,7 +61,7 @@ function ExamModeCard({ mode, starting, disabled, onStart }) {
         disabled={disabled}
         className="mt-6 w-full rounded-xl bg-sky-500 px-4 py-3 font-bold text-white shadow-md shadow-sky-100 transition hover:bg-sky-600 disabled:cursor-wait disabled:bg-sky-300"
       >
-        {starting ? "Preparing..." : "Start"}
+        {starting ? t("preparing") : t("start")}
       </button>
     </article>
   );

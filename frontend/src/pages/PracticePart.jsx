@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { auth } from "../firebase";
+import LanguageSwitcher from "../components/LanguageSwitcher";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
@@ -8,6 +10,7 @@ const API_BASE_URL =
     : "https://toeicpracticeweb.onrender.com");
 
 function PracticePart() {
+  const { t } = useLanguage();
   const [part, setPart] = useState(null);
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(true);
@@ -39,7 +42,7 @@ function PracticePart() {
       const user = auth.currentUser;
 
       if (!user) {
-        alert("Please sign in before starting a test.");
+        alert(t("signInBeforeTest"));
         return;
       }
 
@@ -96,15 +99,16 @@ function PracticePart() {
   };
 
   if (loading) {
-    return <p>Loading...</p>;
+    return <p>{t("loading")}</p>;
   }
 
   if (!part) {
-    return <p>No data available.</p>;
+    return <p>{t("noDataAvailable")}</p>;
   }
 
   return (
     <div style={{ maxWidth: "800px", margin: "40px auto" }}>
+      <LanguageSwitcher className="mb-6" />
       <h1>
         Part {part.partNumber}: {part.title}
       </h1>
@@ -119,13 +123,13 @@ function PracticePart() {
             marginBottom: "30px",
           }}
         >
-          {startingAttempt ? "Starting..." : "Start test"}
+          {startingAttempt ? t("starting") : t("startTest")}
         </button>
       )}
 
       {attemptId && (
         <>
-          <p>Your attempt has started.</p>
+          <p>{t("attemptStarted")}</p>
 
           {part.questions.map((question) => (
             <div
@@ -138,7 +142,7 @@ function PracticePart() {
               }}
             >
               <h3>
-                Question {question.number}: {question.content}
+                {t("question")} {question.number}: {question.content}
               </h3>
 
               {question.options.map((option) => (
@@ -170,7 +174,7 @@ function PracticePart() {
               cursor: "pointer",
             }}
           >
-            Submit
+            {t("submit")}
           </button>
         </>
       )}

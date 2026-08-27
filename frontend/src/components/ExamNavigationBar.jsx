@@ -1,3 +1,5 @@
+import { useLanguage } from "../i18n/LanguageContext";
+
 function NavigationButton({ children, disabled, onClick, title, variant = "secondary" }) {
   const variants = {
     secondary: "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50",
@@ -33,6 +35,7 @@ function ExamNavigationBar({
   submitLabel = "Submit",
   submitVariant = "submit",
 }) {
+  const { t } = useLanguage();
   return (
     <footer className="fixed inset-x-3 bottom-3 z-30 rounded-xl border border-slate-200 bg-white/95 p-2.5 shadow-lg shadow-slate-900/10 backdrop-blur sm:inset-x-4 xl:sticky xl:inset-x-auto xl:bottom-3 xl:mt-3 xl:shrink-0 xl:shadow-sm">
       <div className="grid grid-cols-4 items-stretch gap-2 sm:flex sm:items-center">
@@ -41,14 +44,14 @@ function ExamNavigationBar({
           disabled={previousDisabled}
           title={previousTitle}
         >
-          <span aria-hidden="true">← </span>Previous
+          <span aria-hidden="true">← </span>{t("previous")}
         </NavigationButton>
 
         <button
           type="button"
           onClick={onOpenNavigator}
           className="min-h-11 min-w-0 rounded-lg border border-sky-200 bg-sky-50 px-1.5 py-2.5 text-[11px] font-bold tabular-nums text-sky-700 transition hover:border-sky-300 hover:bg-sky-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 sm:min-w-24 sm:px-4 sm:text-sm"
-          aria-label={`Open question navigator. Current progress ${progressLabel}`}
+          aria-label={`${t("openQuestionNavigator")} ${progressLabel}`}
         >
           {progressLabel}
         </button>
@@ -59,7 +62,7 @@ function ExamNavigationBar({
           disabled={nextDisabled}
           title={nextTitle}
         >
-          Next<span aria-hidden="true"> →</span>
+          {t("next")}<span aria-hidden="true"> →</span>
         </NavigationButton>
 
         <div className="sm:ml-auto">
@@ -68,7 +71,7 @@ function ExamNavigationBar({
             onClick={onSubmit}
             disabled={submitDisabled}
           >
-            {submitLabel}
+            {submitLabel === "Submit" ? t("submit") : submitLabel}
           </NavigationButton>
         </div>
       </div>

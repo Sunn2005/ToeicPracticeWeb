@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { EXAM_MODES, TOEIC_PARTS } from "../data/testCatalog";
 import { getSuggestedPartDuration } from "../config/examTiming";
 import ExamModeCard from "./ExamModeCard";
+import { useLanguage } from "../i18n/LanguageContext";
 
 function PartGroup({ title, parts, selectedParts, onToggle }) {
+  const { t } = useLanguage();
   return (
     <section>
       <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
@@ -27,10 +29,10 @@ function PartGroup({ title, parts, selectedParts, onToggle }) {
                   className="h-4 w-4 accent-sky-600"
                 />
                 <span className={`text-sm font-bold ${selected ? "text-sky-700" : "text-slate-800"}`}>
-                  Part {item.part}
+                  {t("part")} {item.part}
                 </span>
               </span>
-              <span className="text-sm font-medium text-slate-500">{item.questions} questions</span>
+              <span className="text-sm font-medium text-slate-500">{item.questions} {t("questions")}</span>
             </label>
           );
         })}
@@ -40,6 +42,7 @@ function PartGroup({ title, parts, selectedParts, onToggle }) {
 }
 
 function TestModeModal({ test, onClose, onStart }) {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState("exam");
   const [selectedParts, setSelectedParts] = useState([]);
   const [customTimeEnabled, setCustomTimeEnabled] = useState(false);
@@ -70,7 +73,7 @@ function TestModeModal({ test, onClose, onStart }) {
     try {
       await onStart(selection);
     } catch (requestError) {
-      setError(requestError.message || "Unable to start the test.");
+      setError(requestError.message || t("unableStartTest"));
       setStartingKey("");
     }
   };
@@ -102,6 +105,15 @@ function TestModeModal({ test, onClose, onStart }) {
     });
   };
 
+  const startSelectedParts = () => startMode({
+    mode: "PART",
+    part: selectedParts.length === 1 ? selectedParts[0] : null,
+    parts: selectedParts,
+    durationMinutes: customTimeEnabled
+      ? parsedCustomMinutes
+      : suggestedMinutes,
+  });
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-3 backdrop-blur-sm sm:p-6"
@@ -118,7 +130,7 @@ function TestModeModal({ test, onClose, onStart }) {
         <header className="sticky top-0 z-10 flex items-start justify-between gap-5 border-b border-slate-200 bg-white/95 px-5 py-5 backdrop-blur-xl sm:px-8">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-sky-600">
-              Choose a mode
+              {t("chooseMode")}
             </p>
             <h2 id="test-mode-title" className="mt-1 text-2xl font-bold text-slate-950">
               {test.name}
@@ -129,7 +141,7 @@ function TestModeModal({ test, onClose, onStart }) {
             type="button"
             onClick={onClose}
             disabled={Boolean(startingKey)}
-            aria-label="Close mode selection"
+            aria-label={t("closeModeSelection")}
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-xl text-slate-500 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-40"
           >
             ×
@@ -145,7 +157,7 @@ function TestModeModal({ test, onClose, onStart }) {
                 activeTab === "exam" ? "bg-white text-sky-700 shadow-sm" : "text-slate-500"
               }`}
             >
-              Test
+              {t("test")}
             </button>
             <button
               type="button"
@@ -154,9 +166,9 @@ function TestModeModal({ test, onClose, onStart }) {
                 activeTab === "practice" ? "bg-white text-slate-700 shadow-sm" : "text-slate-500"
               }`}
             >
-              Practice
+              {t("practice")}
               <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] text-amber-700">
-                Coming soon
+                {t("comingSoon")}
               </span>
             </button>
           </div>
@@ -172,9 +184,9 @@ function TestModeModal({ test, onClose, onStart }) {
               <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100 text-xl font-black text-amber-700">
                 P
               </span>
-              <h3 className="mt-4 text-xl font-bold text-slate-900">Practice mode is under development</h3>
+              <h3 className="mt-4 text-xl font-bold text-slate-900">{t("practiceDevelopment")}</h3>
               <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-slate-500">
-                All test modes are currently available from the Test tab.
+                {t("practiceDevelopmentDescription")}
               </p>
             </div>
           ) : (
@@ -192,22 +204,32 @@ function TestModeModal({ test, onClose, onStart }) {
               </div>
 
               <section className="mt-8 border-t border-slate-200 pt-7">
-                <div>
-                  <h3 className="text-xl font-bold text-slate-950">Test by Part</h3>
-                  <p className="mt-1 text-sm text-slate-500">
-                    Select one or more Parts, then use the suggested time or set your own.
-                  </p>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-950">{t("testByPart")}</h3>
+                    <p className="mt-1 text-sm text-slate-500">
+                      {t("testByPartDescription")}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={startSelectedParts}
+                    disabled={!selectedParts.length || !validCustomTime || Boolean(startingKey)}
+                    className="shrink-0 rounded-xl bg-sky-500 px-7 py-3 font-bold text-white shadow-lg shadow-sky-100 transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+                  >
+                    {startingKey.startsWith("PART-") ? t("preparing") : t("start")}
+                  </button>
                 </div>
 
                 <div className="mt-5 grid gap-5 md:grid-cols-2">
                   <PartGroup
-                    title="Listening"
+                    title={t("listening")}
                     parts={listeningParts}
                     selectedParts={selectedParts}
                     onToggle={togglePart}
                   />
                   <PartGroup
-                    title="Reading"
+                    title={t("reading")}
                     parts={readingParts}
                     selectedParts={selectedParts}
                     onToggle={togglePart}
@@ -217,13 +239,13 @@ function TestModeModal({ test, onClose, onStart }) {
                 <div className="mt-6 rounded-3xl bg-slate-100 p-5 sm:p-6">
                   <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                     <div>
-                      <h4 className="font-bold text-slate-900">Test duration</h4>
+                      <h4 className="font-bold text-slate-900">{t("testDuration")}</h4>
                       {!customTimeEnabled && selectedParts.length > 0 && (
                         <p className="mt-3 text-sm text-slate-500">
                           <span className="mr-2 rounded-full border border-sky-200 bg-sky-50 px-3 py-1.5 font-bold text-sky-600">
-                            {suggestedMinutes} min
+                            {suggestedMinutes} {t("minuteShort")}
                           </span>
-                          Suggested time
+                          {t("suggestedTime")}
                         </p>
                       )}
                     </div>
@@ -234,7 +256,7 @@ function TestModeModal({ test, onClose, onStart }) {
                       onClick={toggleCustomTime}
                       className="flex items-center gap-3 font-semibold text-slate-600"
                     >
-                      Custom time
+                      {t("customTime")}
                       <span className={`relative h-7 w-12 rounded-full transition ${
                         customTimeEnabled ? "bg-sky-500" : "bg-slate-300"
                       }`}>
@@ -247,7 +269,7 @@ function TestModeModal({ test, onClose, onStart }) {
 
                   {customTimeEnabled && (
                     <label className="mt-5 block max-w-xs">
-                      <span className="text-sm font-semibold text-slate-700">Minutes (1–180)</span>
+                      <span className="text-sm font-semibold text-slate-700">{t("minuteRange")}</span>
                       <div className="mt-2 flex items-center rounded-xl border border-slate-200 bg-white px-4 focus-within:border-sky-400 focus-within:ring-4 focus-within:ring-sky-100">
                         <input
                           type="number"
@@ -258,39 +280,22 @@ function TestModeModal({ test, onClose, onStart }) {
                           onChange={(event) => setCustomMinutes(event.target.value)}
                           className="min-w-0 flex-1 bg-transparent py-3 font-bold text-slate-900 outline-none"
                         />
-                        <span className="text-sm text-slate-500">min</span>
+                        <span className="text-sm text-slate-500">{t("minuteShort")}</span>
                       </div>
                       {!validCustomTime && (
                         <span className="mt-2 block text-sm text-red-600">
-                          Enter a whole number from 1 to 180.
+                          {t("invalidMinutes")}
                         </span>
                       )}
                     </label>
                   )}
                 </div>
 
-                <div className="mt-5 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-                  <div className="flex flex-wrap items-center gap-3 text-sm font-semibold text-slate-500">
-                    <span className="rounded-full bg-sky-50 px-3 py-2 text-sky-700">
-                      {selectedQuestionCount} questions
-                    </span>
-                    <span>{selectedParts.length} Parts selected</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => startMode({
-                      mode: "PART",
-                      part: selectedParts.length === 1 ? selectedParts[0] : null,
-                      parts: selectedParts,
-                      durationMinutes: customTimeEnabled
-                        ? parsedCustomMinutes
-                        : suggestedMinutes,
-                    })}
-                    disabled={!selectedParts.length || !validCustomTime || Boolean(startingKey)}
-                    className="w-full rounded-xl bg-sky-500 px-7 py-3.5 font-bold text-white shadow-lg shadow-sky-100 transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none sm:w-auto"
-                  >
-                    {startingKey.startsWith("PART-") ? "Preparing..." : "Start selected Parts"}
-                  </button>
+                <div className="mt-5 flex flex-wrap items-center gap-3 text-sm font-semibold text-slate-500">
+                  <span className="rounded-full bg-sky-50 px-3 py-2 text-sky-700">
+                    {selectedQuestionCount} {t("questions")}
+                  </span>
+                  <span>{selectedParts.length} {t("partsSelected")}</span>
                 </div>
               </section>
             </>

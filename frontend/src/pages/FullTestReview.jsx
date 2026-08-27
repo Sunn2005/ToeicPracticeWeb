@@ -8,43 +8,47 @@ import QuestionNavigatorDrawer from "../components/QuestionNavigatorDrawer";
 import ResizableExamLayout from "../components/ResizableExamLayout";
 import ReviewTogglePanel from "../components/ReviewTogglePanel";
 import { getAllQuestions } from "../utils/testData";
+import LanguageSwitcher from "../components/LanguageSwitcher";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const FILTERS = [
-  ["ALL", "All"],
-  ["CORRECT", "Correct"],
-  ["INCORRECT", "Incorrect"],
-  ["UNANSWERED", "Unanswered"],
+  ["ALL", "all"],
+  ["CORRECT", "correct"],
+  ["INCORRECT", "incorrect"],
+  ["UNANSWERED", "unanswered"],
 ];
 
-function modeLabel(attempt) {
+function modeLabel(attempt, t) {
   const selectedParts = attempt.selectedParts?.length
     ? attempt.selectedParts
     : attempt.selectedPart
       ? [attempt.selectedPart]
       : [];
 
-  if (attempt.mode === "FULL") return "Full Test";
-  if (attempt.mode === "PART") return `Part ${selectedParts.join(" + ")}`;
-  return attempt.mode === "LISTENING" ? "Listening Test" : "Reading Test";
+  if (attempt.mode === "FULL") return t("fullTest");
+  if (attempt.mode === "PART") return `${t("part")} ${selectedParts.join(" + ")}`;
+  return attempt.mode === "LISTENING" ? t("listeningTest") : t("readingTest");
 }
 
 function ReviewHeader({ data, currentPart, maxScore, onResults, onDashboard }) {
+  const { t } = useLanguage();
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
       <div className="flex w-full items-center justify-between gap-3 px-3 py-2.5 sm:px-5 lg:px-6">
         <div className="min-w-0">
           <p className="truncate text-sm font-bold text-slate-950">
-            {data.test.title || "Test 1"} · Review {modeLabel(data.attempt)}
+            {data.test.title || "Test 1"} · {t("answerReview")} · {modeLabel(data.attempt, t)}
           </p>
           <p className="truncate text-xs font-medium text-slate-500">
-            Answer review{currentPart ? ` · Part ${currentPart}` : ""}
+            {t("answerReview")}{currentPart ? ` · ${t("part")} ${currentPart}` : ""}
           </p>
         </div>
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          <LanguageSwitcher />
           <div className="rounded-lg bg-emerald-50 px-3 py-1.5 text-center text-emerald-800 ring-1 ring-emerald-200 sm:px-4">
             <p className="hidden text-[9px] font-semibold uppercase tracking-widest opacity-70 sm:block">
-              Score
+              {t("score")}
             </p>
             <p className="text-sm font-bold tabular-nums sm:text-base">
               {data.result.totalScore}/{maxScore}
@@ -55,14 +59,14 @@ function ReviewHeader({ data, currentPart, maxScore, onResults, onDashboard }) {
             onClick={onResults}
             className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 sm:px-4 sm:text-sm"
           >
-            Results
+            {t("results")}
           </button>
           <button
             type="button"
             onClick={onDashboard}
             className="hidden rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-700 sm:block sm:px-4 sm:text-sm"
           >
-            Dashboard
+            {t("dashboard")}
           </button>
         </div>
       </div>
@@ -71,6 +75,7 @@ function ReviewHeader({ data, currentPart, maxScore, onResults, onDashboard }) {
 }
 
 function ReviewAudio({ src }) {
+  const { t } = useLanguage();
   return (
     <section className="rounded-xl border border-sky-100 bg-sky-50 px-4 py-3.5">
       <div className="mb-3 flex items-center gap-3">
@@ -78,9 +83,9 @@ function ReviewAudio({ src }) {
           ♫
         </span>
         <div>
-          <p className="text-sm font-bold text-sky-900">Replay audio</p>
+          <p className="text-sm font-bold text-sky-900">{t("replayAudio")}</p>
           <p className="mt-0.5 text-xs leading-5 text-sky-700">
-            Review mode allows pausing and replaying the recording.
+            {t("replayAudioNote")}
           </p>
         </div>
       </div>
@@ -90,6 +95,7 @@ function ReviewAudio({ src }) {
 }
 
 function FullTestReview() {
+  const { t } = useLanguage();
   const { attemptId } = useParams();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
@@ -175,21 +181,21 @@ function FullTestReview() {
   ), [allQuestions]);
 
   if (!data && !error) {
-    return <div className="flex min-h-screen items-center justify-center bg-slate-50">Loading review...</div>;
+    return <div className="flex min-h-screen items-center justify-center bg-slate-50">{t("loadingReview")}</div>;
   }
 
   if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
         <div className="max-w-lg rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700">
-          <p className="font-bold">Unable to open the review</p>
+          <p className="font-bold">{t("unableOpenReview")}</p>
           <p className="mt-2 text-sm leading-6">{error}</p>
           <button
             type="button"
             onClick={() => navigate("/dashboard")}
             className="mt-5 rounded-xl bg-white px-4 py-2 font-semibold text-slate-700"
           >
-            Return to dashboard
+            {t("returnToDashboard")}
           </button>
         </div>
       </div>
@@ -224,7 +230,8 @@ function FullTestReview() {
     || transcript
     || transcriptTranslation,
   );
-  const filterLabel = FILTERS.find(([value]) => value === filter)?.[1] || "All";
+  const filterKey = FILTERS.find(([value]) => value === filter)?.[1] || "all";
+  const filterLabel = t(filterKey);
 
   const selectQuestion = (questionNumber) => {
     const index = filteredQuestions.findIndex(
@@ -249,18 +256,18 @@ function FullTestReview() {
             <div>
               <h1 className="text-base font-bold text-slate-950 sm:text-lg">
                 {unit
-                  ? `Question${unit.start === unit.end ? "" : "s"} ${unit.start}${unit.end !== unit.start ? `–${unit.end}` : ""}`
-                  : "Answer Review"}
+                  ? `${unit.start === unit.end ? t("question") : t("questions")} ${unit.start}${unit.end !== unit.start ? `–${unit.end}` : ""}`
+                  : t("answerReviewTitle")}
               </h1>
               {unit && (
                 <p className="mt-0.5 text-xs font-semibold text-sky-700">
-                  Part {unit.partNumber} · {unit.partName}
+                  {t("part")} {unit.partNumber} · {unit.partName}
                 </p>
               )}
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {FILTERS.map(([value, label]) => {
+              {FILTERS.map(([value, labelKey]) => {
                 const count = value === "ALL"
                   ? allQuestions.length
                   : allQuestions.filter(({ question: item }) => item.answerStatus === value).length;
@@ -278,7 +285,7 @@ function FullTestReview() {
                         : "border border-slate-200 bg-white text-slate-600 hover:border-sky-300 hover:bg-sky-50"
                     }`}
                   >
-                    {label} ({count})
+                    {t(labelKey)} ({count})
                   </button>
                 );
               })}
@@ -287,17 +294,60 @@ function FullTestReview() {
 
           {!current ? (
             <div className="rounded-xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
-              No questions match the {filterLabel.toLowerCase()} filter.
+              {t("noQuestionsFilter")}
             </div>
           ) : (
             <ResizableExamLayout
-              leftLabel="questions, translations, and explanations"
-              rightLabel="audio, passages, and transcripts"
+              leftLabel={t("audioPassagesTranscripts")}
+              rightLabel={t("questionsTranslationsExplanations")}
               left={(
-                <section className="min-w-0 xl:flex xl:h-[calc(100dvh-10.5rem)] xl:flex-col xl:pr-1">
+                <section
+                  ref={mediaPanelRef}
+                  aria-label={t("audioPassagesTranscripts")}
+                  className="min-w-0 space-y-3 xl:h-[calc(100dvh-10.5rem)] xl:overflow-y-auto xl:pr-1"
+                >
+                  {audioUrl && <ReviewAudio src={audioUrl} />}
+
+                  {shouldRenderStandaloneImage && (
+                    <div className="rounded-xl border border-slate-200 bg-white p-3 text-center">
+                      <img
+                        src={imageUrl}
+                        alt={`Material for questions ${unit.start} to ${unit.end}`}
+                        className="mx-auto h-auto max-h-[65vh] max-w-full rounded-xl object-contain"
+                      />
+                    </div>
+                  )}
+
+                  <PassagePanel
+                    compact
+                    passages={unit.passages || []}
+                    imageUrls={unit.imageUrls || []}
+                  />
+
+                  {transcript && (
+                    <ReviewTogglePanel title={t("transcript")} icon="▤" tone="sky">
+                      <p className="whitespace-pre-wrap">{transcript}</p>
+                    </ReviewTogglePanel>
+                  )}
+
+                  {transcriptTranslation && (
+                    <ReviewTogglePanel title={t("transcriptTranslation")} icon="文" tone="sky">
+                      <p className="whitespace-pre-wrap">{transcriptTranslation}</p>
+                    </ReviewTogglePanel>
+                  )}
+
+                  {!hasMedia && (
+                    <div className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm leading-6 text-slate-500">
+                      {t("reviewNoMedia")}
+                    </div>
+                  )}
+                </section>
+              )}
+              right={(
+                <section className="min-w-0 xl:flex xl:h-[calc(100dvh-10.5rem)] xl:flex-col xl:pl-1">
                   <div
                     ref={questionPanelRef}
-                    aria-label="Questions, translations, and explanations"
+                    aria-label={t("questionsTranslationsExplanations")}
                     className="min-w-0 space-y-3 pb-2 xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:pr-1"
                   >
                     {questionsToDisplay.map((item) => (
@@ -321,53 +371,10 @@ function FullTestReview() {
                     onSubmit={() => navigate(`/full-test/${attemptId}/result`)}
                     previousDisabled={currentIndex === 0}
                     nextDisabled={currentIndex >= filteredQuestions.length - 1}
-                    submitLabel="Results"
+                    submitLabel={t("results")}
                     submitVariant="secondary"
-                    statusMessage={`Showing ${filterLabel.toLowerCase()} questions · Part ${unit.partNumber}`}
+                    statusMessage={`${t("showing")} ${filterLabel.toLowerCase()} · ${t("part")} ${unit.partNumber}`}
                   />
-                </section>
-              )}
-              right={(
-                <section
-                  ref={mediaPanelRef}
-                  aria-label="Audio, passages, and transcripts"
-                  className="min-w-0 space-y-3 xl:h-[calc(100dvh-10.5rem)] xl:overflow-y-auto xl:pl-1 xl:pr-1"
-                >
-                  {audioUrl && <ReviewAudio src={audioUrl} />}
-
-                  {shouldRenderStandaloneImage && (
-                    <div className="rounded-xl border border-slate-200 bg-white p-3 text-center">
-                      <img
-                        src={imageUrl}
-                        alt={`Material for questions ${unit.start} to ${unit.end}`}
-                        className="mx-auto h-auto max-h-[65vh] max-w-full rounded-xl object-contain"
-                      />
-                    </div>
-                  )}
-
-                  <PassagePanel
-                    compact
-                    passages={unit.passages || []}
-                    imageUrls={unit.imageUrls || []}
-                  />
-
-                  {transcript && (
-                    <ReviewTogglePanel title="Transcript" icon="▤" tone="sky">
-                      <p className="whitespace-pre-wrap">{transcript}</p>
-                    </ReviewTogglePanel>
-                  )}
-
-                  {transcriptTranslation && (
-                    <ReviewTogglePanel title="Dịch nghĩa Transcript" icon="文" tone="sky">
-                      <p className="whitespace-pre-wrap">{transcriptTranslation}</p>
-                    </ReviewTogglePanel>
-                  )}
-
-                  {!hasMedia && (
-                    <div className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm leading-6 text-slate-500">
-                      This Part has no separate audio or reading material. Review the question on the left.
-                    </div>
-                  )}
                 </section>
               )}
             />
@@ -383,7 +390,7 @@ function FullTestReview() {
         answers={selectedAnswers}
         questionStatuses={questionStatuses}
         reviewMode
-        title={`Question Navigator · ${filterLabel}`}
+        title={`${t("questionNavigator")} · ${filterLabel}`}
         onSelect={selectQuestion}
       />
     </div>

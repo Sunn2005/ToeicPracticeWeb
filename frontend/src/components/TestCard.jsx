@@ -1,4 +1,7 @@
+import { useLanguage } from "../i18n/LanguageContext";
+
 function TestCard({ test, onSelect }) {
+  const { t } = useLanguage();
   return (
     <article
       className={`group relative overflow-hidden rounded-3xl border bg-linear-to-br from-white to-sky-50/70 p-6 shadow-sm transition duration-200 sm:p-7 ${
@@ -18,7 +21,7 @@ function TestCard({ test, onSelect }) {
               : "bg-slate-100 text-slate-500"
           }`}
         >
-          {test.available ? "Ready" : "Coming soon"}
+          {test.available ? t("ready") : t("comingSoon")}
         </span>
       </div>
 
@@ -30,10 +33,10 @@ function TestCard({ test, onSelect }) {
       </h4>
       <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-slate-600">
         <span className="rounded-full bg-white px-3 py-1.5 ring-1 ring-slate-200">
-          {test.totalQuestions} questions
+          {test.totalQuestions} {t("questions")}
         </span>
         <span className="rounded-full bg-white px-3 py-1.5 ring-1 ring-slate-200">
-          {test.duration} min
+          {test.duration} {t("minuteShort")}
         </span>
         <span className="rounded-full bg-white px-3 py-1.5 ring-1 ring-slate-200">
           Part 1–7
@@ -46,7 +49,7 @@ function TestCard({ test, onSelect }) {
         disabled={!test.available}
         className="mt-6 inline-flex items-center gap-2 font-bold text-sky-600 transition group-hover:gap-3 disabled:cursor-not-allowed disabled:text-slate-400"
       >
-        {test.available ? "Select test →" : "No data yet"}
+        {test.available ? t("selectTest") : t("noDataYet")}
       </button>
     </article>
   );

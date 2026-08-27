@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const DEFAULT_LEFT_WIDTH = 60;
 const MIN_LEFT_WIDTH = 35;
@@ -9,6 +10,7 @@ function clampWidth(value) {
 }
 
 function ResizableExamLayout({ left, right, leftLabel, rightLabel }) {
+  const { t } = useLanguage();
   const [leftWidth, setLeftWidth] = useState(DEFAULT_LEFT_WIDTH);
   const containerRef = useRef(null);
   const stopDraggingRef = useRef(null);
@@ -59,13 +61,13 @@ function ResizableExamLayout({ left, right, leftLabel, rightLabel }) {
       <button
         type="button"
         className="exam-split-divider"
-        aria-label={`Resize ${leftLabel} and ${rightLabel}`}
+        aria-label={`${t("resizePanels")}: ${leftLabel}, ${rightLabel}`}
         aria-orientation="vertical"
         aria-valuemin={MIN_LEFT_WIDTH}
         aria-valuemax={MAX_LEFT_WIDTH}
         aria-valuenow={Math.round(leftWidth)}
         role="separator"
-        title="Drag left or right to resize the two panels"
+        title={t("resizePanelHint")}
         onDoubleClick={() => setLeftWidth(DEFAULT_LEFT_WIDTH)}
         onKeyDown={resizeWithKeyboard}
         onPointerDown={startDragging}

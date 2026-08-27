@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
+import { useLanguage } from "../i18n/LanguageContext";
 
 function LockedExamAudio({ src, onEnded, advancing, paused = false }) {
+  const { t } = useLanguage();
   const audioRef = useRef(null);
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
   const [playing, setPlaying] = useState(false);
@@ -74,17 +76,17 @@ function LockedExamAudio({ src, onEnded, advancing, paused = false }) {
           <div>
             <p className="text-sm font-bold text-sky-900">
               {advancing
-                ? "Saving and advancing..."
+                ? t("audioSavingAdvance")
                 : paused
-                  ? "Audio paused while you confirm submission"
+                  ? t("audioPaused")
                   : playing
-                    ? "Audio is playing"
-                    : "Preparing audio"}
+                    ? t("audioPlaying")
+                    : t("audioPreparing")}
             </p>
             <p className="mt-0.5 text-xs leading-5 text-sky-700">
               {paused
-                ? "The audio will resume from this position if you continue the test."
-                : "Test mode: audio plays once and cannot be skipped or replayed."}
+                ? t("audioResumeNote")
+                : t("audioOnceNote")}
             </p>
           </div>
         </div>
@@ -95,7 +97,7 @@ function LockedExamAudio({ src, onEnded, advancing, paused = false }) {
             onClick={startAfterBrowserBlock}
             className="shrink-0 rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-sky-700"
           >
-            Start audio
+            {t("startAudio")}
           </button>
         )}
       </div>

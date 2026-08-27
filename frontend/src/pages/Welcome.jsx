@@ -6,6 +6,8 @@ import { apiFetch, publicApiFetch } from "../api/client";
 import TestList from "../components/TestList";
 import TestModeModal from "../components/TestModeModal";
 import { TOEIC_TESTS } from "../data/testCatalog";
+import LanguageSwitcher from "../components/LanguageSwitcher";
+import { useLanguage } from "../i18n/LanguageContext";
 
 function UserAvatar({ user, displayName, size = "large" }) {
   const sizeClasses =
@@ -35,12 +37,13 @@ function UserAvatar({ user, displayName, size = "large" }) {
 }
 
 function Welcome({ user }) {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState("");
   const [selectedTest, setSelectedTest] = useState(null);
   const [tests, setTests] = useState(TOEIC_TESTS);
-  const displayName = user?.displayName || "Learner";
+  const displayName = user?.displayName || t("learner");
 
   useEffect(() => {
     let active = true;
@@ -77,7 +80,7 @@ function Welcome({ user }) {
       navigate("/login", { replace: true });
     } catch (error) {
       console.error("Unable to sign out:", error);
-      setSignOutError("Unable to sign out right now. Please try again.");
+      setSignOutError(t("signOutError"));
       setIsSigningOut(false);
     }
   };
@@ -99,22 +102,23 @@ function Welcome({ user }) {
             type="button"
             onClick={() => navigate("/dashboard")}
             className="flex items-center gap-3 rounded-xl text-left focus:outline-none focus:ring-4 focus:ring-sky-100"
-            aria-label="Go to dashboard"
+            aria-label={t("goToDashboard")}
           >
             <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-500 font-bold text-white shadow-lg shadow-sky-200">
               TP
             </span>
-            <span>
+            <span className="hidden sm:block">
               <span className="block text-lg font-bold leading-tight text-slate-950">
                 TOEIC Practice
               </span>
               <span className="hidden text-xs text-slate-500 sm:block">
-                Smarter practice every day
+                {t("smarterPractice")}
               </span>
             </span>
           </button>
 
           <div className="flex items-center gap-3">
+            <LanguageSwitcher />
             <div className="hidden min-w-0 text-right sm:block">
               <p className="max-w-48 truncate text-sm font-semibold text-slate-900">
                 {displayName}
@@ -130,7 +134,7 @@ function Welcome({ user }) {
               disabled={isSigningOut}
               className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isSigningOut ? "Signing out..." : "Sign out"}
+              {isSigningOut ? t("signingOut") : t("signOut")}
             </button>
           </div>
         </div>
@@ -150,33 +154,33 @@ function Welcome({ user }) {
           <aside className="space-y-6">
             <section className="overflow-hidden rounded-3xl bg-sky-500 p-6 text-white shadow-xl shadow-sky-200/70 sm:p-7">
               <UserAvatar user={user} displayName={displayName} />
-              <p className="mt-6 text-sm font-medium text-sky-100">Hello,</p>
+              <p className="mt-6 text-sm font-medium text-sky-100">{t("hello")}</p>
               <h1 className="mt-1 break-words text-2xl font-bold">{displayName}</h1>
               <p className="mt-2 break-all text-sm text-sky-100">{user?.email}</p>
 
               <div className="mt-7 rounded-2xl bg-white/15 p-5 ring-1 ring-white/20">
-                <p className="text-sm font-medium text-sky-100">This week's goal</p>
-                <p className="mt-2 text-3xl font-bold">+60 points</p>
+                <p className="text-sm font-medium text-sky-100">{t("weeklyGoal")}</p>
+                <p className="mt-2 text-3xl font-bold">{t("goalPoints")}</p>
                 <p className="mt-3 text-sm leading-6 text-sky-50">
-                  Keep a consistent study rhythm and review mistakes after each session.
+                  {t("goalDescription")}
                 </p>
               </div>
             </section>
 
             <section className="rounded-3xl border border-white bg-white/80 p-6 shadow-lg shadow-sky-100/70 backdrop-blur">
-              <p className="text-sm font-semibold text-slate-900">Today's suggestions</p>
+              <p className="text-sm font-semibold text-slate-900">{t("todaySuggestions")}</p>
               <ul className="mt-4 space-y-3 text-sm text-slate-600">
                 <li className="flex gap-3">
                   <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-sky-400" />
-                  Complete a short Part 5 test
+                  {t("completePart5")}
                 </li>
                 <li className="flex gap-3">
                   <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-sky-400" />
-                  Note unfamiliar vocabulary
+                  {t("noteVocabulary")}
                 </li>
                 <li className="flex gap-3">
                   <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-sky-400" />
-                  Review incorrect answers
+                  {t("reviewIncorrectAnswers")}
                 </li>
               </ul>
             </section>
@@ -187,26 +191,25 @@ function Welcome({ user }) {
               <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-start">
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-wider text-sky-600">
-                    Learning Overview
+                    {t("learningOverview")}
                   </p>
                   <h2 className="mt-3 max-w-3xl text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-                    Ready for today's practice session
+                    {t("readyForPractice")}
                   </h2>
                   <p className="mt-3 max-w-2xl leading-7 text-slate-600">
-                    Choose a suitable test, complete each section, and track your
-                    progress across practice sessions.
+                    {t("overviewDescription")}
                   </p>
                 </div>
                 <span className="w-fit shrink-0 rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700">
-                  Active
+                  {t("active")}
                 </span>
               </div>
 
               <div className="mt-8 grid gap-4 md:grid-cols-3">
                 {[
-                  ["12", "Tests completed"],
-                  ["86%", "Accuracy"],
-                  ["5 days", "Study streak"],
+                  ["12", t("testsCompleted")],
+                  ["86%", t("accuracy")],
+                  [t("fiveDays"), t("studyStreak")],
                 ].map(([value, label]) => (
                   <div
                     key={label}
@@ -223,17 +226,17 @@ function Welcome({ user }) {
               <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-wider text-sky-600">
-                    TOEIC Test Sets
+                    {t("testSets")}
                   </p>
                   <h3 className="mt-2 text-2xl font-bold text-slate-950">
-                    Choose a test to begin
+                    {t("chooseTest")}
                   </h3>
                   <p className="mt-2 text-sm text-slate-500">
-                    Select a test set, then choose Full Test, Listening, Reading, or specific Parts.
+                    {t("chooseTestDescription")}
                   </p>
                 </div>
                 <span className="w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                  {tests.filter((test) => test.available).length} tests ready
+                  {tests.filter((test) => test.available).length} {t("testsReady")}
                 </span>
               </div>
 

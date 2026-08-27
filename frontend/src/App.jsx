@@ -14,12 +14,14 @@ import FullTestExam from "./pages/FullTestExam";
 import FullTestIntro from "./pages/FullTestIntro";
 import FullTestResult from "./pages/FullTestResult";
 import FullTestReview from "./pages/FullTestReview";
+import { LanguageProvider, useLanguage } from "./i18n/LanguageContext";
 
 function LoadingScreen() {
+  const { t } = useLanguage();
   return (
     <div className="flex min-h-screen items-center justify-center bg-sky-50">
       <p className="text-sm font-medium text-sky-700">
-        Checking your session...
+        {t("checkingSession")}
       </p>
     </div>
   );
@@ -84,9 +86,11 @@ function AppRoutes() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <AppRoutes />
-    </BrowserRouter>
+    <LanguageProvider>
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </LanguageProvider>
   );
 }
 
