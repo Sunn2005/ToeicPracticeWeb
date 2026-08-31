@@ -10,6 +10,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 class UserLearningServiceTests {
 
@@ -35,5 +36,34 @@ class UserLearningServiceTests {
         assertEquals(750, result.get("averageScore"));
         assertEquals(390, result.get("averageListeningScore"));
         assertEquals(360, result.get("averageReadingScore"));
+    }
+
+    @Test
+    void deletesOnlyAnAttemptOwnedByTheCurrentUser() throws Exception {
+        AttemptDao attemptDao = mock(AttemptDao.class);
+        UserLearningService service = new UserLearningService(attemptDao);
+        Attempt attempt = new Attempt();
+        attempt.setId("attempt-1");
+        attempt.setUserId("user-1");
+        when(attemptDao.findById("attempt-1")).thenReturn(java.util.Optional.of(attempt));
+
+        service.deleteAttempt("user-1", "attempt-1");
+
+        verify(attemptDao).delete("attempt-1");
+    }
+
+    @Test
+    void includesAttemptTypeInHistory() throws Exception {
+        AttemptDao attemptDao = mock(AttemptDao.class);
+        UserLearningService service = new UserLearningService(attemptDao);
+        Attempt attempt = new Attempt();
+        attempt.setId("practice-1");
+        attempt.setType("PRACTICE");
+        attempt.setStartedAt(100L);
+        when(attemptDao.findByUserId("user-1")).thenReturn(List.of(attempt));
+
+        List<Map<String, Object>> history = service.getAttempts("user-1");
+
+        assertEquals("PRACTICE", history.getFirst().get("type"));
     }
 }

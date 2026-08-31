@@ -57,13 +57,15 @@ function FullTestResult() {
       ? [result.selectedPart]
       : [];
   const modeTitle =
-    resultMode === "FULL"
-      ? t("fullTest")
-      : resultMode === "LISTENING"
-        ? t("listeningTest")
-        : resultMode === "READING"
-          ? t("readingTest")
-          : `${t("part")} ${selectedParts.join(" + ")} - Test 1`;
+    result?.type === "PRACTICE"
+      ? `${t("practiceMode")} · ${t("part")} ${selectedParts.join(" + ")}`
+      : resultMode === "FULL"
+        ? t("fullTest")
+        : resultMode === "LISTENING"
+          ? t("listeningTest")
+          : resultMode === "READING"
+            ? t("readingTest")
+            : `${t("part")} ${selectedParts.join(" + ")} - Test 1`;
   const maxScore = resultMode === "FULL" || (listeningTotal > 0 && readingTotal > 0) ? 990 : 495;
 
   return (

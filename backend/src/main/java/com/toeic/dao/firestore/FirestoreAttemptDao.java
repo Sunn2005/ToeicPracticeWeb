@@ -4,6 +4,7 @@ import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
+import com.google.cloud.firestore.WriteBatch;
 import com.toeic.dao.AttemptDao;
 import com.toeic.model.Attempt;
 import com.toeic.model.AttemptAnswer;
@@ -71,6 +72,21 @@ public class FirestoreAttemptDao implements AttemptDao {
             }
         }
         return attempts;
+    }
+
+    @Override
+    public void delete(String attemptId) throws Exception {
+        var attemptReference = firestore.collection("attempts").document(attemptId);
+        WriteBatch batch = firestore.batch();
+        for (QueryDocumentSnapshot answer : attemptReference
+                .collection("answers")
+                .get()
+                .get()
+                .getDocuments()) {
+            batch.delete(answer.getReference());
+        }
+        batch.delete(attemptReference);
+        batch.commit().get();
     }
 
     @Override

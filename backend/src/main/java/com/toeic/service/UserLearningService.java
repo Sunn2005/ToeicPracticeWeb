@@ -3,6 +3,8 @@ package com.toeic.service;
 import com.toeic.dao.AttemptDao;
 import com.toeic.model.Attempt;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -76,10 +78,21 @@ public class UserLearningService {
         return response;
     }
 
+    public void deleteAttempt(String userId, String attemptId) throws Exception {
+        Attempt attempt = attemptDao.findById(attemptId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy lượt làm bài")
+        );
+        if (!userId.equals(attempt.getUserId())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy lượt làm bài");
+        }
+        attemptDao.delete(attemptId);
+    }
+
     private Map<String, Object> toAttemptSummary(Attempt attempt) {
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("id", attempt.getId());
         response.put("testId", attempt.getTestId());
+        response.put("type", attempt.getType());
         response.put("mode", attempt.getMode());
         response.put("selectedPart", attempt.getSelectedPart());
         response.put("selectedParts", attempt.getSelectedParts());

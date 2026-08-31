@@ -78,6 +78,34 @@ class AttemptServiceTests {
     }
 
     @Test
+    void createsPracticeAttemptWithoutResumingMockTest() throws Exception {
+        AttemptDao attemptDao = mock(AttemptDao.class);
+        TestService testService = mock(TestService.class);
+        AttemptService attemptService = new AttemptService(attemptDao, testService);
+
+        Attempt mockAttempt = inProgressAttempt("mock-attempt", List.of(5), "READING", 101);
+        when(testService.getMetadata("test-1")).thenReturn(Map.of("testId", "test-1"));
+        when(attemptDao.findByUserId("user-1")).thenReturn(List.of(mockAttempt));
+        when(attemptDao.nextId()).thenReturn("practice-attempt");
+        when(attemptDao.findAnswers("practice-attempt")).thenReturn(Map.of());
+
+        attemptService.createOrResume(
+                "user-1",
+                "test-1",
+                "PART",
+                5,
+                List.of(5),
+                20,
+                "PRACTICE"
+        );
+
+        ArgumentCaptor<Attempt> captor = ArgumentCaptor.forClass(Attempt.class);
+        verify(attemptDao).save(captor.capture());
+        assertEquals("PRACTICE", captor.getValue().getType());
+        assertEquals("practice-attempt", captor.getValue().getId());
+    }
+
+    @Test
     void skipsUnselectedListeningPartsWhenAudioAdvances() throws Exception {
         AttemptDao attemptDao = mock(AttemptDao.class);
         TestService testService = mock(TestService.class);
@@ -118,6 +146,42 @@ class AttemptServiceTests {
         assertEquals(84, result.get("readingTotalQuestions"));
         assertEquals(2, result.get("totalCorrect"));
         assertEquals(List.of(5, 7), result.get("selectedParts"));
+    }
+
+    @Test
+    void submitsListeningFullTestDirectlyForReview() throws Exception {
+        AttemptDao attemptDao = mock(AttemptDao.class);
+        TestService testService = mock(TestService.class);
+        AttemptService attemptService = new AttemptService(attemptDao, testService);
+        Attempt attempt = inProgressAttempt(
+                "attempt-full-listening",
+                List.of(1, 2, 3, 4, 5, 6, 7),
+                "LISTENING",
+                32
+        );
+        attempt.setMode("FULL");
+        attempt.setLastQuestionNumber(200);
+        attempt.setTotalQuestions(200);
+
+        Map<Integer, String> answerKey = new LinkedHashMap<>();
+        for (int number = 1; number <= 200; number++) {
+            answerKey.put(number, "A");
+        }
+        when(attemptDao.findById("attempt-full-listening")).thenReturn(Optional.of(attempt));
+        when(attemptDao.findAnswers("attempt-full-listening")).thenReturn(Map.of(1, "A", 32, "B"));
+        when(testService.getAnswerKey("test-1")).thenReturn(answerKey);
+
+        Map<String, Object> result = attemptService.submitForReview(
+                "user-1",
+                "attempt-full-listening"
+        );
+
+        assertEquals(1, result.get("totalCorrect"));
+        assertEquals(1, result.get("totalWrong"));
+        assertEquals(198, result.get("totalUnanswered"));
+        assertEquals("COMPLETED", attempt.getStatus());
+        assertEquals("FINISHED", attempt.getCurrentSection());
+        verify(attemptDao).save(attempt);
     }
 
     private Attempt inProgressAttempt(

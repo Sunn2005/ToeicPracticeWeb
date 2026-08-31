@@ -5,6 +5,7 @@ import { useLanguage } from "../i18n/LanguageContext";
 
 function ExamHeader({
   section,
+  type,
   mode,
   selectedPart,
   selectedParts,
@@ -17,8 +18,9 @@ function ExamHeader({
   const { t } = useLanguage();
   const isElapsed = timerType === TIMER_TYPES.ELAPSED;
   const isUrgent = !isElapsed && remainingSeconds <= 300;
-  const modeLabel =
-    mode === "FULL"
+  const modeLabel = type === "PRACTICE"
+    ? `${t("practiceMode")} · ${t("part")} ${(selectedParts?.length ? selectedParts : [selectedPart]).filter(Boolean).join(" + ")}`
+    : mode === "FULL"
       ? t("fullTest")
       : mode === "PART"
         ? `${t("part")} ${(selectedParts?.length ? selectedParts : [selectedPart]).filter(Boolean).join(" + ")}`

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
@@ -8,6 +8,9 @@ import TestModeModal from "../components/TestModeModal";
 import { TOEIC_TESTS } from "../data/testCatalog";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import { useLanguage } from "../i18n/LanguageContext";
+import AttemptHistoryDrawer from "../components/AttemptHistoryDrawer";
+import { deleteAttempt, getAttemptHistory } from "../api/userLearning";
+import { getHistoryStats } from "../utils/attemptHistory";
 
 function UserAvatar({ user, displayName, size = "large" }) {
   const sizeClasses =
@@ -42,7 +45,12 @@ function Welcome({ user }) {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState("");
   const [selectedTest, setSelectedTest] = useState(null);
+  const [modalTab, setModalTab] = useState("exam");
   const [tests, setTests] = useState(TOEIC_TESTS);
+  const [attempts, setAttempts] = useState([]);
+  const [historyTest, setHistoryTest] = useState(null);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [historyError, setHistoryError] = useState("");
   const displayName = user?.displayName || t("learner");
 
   useEffect(() => {
@@ -71,6 +79,23 @@ function Welcome({ user }) {
     };
   }, []);
 
+  useEffect(() => {
+    let active = true;
+    getAttemptHistory()
+      .then((history) => {
+        if (active) setAttempts(Array.isArray(history) ? history : []);
+      })
+      .catch((requestError) => {
+        if (active) setHistoryError(requestError.message || t("historyLoadError"));
+      })
+      .finally(() => {
+        if (active) setHistoryLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [t]);
+
   const handleSignOut = async () => {
     setIsSigningOut(true);
     setSignOutError("");
@@ -85,14 +110,50 @@ function Welcome({ user }) {
     }
   };
 
-  const handleStartExam = async ({ mode, part, parts, durationMinutes }) => {
+  const handleStartExam = async ({ mode, part, parts, durationMinutes, experience }) => {
     const attempt = await apiFetch(`/api/tests/${selectedTest.id}/attempts`, {
       method: "POST",
       forceRefresh: true,
-      body: JSON.stringify({ mode, part, parts, durationMinutes }),
+      body: JSON.stringify({
+        type: experience === "practice" ? "PRACTICE" : "FULL_TEST",
+        mode,
+        part,
+        parts,
+        durationMinutes,
+      }),
     });
     navigate(`/full-test/${attempt.id}/exam`);
   };
+
+  const openTestMode = (test, tab) => {
+    setModalTab(tab);
+    setSelectedTest(test);
+  };
+
+  const handleDeleteAttempt = async (attemptId) => {
+    await deleteAttempt(attemptId);
+    setAttempts((current) => current.filter((attempt) => attempt.id !== attemptId));
+  };
+
+  const openAttemptReview = async (attempt, filter = "") => {
+    setHistoryError("");
+
+    try {
+      if (attempt.status !== "COMPLETED") {
+        await apiFetch(`/api/attempts/${attempt.id}/submit-for-review`, {
+          method: "POST",
+          forceRefresh: true,
+        });
+      }
+
+      const query = filter ? `?filter=${filter}` : "";
+      navigate(`/full-test/${attempt.id}/review${query}`);
+    } catch (requestError) {
+      setHistoryError(requestError.message || t("historyReviewError"));
+    }
+  };
+
+  const learningStats = useMemo(() => getHistoryStats(attempts), [attempts]);
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-sky-50 to-cyan-100 text-slate-900">
@@ -207,9 +268,9 @@ function Welcome({ user }) {
 
               <div className="mt-8 grid gap-4 md:grid-cols-3">
                 {[
-                  ["12", t("testsCompleted")],
-                  ["86%", t("accuracy")],
-                  [t("fiveDays"), t("studyStreak")],
+                  [String(learningStats.completed), t("testsCompleted")],
+                  [`${learningStats.accuracy}%`, t("accuracy")],
+                  [`${learningStats.streak} ${learningStats.streak === 1 ? t("day") : t("days")}`, t("studyStreak")],
                 ].map(([value, label]) => (
                   <div
                     key={label}
@@ -240,7 +301,12 @@ function Welcome({ user }) {
                 </span>
               </div>
 
-              <TestList tests={tests} onSelectTest={setSelectedTest} />
+              <TestList
+                tests={tests}
+                attempts={attempts}
+                onSelectTest={openTestMode}
+                onOpenHistory={setHistoryTest}
+              />
             </div>
           </section>
         </div>
@@ -249,10 +315,24 @@ function Welcome({ user }) {
       {selectedTest && (
         <TestModeModal
           test={selectedTest}
+          initialTab={modalTab}
           onClose={() => setSelectedTest(null)}
           onStart={handleStartExam}
         />
       )}
+
+      <AttemptHistoryDrawer
+        open={Boolean(historyTest)}
+        attempts={attempts.filter((attempt) => attempt.testId === historyTest?.id)}
+        tests={tests}
+        selectedTest={historyTest}
+        loading={historyLoading}
+        error={historyError}
+        onClose={() => setHistoryTest(null)}
+        onDelete={handleDeleteAttempt}
+        onReview={(attempt) => openAttemptReview(attempt)}
+        onReviewIncorrect={(attempt) => openAttemptReview(attempt, "INCORRECT")}
+      />
     </div>
   );
 }

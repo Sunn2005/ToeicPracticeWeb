@@ -23,6 +23,7 @@ import java.util.Objects;
 public class AttemptService {
 
     public static final String FULL_TEST = TestType.FULL_TEST.name();
+    public static final String PRACTICE = TestType.PRACTICE.name();
     public static final String IN_PROGRESS = AttemptStatus.IN_PROGRESS.name();
     public static final String COMPLETED = AttemptStatus.COMPLETED.name();
     public static final String LISTENING = AttemptSection.LISTENING.name();
@@ -73,10 +74,37 @@ public class AttemptService {
             List<Integer> requestedParts,
             Integer durationMinutes
     ) throws Exception {
+        return createOrResume(
+                userId,
+                testId,
+                requestedMode,
+                selectedPart,
+                requestedParts,
+                durationMinutes,
+                null
+        );
+    }
+
+    public Map<String, Object> createOrResume(
+            String userId,
+            String testId,
+            String requestedMode,
+            Integer selectedPart,
+            List<Integer> requestedParts,
+            Integer durationMinutes,
+            String requestedType
+    ) throws Exception {
         testService.getMetadata(testId);
         AttemptScope scope = resolveScope(requestedMode, selectedPart, requestedParts, durationMinutes);
+        String attemptType = normalizeAttemptType(requestedType);
 
-        Attempt active = findCurrentAttempt(userId, testId, scope.mode(), scope.selectedParts());
+        Attempt active = findCurrentAttempt(
+                userId,
+                testId,
+                scope.mode(),
+                scope.selectedParts(),
+                attemptType
+        );
         if (active != null) {
             active = reconcileTimeout(active);
             if (IN_PROGRESS.equals(active.getStatus())) {
@@ -89,7 +117,7 @@ public class AttemptService {
         attempt.setId(attemptDao.nextId());
         attempt.setUserId(userId);
         attempt.setTestId(testId);
-        attempt.setType(FULL_TEST);
+        attempt.setType(attemptType);
         attempt.setMode(scope.mode());
         attempt.setSelectedPart(scope.selectedPart());
         attempt.setSelectedParts(scope.selectedParts());
@@ -126,7 +154,13 @@ public class AttemptService {
     }
 
     public Map<String, Object> getCurrent(String userId, String testId) throws Exception {
-        Attempt active = findCurrentAttempt(userId, testId, MODE_FULL, List.of(1, 2, 3, 4, 5, 6, 7));
+        Attempt active = findCurrentAttempt(
+                userId,
+                testId,
+                MODE_FULL,
+                List.of(1, 2, 3, 4, 5, 6, 7),
+                FULL_TEST
+        );
         if (active == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không có bài đang làm");
         }
@@ -300,6 +334,15 @@ public class AttemptService {
         return submitInternal(attempt, false).getResult();
     }
 
+    public Map<String, Object> submitForReview(String userId, String attemptId) throws Exception {
+        Attempt attempt = reconcileTimeout(getOwnedAttempt(userId, attemptId));
+        if (COMPLETED.equals(attempt.getStatus())) {
+            return attempt.getResult();
+        }
+        requireInProgress(attempt);
+        return submitInternal(attempt, false).getResult();
+    }
+
     public Map<String, Object> getResult(String userId, String attemptId) throws Exception {
         Attempt attempt = reconcileTimeout(getOwnedAttempt(userId, attemptId));
         if (!COMPLETED.equals(attempt.getStatus()) || attempt.getResult() == null) {
@@ -331,13 +374,14 @@ public class AttemptService {
             String userId,
             String testId,
             String requestedMode,
-            List<Integer> requestedParts
+            List<Integer> requestedParts,
+            String requestedType
     ) throws Exception {
         List<Attempt> candidates = new ArrayList<>();
         for (Attempt attempt : attemptDao.findByUserId(userId)) {
             applyLegacyScope(attempt);
             if (testId.equals(attempt.getTestId())
-                    && FULL_TEST.equals(attempt.getType())
+                    && requestedType.equals(attemptType(attempt))
                     && requestedMode.equals(mode(attempt))
                     && Objects.equals(requestedParts, selectedParts(attempt))
                     && IN_PROGRESS.equals(attempt.getStatus())) {
@@ -357,8 +401,9 @@ public class AttemptService {
         if (!userId.equals(attempt.getUserId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền truy cập bài làm này");
         }
-        if (!FULL_TEST.equals(attempt.getType())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Đây không phải attempt luyện thi");
+        String type = attemptType(attempt);
+        if (!FULL_TEST.equals(type) && !PRACTICE.equals(type)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Loại lượt làm này không được hỗ trợ");
         }
         applyLegacyScope(attempt);
         return attempt;
@@ -458,6 +503,7 @@ public class AttemptService {
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("attemptId", attempt.getId());
         result.put("testId", attempt.getTestId());
+        result.put("type", attemptType(attempt));
         result.put("mode", mode(attempt));
         result.put("selectedPart", attempt.getSelectedPart());
         result.put("selectedParts", selectedParts(attempt));
@@ -701,6 +747,26 @@ public class AttemptService {
         return attempt.getMode() == null || attempt.getMode().isBlank()
                 ? MODE_FULL
                 : attempt.getMode();
+    }
+
+    private String normalizeAttemptType(String requestedType) {
+        if (requestedType == null || requestedType.isBlank()) {
+            return FULL_TEST;
+        }
+        String normalized = requestedType.trim().toUpperCase(Locale.ROOT);
+        if (!FULL_TEST.equals(normalized) && !PRACTICE.equals(normalized)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "type phải là FULL_TEST hoặc PRACTICE"
+            );
+        }
+        return normalized;
+    }
+
+    private String attemptType(Attempt attempt) {
+        return attempt.getType() == null || attempt.getType().isBlank()
+                ? FULL_TEST
+                : attempt.getType();
     }
 
     private int firstQuestion(Attempt attempt) {

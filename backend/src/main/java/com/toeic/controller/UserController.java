@@ -4,8 +4,12 @@ import com.toeic.model.User;
 import com.toeic.service.CurrentUserService;
 import com.toeic.service.UserLearningService;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -46,5 +50,15 @@ public class UserController {
     ) throws Exception {
         User user = currentUserService.requireUser(authorization);
         return userLearningService.getStatistics(user.getUid());
+    }
+
+    @DeleteMapping("/attempts/{attemptId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteAttempt(
+            @PathVariable String attemptId,
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization
+    ) throws Exception {
+        User user = currentUserService.requireUser(authorization);
+        userLearningService.deleteAttempt(user.getUid(), attemptId);
     }
 }

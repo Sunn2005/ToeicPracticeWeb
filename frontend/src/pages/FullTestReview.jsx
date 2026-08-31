@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { apiFetch } from "../api/client";
 import ExamNavigationBar from "../components/ExamNavigationBar";
 import PassagePanel from "../components/PassagePanel";
@@ -10,6 +10,7 @@ import ReviewTogglePanel from "../components/ReviewTogglePanel";
 import { getAllQuestions } from "../utils/testData";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import { useLanguage } from "../i18n/LanguageContext";
+import { deleteAttempt } from "../api/userLearning";
 
 const FILTERS = [
   ["ALL", "all"],
@@ -25,12 +26,23 @@ function modeLabel(attempt, t) {
       ? [attempt.selectedPart]
       : [];
 
+  if (attempt.type === "PRACTICE") {
+    return `${t("practiceMode")} · ${t("part")} ${selectedParts.join(" + ")}`;
+  }
   if (attempt.mode === "FULL") return t("fullTest");
   if (attempt.mode === "PART") return `${t("part")} ${selectedParts.join(" + ")}`;
   return attempt.mode === "LISTENING" ? t("listeningTest") : t("readingTest");
 }
 
-function ReviewHeader({ data, currentPart, maxScore, onResults, onDashboard }) {
+function TrashIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5" />
+    </svg>
+  );
+}
+
+function ReviewHeader({ data, currentPart, maxScore, onResults, onDashboard, onDelete }) {
   const { t } = useLanguage();
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
@@ -57,9 +69,18 @@ function ReviewHeader({ data, currentPart, maxScore, onResults, onDashboard }) {
           <button
             type="button"
             onClick={onResults}
-            className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 sm:px-4 sm:text-sm"
+            className="hidden rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 sm:block sm:px-4 sm:text-sm"
           >
             {t("results")}
+          </button>
+          <button
+            type="button"
+            onClick={onDelete}
+            aria-label={t("delete")}
+            title={t("delete")}
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-red-100 text-red-500 transition hover:bg-red-50 hover:text-red-700"
+          >
+            <TrashIcon />
           </button>
           <button
             type="button"
@@ -71,6 +92,25 @@ function ReviewHeader({ data, currentPart, maxScore, onResults, onDashboard }) {
         </div>
       </div>
     </header>
+  );
+}
+
+function ReviewDeleteDialog({ open, deleting, error, onCancel, onConfirm }) {
+  const { t } = useLanguage();
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-5">
+      <section role="alertdialog" aria-modal="true" aria-labelledby="review-delete-title" className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
+        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-red-600"><TrashIcon /></span>
+        <h2 id="review-delete-title" className="mt-5 text-xl font-bold text-slate-950">{t("deleteAttemptTitle")}</h2>
+        <p className="mt-3 text-sm leading-6 text-slate-600">{t("deleteAttemptDescription")}</p>
+        {error && <p className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
+        <div className="mt-6 flex gap-3">
+          <button type="button" onClick={onCancel} disabled={deleting} className="flex-1 rounded-xl border border-slate-200 px-4 py-3 font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50">{t("cancel")}</button>
+          <button type="button" onClick={onConfirm} disabled={deleting} className="flex-1 rounded-xl bg-red-600 px-4 py-3 font-bold text-white hover:bg-red-700 disabled:bg-red-300">{deleting ? t("deleting") : t("delete")}</button>
+        </div>
+      </section>
+    </div>
   );
 }
 
@@ -98,11 +138,18 @@ function FullTestReview() {
   const { t } = useLanguage();
   const { attemptId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const requestedFilter = searchParams.get("filter")?.toUpperCase();
   const [data, setData] = useState(null);
-  const [filter, setFilter] = useState("ALL");
+  const [filter, setFilter] = useState(
+    FILTERS.some(([value]) => value === requestedFilter) ? requestedFilter : "ALL",
+  );
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showNavigator, setShowNavigator] = useState(false);
   const [error, setError] = useState("");
+  const [showDelete, setShowDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
   const questionPanelRef = useRef(null);
   const mediaPanelRef = useRef(null);
 
@@ -240,6 +287,18 @@ function FullTestReview() {
     if (index >= 0) setCurrentIndex(index);
   };
 
+  const confirmDelete = async () => {
+    setDeleting(true);
+    setDeleteError("");
+    try {
+      await deleteAttempt(attemptId);
+      navigate("/dashboard", { replace: true });
+    } catch (requestError) {
+      setDeleteError(requestError.message || t("historyDeleteError"));
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <ReviewHeader
@@ -248,6 +307,7 @@ function FullTestReview() {
         maxScore={maxScore}
         onResults={() => navigate(`/full-test/${attemptId}/result`)}
         onDashboard={() => navigate("/dashboard")}
+        onDelete={() => setShowDelete(true)}
       />
 
       <main className="w-full px-3 py-3 pb-28 sm:px-5 lg:px-6 xl:pb-5">
@@ -392,6 +452,17 @@ function FullTestReview() {
         reviewMode
         title={`${t("questionNavigator")} · ${filterLabel}`}
         onSelect={selectQuestion}
+      />
+
+      <ReviewDeleteDialog
+        open={showDelete}
+        deleting={deleting}
+        error={deleteError}
+        onCancel={() => {
+          setShowDelete(false);
+          setDeleteError("");
+        }}
+        onConfirm={confirmDelete}
       />
     </div>
   );

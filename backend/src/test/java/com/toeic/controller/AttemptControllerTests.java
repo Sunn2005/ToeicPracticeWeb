@@ -75,7 +75,7 @@ class AttemptControllerTests {
         when(authenticationService.requireUid("Bearer firebase-id-token"))
                 .thenReturn("firebase-uid-123");
         when(attemptService.createOrResume(
-                "firebase-uid-123", "test-1", null, null, null, null
+                "firebase-uid-123", "test-1", null, null, null, null, null
         ))
                 .thenReturn(expected);
 
@@ -86,7 +86,7 @@ class AttemptControllerTests {
 
         assertEquals(expected, result);
         verify(attemptService).createOrResume(
-                "firebase-uid-123", "test-1", null, null, null, null
+                "firebase-uid-123", "test-1", null, null, null, null, null
         );
     }
 
@@ -105,7 +105,7 @@ class AttemptControllerTests {
         when(authenticationService.requireUid("Bearer firebase-id-token"))
                 .thenReturn("firebase-uid-123");
         when(attemptService.createOrResume(
-                "firebase-uid-123", "test-1", "PART", 6, null, null
+                "firebase-uid-123", "test-1", "PART", 6, null, null, null
         ))
                 .thenReturn(expected);
 
@@ -116,7 +116,7 @@ class AttemptControllerTests {
 
         assertEquals(expected, result);
         verify(attemptService).createOrResume(
-                "firebase-uid-123", "test-1", "PART", 6, null, null
+                "firebase-uid-123", "test-1", "PART", 6, null, null, null
         );
     }
 
@@ -139,7 +139,8 @@ class AttemptControllerTests {
                 "PART",
                 null,
                 List.of(5, 6),
-                25
+                25,
+                null
         )).thenReturn(expected);
 
         Map<String, Object> result = controller.createAttempt(request, "Bearer firebase-id-token");
@@ -151,7 +152,28 @@ class AttemptControllerTests {
                 "PART",
                 null,
                 List.of(5, 6),
-                25
+                25,
+                null
         );
+    }
+
+    @Test
+    void submitsAttemptForReviewWithAuthenticatedUser() throws Exception {
+        Map<String, Object> expected = Map.of(
+                "attemptId", "attempt-123",
+                "totalCorrect", 4
+        );
+        when(authenticationService.requireUid("Bearer firebase-id-token"))
+                .thenReturn("firebase-uid-123");
+        when(attemptService.submitForReview("firebase-uid-123", "attempt-123"))
+                .thenReturn(expected);
+
+        Map<String, Object> result = controller.submitForReview(
+                "attempt-123",
+                "Bearer firebase-id-token"
+        );
+
+        assertEquals(expected, result);
+        verify(attemptService).submitForReview("firebase-uid-123", "attempt-123");
     }
 }

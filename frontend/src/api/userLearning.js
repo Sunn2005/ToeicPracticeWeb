@@ -1,1 +1,11 @@
-// TODO(Member 2): Add typed wrappers for /api/tests and /api/users/me endpoints.
+import { apiFetch } from "./client";
+
+export function getAttemptHistory() {
+  return apiFetch("/api/users/me/attempts");
+}
+
+export function deleteAttempt(attemptId) {
+  return apiFetch(`/api/users/me/attempts/${attemptId}`, {
+    method: "DELETE",
+  });
+}

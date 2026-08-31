@@ -13,6 +13,7 @@ import java.util.List;
 @Setter
 public class CreateAttemptRequest {
     private String testId;
+    private String type;
     private String mode;
     private Integer part;
     private List<Integer> parts;

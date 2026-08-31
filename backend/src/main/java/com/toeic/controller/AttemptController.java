@@ -57,7 +57,8 @@ public class AttemptController {
                 request.getMode(),
                 request.getPart(),
                 request.getParts(),
-                request.getDurationMinutes()
+                request.getDurationMinutes(),
+                request.getType()
         );
     }
 
@@ -138,6 +139,15 @@ public class AttemptController {
     ) throws Exception {
         String userId = authenticationService.requireUid(authorization);
         return attemptService.submit(userId, attemptId);
+    }
+
+    @PostMapping("/{attemptId}/submit-for-review")
+    public Map<String, Object> submitForReview(
+            @PathVariable String attemptId,
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization
+    ) throws Exception {
+        String userId = authenticationService.requireUid(authorization);
+        return attemptService.submitForReview(userId, attemptId);
     }
 
     @GetMapping("/{attemptId}/result")

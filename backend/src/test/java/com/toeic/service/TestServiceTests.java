@@ -22,23 +22,23 @@ class TestServiceTests {
 
     private TestService testService;
     private String testId;
+    private com.toeic.model.Test sourceTest;
 
     @BeforeEach
     void setUp() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         TestDao testDao = mock(TestDao.class);
 
-        com.toeic.model.Test test;
         try (InputStream input = getClass().getResourceAsStream(
                 "/data/test-1-data.json"
         )) {
-            test = objectMapper.readValue(input, com.toeic.model.Test.class);
+            sourceTest = objectMapper.readValue(input, com.toeic.model.Test.class);
         }
-        testId = test.getTestId();
+        testId = sourceTest.getTestId();
 
-        when(testDao.findMetadataById(test.getTestId())).thenReturn(Optional.of(test));
-        for (TestPart part : test.getParts()) {
-            when(testDao.findPart(test.getTestId(), part.getPartNumber()))
+        when(testDao.findMetadataById(sourceTest.getTestId())).thenReturn(Optional.of(sourceTest));
+        for (TestPart part : sourceTest.getParts()) {
+            when(testDao.findPart(sourceTest.getTestId(), part.getPartNumber()))
                     .thenReturn(Optional.of(part));
         }
         testService = new TestService(testDao, objectMapper);
@@ -92,6 +92,21 @@ class TestServiceTests {
         assertTrue(serialized.contains("Nữ: Này Oliver"));
         assertFalse(serialized.contains("\"translation\""));
         assertFalse(serialized.contains("\"explanation\""));
+    }
+
+    @Test
+    void providesReadableTranscriptTranslationsForEveryPartThreeAndFourGroup() {
+        List<TestPart> listeningParts = sourceTest.getParts().stream()
+                .filter(part -> part.getPartNumber() == 3 || part.getPartNumber() == 4)
+                .toList();
+
+        assertEquals(2, listeningParts.size());
+        assertEquals(23, listeningParts.stream().mapToInt(part -> part.getGroups().size()).sum());
+        assertTrue(listeningParts.stream()
+                .flatMap(part -> part.getGroups().stream())
+                .allMatch(group -> group.getTranscriptTranslation() != null
+                        && !group.getTranscriptTranslation().isBlank()
+                        && group.getTranscriptTranslation().contains("\n\n")));
     }
 
     @Test

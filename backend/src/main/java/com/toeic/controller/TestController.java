@@ -66,7 +66,8 @@ public class TestController {
                 mode,
                 part,
                 request == null ? null : request.getParts(),
-                request == null ? null : request.getDurationMinutes()
+                request == null ? null : request.getDurationMinutes(),
+                request == null ? null : request.getType()
         );
     }
 
