@@ -24,12 +24,12 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Adds only the Part 3-4 transcript translations to an existing Firestore test.
+ * Adds only the readable Part 3-4 transcripts and their translations to an existing Firestore test.
  * All other group fields are copied from Firestore so this targeted import does
  * not replace questions, answers, media URLs, or explanations.
  */
 @Component
-@ConditionalOnProperty(name = "app.import-listening-transcript-translations", havingValue = "true")
+@ConditionalOnProperty(name = "app.import-listening-review-text", havingValue = "true")
 public class ListeningTranscriptTranslationImportRunner implements CommandLineRunner {
 
     private static final Logger log =
@@ -45,7 +45,7 @@ public class ListeningTranscriptTranslationImportRunner implements CommandLineRu
             Firestore firestore,
             ObjectMapper objectMapper,
             @Value("${app.toeic-data-resource}") Resource dataResource,
-            @Value("${app.listening-transcript-translation-test-id:test-1}") String testId
+            @Value("${app.listening-review-text-test-id:test-1}") String testId
     ) {
         this.firestore = firestore;
         this.objectMapper = objectMapper;
@@ -55,7 +55,7 @@ public class ListeningTranscriptTranslationImportRunner implements CommandLineRu
 
     @Override
     public void run(String... args) throws Exception {
-        Map<Integer, Map<String, String>> translations = loadTranslations();
+        Map<Integer, Map<String, ListeningReviewText>> sourceGroups = loadReviewText();
         WriteBatch batch = firestore.batch();
         int updatedGroups = 0;
 
@@ -73,20 +73,21 @@ public class ListeningTranscriptTranslationImportRunner implements CommandLineRu
             }
 
             List<Map<String, Object>> groups = copyGroups(snapshot.get("groups"));
-            Map<String, String> pendingTranslations =
-                    new LinkedHashMap<>(translations.get(partNumber));
+            Map<String, ListeningReviewText> pendingGroups =
+                    new LinkedHashMap<>(sourceGroups.get(partNumber));
             for (Map<String, Object> group : groups) {
                 String questionRange = String.valueOf(group.get("questionRange"));
-                String translation = pendingTranslations.remove(questionRange);
-                if (translation != null) {
-                    group.put("transcriptTranslation", translation);
+                ListeningReviewText reviewText = pendingGroups.remove(questionRange);
+                if (reviewText != null) {
+                    group.put("transcript", reviewText.transcript());
+                    group.put("transcriptTranslation", reviewText.translation());
                     updatedGroups++;
                 }
             }
-            if (!pendingTranslations.isEmpty()) {
+            if (!pendingGroups.isEmpty()) {
                 throw new IllegalStateException(
                         "Part " + partNumber + " thiếu group trên Firestore: "
-                                + pendingTranslations.keySet()
+                                + pendingGroups.keySet()
                 );
             }
             batch.update(partDocument, "groups", groups);
@@ -94,13 +95,13 @@ public class ListeningTranscriptTranslationImportRunner implements CommandLineRu
 
         batch.commit().get();
         log.info(
-                "Updated {} Listening transcript translations for Firestore testId={}",
+                "Updated {} readable Listening transcripts and translations for Firestore testId={}",
                 updatedGroups,
                 testId
         );
     }
 
-    private Map<Integer, Map<String, String>> loadTranslations() throws Exception {
+    private Map<Integer, Map<String, ListeningReviewText>> loadReviewText() throws Exception {
         if (!dataResource.exists()) {
             throw new IllegalStateException(
                     "Không tìm thấy file dữ liệu TOEIC: " + dataResource.getDescription()
@@ -112,28 +113,34 @@ public class ListeningTranscriptTranslationImportRunner implements CommandLineRu
             sourceTest = objectMapper.readValue(inputStream, Test.class);
         }
 
-        Map<Integer, Map<String, String>> translations = new LinkedHashMap<>();
+        Map<Integer, Map<String, ListeningReviewText>> reviewText = new LinkedHashMap<>();
         for (TestPart part : sourceTest.getParts()) {
             if (!LISTENING_PARTS.contains(part.getPartNumber())) {
                 continue;
             }
-            Map<String, String> partTranslations = new LinkedHashMap<>();
+            Map<String, ListeningReviewText> partReviewText = new LinkedHashMap<>();
             for (QuestionGroup group : part.getGroups()) {
+                String transcript = group.getTranscript();
                 String translation = group.getTranscriptTranslation();
-                if (translation == null || translation.isBlank()) {
+                if (transcript == null || transcript.isBlank()
+                        || translation == null || translation.isBlank()) {
                     throw new IllegalStateException(
-                            "Thiếu transcriptTranslation cho group " + group.getQuestionRange()
+                            "Thiếu transcript hoặc transcriptTranslation cho group "
+                                    + group.getQuestionRange()
                     );
                 }
-                partTranslations.put(group.getQuestionRange(), translation);
+                partReviewText.put(
+                        group.getQuestionRange(),
+                        new ListeningReviewText(transcript, translation)
+                );
             }
-            translations.put(part.getPartNumber(), partTranslations);
+            reviewText.put(part.getPartNumber(), partReviewText);
         }
 
-        if (!translations.keySet().equals(LISTENING_PARTS)) {
+        if (!reviewText.keySet().equals(LISTENING_PARTS)) {
             throw new IllegalStateException("Dữ liệu nguồn phải có đủ Part 3 và Part 4");
         }
-        return translations;
+        return reviewText;
     }
 
     @SuppressWarnings("unchecked")
@@ -150,5 +157,8 @@ public class ListeningTranscriptTranslationImportRunner implements CommandLineRu
             groups.add(new LinkedHashMap<>((Map<String, Object>) rawMap));
         }
         return groups;
+    }
+
+    private record ListeningReviewText(String transcript, String translation) {
     }
 }

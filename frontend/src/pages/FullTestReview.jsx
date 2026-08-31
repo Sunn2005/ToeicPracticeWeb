@@ -8,6 +8,7 @@ import QuestionNavigatorDrawer from "../components/QuestionNavigatorDrawer";
 import ResizableExamLayout from "../components/ResizableExamLayout";
 import ReviewTogglePanel from "../components/ReviewTogglePanel";
 import { getAllQuestions } from "../utils/testData";
+import { formatListeningTranscript } from "../utils/reviewContent";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import { useLanguage } from "../i18n/LanguageContext";
 import { deleteAttempt } from "../api/userLearning";
@@ -268,13 +269,14 @@ function FullTestReview() {
   const shouldRenderStandaloneImage = imageUrl && !passagePanelImageUrls.has(imageUrl);
   const showListeningReview = [3, 4].includes(unit?.partNumber);
   const transcript = showListeningReview ? unit?.transcript : null;
+  const formattedTranscript = formatListeningTranscript(transcript, unit?.partNumber);
   const transcriptTranslation = showListeningReview ? unit?.transcriptTranslation : null;
   const hasMedia = Boolean(
     audioUrl
     || imageUrl
     || unit?.imageUrls?.length
     || unit?.passages?.length
-    || transcript
+    || formattedTranscript
     || transcriptTranslation,
   );
   const filterKey = FILTERS.find(([value]) => value === filter)?.[1] || "all";
@@ -384,9 +386,9 @@ function FullTestReview() {
                     imageUrls={unit.imageUrls || []}
                   />
 
-                  {transcript && (
+                  {formattedTranscript && (
                     <ReviewTogglePanel title={t("transcript")} icon="▤" tone="sky">
-                      <p className="whitespace-pre-wrap">{transcript}</p>
+                      <p className="whitespace-pre-wrap">{formattedTranscript}</p>
                     </ReviewTogglePanel>
                   )}
 

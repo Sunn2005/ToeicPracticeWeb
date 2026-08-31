@@ -26,3 +26,28 @@ export function getReviewParagraphs(value) {
     .map((paragraph) => paragraph.trim())
     .filter(Boolean);
 }
+
+export function formatListeningTranscript(value, partNumber) {
+  if (!value || !value.trim()) {
+    return "";
+  }
+
+  let formatted = value
+    .replace(/\r\n?/g, "\n")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n[ \t]+/g, "\n");
+
+  if (partNumber === 3) {
+    formatted = formatted.replace(
+      /[ \t\n]+(?=(?:W|M)\d?:\s)/g,
+      "\n\n",
+    );
+  } else if (partNumber === 4) {
+    formatted = formatted.replace(
+      /([.!?]["']?)[ \t]+(?=[A-Z])/g,
+      "$1\n\n",
+    );
+  }
+
+  return formatted.replace(/\n{3,}/g, "\n\n").trim();
+}

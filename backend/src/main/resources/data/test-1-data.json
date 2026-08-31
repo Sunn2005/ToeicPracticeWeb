@@ -1288,7 +1288,7 @@
           "questionRange": "32-34",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-32-34.mp3",
           "imageUrl": null,
-          "transcript": "W: Hey, Oliver. Did you see the focus group results for our new spicy cheddar cheese? Everyone really liked it. M: Yes. It should be a great addition to our company's line of cheeses. W: Several people mentioned that they'd like to use it in recipes-to add to sauces, for example. M: So maybe we should consider selling a shredded version that would melt easily when cooked. W: I'm sure we could do that. I'll get in touch with the production manager with that request.",
+          "transcript": "W: Hey, Oliver. Did you see the focus group results for our new spicy cheddar cheese? Everyone really liked it.\n\nM: Yes. It should be a great addition to our company's line of cheeses.\n\nW: Several people mentioned that they'd like to use it in recipes-to add to sauces, for example.\n\nM: So maybe we should consider selling a shredded version that would melt easily when cooked.\n\nW: I'm sure we could do that. I'll get in touch with the production manager with that request.",
           "questions": [
             {
               "questionNumber": 32,
@@ -1397,7 +1397,7 @@
           "questionRange": "35-37",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-35-37.mp3",
           "imageUrl": null,
-          "transcript": "M: Hi. I'm calling to book three tickets for this Thursday's tennis match. Are there any seats left? W: Just a few! Tickets for Thursday's match have been selling quickly. M: I'm not surprised! After all, Ife Rotimi won the regional championship tournament last month. Everyone wants to see her play after her incredible performance. W: Well, there's only one group of three seats together. Advance payment is required to hold them.",
+          "transcript": "M: Hi. I'm calling to book three tickets for this Thursday's tennis match. Are there any seats left?\n\nW: Just a few! Tickets for Thursday's match have been selling quickly.\n\nM: I'm not surprised! After all, Ife Rotimi won the regional championship tournament last month. Everyone wants to see her play after her incredible performance.\n\nW: Well, there's only one group of three seats together. Advance payment is required to hold them.",
           "questions": [
             {
               "questionNumber": 35,
@@ -1506,7 +1506,7 @@
           "questionRange": "38-40",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-38-40.mp3",
           "imageUrl": null,
-          "transcript": "W: Thanks for agreeing to help me organize the library's annual fund-raising dinner, Klaus. We hope the event brings in enough money to expand our children's book section. M: What task would you like me to start with? W: Well, I could use some help sending out the invitations. M: OK, I can take care of that. Is there a list of attendees available? W: It's in my computer files. I'll e-mail it to you.",
+          "transcript": "W: Thanks for agreeing to help me organize the library's annual fund-raising dinner, Klaus. We hope the event brings in enough money to expand our children's book section.\n\nM: What task would you like me to start with?\n\nW: Well, I could use some help sending out the invitations.\n\nM: OK, I can take care of that. Is there a list of attendees available?\n\nW: It's in my computer files. I'll e-mail it to you.",
           "questions": [
             {
               "questionNumber": 38,
@@ -1615,7 +1615,7 @@
           "questionRange": "41-43",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-41-43.mp3",
           "imageUrl": null,
-          "transcript": "W: Hey, Brian and Matteo. I found some great pens to give away at the community festival to promote our business. M1: Great. Can we put our cleaning service logo on them? W: Yes, for no extra charge. And they're biodegradable. They're made from paper. M2: So when we hand them out, we can mention that. M1: As well as talk about the organic cleaning supplies our company uses. W: OK. I'll go ahead and order several cases.",
+          "transcript": "W: Hey, Brian and Matteo. I found some great pens to give away at the community festival to promote our business.\n\nM1: Great. Can we put our cleaning service logo on them?\n\nW: Yes, for no extra charge. And they're biodegradable. They're made from paper.\n\nM2: So when we hand them out, we can mention that.\n\nM1: As well as talk about the organic cleaning supplies our company uses.\n\nW: OK. I'll go ahead and order several cases.",
           "questions": [
             {
               "questionNumber": 41,
@@ -1724,7 +1724,7 @@
           "questionRange": "44-46",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-44-46.mp3",
           "imageUrl": null,
-          "transcript": "W: Jamestown Recycling Facility. How can I help you? M: Hi. I'm preparing to move soon, and I have some electronics, such as televisions and computers, that I'd like to get rid of before I put my house on the market. W: Yes, that's right. We'll take all electronics. M: Great. I just have one question. Do you provide a pickup service? W: No, unfortunately you'll have to bring everything here yourself. However, on our Web site we list a number of companies that can remove and dispose of the items for you.",
+          "transcript": "W: Jamestown Recycling Facility. How can I help you?\n\nM: Hi. I'm preparing to move soon, and I have some electronics, such as televisions and computers, that I'd like to get rid of before I put my house on the market.\n\nW: Yes, that's right. We'll take all electronics.\n\nM: Great. I just have one question. Do you provide a pickup service?\n\nW: No, unfortunately you'll have to bring everything here yourself. However, on our Web site we list a number of companies that can remove and dispose of the items for you.",
           "questions": [
             {
               "questionNumber": 44,
@@ -1833,7 +1833,7 @@
           "questionRange": "47-49",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-47-49.mp3",
           "imageUrl": null,
-          "transcript": "M: Zaina! What a surprise! I haven't seen you since we took that class for business owners together last year. W: Great, thanks. I was just in the neighborhood and thought I'd stop in for a cookie or a piece of cake. You have so many delicious baked goods here. M: Thank you! It's been a good year for business. I'm even considering opening a second location. W: Really? Well, I noticed that Sunnyvale Restaurant went out of business, and the building's up for lease. It's very close to the local university.",
+          "transcript": "M: Zaina! What a surprise! I haven't seen you since we took that class for business owners together last year.\n\nW: Great, thanks. I was just in the neighborhood and thought I'd stop in for a cookie or a piece of cake. You have so many delicious baked goods here.\n\nM: Thank you! It's been a good year for business. I'm even considering opening a second location.\n\nW: Really? Well, I noticed that Sunnyvale Restaurant went out of business, and the building's up for lease. It's very close to the local university.",
           "questions": [
             {
               "questionNumber": 47,
@@ -1942,7 +1942,7 @@
           "questionRange": "50-52",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-50-52.mp3",
           "imageUrl": null,
-          "transcript": "W: Hi, Koji. I think our new video game is nearly ready to be released. Are you aware of any improvements that need to be made before then? M: Actually, I just finished testing the game this morning. I found a problem in the third stage of the game. There were a few times when my character couldn't move. W: Oh, that's strange! M: I double-checked the problem using a different controller. The same issue came up. W: Oh. I think Pauline had a similar problem with a game she tested. Maybe you should ask her about it.",
+          "transcript": "W: Hi, Koji. I think our new video game is nearly ready to be released. Are you aware of any improvements that need to be made before then?\n\nM: Actually, I just finished testing the game this morning. I found a problem in the third stage of the game. There were a few times when my character couldn't move.\n\nW: Oh, that's strange!\n\nM: I double-checked the problem using a different controller. The same issue came up.\n\nW: Oh. I think Pauline had a similar problem with a game she tested. Maybe you should ask her about it.",
           "questions": [
             {
               "questionNumber": 50,
@@ -2051,7 +2051,7 @@
           "questionRange": "53-55",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-53-55.mp3",
           "imageUrl": null,
-          "transcript": "M: You've reached the maintenance office at Hillview Apartment Complex. W: Hi. This is Palavi Sen from unit 35B. I'm calling because the new thermostat in my apartment isn't working. It keeps shutting off and turning on randomly, so my apartment is getting cold. M: When did this issue start? W: A few hours ago. The thermostat was just installed yesterday. M: OK. I can come and take a look at it tomorrow morning. W: But it's supposed to be below freezing tonight!",
+          "transcript": "M: You've reached the maintenance office at Hillview Apartment Complex.\n\nW: Hi. This is Palavi Sen from unit 35B. I'm calling because the new thermostat in my apartment isn't working. It keeps shutting off and turning on randomly, so my apartment is getting cold.\n\nM: When did this issue start?\n\nW: A few hours ago. The thermostat was just installed yesterday.\n\nM: OK. I can come and take a look at it tomorrow morning.\n\nW: But it's supposed to be below freezing tonight!",
           "questions": [
             {
               "questionNumber": 53,
@@ -2160,7 +2160,7 @@
           "questionRange": "56-58",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-56-58.mp3",
           "imageUrl": null,
-          "transcript": "W: Good morning! Welcome to Jasper Bank. M1: Thanks for meeting with us to discuss a loan for our business. W: Why don't you tell me more about your business? I understand it's a repair shop? M2: Well, ten years ago, we opened as a snowmobile repair shop, but after a few years, we also started renting out snowmobiles and other sports equipment. M1: Yes, and because winter tourism has increased recently, we'd like to expand our space so that we can carry more inventory.",
+          "transcript": "W: Good morning! Welcome to Jasper Bank.\n\nM1: Thanks for meeting with us to discuss a loan for our business.\n\nW: Why don't you tell me more about your business? I understand it's a repair shop?\n\nM2: Well, ten years ago, we opened as a snowmobile repair shop, but after a few years, we also started renting out snowmobiles and other sports equipment.\n\nM1: Yes, and because winter tourism has increased recently, we'd like to expand our space so that we can carry more inventory.",
           "questions": [
             {
               "questionNumber": 56,
@@ -2269,7 +2269,7 @@
           "questionRange": "59-61",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-59-61.mp3",
           "imageUrl": null,
-          "transcript": "M: Many of our factory workers have expressed interest in upgrading their skills. I'd like to implement a peer-training program, where learners shadow more-experienced employees and observe how they do their jobs. W: I'm afraid that might become a burden for our long-time employees. They'll have to slow down their work to explain what they're doing. M: What if we videotaped experienced employees doing specific tasks? High-quality video can be recorded and edited with a smartphone. W: I like that idea. It would allow us to capture our workers' expertise without slowing down the production line.",
+          "transcript": "M: Many of our factory workers have expressed interest in upgrading their skills. I'd like to implement a peer-training program, where learners shadow more-experienced employees and observe how they do their jobs.\n\nW: I'm afraid that might become a burden for our long-time employees. They'll have to slow down their work to explain what they're doing.\n\nM: What if we videotaped experienced employees doing specific tasks? High-quality video can be recorded and edited with a smartphone.\n\nW: I like that idea. It would allow us to capture our workers' expertise without slowing down the production line.",
           "questions": [
             {
               "questionNumber": 59,
@@ -2378,7 +2378,7 @@
           "questionRange": "62-64",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-62-64.mp3",
           "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/picture/T01-P3-62-64.png",
-          "transcript": "W: Hi, Suresh, I'm at the airport waiting for my flight. I want to meet with a potential investor while I'm in Chicago. Her name's Marta Gomez. M: OK. Which day would you prefer to meet with her? W: How about right after my meeting with the Chicago staff? M: OK. By the way, did you see that our company won an award for our contributions to the community? It was just announced this morning.",
+          "transcript": "W: Hi, Suresh, I'm at the airport waiting for my flight. I want to meet with a potential investor while I'm in Chicago. Her name's Marta Gomez.\n\nM: OK. Which day would you prefer to meet with her?\n\nW: How about right after my meeting with the Chicago staff?\n\nM: OK. By the way, did you see that our company won an award for our contributions to the community? It was just announced this morning.",
           "questions": [
             {
               "questionNumber": 62,
@@ -2487,7 +2487,7 @@
           "questionRange": "65-67",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-65-67.mp3",
           "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/picture/T01-P3-65-67.png",
-          "transcript": "M: Marion, we keep getting calls from people who want to visit the botanical garden but can't find parking information. Isn't it on our Web site? W: It is, but you have to click on the \"About Us\" page and scroll to the bottom of that page. Maybe people don't see it. M: Oh, I think we should move that information from the \"About Us\" page and make a separate page for directions and parking information. W: I'd be happy to make that change. But we're in the middle of updating our software, so it'll have to wait until Monday.",
+          "transcript": "M: Marion, we keep getting calls from people who want to visit the botanical garden but can't find parking information. Isn't it on our Web site?\n\nW: It is, but you have to click on the \"About Us\" page and scroll to the bottom of that page. Maybe people don't see it.\n\nM: Oh, I think we should move that information from the \"About Us\" page and make a separate page for directions and parking information.\n\nW: I'd be happy to make that change. But we're in the middle of updating our software, so it'll have to wait until Monday.",
           "questions": [
             {
               "questionNumber": 65,
@@ -2596,7 +2596,7 @@
           "questionRange": "68-70",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-68-70.mp3",
           "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/picture/T01-P3-68-70.png",
-          "transcript": "M: Good news! We have finally received the go-ahead for our department's project to install bicycle racks at the train station downtown. W: At last! So, now we need to decide where to place the racks. How about by the station entrance? M: Hmm. If we asked riders, I bet they'd say that the most convenient spot is as close to the platform as possible. W: Let's do that. I'll contact some companies for estimates.",
+          "transcript": "M: Good news! We have finally received the go-ahead for our department's project to install bicycle racks at the train station downtown.\n\nW: At last! So, now we need to decide where to place the racks. How about by the station entrance?\n\nM: Hmm. If we asked riders, I bet they'd say that the most convenient spot is as close to the platform as possible.\n\nW: Let's do that. I'll contact some companies for estimates.",
           "questions": [
             {
               "questionNumber": 68,
@@ -2711,7 +2711,7 @@
           "questionRange": "71-73",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-71-73.mp3",
           "imageUrl": null,
-          "transcript": "You've reached Select Repair Service. We specialize in all makes and models of automobiles. Our factory-trained specialists will keep your vehicle running in top condition. As an added benefit, we offer extended warranties on all vehicles we service. Please note that Select Repair Service will be closing on Friday, June 30, so we can complete our quarterly inventory of supplies.",
+          "transcript": "You've reached Select Repair Service.\n\nWe specialize in all makes and models of automobiles.\n\nOur factory-trained specialists will keep your vehicle running in top condition.\n\nAs an added benefit, we offer extended warranties on all vehicles we service.\n\nPlease note that Select Repair Service will be closing on Friday, June 30, so we can complete our quarterly inventory of supplies.",
           "questions": [
             {
               "questionNumber": 71,
@@ -2820,7 +2820,7 @@
           "questionRange": "74-76",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-74-76.mp3",
           "imageUrl": null,
-          "transcript": "Welcome, new employees! My name is Diego, and I facilitate all orientation sessions. Before we start today, you will need to set up your employee account. If you look at the first page of your training binder, you'll see your username and a temporary password. Once that's complete, you'll have access to all your department's files. Please note that you can only access them from your company computer.",
+          "transcript": "Welcome, new employees!\n\nMy name is Diego, and I facilitate all orientation sessions.\n\nBefore we start today, you will need to set up your employee account.\n\nIf you look at the first page of your training binder, you'll see your username and a temporary password.\n\nOnce that's complete, you'll have access to all your department's files.\n\nPlease note that you can only access them from your company computer.",
           "questions": [
             {
               "questionNumber": 74,
@@ -2929,7 +2929,7 @@
           "questionRange": "77-79",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-77-79.mp3",
           "imageUrl": null,
-          "transcript": "Hello. This is Heather Ross calling from Denville Amusement Park. About a month ago, I ordered one of your new video-game machines, Space Defenders. I'm really happy with my purchase, since the game has been incredibly popular with our park guests! I heard you may be releasing a new game soon. Could you call me back and let me know if that's true?",
+          "transcript": "Hello.\n\nThis is Heather Ross calling from Denville Amusement Park.\n\nAbout a month ago, I ordered one of your new video-game machines, Space Defenders.\n\nI'm really happy with my purchase, since the game has been incredibly popular with our park guests!\n\nI heard you may be releasing a new game soon.\n\nCould you call me back and let me know if that's true?",
           "questions": [
             {
               "questionNumber": 77,
@@ -3038,7 +3038,7 @@
           "questionRange": "80-82",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-80-82.mp3",
           "imageUrl": null,
-          "transcript": "The first agenda item for our board meeting is the annual sales report. We're all disappointed by the drop in our clothing sales. So I'm recommending that we start manufacturing some clothing locally. I hired a consultant to put together a list of locations we could use. He'll be at our next board meeting to explain the pros and cons of each.",
+          "transcript": "The first agenda item for our board meeting is the annual sales report.\n\nWe're all disappointed by the drop in our clothing sales.\n\nSo I'm recommending that we start manufacturing some clothing locally.\n\nI hired a consultant to put together a list of locations we could use.\n\nHe'll be at our next board meeting to explain the pros and cons of each.",
           "questions": [
             {
               "questionNumber": 80,
@@ -3147,7 +3147,7 @@
           "questionRange": "83-85",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-83-85.mp3",
           "imageUrl": null,
-          "transcript": "Attention, passengers. All trains to Midway Station are delayed for track repairs. They expect to complete the repair within the hour. A bus will be departing for that destination in fifteen minutes. Also, a reminder that the station café opens at eight A.M., and there are food kiosks on platform one.",
+          "transcript": "Attention, passengers.\n\nAll trains to Midway Station are delayed for track repairs.\n\nThey expect to complete the repair within the hour.\n\nA bus will be departing for that destination in fifteen minutes.\n\nAlso, a reminder that the station café opens at eight A.M., and there are food kiosks on platform one.",
           "questions": [
             {
               "questionNumber": 83,
@@ -3256,7 +3256,7 @@
           "questionRange": "86-88",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-86-88.mp3",
           "imageUrl": null,
-          "transcript": "I'm calling about the work my design team's doing to update your company logo. I've just e-mailed two versions for you to review. Take your time to think about which one you'd like to choose. I'll be on vacation all next week, but if you call the office, my assistant will set up a meeting for when I get back.",
+          "transcript": "I'm calling about the work my design team's doing to update your company logo.\n\nI've just e-mailed two versions for you to review.\n\nTake your time to think about which one you'd like to choose.\n\nI'll be on vacation all next week, but if you call the office, my assistant will set up a meeting for when I get back.",
           "questions": [
             {
               "questionNumber": 86,
@@ -3365,7 +3365,7 @@
           "questionRange": "89-91",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-89-91.mp3",
           "imageUrl": null,
-          "transcript": "I've scheduled this press conference to officially respond to your inquiries regarding fuel-efficient engines. We hired a firm to determine if this upgrade would be feasible for our trains. It reported that the upgrade would be economical only for trains less than five years old. All of ours are at least ten years old. If you're interested in more details, e-mail our media relations department to receive a summary of the findings.",
+          "transcript": "I've scheduled this press conference to officially respond to your inquiries regarding fuel-efficient engines.\n\nWe hired a firm to determine if this upgrade would be feasible for our trains.\n\nIt reported that the upgrade would be economical only for trains less than five years old.\n\nAll of ours are at least ten years old.\n\nIf you're interested in more details, e-mail our media relations department to receive a summary of the findings.",
           "questions": [
             {
               "questionNumber": 89,
@@ -3474,7 +3474,7 @@
           "questionRange": "92-94",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-92-94.mp3",
           "imageUrl": null,
-          "transcript": "I want to explore the use of a more modernized payment system in our cosmetics stores. This system would allow any sales associate to take customer payments from a tablet anywhere in the store. The main complaint about shopping at our stores is waiting in long lines to pay. I've decided to conduct a trial run at our store in the Center City Mall.",
+          "transcript": "I want to explore the use of a more modernized payment system in our cosmetics stores.\n\nThis system would allow any sales associate to take customer payments from a tablet anywhere in the store.\n\nThe main complaint about shopping at our stores is waiting in long lines to pay.\n\nI've decided to conduct a trial run at our store in the Center City Mall.",
           "questions": [
             {
               "questionNumber": 92,
@@ -3583,7 +3583,7 @@
           "questionRange": "95-97",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-95-97.mp3",
           "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/picture/T01-P4-95-97.png",
-          "transcript": "The downtown Reston Office Tower is completed. The most extraordinary feature of the building is its beautiful garden, located in the lobby. We interviewed the CEO of Barnum Financial Services about its new offices. He said he and his team are excited to move in in January. A recording of the full interview is available on our Web site.",
+          "transcript": "The downtown Reston Office Tower is completed.\n\nThe most extraordinary feature of the building is its beautiful garden, located in the lobby.\n\nWe interviewed the CEO of Barnum Financial Services about its new offices.\n\nHe said he and his team are excited to move in in January.\n\nA recording of the full interview is available on our Web site.",
           "questions": [
             {
               "questionNumber": 95,
@@ -3692,7 +3692,7 @@
           "questionRange": "98-100",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-98-100.mp3",
           "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/picture/T01-P4-98-100.png",
-          "transcript": "Thank you for attending this meeting for prospective investors. ZZ Mining has been planning to expand our operations by opening an additional silver mine. The site with 390 grams per ton has a larger deposit, so that's where we'll build the new mine. Our next step is to apply for the necessary permits. We'll do that next week.",
+          "transcript": "Thank you for attending this meeting for prospective investors.\n\nZZ Mining has been planning to expand our operations by opening an additional silver mine.\n\nThe site with 390 grams per ton has a larger deposit, so that's where we'll build the new mine.\n\nOur next step is to apply for the necessary permits.\n\nWe'll do that next week.",
           "questions": [
             {
               "questionNumber": 98,

@@ -104,7 +104,9 @@ class TestServiceTests {
         assertEquals(23, listeningParts.stream().mapToInt(part -> part.getGroups().size()).sum());
         assertTrue(listeningParts.stream()
                 .flatMap(part -> part.getGroups().stream())
-                .allMatch(group -> group.getTranscriptTranslation() != null
+                .allMatch(group -> group.getTranscript() != null
+                        && group.getTranscript().contains("\n\n")
+                        && group.getTranscriptTranslation() != null
                         && !group.getTranscriptTranslation().isBlank()
                         && group.getTranscriptTranslation().contains("\n\n")));
     }
