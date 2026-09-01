@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { getAttemptDurationSeconds, getAttemptParts, getHistoryStats } from "./attemptHistory.js";
+import {
+  getAttemptDurationSeconds,
+  getAttemptParts,
+  getHistoryStats,
+  getSubmittedAttempts,
+} from "./attemptHistory.js";
 
 test("resolves selected Parts for every attempt mode", () => {
   assert.deepEqual(getAttemptParts({ selectedParts: [2, 5] }), [2, 5]);
@@ -33,4 +38,15 @@ test("calculates attempt duration and dashboard history statistics", () => {
     accuracy: 75,
     streak: 1,
   });
+});
+
+test("keeps only submitted attempts in history", () => {
+  const completed = { id: "completed", status: "COMPLETED" };
+  const attempts = [
+    { id: "in-progress", status: "IN_PROGRESS" },
+    completed,
+  ];
+
+  assert.deepEqual(getSubmittedAttempts(attempts), [completed]);
+  assert.deepEqual(getSubmittedAttempts(null), []);
 });

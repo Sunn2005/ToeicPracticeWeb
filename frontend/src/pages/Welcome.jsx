@@ -10,7 +10,7 @@ import LanguageSwitcher from "../components/LanguageSwitcher";
 import { useLanguage } from "../i18n/LanguageContext";
 import AttemptHistoryDrawer from "../components/AttemptHistoryDrawer";
 import { deleteAttempt, getAttemptHistory } from "../api/userLearning";
-import { getHistoryStats } from "../utils/attemptHistory";
+import { getHistoryStats, getSubmittedAttempts } from "../utils/attemptHistory";
 
 function UserAvatar({ user, displayName, size = "large" }) {
   const sizeClasses =
@@ -83,7 +83,7 @@ function Welcome({ user }) {
     let active = true;
     getAttemptHistory()
       .then((history) => {
-        if (active) setAttempts(Array.isArray(history) ? history : []);
+        if (active) setAttempts(getSubmittedAttempts(history));
       })
       .catch((requestError) => {
         if (active) setHistoryError(requestError.message || t("historyLoadError"));
@@ -139,12 +139,7 @@ function Welcome({ user }) {
     setHistoryError("");
 
     try {
-      if (attempt.status !== "COMPLETED") {
-        await apiFetch(`/api/attempts/${attempt.id}/submit-for-review`, {
-          method: "POST",
-          forceRefresh: true,
-        });
-      }
+      if (attempt.status !== "COMPLETED") return;
 
       const query = filter ? `?filter=${filter}` : "";
       navigate(`/full-test/${attempt.id}/review${query}`);

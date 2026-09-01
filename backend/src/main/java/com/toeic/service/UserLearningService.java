@@ -26,7 +26,9 @@ public class UserLearningService {
     }
 
     public List<Map<String, Object>> getAttempts(String userId) throws Exception {
-        List<Attempt> attempts = new ArrayList<>(attemptDao.findByUserId(userId));
+        List<Attempt> attempts = new ArrayList<>(attemptDao.findByUserId(userId).stream()
+                .filter(attempt -> "COMPLETED".equals(attempt.getStatus()))
+                .toList());
         attempts.sort(Comparator.comparing(
                 Attempt::getStartedAt,
                 Comparator.nullsLast(Comparator.reverseOrder())

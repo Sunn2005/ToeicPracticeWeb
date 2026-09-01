@@ -12,6 +12,11 @@ export function getAttemptDurationSeconds(attempt) {
   return Math.max(0, Math.round((endedAt - startedAt) / 1000));
 }
 
+export function getSubmittedAttempts(attempts) {
+  return (Array.isArray(attempts) ? attempts : [])
+    .filter((attempt) => attempt.status === "COMPLETED");
+}
+
 export function getHistoryStats(attempts) {
   const completed = attempts.filter((attempt) => attempt.status === "COMPLETED");
   const totalCorrect = completed.reduce(

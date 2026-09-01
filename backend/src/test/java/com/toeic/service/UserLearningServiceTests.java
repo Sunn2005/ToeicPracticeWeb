@@ -59,11 +59,35 @@ class UserLearningServiceTests {
         Attempt attempt = new Attempt();
         attempt.setId("practice-1");
         attempt.setType("PRACTICE");
+        attempt.setStatus("COMPLETED");
         attempt.setStartedAt(100L);
         when(attemptDao.findByUserId("user-1")).thenReturn(List.of(attempt));
 
         List<Map<String, Object>> history = service.getAttempts("user-1");
 
         assertEquals("PRACTICE", history.getFirst().get("type"));
+    }
+
+    @Test
+    void includesOnlySubmittedAttemptsInHistory() throws Exception {
+        AttemptDao attemptDao = mock(AttemptDao.class);
+        UserLearningService service = new UserLearningService(attemptDao);
+
+        Attempt submitted = new Attempt();
+        submitted.setId("submitted-1");
+        submitted.setStatus("COMPLETED");
+        submitted.setStartedAt(100L);
+
+        Attempt unfinished = new Attempt();
+        unfinished.setId("unfinished-1");
+        unfinished.setStatus("IN_PROGRESS");
+        unfinished.setStartedAt(200L);
+
+        when(attemptDao.findByUserId("user-1")).thenReturn(List.of(unfinished, submitted));
+
+        List<Map<String, Object>> history = service.getAttempts("user-1");
+
+        assertEquals(1, history.size());
+        assertEquals("submitted-1", history.getFirst().get("id"));
     }
 }
