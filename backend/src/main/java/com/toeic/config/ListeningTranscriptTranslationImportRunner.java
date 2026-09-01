@@ -44,7 +44,7 @@ public class ListeningTranscriptTranslationImportRunner implements CommandLineRu
     public ListeningTranscriptTranslationImportRunner(
             Firestore firestore,
             ObjectMapper objectMapper,
-            @Value("${app.toeic-data-resource}") Resource dataResource,
+            @Value("${app.listening-review-text-resource}") Resource dataResource,
             @Value("${app.listening-review-text-test-id:test-1}") String testId
     ) {
         this.firestore = firestore;

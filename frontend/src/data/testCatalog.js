@@ -13,7 +13,7 @@ export const TOEIC_TESTS = [
     title: "TOEIC Listening & Reading – Test 2",
     totalQuestions: 200,
     duration: 120,
-    available: false,
+    available: true,
   },
   {
     id: "test-3",
@@ -21,9 +21,17 @@ export const TOEIC_TESTS = [
     title: "TOEIC Listening & Reading – Test 3",
     totalQuestions: 200,
     duration: 120,
-    available: false,
+    available: true,
   },
 ];
+
+export function getTestName(testId) {
+  return TOEIC_TESTS.find((test) => test.id === testId)?.name || testId || "TOEIC Test";
+}
+
+export function getTestTitle(testId) {
+  return TOEIC_TESTS.find((test) => test.id === testId)?.title || getTestName(testId);
+}
 
 export const TOEIC_PARTS = [
   { part: 1, section: "LISTENING", questions: 6 },

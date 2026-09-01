@@ -4,6 +4,7 @@ import { apiFetch } from "../api/client";
 import { formatDuration } from "../utils/testData";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import { useLanguage } from "../i18n/LanguageContext";
+import { getTestName } from "../data/testCatalog";
 
 function Metric({ label, value, tone = "slate" }) {
   const tones = {
@@ -56,6 +57,7 @@ function FullTestResult() {
     : result?.selectedPart
       ? [result.selectedPart]
       : [];
+  const testName = getTestName(result?.testId);
   const modeTitle =
     result?.type === "PRACTICE"
       ? `${t("practiceMode")} · ${t("part")} ${selectedParts.join(" + ")}`
@@ -65,7 +67,7 @@ function FullTestResult() {
           ? t("listeningTest")
           : resultMode === "READING"
             ? t("readingTest")
-            : `${t("part")} ${selectedParts.join(" + ")} - Test 1`;
+            : `${t("part")} ${selectedParts.join(" + ")}`;
   const maxScore = resultMode === "FULL" || (listeningTotal > 0 && readingTotal > 0) ? 990 : 495;
 
   return (
@@ -82,7 +84,7 @@ function FullTestResult() {
           <>
             <section className="overflow-hidden rounded-4xl bg-white shadow-2xl shadow-sky-100">
               <div className="bg-slate-950 px-6 py-8 text-white sm:px-10">
-                <p className="text-sm font-bold uppercase tracking-[0.2em] text-sky-300">{modeTitle} · {t("testResults")}</p>
+                <p className="text-sm font-bold uppercase tracking-[0.2em] text-sky-300">{testName} · {modeTitle} · {t("testResults")}</p>
                 <div className="mt-4 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
                   <div>
                     <h1 className="text-3xl font-bold sm:text-4xl">{t("completedTest")}</h1>

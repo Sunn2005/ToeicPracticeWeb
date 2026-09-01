@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ApiError, apiFetch, publicApiFetch } from "../api/client";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import { useLanguage } from "../i18n/LanguageContext";
+import { getTestName, getTestTitle } from "../data/testCatalog";
 
 function FullTestIntro() {
   const { t } = useLanguage();
@@ -107,10 +108,10 @@ function FullTestIntro() {
         <section className="overflow-hidden rounded-4xl border border-white bg-white/90 shadow-2xl shadow-sky-100/80">
           <div className="bg-linear-to-r from-sky-500 to-cyan-500 px-6 py-8 text-white sm:px-10 sm:py-10">
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-sky-100">
-              {t("fullTestLabel")}
+              {t("fullTestLabel")} · {getTestName(test?.testId || testId)}
             </p>
             <h1 className="mt-3 max-w-3xl text-3xl font-bold tracking-tight sm:text-4xl">
-              {test?.title || "TOEIC Listening & Reading – Test 1"}
+              {test?.title || getTestTitle(testId)}
             </h1>
             <p className="mt-4 max-w-3xl leading-7 text-sky-50">
               {t("fullTestDescription")}

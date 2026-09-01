@@ -502,6 +502,7 @@ function FullTestExam() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <ExamHeader
+        testId={payload.test?.testId || attempt.testId}
         section={attempt.currentSection}
         type={attempt.type}
         mode={attempt.mode}

@@ -2,8 +2,10 @@ import { formatClock } from "../utils/testData";
 import { TIMER_TYPES } from "../config/examTiming";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useLanguage } from "../i18n/LanguageContext";
+import { getTestName } from "../data/testCatalog";
 
 function ExamHeader({
+  testId,
   section,
   type,
   mode,
@@ -32,7 +34,7 @@ function ExamHeader({
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
       <div className="flex w-full items-center justify-between gap-3 px-3 py-2.5 sm:px-5 lg:px-6">
         <div className="min-w-0">
-          <p className="truncate text-sm font-bold text-slate-950">Test 1 · {modeLabel}</p>
+          <p className="truncate text-sm font-bold text-slate-950">{getTestName(testId)} · {modeLabel}</p>
           <p className="truncate text-xs font-medium text-slate-500">
             {section === "LISTENING" ? t("listening") : t("reading")} · {t("questions")} {firstQuestion}–{lastQuestion}
           </p>
