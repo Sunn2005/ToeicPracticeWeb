@@ -13,6 +13,7 @@ import LanguageSwitcher from "../components/LanguageSwitcher";
 import { useLanguage } from "../i18n/LanguageContext";
 import { deleteAttempt } from "../api/userLearning";
 import { getTestName } from "../data/testCatalog";
+import { useAIExplanationJobs } from "../hooks/useAIExplanationJobs";
 
 const FILTERS = [
   ["ALL", "all"],
@@ -138,6 +139,7 @@ function ReviewAudio({ src }) {
 
 function FullTestReview() {
   const { t } = useLanguage();
+  const { feedbackByQuestion, requestExplanation } = useAIExplanationJobs();
   const { attemptId } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -422,6 +424,9 @@ function FullTestReview() {
                         review
                         compact
                         isFocused={item.questionNumber === question.questionNumber}
+                        showAiFeedback={item.questionNumber >= 101 && item.questionNumber <= 130}
+                        aiFeedback={feedbackByQuestion[item.questionNumber]}
+                        onRequestAiFeedback={() => requestExplanation(item)}
                       />
                     ))}
                   </div>

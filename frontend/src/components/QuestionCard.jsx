@@ -1,6 +1,7 @@
 import { getReviewParagraphs } from "../utils/reviewContent";
 import ReviewTogglePanel from "./ReviewTogglePanel";
 import { useLanguage } from "../i18n/LanguageContext";
+import AIExplanationPanel from "./AIExplanationPanel";
 
 function ReviewContent({ children }) {
   if (typeof children !== "string") return null;
@@ -41,6 +42,9 @@ function QuestionCard({
   isFocused = false,
   compact = false,
   review = false,
+  showAiFeedback = false,
+  aiFeedback,
+  onRequestAiFeedback,
 }) {
   const { t } = useLanguage();
   const questionTranslation =
@@ -173,6 +177,12 @@ function QuestionCard({
               </ReviewContent>
             </div>
           </ReviewTogglePanel>
+          {showAiFeedback && (
+            <AIExplanationPanel
+              feedback={aiFeedback}
+              onRequest={onRequestAiFeedback}
+            />
+          )}
         </div>
       )}
     </article>
