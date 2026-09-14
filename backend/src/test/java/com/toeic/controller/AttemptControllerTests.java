@@ -1,67 +1,39 @@
 package com.toeic.controller;
 
 import com.toeic.dto.CreateAttemptRequest;
+import com.toeic.model.enums.UserRole;
+import com.toeic.security.ToeicUserPrincipal;
 import com.toeic.service.AttemptService;
-import com.toeic.service.FirebaseAuthenticationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 class AttemptControllerTests {
 
-    private FirebaseAuthenticationService authenticationService;
     private AttemptService attemptService;
     private AttemptController controller;
+    private ToeicUserPrincipal principal;
 
     @BeforeEach
     void setUp() {
-        authenticationService = mock(FirebaseAuthenticationService.class);
         attemptService = mock(AttemptService.class);
-        controller = new AttemptController(authenticationService, attemptService);
-    }
-
-    @Test
-    void returnsUnauthorizedWhenAuthorizationHeaderIsMissing() {
-        when(authenticationService.requireUid(null)).thenThrow(
-                new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Thiếu Authorization header")
+        controller = new AttemptController(attemptService);
+        principal = new ToeicUserPrincipal(
+                "firebase-uid-123",
+                "user@example.com",
+                "User",
+                null,
+                UserRole.USER,
+                1L,
+                1L
         );
-
-        ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> controller.createAttempt(new CreateAttemptRequest("test-1"), null)
-        );
-
-        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatusCode());
-        verifyNoInteractions(attemptService);
-    }
-
-    @Test
-    void returnsUnauthorizedWhenBearerTokenIsInvalid() {
-        when(authenticationService.requireUid("Bearer invalid-token")).thenThrow(
-                new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Firebase ID token không hợp lệ")
-        );
-
-        ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> controller.createAttempt(
-                        new CreateAttemptRequest("test-1"),
-                        "Bearer invalid-token"
-                )
-        );
-
-        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatusCode());
-        verifyNoInteractions(attemptService);
     }
 
     @Test
@@ -72,8 +44,6 @@ class AttemptControllerTests {
                 "testId", "test-1",
                 "status", "IN_PROGRESS"
         );
-        when(authenticationService.requireUid("Bearer firebase-id-token"))
-                .thenReturn("firebase-uid-123");
         when(attemptService.createOrResume(
                 "firebase-uid-123", "test-1", null, null, null, null, null
         ))
@@ -81,7 +51,7 @@ class AttemptControllerTests {
 
         Map<String, Object> result = controller.createAttempt(
                 new CreateAttemptRequest("test-1"),
-                "Bearer firebase-id-token"
+                principal
         );
 
         assertEquals(expected, result);
@@ -102,8 +72,6 @@ class AttemptControllerTests {
                 "mode", "PART",
                 "selectedPart", 6
         );
-        when(authenticationService.requireUid("Bearer firebase-id-token"))
-                .thenReturn("firebase-uid-123");
         when(attemptService.createOrResume(
                 "firebase-uid-123", "test-1", "PART", 6, null, null, null
         ))
@@ -111,7 +79,7 @@ class AttemptControllerTests {
 
         Map<String, Object> result = controller.createAttempt(
                 request,
-                "Bearer firebase-id-token"
+                principal
         );
 
         assertEquals(expected, result);
@@ -131,8 +99,6 @@ class AttemptControllerTests {
                 "id", "attempt-parts-5-6",
                 "selectedParts", List.of(5, 6)
         );
-        when(authenticationService.requireUid("Bearer firebase-id-token"))
-                .thenReturn("firebase-uid-123");
         when(attemptService.createOrResume(
                 "firebase-uid-123",
                 "test-1",
@@ -143,7 +109,7 @@ class AttemptControllerTests {
                 null
         )).thenReturn(expected);
 
-        Map<String, Object> result = controller.createAttempt(request, "Bearer firebase-id-token");
+        Map<String, Object> result = controller.createAttempt(request, principal);
 
         assertEquals(expected, result);
         verify(attemptService).createOrResume(
@@ -163,14 +129,12 @@ class AttemptControllerTests {
                 "attemptId", "attempt-123",
                 "totalCorrect", 4
         );
-        when(authenticationService.requireUid("Bearer firebase-id-token"))
-                .thenReturn("firebase-uid-123");
         when(attemptService.submitForReview("firebase-uid-123", "attempt-123"))
                 .thenReturn(expected);
 
         Map<String, Object> result = controller.submitForReview(
                 "attempt-123",
-                "Bearer firebase-id-token"
+                principal
         );
 
         assertEquals(expected, result);

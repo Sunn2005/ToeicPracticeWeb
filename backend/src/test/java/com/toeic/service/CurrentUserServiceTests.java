@@ -5,13 +5,10 @@ import com.toeic.model.FirebaseIdentity;
 import com.toeic.model.User;
 import com.toeic.model.enums.UserRole;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -25,7 +22,7 @@ class CurrentUserServiceTests {
         UserDao userDao = mock(UserDao.class);
         CurrentUserService service = new CurrentUserService(authenticationService, userDao);
         when(authenticationService.requireIdentity("Bearer token")).thenReturn(
-                new FirebaseIdentity("uid-1", "user@example.com", "User", null, null)
+                new FirebaseIdentity("uid-1", "user@example.com", "User", null, "ADMIN")
         );
         when(userDao.findByUid("uid-1")).thenReturn(Optional.empty());
 
@@ -36,23 +33,21 @@ class CurrentUserServiceTests {
     }
 
     @Test
-    void rejectsAUserWithoutTheRequiredRole() throws Exception {
+    void repairsLegacyProfileWithoutRoleAsUser() throws Exception {
         FirebaseAuthenticationService authenticationService = mock(FirebaseAuthenticationService.class);
         UserDao userDao = mock(UserDao.class);
         CurrentUserService service = new CurrentUserService(authenticationService, userDao);
-        User user = new User();
-        user.setUid("uid-1");
-        user.setRole(UserRole.USER);
+        User legacyUser = new User();
+        legacyUser.setUid("uid-legacy");
         when(authenticationService.requireIdentity("Bearer token")).thenReturn(
-                new FirebaseIdentity("uid-1", null, null, null, null)
+                new FirebaseIdentity("uid-legacy", null, null, null, "ADMIN")
         );
-        when(userDao.findByUid("uid-1")).thenReturn(Optional.of(user));
+        when(userDao.findByUid("uid-legacy")).thenReturn(Optional.of(legacyUser));
 
-        ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
-                () -> service.requireRole("Bearer token", UserRole.ADMIN)
-        );
+        User result = service.requireUser("Bearer token");
 
-        assertEquals(HttpStatus.FORBIDDEN, exception.getStatusCode());
+        assertEquals(UserRole.USER, result.getRole());
+        verify(userDao).save(legacyUser);
     }
+
 }

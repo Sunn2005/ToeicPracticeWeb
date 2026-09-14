@@ -4,14 +4,10 @@ import com.toeic.dao.UserDao;
 import com.toeic.model.FirebaseIdentity;
 import com.toeic.model.User;
 import com.toeic.model.enums.UserRole;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.LinkedHashMap;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 @Service
 public class CurrentUserService {
@@ -32,7 +28,8 @@ public class CurrentUserService {
         User existing = userDao.findByUid(identity.uid()).orElse(null);
         if (existing != null) {
             if (existing.getRole() == null) {
-                existing.setRole(resolveClaimedRole(identity.claimedRole()));
+                existing.setRole(UserRole.USER);
+                userDao.save(existing);
             }
             return existing;
         }
@@ -43,21 +40,12 @@ public class CurrentUserService {
         user.setEmail(identity.email());
         user.setDisplayName(identity.displayName());
         user.setPhotoUrl(identity.photoUrl());
-        user.setRole(resolveClaimedRole(identity.claimedRole()));
+        // Firestore users/{uid}.role là nguồn phân quyền duy nhất. Mọi tài khoản
+        // mới đều bắt đầu với USER; EMPLOYEE/ADMIN phải được cấp bởi quản trị viên.
+        user.setRole(UserRole.USER);
         user.setCreatedAt(now);
         user.setLastLoginAt(now);
         userDao.save(user);
-        return user;
-    }
-
-    public User requireRole(String authorization, UserRole... allowedRoles) throws Exception {
-        User user = requireUser(authorization);
-        if (!Set.of(allowedRoles).contains(user.getRole())) {
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "Bạn không có quyền thực hiện thao tác này"
-            );
-        }
         return user;
     }
 
@@ -73,14 +61,4 @@ public class CurrentUserService {
         return response;
     }
 
-    private UserRole resolveClaimedRole(String claimedRole) {
-        if (claimedRole == null || claimedRole.isBlank()) {
-            return UserRole.USER;
-        }
-        try {
-            return UserRole.valueOf(claimedRole.trim().toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException exception) {
-            return UserRole.USER;
-        }
-    }
 }

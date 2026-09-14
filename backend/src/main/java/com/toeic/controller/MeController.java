@@ -1,11 +1,11 @@
 package com.toeic.controller;
 
-import com.toeic.model.User;
+import com.toeic.security.ToeicUserPrincipal;
 import com.toeic.service.CurrentUserService;
-import org.springframework.http.HttpHeaders;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
@@ -24,10 +24,10 @@ public class MeController {
     }
 
     @GetMapping("/api/me")
+    @PreAuthorize("isAuthenticated()")
     public Map<String, Object> getMe(
-            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization
-    ) throws Exception {
-        User user = currentUserService.requireUser(authorization);
-        return currentUserService.toResponse(user);
+            @AuthenticationPrincipal ToeicUserPrincipal principal
+    ) {
+        return currentUserService.toResponse(principal.toUser());
     }
 }

@@ -165,9 +165,9 @@ Không có username/password mặc định trong repository và không được 
 | `EMPLOYEE` | Tạo, sửa, xóa, preview và gửi đề để duyệt | Gửi email Google cho trưởng nhóm để được cấp quyền |
 | `ADMIN` | Xem hàng đợi, duyệt/từ chối đề và xem lịch sử duyệt | Gửi email Google cho trưởng nhóm để được cấp quyền |
 
-Quyền `EMPLOYEE` và `ADMIN` được backend kiểm tra, không được giả lập bằng cách sửa state hoặc local storage trên frontend.
+Quyền `EMPLOYEE` và `ADMIN` được backend kiểm tra bằng Spring Security, không được giả lập bằng cách sửa state hoặc local storage trên frontend. Firestore `users/{uid}.role` là nguồn role duy nhất.
 
-Sau khi trưởng nhóm thay đổi role, hãy đăng xuất rồi đăng nhập lại để nhận Firebase ID token mới. Nếu vẫn nhận `403`, báo trưởng nhóm kiểm tra custom claim và document người dùng trong Firestore.
+Sau khi trưởng nhóm thay đổi role trong Firestore, tải lại profile bằng `GET /api/me`. Nếu vẫn nhận `403`, báo trưởng nhóm kiểm tra trường `role` trong document `users/{uid}`.
 
 ### Khi thành viên mới không đăng nhập được
 
