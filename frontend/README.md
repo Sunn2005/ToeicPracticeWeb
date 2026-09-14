@@ -303,7 +303,7 @@ const attempt = await apiFetch("/api/tests/test-1/attempts", {
 
 Không tự sao chép logic lấy token vào từng page. Nếu cần thêm endpoint, hãy tạo wrapper trong file tương ứng của thư mục `src/api/`.
 
-Lưu ý: client hiện được tối ưu cho request JSON. Khi Member 3 triển khai upload `multipart/form-data`, cần mở rộng helper để không tự đặt `Content-Type: application/json`; trình duyệt phải tự thêm multipart boundary cho `FormData`.
+Client đã hỗ trợ cả JSON và `FormData`. Khi Member 3 triển khai upload `multipart/form-data`, chỉ cần truyền `FormData` làm body và không tự đặt `Content-Type`; trình duyệt sẽ tự thêm multipart boundary. Không sửa `src/api/client.js` nếu chưa được trưởng nhóm đồng ý.
 
 ### Nhóm endpoint chính
 
@@ -317,6 +317,12 @@ Lưu ý: client hiện được tối ưu cho request JSON. Khi Member 3 triển
 | Admin review | `/api/admin/test-submissions`, `/api/admin/review-history` | `ADMIN` |
 
 ## 10. Phân chia công việc frontend
+
+Quy định ownership, file bị khóa, cách đặt branch, commit và pull request được mô tả đầy đủ tại:
+
+➡️ **[Quy định làm việc nhóm Frontend](TEAM_FRONTEND_ASSIGNMENTS.md)**
+
+Mọi thành viên phải đọc tài liệu này trước khi tạo branch đầu tiên.
 
 ### Member 1 — nền tảng dùng chung
 
@@ -354,7 +360,7 @@ Từ thư mục gốc repository:
 ```bash
 git switch main
 git pull --ff-only origin main
-git switch -c feature/member-2-user-dashboard
+git switch -c feature/m2-user-dashboard
 ```
 
 Sau khi hoàn thành:
@@ -366,9 +372,10 @@ npm test
 npm run build
 cd ..
 git status
-git add frontend/src
-git commit -m "Implement user dashboard"
-git push -u origin feature/member-2-user-dashboard
+git add frontend/src/pages/user frontend/src/components/user frontend/src/components/tests frontend/src/api/userLearning.js
+git diff --cached
+git commit -m "feat(user): implement user dashboard"
+git push -u origin feature/m2-user-dashboard
 ```
 
 Không đưa các file sau vào commit:
