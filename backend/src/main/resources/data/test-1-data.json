@@ -10,6 +10,10 @@
       "questions": [
         {
           "questionNumber": 1,
+          "questionType": "PHOTO_DESCRIPTION",
+          "skillTags": ["PHOTO_SCENE_RECOGNITION","IDENTIFYING_PEOPLE_AND_ACTIONS"],
+          "grammarTags": [],
+          "difficulty": "EASY",
           "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/picture/T01-01.png",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-01.mp3",
           "question": null,
@@ -58,6 +62,10 @@
         },
         {
           "questionNumber": 2,
+          "questionType": "PHOTO_DESCRIPTION",
+          "skillTags": ["PHOTO_SCENE_RECOGNITION","IDENTIFYING_PEOPLE_AND_ACTIONS"],
+          "grammarTags": [],
+          "difficulty": "EASY",
           "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/picture/T01-02.png",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-02.mp3",
           "question": null,
@@ -106,6 +114,10 @@
         },
         {
           "questionNumber": 3,
+          "questionType": "PHOTO_DESCRIPTION",
+          "skillTags": ["PHOTO_SCENE_RECOGNITION","IDENTIFYING_OBJECTS_AND_LOCATIONS"],
+          "grammarTags": [],
+          "difficulty": "MEDIUM",
           "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/picture/T01-03.png",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-03.mp3",
           "question": null,
@@ -154,6 +166,10 @@
         },
         {
           "questionNumber": 4,
+          "questionType": "PHOTO_DESCRIPTION",
+          "skillTags": ["PHOTO_SCENE_RECOGNITION","IDENTIFYING_PEOPLE_AND_OBJECTS"],
+          "grammarTags": [],
+          "difficulty": "EASY",
           "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/picture/T01-04.png",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-04.mp3",
           "question": null,
@@ -202,6 +218,10 @@
         },
         {
           "questionNumber": 5,
+          "questionType": "PHOTO_DESCRIPTION",
+          "skillTags": ["PHOTO_SCENE_RECOGNITION","IDENTIFYING_OBJECTS_AND_LOCATIONS"],
+          "grammarTags": [],
+          "difficulty": "MEDIUM",
           "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/picture/T01-05.png",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-05.mp3",
           "question": null,
@@ -250,6 +270,10 @@
         },
         {
           "questionNumber": 6,
+          "questionType": "PHOTO_DESCRIPTION",
+          "skillTags": ["PHOTO_SCENE_RECOGNITION","IDENTIFYING_OBJECTS_AND_LOCATIONS"],
+          "grammarTags": [],
+          "difficulty": "MEDIUM",
           "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/picture/T01-06.png",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-06.mp3",
           "question": null,
@@ -304,6 +328,10 @@
       "questions": [
         {
           "questionNumber": 7,
+          "questionType": "WH_QUESTION",
+          "skillTags": ["IDENTIFYING_QUESTION_FOCUS","INTERPRETING_RESPONSES"],
+          "grammarTags": [],
+          "difficulty": "EASY",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-07.mp3",
           "question": "Where is the conference being held?",
           "answers": [
@@ -343,6 +371,10 @@
         },
         {
           "questionNumber": 8,
+          "questionType": "WH_QUESTION",
+          "skillTags": ["IDENTIFYING_QUESTION_FOCUS","INTERPRETING_RESPONSES"],
+          "grammarTags": [],
+          "difficulty": "EASY",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-08.mp3",
           "question": "When does the warehouse manager arrive?",
           "answers": [
@@ -382,6 +414,10 @@
         },
         {
           "questionNumber": 9,
+          "questionType": "TAG_QUESTION",
+          "skillTags": ["IDENTIFYING_QUESTION_FOCUS","INTERPRETING_RESPONSES"],
+          "grammarTags": [],
+          "difficulty": "EASY",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-09.mp3",
           "question": "There's a nice park nearby, right?",
           "answers": [
@@ -421,6 +457,10 @@
         },
         {
           "questionNumber": 10,
+          "questionType": "WH_QUESTION",
+          "skillTags": ["IDENTIFYING_QUESTION_FOCUS","INTERPRETING_RESPONSES"],
+          "grammarTags": [],
+          "difficulty": "EASY",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-10.mp3",
           "question": "Who sent the meeting minutes to the accounting department?",
           "answers": [
@@ -460,6 +500,10 @@
         },
         {
           "questionNumber": 11,
+          "questionType": "STATEMENT_RESPONSE",
+          "skillTags": ["IDENTIFYING_QUESTION_FOCUS","INTERPRETING_RESPONSES"],
+          "grammarTags": [],
+          "difficulty": "EASY",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-11.mp3",
           "question": "I'd like to know what you think of our new finance analyst.",
           "answers": [
@@ -499,6 +543,10 @@
         },
         {
           "questionNumber": 12,
+          "questionType": "SUGGESTION",
+          "skillTags": ["IDENTIFYING_QUESTION_FOCUS","INTERPRETING_RESPONSES"],
+          "grammarTags": [],
+          "difficulty": "EASY",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-12.mp3",
           "question": "Let's go on the company retreat.",
           "answers": [
@@ -538,6 +586,10 @@
         },
         {
           "questionNumber": 13,
+          "questionType": "WH_QUESTION",
+          "skillTags": ["IDENTIFYING_QUESTION_FOCUS","INTERPRETING_RESPONSES"],
+          "grammarTags": [],
+          "difficulty": "EASY",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-13.mp3",
           "question": "What time can I pick up my glasses?",
           "answers": [
@@ -577,6 +629,10 @@
         },
         {
           "questionNumber": 14,
+          "questionType": "TAG_QUESTION",
+          "skillTags": ["IDENTIFYING_QUESTION_FOCUS","INTERPRETING_INDIRECT_RESPONSES"],
+          "grammarTags": [],
+          "difficulty": "MEDIUM",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-14.mp3",
           "question": "The sales team knows how to use the tracking software, don't they?",
           "answers": [
@@ -616,6 +672,10 @@
         },
         {
           "questionNumber": 15,
+          "questionType": "YES_NO_QUESTION",
+          "skillTags": ["IDENTIFYING_QUESTION_FOCUS","INTERPRETING_INDIRECT_RESPONSES"],
+          "grammarTags": [],
+          "difficulty": "MEDIUM",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-15.mp3",
           "question": "Are you going to the hardware store on Mill Street?",
           "answers": [
@@ -655,6 +715,10 @@
         },
         {
           "questionNumber": 16,
+          "questionType": "REQUEST",
+          "skillTags": ["IDENTIFYING_QUESTION_FOCUS","INTERPRETING_RESPONSES"],
+          "grammarTags": [],
+          "difficulty": "EASY",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-16.mp3",
           "question": "Would you be able to write the introduction for the workshop?",
           "answers": [
@@ -694,6 +758,10 @@
         },
         {
           "questionNumber": 17,
+          "questionType": "STATEMENT_RESPONSE",
+          "skillTags": ["IDENTIFYING_QUESTION_FOCUS","INTERPRETING_RESPONSES"],
+          "grammarTags": [],
+          "difficulty": "EASY",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-17.mp3",
           "question": "I picked up some flowers for Tunji's retirement party.",
           "answers": [
@@ -733,6 +801,10 @@
         },
         {
           "questionNumber": 18,
+          "questionType": "WH_QUESTION",
+          "skillTags": ["IDENTIFYING_QUESTION_FOCUS","INTERPRETING_RESPONSES"],
+          "grammarTags": [],
+          "difficulty": "EASY",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-18.mp3",
           "question": "Which meeting room did you tell the interns to go to?",
           "answers": [
@@ -772,6 +844,10 @@
         },
         {
           "questionNumber": 19,
+          "questionType": "YES_NO_QUESTION",
+          "skillTags": ["IDENTIFYING_QUESTION_FOCUS","INTERPRETING_INDIRECT_RESPONSES"],
+          "grammarTags": [],
+          "difficulty": "MEDIUM",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-19.mp3",
           "question": "Is your dental appointment next Tuesday?",
           "answers": [
@@ -811,6 +887,10 @@
         },
         {
           "questionNumber": 20,
+          "questionType": "WH_QUESTION",
+          "skillTags": ["IDENTIFYING_QUESTION_FOCUS","INTERPRETING_RESPONSES"],
+          "grammarTags": [],
+          "difficulty": "EASY",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-20.mp3",
           "question": "Why aren't there any brochures in the lobby?",
           "answers": [
@@ -850,6 +930,10 @@
         },
         {
           "questionNumber": 21,
+          "questionType": "WH_QUESTION",
+          "skillTags": ["IDENTIFYING_QUESTION_FOCUS","INTERPRETING_RESPONSES"],
+          "grammarTags": [],
+          "difficulty": "EASY",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-21.mp3",
           "question": "What's the process for submitting my expense report?",
           "answers": [
@@ -889,6 +973,10 @@
         },
         {
           "questionNumber": 22,
+          "questionType": "ALTERNATIVE_QUESTION",
+          "skillTags": ["IDENTIFYING_QUESTION_FOCUS","INTERPRETING_RESPONSES"],
+          "grammarTags": [],
+          "difficulty": "EASY",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-22.mp3",
           "question": "Do you sell your products online or in stores?",
           "answers": [
@@ -928,6 +1016,10 @@
         },
         {
           "questionNumber": 23,
+          "questionType": "WH_QUESTION",
+          "skillTags": ["IDENTIFYING_QUESTION_FOCUS","INTERPRETING_RESPONSES"],
+          "grammarTags": [],
+          "difficulty": "EASY",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-23.mp3",
           "question": "How often do you charge this device?",
           "answers": [
@@ -967,6 +1059,10 @@
         },
         {
           "questionNumber": 24,
+          "questionType": "STATEMENT_RESPONSE",
+          "skillTags": ["IDENTIFYING_QUESTION_FOCUS","INTERPRETING_RESPONSES"],
+          "grammarTags": [],
+          "difficulty": "EASY",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-24.mp3",
           "question": "The tickets to Friday night's concert cost ten dollars each.",
           "answers": [
@@ -1006,6 +1102,10 @@
         },
         {
           "questionNumber": 25,
+          "questionType": "NEGATIVE_QUESTION",
+          "skillTags": ["IDENTIFYING_QUESTION_FOCUS","INTERPRETING_RESPONSES"],
+          "grammarTags": [],
+          "difficulty": "EASY",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-25.mp3",
           "question": "Can't you update the database today?",
           "answers": [
@@ -1045,6 +1145,10 @@
         },
         {
           "questionNumber": 26,
+          "questionType": "WH_QUESTION",
+          "skillTags": ["IDENTIFYING_QUESTION_FOCUS","INTERPRETING_INDIRECT_RESPONSES"],
+          "grammarTags": [],
+          "difficulty": "HARD",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-26.mp3",
           "question": "How are we going to fit the extra supplies in that closet?",
           "answers": [
@@ -1084,6 +1188,10 @@
         },
         {
           "questionNumber": 27,
+          "questionType": "YES_NO_QUESTION",
+          "skillTags": ["IDENTIFYING_QUESTION_FOCUS","INTERPRETING_INDIRECT_RESPONSES"],
+          "grammarTags": [],
+          "difficulty": "MEDIUM",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-27.mp3",
           "question": "Have all the new windows been installed?",
           "answers": [
@@ -1123,6 +1231,10 @@
         },
         {
           "questionNumber": 28,
+          "questionType": "ALTERNATIVE_QUESTION",
+          "skillTags": ["IDENTIFYING_QUESTION_FOCUS","INTERPRETING_INDIRECT_RESPONSES"],
+          "grammarTags": [],
+          "difficulty": "HARD",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-28.mp3",
           "question": "Would you rather go to lunch now or at noon?",
           "answers": [
@@ -1162,6 +1274,10 @@
         },
         {
           "questionNumber": 29,
+          "questionType": "TAG_QUESTION",
+          "skillTags": ["IDENTIFYING_QUESTION_FOCUS","INTERPRETING_INDIRECT_RESPONSES"],
+          "grammarTags": [],
+          "difficulty": "MEDIUM",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-29.mp3",
           "question": "You're taking the training in the afternoon, aren't you?",
           "answers": [
@@ -1201,6 +1317,10 @@
         },
         {
           "questionNumber": 30,
+          "questionType": "NEGATIVE_QUESTION",
+          "skillTags": ["IDENTIFYING_QUESTION_FOCUS","INTERPRETING_INDIRECT_RESPONSES"],
+          "grammarTags": [],
+          "difficulty": "HARD",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-30.mp3",
           "question": "Shouldn't Ms. Ishida look over the financial projections?",
           "answers": [
@@ -1240,6 +1360,10 @@
         },
         {
           "questionNumber": 31,
+          "questionType": "WH_QUESTION",
+          "skillTags": ["IDENTIFYING_QUESTION_FOCUS","INTERPRETING_INDIRECT_RESPONSES"],
+          "grammarTags": [],
+          "difficulty": "HARD",
           "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T01-media/audio/T01-31.mp3",
           "question": "When are you going to choose a new project manager?",
           "answers": [
@@ -1292,6 +1416,10 @@
           "questions": [
             {
               "questionNumber": 32,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What type of food product does the speakers' company sell?",
               "answers": [
                 {
@@ -1325,6 +1453,10 @@
             },
             {
               "questionNumber": 33,
+              "questionType": "SPEAKER_INTENT",
+              "skillTags": ["INTERPRETING_SPEAKER_INTENT"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What does the man suggest?",
               "answers": [
                 {
@@ -1358,6 +1490,10 @@
             },
             {
               "questionNumber": 34,
+              "questionType": "ACTION_OR_NEXT_STEP",
+              "skillTags": ["LISTENING_FOR_DETAILS","TRACKING_FUTURE_ACTIONS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What does the woman say she will do?",
               "answers": [
                 {
@@ -1401,6 +1537,10 @@
           "questions": [
             {
               "questionNumber": 35,
+              "questionType": "MAIN_IDEA_OR_PURPOSE",
+              "skillTags": ["LISTENING_FOR_MAIN_IDEA"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "Why is the man calling?",
               "answers": [
                 {
@@ -1434,6 +1574,10 @@
             },
             {
               "questionNumber": 36,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What did Ife Rotimi do last month?",
               "answers": [
                 {
@@ -1467,6 +1611,10 @@
             },
             {
               "questionNumber": 37,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What does the woman say is required?",
               "answers": [
                 {
@@ -1510,6 +1658,10 @@
           "questions": [
             {
               "questionNumber": 38,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What event are the speakers planning?",
               "answers": [
                 {
@@ -1543,6 +1695,10 @@
             },
             {
               "questionNumber": 39,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What task does the woman ask the man to help with?",
               "answers": [
                 {
@@ -1576,6 +1732,10 @@
             },
             {
               "questionNumber": 40,
+              "questionType": "ACTION_OR_NEXT_STEP",
+              "skillTags": ["LISTENING_FOR_DETAILS","TRACKING_FUTURE_ACTIONS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What does the woman say she will do?",
               "answers": [
                 {
@@ -1619,6 +1779,10 @@
           "questions": [
             {
               "questionNumber": 41,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What event are the speakers preparing for?",
               "answers": [
                 {
@@ -1652,6 +1816,10 @@
             },
             {
               "questionNumber": 42,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What is mentioned about some pens?",
               "answers": [
                 {
@@ -1685,6 +1853,10 @@
             },
             {
               "questionNumber": 43,
+              "questionType": "ACTION_OR_NEXT_STEP",
+              "skillTags": ["LISTENING_FOR_DETAILS","TRACKING_FUTURE_ACTIONS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What does the woman offer to do?",
               "answers": [
                 {
@@ -1728,6 +1900,10 @@
           "questions": [
             {
               "questionNumber": 44,
+              "questionType": "INFERENCE",
+              "skillTags": ["LISTENING_FOR_INFERENCE"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "Where does the woman work?",
               "answers": [
                 {
@@ -1761,6 +1937,10 @@
             },
             {
               "questionNumber": 45,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What does the man want to dispose of?",
               "answers": [
                 {
@@ -1794,6 +1974,10 @@
             },
             {
               "questionNumber": 46,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What does the woman say can be found on a Web site?",
               "answers": [
                 {
@@ -1837,6 +2021,10 @@
           "questions": [
             {
               "questionNumber": 47,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "How do the speakers know each other?",
               "answers": [
                 {
@@ -1870,6 +2058,10 @@
             },
             {
               "questionNumber": 48,
+              "questionType": "INFERENCE",
+              "skillTags": ["LISTENING_FOR_INFERENCE"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What type of business does the man most likely own?",
               "answers": [
                 {
@@ -1903,6 +2095,10 @@
             },
             {
               "questionNumber": 49,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What advantage does the woman point out about a rental space?",
               "answers": [
                 {
@@ -1946,6 +2142,10 @@
           "questions": [
             {
               "questionNumber": 50,
+              "questionType": "INFERENCE",
+              "skillTags": ["LISTENING_FOR_INFERENCE"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "Who most likely are the speakers?",
               "answers": [
                 {
@@ -1979,6 +2179,10 @@
             },
             {
               "questionNumber": 51,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What did the man recently do?",
               "answers": [
                 {
@@ -2012,6 +2216,10 @@
             },
             {
               "questionNumber": 52,
+              "questionType": "SPEAKER_INTENT",
+              "skillTags": ["INTERPRETING_SPEAKER_INTENT"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What does the woman suggest?",
               "answers": [
                 {
@@ -2055,6 +2263,10 @@
           "questions": [
             {
               "questionNumber": 53,
+              "questionType": "INFERENCE",
+              "skillTags": ["LISTENING_FOR_INFERENCE"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "Who most likely is the man?",
               "answers": [
                 {
@@ -2088,6 +2300,10 @@
             },
             {
               "questionNumber": 54,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What problem does the woman describe?",
               "answers": [
                 {
@@ -2121,6 +2337,10 @@
             },
             {
               "questionNumber": 55,
+              "questionType": "IMPLIED_MEANING",
+              "skillTags": ["INTERPRETING_SPEAKER_INTENT","LISTENING_FOR_INFERENCE"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "What does the woman mean when she says, \"it's supposed to be below freezing tonight\"?",
               "answers": [
                 {
@@ -2164,6 +2384,10 @@
           "questions": [
             {
               "questionNumber": 56,
+              "questionType": "MAIN_IDEA_OR_PURPOSE",
+              "skillTags": ["LISTENING_FOR_MAIN_IDEA"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "Why do the men want to speak to the woman?",
               "answers": [
                 {
@@ -2197,6 +2421,10 @@
             },
             {
               "questionNumber": 57,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What type of business do the men own?",
               "answers": [
                 {
@@ -2230,6 +2458,10 @@
             },
             {
               "questionNumber": 58,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "According to the men, what has changed recently?",
               "answers": [
                 {
@@ -2273,6 +2505,10 @@
           "questions": [
             {
               "questionNumber": 59,
+              "questionType": "SPEAKER_INTENT",
+              "skillTags": ["INTERPRETING_SPEAKER_INTENT"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What does the man want to do?",
               "answers": [
                 {
@@ -2306,6 +2542,10 @@
             },
             {
               "questionNumber": 60,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What is the woman concerned about?",
               "answers": [
                 {
@@ -2339,6 +2579,10 @@
             },
             {
               "questionNumber": 61,
+              "questionType": "IMPLIED_MEANING",
+              "skillTags": ["INTERPRETING_SPEAKER_INTENT","LISTENING_FOR_INFERENCE"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "What does the man mean when he says, \"High-quality video can be recorded and edited with a smartphone\"?",
               "answers": [
                 {
@@ -2382,6 +2626,10 @@
           "questions": [
             {
               "questionNumber": 62,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "Where is the woman?",
               "answers": [
                 {
@@ -2415,6 +2663,10 @@
             },
             {
               "questionNumber": 63,
+              "questionType": "GRAPHIC_INTEGRATION",
+              "skillTags": ["INTEGRATING_AUDIO_AND_VISUAL","LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "Look at the graphic. When does the woman prefer to meet with an investor?",
               "answers": [
                 {
@@ -2448,6 +2700,10 @@
             },
             {
               "questionNumber": 64,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What good news does the man share?",
               "answers": [
                 {
@@ -2491,6 +2747,10 @@
           "questions": [
             {
               "questionNumber": 65,
+              "questionType": "INFERENCE",
+              "skillTags": ["LISTENING_FOR_INFERENCE"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "Where do the speakers work?",
               "answers": [
                 {
@@ -2524,6 +2784,10 @@
             },
             {
               "questionNumber": 66,
+              "questionType": "GRAPHIC_INTEGRATION",
+              "skillTags": ["INTEGRATING_AUDIO_AND_VISUAL","LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "Look at the graphic. Which page on the Web site does the man want to change?",
               "answers": [
                 {
@@ -2557,6 +2821,10 @@
             },
             {
               "questionNumber": 67,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "Why does the woman say she cannot complete a task until Monday?",
               "answers": [
                 {
@@ -2600,6 +2868,10 @@
           "questions": [
             {
               "questionNumber": 68,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What news does the man share?",
               "answers": [
                 {
@@ -2633,6 +2905,10 @@
             },
             {
               "questionNumber": 69,
+              "questionType": "GRAPHIC_INTEGRATION",
+              "skillTags": ["INTEGRATING_AUDIO_AND_VISUAL","LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "Look at the graphic. Where do the speakers decide to install some bicycle racks?",
               "answers": [
                 {
@@ -2666,6 +2942,10 @@
             },
             {
               "questionNumber": 70,
+              "questionType": "MAIN_IDEA_OR_PURPOSE",
+              "skillTags": ["LISTENING_FOR_MAIN_IDEA"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "Why does the woman say she will contact some companies?",
               "answers": [
                 {
@@ -2715,6 +2995,10 @@
           "questions": [
             {
               "questionNumber": 71,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What type of products does the business repair?",
               "answers": [
                 {
@@ -2748,6 +3032,10 @@
             },
             {
               "questionNumber": 72,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What special benefit does the speaker mention?",
               "answers": [
                 {
@@ -2781,6 +3069,10 @@
             },
             {
               "questionNumber": 73,
+              "questionType": "MAIN_IDEA_OR_PURPOSE",
+              "skillTags": ["LISTENING_FOR_MAIN_IDEA"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "Why will a business close on Friday?",
               "answers": [
                 {
@@ -2824,6 +3116,10 @@
           "questions": [
             {
               "questionNumber": 74,
+              "questionType": "INFERENCE",
+              "skillTags": ["LISTENING_FOR_INFERENCE"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "Who most likely is the speaker?",
               "answers": [
                 {
@@ -2857,6 +3153,10 @@
             },
             {
               "questionNumber": 75,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "According to the speaker, what will the listeners find in a binder?",
               "answers": [
                 {
@@ -2890,6 +3190,10 @@
             },
             {
               "questionNumber": 76,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What does the speaker say about department files?",
               "answers": [
                 {
@@ -2933,6 +3237,10 @@
           "questions": [
             {
               "questionNumber": 77,
+              "questionType": "INFERENCE",
+              "skillTags": ["LISTENING_FOR_INFERENCE"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "Where does the speaker work?",
               "answers": [
                 {
@@ -2966,6 +3274,10 @@
             },
             {
               "questionNumber": 78,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What does the speaker say about an item she ordered a month ago?",
               "answers": [
                 {
@@ -2999,6 +3311,10 @@
             },
             {
               "questionNumber": 79,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What does the speaker ask the listener to confirm?",
               "answers": [
                 {
@@ -3042,6 +3358,10 @@
           "questions": [
             {
               "questionNumber": 80,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What type of product does the speaker's company make?",
               "answers": [
                 {
@@ -3075,6 +3395,10 @@
             },
             {
               "questionNumber": 81,
+              "questionType": "SPEAKER_INTENT",
+              "skillTags": ["INTERPRETING_SPEAKER_INTENT"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What does the speaker recommend doing?",
               "answers": [
                 {
@@ -3108,6 +3432,10 @@
             },
             {
               "questionNumber": 82,
+              "questionType": "ACTION_OR_NEXT_STEP",
+              "skillTags": ["LISTENING_FOR_DETAILS","TRACKING_FUTURE_ACTIONS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What will happen at the next meeting?",
               "answers": [
                 {
@@ -3151,6 +3479,10 @@
           "questions": [
             {
               "questionNumber": 83,
+              "questionType": "MAIN_IDEA_OR_PURPOSE",
+              "skillTags": ["LISTENING_FOR_MAIN_IDEA"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What is the announcement mainly about?",
               "answers": [
                 {
@@ -3184,6 +3516,10 @@
             },
             {
               "questionNumber": 84,
+              "questionType": "IMPLIED_MEANING",
+              "skillTags": ["INTERPRETING_SPEAKER_INTENT","LISTENING_FOR_INFERENCE"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "Why does the speaker say, \"A bus will be departing for that destination in fifteen minutes\"?",
               "answers": [
                 {
@@ -3217,6 +3553,10 @@
             },
             {
               "questionNumber": 85,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What does the speaker remind the listeners about?",
               "answers": [
                 {
@@ -3260,6 +3600,10 @@
           "questions": [
             {
               "questionNumber": 86,
+              "questionType": "INFERENCE",
+              "skillTags": ["LISTENING_FOR_INFERENCE"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "Where does the speaker most likely work?",
               "answers": [
                 {
@@ -3293,6 +3637,10 @@
             },
             {
               "questionNumber": 87,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What did the listener receive by e-mail?",
               "answers": [
                 {
@@ -3326,6 +3674,10 @@
             },
             {
               "questionNumber": 88,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "Why is the speaker unavailable next week?",
               "answers": [
                 {
@@ -3369,6 +3721,10 @@
           "questions": [
             {
               "questionNumber": 89,
+              "questionType": "INFERENCE",
+              "skillTags": ["LISTENING_FOR_INFERENCE"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "Who most likely are the listeners?",
               "answers": [
                 {
@@ -3402,6 +3758,10 @@
             },
             {
               "questionNumber": 90,
+              "questionType": "IMPLIED_MEANING",
+              "skillTags": ["INTERPRETING_SPEAKER_INTENT","LISTENING_FOR_INFERENCE"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "What does the speaker mean when she says, \"All of ours are at least ten years old\"?",
               "answers": [
                 {
@@ -3435,6 +3795,10 @@
             },
             {
               "questionNumber": 91,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "According to the speaker, what can be requested by e-mail?",
               "answers": [
                 {
@@ -3478,6 +3842,10 @@
           "questions": [
             {
               "questionNumber": 92,
+              "questionType": "SPEAKER_INTENT",
+              "skillTags": ["INTERPRETING_SPEAKER_INTENT"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What does the speaker want to do?",
               "answers": [
                 {
@@ -3511,6 +3879,10 @@
             },
             {
               "questionNumber": 93,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "According to the speaker, what is the customers' main complaint?",
               "answers": [
                 {
@@ -3544,6 +3916,10 @@
             },
             {
               "questionNumber": 94,
+              "questionType": "IMPLIED_MEANING",
+              "skillTags": ["INTERPRETING_SPEAKER_INTENT","LISTENING_FOR_INFERENCE"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "Why does the speaker say, \"that's our busiest location\"?",
               "answers": [
                 {
@@ -3587,6 +3963,10 @@
           "questions": [
             {
               "questionNumber": 95,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "According to the speaker, what is special about the Reston Office Tower?",
               "answers": [
                 {
@@ -3620,6 +4000,10 @@
             },
             {
               "questionNumber": 96,
+              "questionType": "GRAPHIC_INTEGRATION",
+              "skillTags": ["INTEGRATING_AUDIO_AND_VISUAL","LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "Look at the graphic. Which floors will be occupied in January?",
               "answers": [
                 {
@@ -3653,6 +4037,10 @@
             },
             {
               "questionNumber": 97,
+              "questionType": "DETAIL",
+              "skillTags": ["LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What does the speaker say is available on a Web site?",
               "answers": [
                 {
@@ -3696,6 +4084,10 @@
           "questions": [
             {
               "questionNumber": 98,
+              "questionType": "INFERENCE",
+              "skillTags": ["LISTENING_FOR_INFERENCE"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "Who most likely are the listeners?",
               "answers": [
                 {
@@ -3729,6 +4121,10 @@
             },
             {
               "questionNumber": 99,
+              "questionType": "GRAPHIC_INTEGRATION",
+              "skillTags": ["INTEGRATING_AUDIO_AND_VISUAL","LISTENING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "Look at the graphic. Where will a new mine be built?",
               "answers": [
                 {
@@ -3762,6 +4158,10 @@
             },
             {
               "questionNumber": 100,
+              "questionType": "ACTION_OR_NEXT_STEP",
+              "skillTags": ["LISTENING_FOR_DETAILS","TRACKING_FUTURE_ACTIONS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What does the speaker say is the next step?",
               "answers": [
                 {
@@ -3804,6 +4204,10 @@
       "questions": [
         {
           "questionNumber": 101,
+          "questionType": "PREPOSITION_USAGE",
+          "skillTags": ["GRAMMATICAL_ACCURACY","SENTENCE_STRUCTURE"],
+          "grammarTags": ["PREPOSITIONS","RELATIVE_CLAUSES"],
+          "difficulty": "HARD",
           "question": "The lecture will take place at 6:00 P.M., _____ which attendees may ask questions.",
           "answers": [
             {
@@ -3850,6 +4254,10 @@
         },
         {
           "questionNumber": 102,
+          "questionType": "WORD_FORM",
+          "skillTags": ["GRAMMATICAL_FORM","PART_OF_SPEECH_RECOGNITION"],
+          "grammarTags": ["PARTS_OF_SPEECH"],
+          "difficulty": "EASY",
           "question": "The_____ antique shop in Pepper Valley will close down next month.",
           "answers": [
             {
@@ -3896,6 +4304,10 @@
         },
         {
           "questionNumber": 103,
+          "questionType": "VOCABULARY_IN_CONTEXT",
+          "skillTags": ["VOCABULARY_IN_CONTEXT","COLLOCATION"],
+          "grammarTags": [],
+          "difficulty": "EASY",
           "question": "Merryville residents will receive an online status _____ about the ongoing bridge construction project.",
           "answers": [
             {
@@ -3942,6 +4354,10 @@
         },
         {
           "questionNumber": 104,
+          "questionType": "PRONOUN_USAGE",
+          "skillTags": ["GRAMMATICAL_ACCURACY","REFERENCE_TRACKING"],
+          "grammarTags": ["POSSESSIVE_DETERMINERS"],
+          "difficulty": "MEDIUM",
           "question": "As a result of _____ many years leading media organizations, Ms. Ayo was selected for the Dowel Journalism Prize.",
           "answers": [
             {
@@ -3988,6 +4404,10 @@
         },
         {
           "questionNumber": 105,
+          "questionType": "VOCABULARY_IN_CONTEXT",
+          "skillTags": ["VOCABULARY_IN_CONTEXT","COLLOCATION"],
+          "grammarTags": [],
+          "difficulty": "EASY",
           "question": "To stop the _____ of computer viruses, do not open suspicious e-mails.",
           "answers": [
             {
@@ -4034,6 +4454,10 @@
         },
         {
           "questionNumber": 106,
+          "questionType": "WORD_FORM",
+          "skillTags": ["GRAMMATICAL_FORM","PART_OF_SPEECH_RECOGNITION"],
+          "grammarTags": ["ADVERBS"],
+          "difficulty": "EASY",
           "question": "The hiring manager _____ considered each applicant's résumé and qualifications.",
           "answers": [
             {
@@ -4080,6 +4504,10 @@
         },
         {
           "questionNumber": 107,
+          "questionType": "CONNECTOR_USAGE",
+          "skillTags": ["SENTENCE_STRUCTURE","LOGICAL_RELATIONSHIPS"],
+          "grammarTags": ["COORDINATING_CONJUNCTIONS"],
+          "difficulty": "MEDIUM",
           "question": "In October, Mr. Sakamoto will leave for New Zealand _____ will oversee the opening of the new Auckland branch.",
           "answers": [
             {
@@ -4126,6 +4554,10 @@
         },
         {
           "questionNumber": 108,
+          "questionType": "VOCABULARY_IN_CONTEXT",
+          "skillTags": ["VOCABULARY_IN_CONTEXT","COLLOCATION"],
+          "grammarTags": [],
+          "difficulty": "EASY",
           "question": "Tarateer Pharmaceuticals is varying its product _____ to include over-the-counter medications.",
           "answers": [
             {
@@ -4172,6 +4604,10 @@
         },
         {
           "questionNumber": 109,
+          "questionType": "WORD_FORM",
+          "skillTags": ["GRAMMATICAL_FORM","PART_OF_SPEECH_RECOGNITION"],
+          "grammarTags": ["PARTS_OF_SPEECH","SUBJECT_VERB_AGREEMENT"],
+          "difficulty": "EASY",
           "question": "Dynart, Inc., continuously _____ new ways to reduce its use of plastics.",
           "answers": [
             {
@@ -4218,6 +4654,10 @@
         },
         {
           "questionNumber": 110,
+          "questionType": "WORD_FORM",
+          "skillTags": ["GRAMMATICAL_FORM","PART_OF_SPEECH_RECOGNITION"],
+          "grammarTags": ["PARTS_OF_SPEECH","SUBJECT_VERB_AGREEMENT"],
+          "difficulty": "EASY",
           "question": "The cash registers at Pirkle Books automatically _____ the remaining inventory of books available.",
           "answers": [
             {
@@ -4264,6 +4704,10 @@
         },
         {
           "questionNumber": 111,
+          "questionType": "VOCABULARY_IN_CONTEXT",
+          "skillTags": ["VOCABULARY_IN_CONTEXT","COLLOCATION"],
+          "grammarTags": [],
+          "difficulty": "MEDIUM",
           "question": "The product team is designing mapping software that can _____ locate underground minerals.",
           "answers": [
             {
@@ -4310,6 +4754,10 @@
         },
         {
           "questionNumber": 112,
+          "questionType": "WORD_FORM",
+          "skillTags": ["GRAMMATICAL_FORM","PART_OF_SPEECH_RECOGNITION"],
+          "grammarTags": ["ADVERBS"],
+          "difficulty": "MEDIUM",
           "question": "According to CEO Mayu Yamada, it would not be _____ responsible to expand the warehouse at this time.",
           "answers": [
             {
@@ -4356,6 +4804,10 @@
         },
         {
           "questionNumber": 113,
+          "questionType": "VOCABULARY_IN_CONTEXT",
+          "skillTags": ["VOCABULARY_IN_CONTEXT","COLLOCATION"],
+          "grammarTags": [],
+          "difficulty": "MEDIUM",
           "question": "Analysts cannot say with any _____ what the regional demand for electric trucks will be.",
           "answers": [
             {
@@ -4402,6 +4854,10 @@
         },
         {
           "questionNumber": 114,
+          "questionType": "VOCABULARY_IN_CONTEXT",
+          "skillTags": ["VOCABULARY_IN_CONTEXT","COLLOCATION"],
+          "grammarTags": [],
+          "difficulty": "MEDIUM",
           "question": "As part of its marketing campaign, Elegancia Dishware is _____ soliciting feedback from customers.",
           "answers": [
             {
@@ -4448,6 +4904,10 @@
         },
         {
           "questionNumber": 115,
+          "questionType": "VOCABULARY_IN_CONTEXT",
+          "skillTags": ["VOCABULARY_IN_CONTEXT","COLLOCATION"],
+          "grammarTags": [],
+          "difficulty": "EASY",
           "question": "Rain gardens are intended to _____ water to prevent flooding of local roads.",
           "answers": [
             {
@@ -4494,6 +4954,10 @@
         },
         {
           "questionNumber": 116,
+          "questionType": "WORD_FORM",
+          "skillTags": ["GRAMMATICAL_FORM","PART_OF_SPEECH_RECOGNITION"],
+          "grammarTags": ["PARTS_OF_SPEECH"],
+          "difficulty": "EASY",
           "question": "Theta Industries' training program aims to increase the _____ of its manufacturing systems.",
           "answers": [
             {
@@ -4540,6 +5004,10 @@
         },
         {
           "questionNumber": 117,
+          "questionType": "PREPOSITION_USAGE",
+          "skillTags": ["GRAMMATICAL_ACCURACY","SENTENCE_STRUCTURE"],
+          "grammarTags": ["PREPOSITIONS"],
+          "difficulty": "MEDIUM",
           "question": "The board of directors has voted to award Mr. Mitrakos a bonus for his role _____ obtaining the international contract.",
           "answers": [
             {
@@ -4586,6 +5054,10 @@
         },
         {
           "questionNumber": 118,
+          "questionType": "CONNECTOR_USAGE",
+          "skillTags": ["SENTENCE_STRUCTURE","LOGICAL_RELATIONSHIPS"],
+          "grammarTags": ["SUBORDINATING_CONJUNCTIONS","CLAUSES_OF_PURPOSE"],
+          "difficulty": "HARD",
           "question": "The finance director gave his approval _____ the project can move forward.",
           "answers": [
             {
@@ -4632,6 +5104,10 @@
         },
         {
           "questionNumber": 119,
+          "questionType": "VOCABULARY_IN_CONTEXT",
+          "skillTags": ["VOCABULARY_IN_CONTEXT","COLLOCATION"],
+          "grammarTags": [],
+          "difficulty": "MEDIUM",
           "question": "The newspaper article describes ways job seekers can _____ for having little workplace experience.",
           "answers": [
             {
@@ -4678,6 +5154,10 @@
         },
         {
           "questionNumber": 120,
+          "questionType": "PRONOUN_USAGE",
+          "skillTags": ["GRAMMATICAL_ACCURACY","REFERENCE_TRACKING"],
+          "grammarTags": ["INDEFINITE_PRONOUNS"],
+          "difficulty": "HARD",
           "question": "Mr. Ellis and Ms. Barnes were both highly qualified, but _____ got the job.",
           "answers": [
             {
@@ -4724,6 +5204,10 @@
         },
         {
           "questionNumber": 121,
+          "questionType": "CONNECTOR_USAGE",
+          "skillTags": ["SENTENCE_STRUCTURE","LOGICAL_RELATIONSHIPS"],
+          "grammarTags": ["PREPOSITIONS","CONTRAST_CONNECTORS"],
+          "difficulty": "HARD",
           "question": "Ennis Photography purchased all new lighting equipment _____ the high cost.",
           "answers": [
             {
@@ -4770,6 +5254,10 @@
         },
         {
           "questionNumber": 122,
+          "questionType": "VERB_FORM",
+          "skillTags": ["GRAMMATICAL_FORM","SENTENCE_STRUCTURE"],
+          "grammarTags": ["INFINITIVES"],
+          "difficulty": "EASY",
           "question": "Marburton residents who wish to _____ a home should contact the award-winning team at Kwan Real Estate.",
           "answers": [
             {
@@ -4816,6 +5304,10 @@
         },
         {
           "questionNumber": 123,
+          "questionType": "VOCABULARY_IN_CONTEXT",
+          "skillTags": ["VOCABULARY_IN_CONTEXT","COLLOCATION"],
+          "grammarTags": [],
+          "difficulty": "MEDIUM",
           "question": "Maswa Bistro began a _____ agreement with local farmers to purchase a set amount of produce each week.",
           "answers": [
             {
@@ -4862,6 +5354,10 @@
         },
         {
           "questionNumber": 124,
+          "questionType": "WORD_FORM",
+          "skillTags": ["GRAMMATICAL_FORM","PART_OF_SPEECH_RECOGNITION"],
+          "grammarTags": ["PARTS_OF_SPEECH","NOUN_NUMBER"],
+          "difficulty": "MEDIUM",
           "question": "The City of Doyle's new downtown parking _____ have been met with opposition by residents and visitors.",
           "answers": [
             {
@@ -4908,6 +5404,10 @@
         },
         {
           "questionNumber": 125,
+          "questionType": "VOCABULARY_IN_CONTEXT",
+          "skillTags": ["VOCABULARY_IN_CONTEXT","COLLOCATION"],
+          "grammarTags": [],
+          "difficulty": "MEDIUM",
           "question": "The plumbing position requires extensive training, even for those who studied _____ in technical school.",
           "answers": [
             {
@@ -4954,6 +5454,10 @@
         },
         {
           "questionNumber": 126,
+          "questionType": "WORD_FORM",
+          "skillTags": ["GRAMMATICAL_FORM","PART_OF_SPEECH_RECOGNITION"],
+          "grammarTags": ["PARTS_OF_SPEECH"],
+          "difficulty": "MEDIUM",
           "question": "With its fixed price _____, Omega Cellular guarantees no phone bill increases for three years.",
           "answers": [
             {
@@ -5000,6 +5504,10 @@
         },
         {
           "questionNumber": 127,
+          "questionType": "VOCABULARY_IN_CONTEXT",
+          "skillTags": ["VOCABULARY_IN_CONTEXT","COLLOCATION"],
+          "grammarTags": [],
+          "difficulty": "MEDIUM",
           "question": "As chief analytics officer, Mr. Ko has worked at Lochston Ltd. with great _____ for more than twenty years.",
           "answers": [
             {
@@ -5046,6 +5554,10 @@
         },
         {
           "questionNumber": 128,
+          "questionType": "CONNECTOR_USAGE",
+          "skillTags": ["SENTENCE_STRUCTURE","LOGICAL_RELATIONSHIPS"],
+          "grammarTags": ["COMPARATIVE_STRUCTURES"],
+          "difficulty": "MEDIUM",
           "question": "Milltown Hospital's cafeteria serves lunch seven days a week _____ only on weekdays.",
           "answers": [
             {
@@ -5092,6 +5604,10 @@
         },
         {
           "questionNumber": 129,
+          "questionType": "VOCABULARY_IN_CONTEXT",
+          "skillTags": ["VOCABULARY_IN_CONTEXT","COLLOCATION"],
+          "grammarTags": [],
+          "difficulty": "MEDIUM",
           "question": "The store's entire inventory of lumber comes from a nearby _____ supplier.",
           "answers": [
             {
@@ -5138,6 +5654,10 @@
         },
         {
           "questionNumber": 130,
+          "questionType": "WORD_FORM",
+          "skillTags": ["GRAMMATICAL_FORM","PART_OF_SPEECH_RECOGNITION"],
+          "grammarTags": ["ADJECTIVES"],
+          "difficulty": "EASY",
           "question": "For a $95 _____ fee, our mechanics will determine what repairs are needed.",
           "answers": [
             {
@@ -5197,6 +5717,10 @@
           "questions": [
             {
               "questionNumber": 131,
+              "questionType": "SENTENCE_INSERTION",
+              "skillTags": ["TEXT_COHESION","UNDERSTANDING_CONTEXT"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": null,
               "answers": [
                 {
@@ -5242,6 +5766,10 @@
             },
             {
               "questionNumber": 132,
+              "questionType": "VOCABULARY_IN_CONTEXT",
+              "skillTags": ["VOCABULARY_IN_CONTEXT","COLLOCATION"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": null,
               "answers": [
                 {
@@ -5287,6 +5815,10 @@
             },
             {
               "questionNumber": 133,
+              "questionType": "CONNECTOR_USAGE",
+              "skillTags": ["TEXT_COHESION","LOGICAL_RELATIONSHIPS"],
+              "grammarTags": ["ADVERBS"],
+              "difficulty": "MEDIUM",
               "question": null,
               "answers": [
                 {
@@ -5332,6 +5864,10 @@
             },
             {
               "questionNumber": 134,
+              "questionType": "PRONOUN_USAGE",
+              "skillTags": ["GRAMMATICAL_ACCURACY","REFERENCE_TRACKING"],
+              "grammarTags": ["POSSESSIVE_DETERMINERS"],
+              "difficulty": "MEDIUM",
               "question": null,
               "answers": [
                 {
@@ -5386,6 +5922,10 @@
           "questions": [
             {
               "questionNumber": 135,
+              "questionType": "SENTENCE_INSERTION",
+              "skillTags": ["TEXT_COHESION","UNDERSTANDING_CONTEXT"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": null,
               "answers": [
                 {
@@ -5431,6 +5971,10 @@
             },
             {
               "questionNumber": 136,
+              "questionType": "VERB_FORM",
+              "skillTags": ["GRAMMATICAL_FORM","SENTENCE_STRUCTURE"],
+              "grammarTags": ["PRESENT_PERFECT"],
+              "difficulty": "MEDIUM",
               "question": null,
               "answers": [
                 {
@@ -5476,6 +6020,10 @@
             },
             {
               "questionNumber": 137,
+              "questionType": "CONNECTOR_USAGE",
+              "skillTags": ["TEXT_COHESION","LOGICAL_RELATIONSHIPS"],
+              "grammarTags": ["ADVERBS"],
+              "difficulty": "MEDIUM",
               "question": null,
               "answers": [
                 {
@@ -5521,6 +6069,10 @@
             },
             {
               "questionNumber": 138,
+              "questionType": "VOCABULARY_IN_CONTEXT",
+              "skillTags": ["VOCABULARY_IN_CONTEXT","COLLOCATION"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": null,
               "answers": [
                 {
@@ -5575,6 +6127,10 @@
           "questions": [
             {
               "questionNumber": 139,
+              "questionType": "VERB_FORM",
+              "skillTags": ["GRAMMATICAL_FORM","SENTENCE_STRUCTURE"],
+              "grammarTags": ["GERUNDS_AFTER_PREPOSITIONS"],
+              "difficulty": "MEDIUM",
               "question": null,
               "answers": [
                 {
@@ -5620,6 +6176,10 @@
             },
             {
               "questionNumber": 140,
+              "questionType": "VOCABULARY_IN_CONTEXT",
+              "skillTags": ["VOCABULARY_IN_CONTEXT","COLLOCATION"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": null,
               "answers": [
                 {
@@ -5665,6 +6225,10 @@
             },
             {
               "questionNumber": 141,
+              "questionType": "SENTENCE_INSERTION",
+              "skillTags": ["TEXT_COHESION","UNDERSTANDING_CONTEXT"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": null,
               "answers": [
                 {
@@ -5710,6 +6274,10 @@
             },
             {
               "questionNumber": 142,
+              "questionType": "PRONOUN_USAGE",
+              "skillTags": ["GRAMMATICAL_ACCURACY","REFERENCE_TRACKING"],
+              "grammarTags": ["OBJECT_PRONOUNS"],
+              "difficulty": "MEDIUM",
               "question": null,
               "answers": [
                 {
@@ -5764,6 +6332,10 @@
           "questions": [
             {
               "questionNumber": 143,
+              "questionType": "WORD_FORM",
+              "skillTags": ["GRAMMATICAL_FORM","PART_OF_SPEECH_RECOGNITION"],
+              "grammarTags": ["ADJECTIVES","OBJECT_COMPLEMENTS"],
+              "difficulty": "MEDIUM",
               "question": null,
               "answers": [
                 {
@@ -5809,6 +6381,10 @@
             },
             {
               "questionNumber": 144,
+              "questionType": "VOCABULARY_IN_CONTEXT",
+              "skillTags": ["VOCABULARY_IN_CONTEXT","COLLOCATION"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": null,
               "answers": [
                 {
@@ -5854,6 +6430,10 @@
             },
             {
               "questionNumber": 145,
+              "questionType": "CONNECTOR_USAGE",
+              "skillTags": ["TEXT_COHESION","LOGICAL_RELATIONSHIPS"],
+              "grammarTags": ["DISCOURSE_MARKERS"],
+              "difficulty": "MEDIUM",
               "question": null,
               "answers": [
                 {
@@ -5899,6 +6479,10 @@
             },
             {
               "questionNumber": 146,
+              "questionType": "SENTENCE_INSERTION",
+              "skillTags": ["TEXT_COHESION","UNDERSTANDING_CONTEXT"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": null,
               "answers": [
                 {
@@ -5966,6 +6550,10 @@
           "questions": [
             {
               "questionNumber": 147,
+              "questionType": "MAIN_IDEA_OR_PURPOSE",
+              "skillTags": ["READING_FOR_MAIN_IDEA"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What is the purpose of the notice?",
               "answers": [
                 {
@@ -6011,6 +6599,10 @@
             },
             {
               "questionNumber": 148,
+              "questionType": "INFERENCE",
+              "skillTags": ["READING_FOR_INFERENCE"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "What is suggested about High View Apartments?",
               "answers": [
                 {
@@ -6075,6 +6667,10 @@
           "questions": [
             {
               "questionNumber": 149,
+              "questionType": "INFERENCE",
+              "skillTags": ["READING_FOR_INFERENCE"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "What most likely is Ms. Seang's job?",
               "answers": [
                 {
@@ -6120,6 +6716,10 @@
             },
             {
               "questionNumber": 150,
+              "questionType": "IMPLIED_MEANING",
+              "skillTags": ["INTERPRETING_IMPLIED_MEANING","READING_FOR_INFERENCE"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "At 11:23 A.M., what does Ms. Seang imply when she writes, \"I have plenty to go around\"?",
               "answers": [
                 {
@@ -6184,6 +6784,10 @@
           "questions": [
             {
               "questionNumber": 151,
+              "questionType": "DETAIL",
+              "skillTags": ["READING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What is mentioned about Mr. Norton?",
               "answers": [
                 {
@@ -6229,6 +6833,10 @@
             },
             {
               "questionNumber": 152,
+              "questionType": "DETAIL",
+              "skillTags": ["READING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What does Ms. Correa ask members of the sales team to do?",
               "answers": [
                 {
@@ -6293,6 +6901,10 @@
           "questions": [
             {
               "questionNumber": 153,
+              "questionType": "MAIN_IDEA_OR_PURPOSE",
+              "skillTags": ["READING_FOR_MAIN_IDEA"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What is the purpose of the article?",
               "answers": [
                 {
@@ -6338,6 +6950,10 @@
             },
             {
               "questionNumber": 154,
+              "questionType": "INFERENCE",
+              "skillTags": ["READING_FOR_INFERENCE"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "Who is Ms. Flanagan?",
               "answers": [
                 {
@@ -6402,6 +7018,10 @@
           "questions": [
             {
               "questionNumber": 155,
+              "questionType": "MAIN_IDEA_OR_PURPOSE",
+              "skillTags": ["READING_FOR_MAIN_IDEA"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What is the purpose of the e-mail?",
               "answers": [
                 {
@@ -6447,6 +7067,10 @@
             },
             {
               "questionNumber": 156,
+              "questionType": "DETAIL",
+              "skillTags": ["READING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What is mentioned about the Belter BTR-1483 telescope?",
               "answers": [
                 {
@@ -6492,6 +7116,10 @@
             },
             {
               "questionNumber": 157,
+              "questionType": "SENTENCE_INSERTION",
+              "skillTags": ["TEXT_COHESION","UNDERSTANDING_CONTEXT"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "In which of the positions marked [1], [2], [3], and [4] does the following sentence best belong? \"You can see a full list of specifications on our Web site.\"",
               "answers": [
                 {
@@ -6556,6 +7184,10 @@
           "questions": [
             {
               "questionNumber": 158,
+              "questionType": "MAIN_IDEA_OR_PURPOSE",
+              "skillTags": ["READING_FOR_MAIN_IDEA"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What is one purpose of the e-mail?",
               "answers": [
                 {
@@ -6601,6 +7233,10 @@
             },
             {
               "questionNumber": 159,
+              "questionType": "DETAIL",
+              "skillTags": ["READING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What will happen on April 2?",
               "answers": [
                 {
@@ -6646,6 +7282,10 @@
             },
             {
               "questionNumber": 160,
+              "questionType": "DETAIL",
+              "skillTags": ["READING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "How can people subscribe to a newsletter?",
               "answers": [
                 {
@@ -6710,6 +7350,10 @@
           "questions": [
             {
               "questionNumber": 161,
+              "questionType": "MAIN_IDEA_OR_PURPOSE",
+              "skillTags": ["READING_FOR_MAIN_IDEA"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What is one purpose of the article?",
               "answers": [
                 {
@@ -6755,6 +7399,10 @@
             },
             {
               "questionNumber": 162,
+              "questionType": "VOCABULARY_IN_CONTEXT",
+              "skillTags": ["VOCABULARY_IN_CONTEXT","USING_CONTEXT_CLUES"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "The word \"just\" in paragraph 1, line 8, is closest in meaning to",
               "answers": [
                 {
@@ -6800,6 +7448,10 @@
             },
             {
               "questionNumber": 163,
+              "questionType": "INFERENCE",
+              "skillTags": ["READING_FOR_INFERENCE"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "What does Ms. Martens suggest about flash-frozen food?",
               "answers": [
                 {
@@ -6864,6 +7516,10 @@
           "questions": [
             {
               "questionNumber": 164,
+              "questionType": "INFERENCE",
+              "skillTags": ["READING_FOR_INFERENCE"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "According to the advertisement, who most likely is Ms. Navani?",
               "answers": [
                 {
@@ -6909,6 +7565,10 @@
             },
             {
               "questionNumber": 165,
+              "questionType": "DETAIL",
+              "skillTags": ["READING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What is indicated about Karning Creative Designs?",
               "answers": [
                 {
@@ -6954,6 +7614,10 @@
             },
             {
               "questionNumber": 166,
+              "questionType": "DETAIL",
+              "skillTags": ["READING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What is required of job applicants?",
               "answers": [
                 {
@@ -6999,6 +7663,10 @@
             },
             {
               "questionNumber": 167,
+              "questionType": "DETAIL",
+              "skillTags": ["READING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What will happen on March 31?",
               "answers": [
                 {
@@ -7063,6 +7731,10 @@
           "questions": [
             {
               "questionNumber": 168,
+              "questionType": "DETAIL",
+              "skillTags": ["READING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What does the article mention about Marco's Italian Restaurant?",
               "answers": [
                 {
@@ -7108,6 +7780,10 @@
             },
             {
               "questionNumber": 169,
+              "questionType": "INFERENCE",
+              "skillTags": ["READING_FOR_INFERENCE"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "What is indicated about Marco's Italian Market?",
               "answers": [
                 {
@@ -7153,6 +7829,10 @@
             },
             {
               "questionNumber": 170,
+              "questionType": "DETAIL",
+              "skillTags": ["READING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What will happen during the event on June 25?",
               "answers": [
                 {
@@ -7198,6 +7878,10 @@
             },
             {
               "questionNumber": 171,
+              "questionType": "SENTENCE_INSERTION",
+              "skillTags": ["TEXT_COHESION","UNDERSTANDING_CONTEXT"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "In which of the positions marked [1], [2], [3], and [4] does the following sentence best belong? \"During repairs, some additional dining space was added.\"",
               "answers": [
                 {
@@ -7262,6 +7946,10 @@
           "questions": [
             {
               "questionNumber": 172,
+              "questionType": "MAIN_IDEA_OR_PURPOSE",
+              "skillTags": ["READING_FOR_MAIN_IDEA"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "Why did Ms. Barry begin an online chat with Mr. Kubelski?",
               "answers": [
                 {
@@ -7307,6 +7995,10 @@
             },
             {
               "questionNumber": 173,
+              "questionType": "DETAIL",
+              "skillTags": ["READING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "Who will receive an e-mail from Mr. Kubelski?",
               "answers": [
                 {
@@ -7352,6 +8044,10 @@
             },
             {
               "questionNumber": 174,
+              "questionType": "DETAIL",
+              "skillTags": ["READING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What does Ms. Choi offer to do?",
               "answers": [
                 {
@@ -7397,6 +8093,10 @@
             },
             {
               "questionNumber": 175,
+              "questionType": "IMPLIED_MEANING",
+              "skillTags": ["INTERPRETING_IMPLIED_MEANING","READING_FOR_INFERENCE"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "At 10:22 A.M., what does Ms. Barry most likely mean when she writes, \"There are several projects ahead of yours\"?",
               "answers": [
                 {
@@ -7468,6 +8168,10 @@
           "questions": [
             {
               "questionNumber": 176,
+              "questionType": "DETAIL",
+              "skillTags": ["READING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "According to the article, what is one way that food truck owners traditionally attract customers?",
               "answers": [
                 {
@@ -7513,6 +8217,10 @@
             },
             {
               "questionNumber": 177,
+              "questionType": "DETAIL",
+              "skillTags": ["READING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "According to the article, what information does not need to appear on the Home page?",
               "answers": [
                 {
@@ -7558,6 +8266,10 @@
             },
             {
               "questionNumber": 178,
+              "questionType": "INFERENCE",
+              "skillTags": ["READING_FOR_INFERENCE"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "In what field does Mr. Abruzzo most likely work?",
               "answers": [
                 {
@@ -7603,6 +8315,10 @@
             },
             {
               "questionNumber": 179,
+              "questionType": "INFERENCE",
+              "skillTags": ["READING_FOR_INFERENCE","CROSS_TEXT_INTEGRATION"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "In which section of the Web site will information most likely be added?",
               "answers": [
                 {
@@ -7648,6 +8364,10 @@
             },
             {
               "questionNumber": 180,
+              "questionType": "DETAIL",
+              "skillTags": ["READING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "According to the e-mail, when will the Web site launch?",
               "answers": [
                 {
@@ -7720,6 +8440,10 @@
           "questions": [
             {
               "questionNumber": 181,
+              "questionType": "DETAIL",
+              "skillTags": ["READING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What is indicated about the Net Zero Initiative?",
               "answers": [
                 {
@@ -7765,6 +8489,10 @@
             },
             {
               "questionNumber": 182,
+              "questionType": "VOCABULARY_IN_CONTEXT",
+              "skillTags": ["VOCABULARY_IN_CONTEXT","USING_CONTEXT_CLUES"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "In the e-mail, the word \"conduct\" in paragraph 2, line 1, is closest in meaning to",
               "answers": [
                 {
@@ -7810,6 +8538,10 @@
             },
             {
               "questionNumber": 183,
+              "questionType": "INFERENCE",
+              "skillTags": ["READING_FOR_INFERENCE"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "What can be concluded about the Red Hills Business District?",
               "answers": [
                 {
@@ -7855,6 +8587,10 @@
             },
             {
               "questionNumber": 184,
+              "questionType": "INFERENCE",
+              "skillTags": ["READING_FOR_INFERENCE","CROSS_TEXT_INTEGRATION"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "Why most likely did the Red Hills Business Association change the dates of its concert series?",
               "answers": [
                 {
@@ -7900,6 +8636,10 @@
             },
             {
               "questionNumber": 185,
+              "questionType": "DETAIL",
+              "skillTags": ["READING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What is mentioned in the press release about the Cultural Center?",
               "answers": [
                 {
@@ -7979,6 +8719,10 @@
           "questions": [
             {
               "questionNumber": 186,
+              "questionType": "DETAIL",
+              "skillTags": ["READING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "According to the advertisement, what is one type of work performed by Lawal Home Service?",
               "answers": [
                 {
@@ -8024,6 +8768,10 @@
             },
             {
               "questionNumber": 187,
+              "questionType": "DETAIL",
+              "skillTags": ["READING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What does Mr. Gerson indicate on the form about his roof?",
               "answers": [
                 {
@@ -8069,6 +8817,10 @@
             },
             {
               "questionNumber": 188,
+              "questionType": "INFERENCE",
+              "skillTags": ["READING_FOR_INFERENCE","CROSS_TEXT_INTEGRATION"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "When did Lawal Home Service inspect Mr. Gerson's roof?",
               "answers": [
                 {
@@ -8114,6 +8866,10 @@
             },
             {
               "questionNumber": 189,
+              "questionType": "INFERENCE",
+              "skillTags": ["READING_FOR_INFERENCE","CROSS_TEXT_INTEGRATION"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "Who most likely is Ms. Perez?",
               "answers": [
                 {
@@ -8159,6 +8915,10 @@
             },
             {
               "questionNumber": 190,
+              "questionType": "DETAIL",
+              "skillTags": ["READING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "According to the review, what surprised Mr. Gerson about the crew from Lawal Home Service?",
               "answers": [
                 {
@@ -8238,6 +8998,10 @@
           "questions": [
             {
               "questionNumber": 191,
+              "questionType": "INFERENCE",
+              "skillTags": ["READING_FOR_INFERENCE"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "What is one service that Darboury Company most likely provides?",
               "answers": [
                 {
@@ -8283,6 +9047,10 @@
             },
             {
               "questionNumber": 192,
+              "questionType": "INFERENCE",
+              "skillTags": ["READING_FOR_INFERENCE","CROSS_TEXT_INTEGRATION"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "What sample was delayed?",
               "answers": [
                 {
@@ -8328,6 +9096,10 @@
             },
             {
               "questionNumber": 193,
+              "questionType": "DETAIL",
+              "skillTags": ["READING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "When is the deadline for Ms. Pereira to approve samples?",
               "answers": [
                 {
@@ -8373,6 +9145,10 @@
             },
             {
               "questionNumber": 194,
+              "questionType": "DETAIL",
+              "skillTags": ["READING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What does the form indicate about the Bun Bun Books order?",
               "answers": [
                 {
@@ -8418,6 +9194,10 @@
             },
             {
               "questionNumber": 195,
+              "questionType": "DETAIL",
+              "skillTags": ["READING_FOR_DETAILS","CROSS_TEXT_INTEGRATION"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "What is the background color on the cover of item N3-GT?",
               "answers": [
                 {
@@ -8498,6 +9278,10 @@
           "questions": [
             {
               "questionNumber": 196,
+              "questionType": "MAIN_IDEA_OR_PURPOSE",
+              "skillTags": ["READING_FOR_MAIN_IDEA"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What is the purpose of the e-mail?",
               "answers": [
                 {
@@ -8543,6 +9327,10 @@
             },
             {
               "questionNumber": 197,
+              "questionType": "DETAIL",
+              "skillTags": ["READING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "According to the e-mail, who identified a technical problem?",
               "answers": [
                 {
@@ -8588,6 +9376,10 @@
             },
             {
               "questionNumber": 198,
+              "questionType": "INFERENCE",
+              "skillTags": ["READING_FOR_INFERENCE","CROSS_TEXT_INTEGRATION"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "What can be concluded about Mr. Riggs?",
               "answers": [
                 {
@@ -8633,6 +9425,10 @@
             },
             {
               "questionNumber": 199,
+              "questionType": "DETAIL",
+              "skillTags": ["READING_FOR_DETAILS"],
+              "grammarTags": [],
+              "difficulty": "MEDIUM",
               "question": "What is indicated in the notice about Ms. Boyd?",
               "answers": [
                 {
@@ -8678,6 +9474,10 @@
             },
             {
               "questionNumber": 200,
+              "questionType": "INFERENCE",
+              "skillTags": ["READING_FOR_INFERENCE","CROSS_TEXT_INTEGRATION"],
+              "grammarTags": [],
+              "difficulty": "HARD",
               "question": "What is most likely true about Ms. Boyd?",
               "answers": [
                 {

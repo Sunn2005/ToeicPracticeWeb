@@ -42,6 +42,9 @@ function QuestionCard({
   isFocused = false,
   compact = false,
   review = false,
+  hideReviewTranslations = false,
+  translatedTranscript,
+  hideDetailedExplanation = false,
   showAiFeedback = false,
   aiFeedback,
   onRequestAiFeedback,
@@ -147,20 +150,27 @@ function QuestionCard({
         <div className="mt-5 space-y-3">
           <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6">
             <strong>{t("correctAnswer")}</strong> {question.correctAnswer}
-            {question.selectedAnswer && (
+            {/* {question.selectedAnswer && (
               <>
                 {" "}· <strong>{t("yourAnswer")}</strong> {question.selectedAnswer}
               </>
-            )}
+            )} */}
           </p>
-          {questionTranslation && (
+          {translatedTranscript && (
+            <ReviewTogglePanel title={t("transcriptTranslation")} icon="文" tone="sky">
+              <div className="space-y-3">
+                <ReviewContent>{translatedTranscript}</ReviewContent>
+              </div>
+            </ReviewTogglePanel>
+          )}
+          {!hideReviewTranslations && questionTranslation && (
             <ReviewTogglePanel title={t("questionTranslation")} icon="文" tone="sky">
               <div className="space-y-3">
                 <ReviewContent>{questionTranslation}</ReviewContent>
               </div>
             </ReviewTogglePanel>
           )}
-          {question.answerTranslation && (
+          {!hideReviewTranslations && question.answerTranslation && (
             <ReviewTogglePanel title={t("answerTranslation")} icon="☷" tone="emerald">
               <div className="space-y-1.5">
                 <AnswerTranslationContent
@@ -170,13 +180,15 @@ function QuestionCard({
               </div>
             </ReviewTogglePanel>
           )}
-          <ReviewTogglePanel title={t("detailedExplanation")} icon="✦" tone="violet">
-            <div className="space-y-3 text-slate-700">
-              <ReviewContent>
-                {detailedExplanation || t("noExplanation")}
-              </ReviewContent>
-            </div>
-          </ReviewTogglePanel>
+          {!hideDetailedExplanation && (
+            <ReviewTogglePanel title={t("detailedExplanation")} icon="✦" tone="violet">
+              <div className="space-y-3 text-slate-700">
+                <ReviewContent>
+                  {detailedExplanation || t("noExplanation")}
+                </ReviewContent>
+              </div>
+            </ReviewTogglePanel>
+          )}
           {showAiFeedback && (
             <AIExplanationPanel
               feedback={aiFeedback}

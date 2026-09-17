@@ -163,6 +163,12 @@ public class FirestoreAttemptDao implements AttemptDao {
         attempt.setReadingEndAt(epochMillis(data.get("readingEndAt"), "readingEndAt"));
         attempt.setScore(integerValue(data.get("score"), "score"));
         attempt.setResult(objectMapValue(data.get("result"), "result"));
+        attempt.setAiAnalysisStatus(stringValue(data.get("aiAnalysisStatus")));
+        attempt.setAiAnalysisId(stringValue(data.get("aiAnalysisId")));
+        attempt.setAiAnalysisRequestedAt(epochMillis(
+                data.get("aiAnalysisRequestedAt"),
+                "aiAnalysisRequestedAt"
+        ));
         attempt.setAnswers(stringMapValue(data.get("answers"), "answers"));
         return attempt;
     }

@@ -85,3 +85,9 @@ export function shouldSubmitAfterListeningAudio(attempt, currentUnit, listeningU
     && selectedParts.length > 0
     && selectedParts.every((part) => part <= 4);
 }
+
+export function shouldDisableSubmit(attempt, busy = false) {
+  return Boolean(busy)
+    || (normalizeMode(attempt?.mode) === "FULL"
+      && attempt?.currentSection === "LISTENING");
+}

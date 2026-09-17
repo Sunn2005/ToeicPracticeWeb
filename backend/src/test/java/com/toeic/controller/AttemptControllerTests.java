@@ -4,6 +4,7 @@ import com.toeic.dto.CreateAttemptRequest;
 import com.toeic.model.enums.UserRole;
 import com.toeic.security.ToeicUserPrincipal;
 import com.toeic.service.AttemptService;
+import com.toeic.service.AIReviewService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -19,12 +20,14 @@ class AttemptControllerTests {
 
     private AttemptService attemptService;
     private AttemptController controller;
+    private AIReviewService aiReviewService;
     private ToeicUserPrincipal principal;
 
     @BeforeEach
     void setUp() {
         attemptService = mock(AttemptService.class);
-        controller = new AttemptController(attemptService);
+        aiReviewService = mock(AIReviewService.class);
+        controller = new AttemptController(attemptService, aiReviewService);
         principal = new ToeicUserPrincipal(
                 "firebase-uid-123",
                 "user@example.com",

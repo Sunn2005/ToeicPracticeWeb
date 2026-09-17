@@ -8,7 +8,11 @@ import QuestionNavigatorDrawer from "../components/QuestionNavigatorDrawer";
 import ResizableExamLayout from "../components/ResizableExamLayout";
 import ReviewTogglePanel from "../components/ReviewTogglePanel";
 import { getAllQuestions } from "../utils/testData";
-import { formatListeningTranscript } from "../utils/reviewContent";
+import {
+  formatListeningTranscript,
+  formatPartTwoTranscript,
+  formatTranslatedTranscript,
+} from "../utils/reviewContent";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import { useLanguage } from "../i18n/LanguageContext";
 import { deleteAttempt } from "../api/userLearning";
@@ -270,10 +274,30 @@ function FullTestReview() {
     ...(unit?.passages || []).map((passage) => passage.imageUrl),
   ].filter(Boolean));
   const shouldRenderStandaloneImage = imageUrl && !passagePanelImageUrls.has(imageUrl);
-  const showListeningReview = [3, 4].includes(unit?.partNumber);
-  const transcript = showListeningReview ? unit?.transcript : null;
-  const formattedTranscript = formatListeningTranscript(transcript, unit?.partNumber);
-  const transcriptTranslation = showListeningReview ? unit?.transcriptTranslation : null;
+  const listeningPart = unit?.partNumber;
+  const showGroupedListeningReview = [3, 4].includes(listeningPart);
+  const transcript = listeningPart === 2
+    ? question?.transcript
+    : showGroupedListeningReview
+      ? unit?.transcript
+      : null;
+  const formattedTranscript = listeningPart === 2
+    ? formatPartTwoTranscript(transcript)
+    : formatListeningTranscript(transcript, listeningPart);
+  const formattedQuestionTranslation = [1, 2].includes(listeningPart)
+    ? formatTranslatedTranscript(
+      question?.questionTranslation,
+      question?.answerTranslation,
+    )
+    : "";
+  const partOneTranscriptTranslation = listeningPart === 1
+    ? formattedQuestionTranslation
+    : null;
+  const transcriptTranslation = listeningPart === 2
+    ? formattedQuestionTranslation
+    : showGroupedListeningReview
+      ? unit?.transcriptTranslation
+      : null;
   const hasMedia = Boolean(
     audioUrl
     || imageUrl
@@ -423,6 +447,11 @@ function FullTestReview() {
                         disabled
                         review
                         compact
+                        hideReviewTranslations={[1, 2].includes(unit.partNumber)}
+                        translatedTranscript={unit.partNumber === 1
+                          ? partOneTranscriptTranslation
+                          : null}
+                        hideDetailedExplanation={[1, 2].includes(unit.partNumber)}
                         isFocused={item.questionNumber === question.questionNumber}
                         showAiFeedback={item.questionNumber >= 101 && item.questionNumber <= 130}
                         aiFeedback={feedbackByQuestion[item.questionNumber]}

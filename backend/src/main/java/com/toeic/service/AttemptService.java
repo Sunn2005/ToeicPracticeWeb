@@ -147,6 +147,9 @@ public class AttemptService {
         attempt.setSubmittedAt(null);
         attempt.setScore(null);
         attempt.setResult(null);
+        attempt.setAiAnalysisStatus("NOT_REQUESTED");
+        attempt.setAiAnalysisId(null);
+        attempt.setAiAnalysisRequestedAt(null);
         attempt.setAnswers(null);
 
         attemptDao.save(attempt);
@@ -366,6 +369,10 @@ public class AttemptService {
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("attempt", toResponse(attempt, true));
         response.put("result", attempt.getResult());
+        response.put("aiAnalysisStatus", attempt.getAiAnalysisStatus() == null
+                ? "NOT_REQUESTED"
+                : attempt.getAiAnalysisStatus());
+        response.put("aiAnalysisId", attempt.getAiAnalysisId());
         response.put("test", reviewTest);
         return response;
     }
@@ -496,8 +503,8 @@ public class AttemptService {
         }
 
         long submittedAt = System.currentTimeMillis();
-        int listeningScore = estimateSectionScore(listeningCorrect, listeningTotal);
-        int readingScore = estimateSectionScore(readingCorrect, readingTotal);
+        int listeningScore = ToeicScoreConverter.listeningScore(listeningCorrect, listeningTotal);
+        int readingScore = ToeicScoreConverter.readingScore(readingCorrect, readingTotal);
         int totalQuestions = questionNumbers.size();
 
         Map<String, Object> result = new LinkedHashMap<>();
@@ -541,15 +548,6 @@ public class AttemptService {
         attempt.setResult(result);
         saveAttempt(attempt);
         return attempt;
-    }
-
-    private int estimateSectionScore(int correct, int totalQuestions) {
-        if (totalQuestions <= 0) {
-            return 0;
-        }
-        double normalizedCorrect = Math.max(0, Math.min(totalQuestions, correct)) * 100.0 / totalQuestions;
-        double rawScore = 5.0 + normalizedCorrect * 4.9;
-        return Math.max(5, Math.min(495, (int) Math.round(rawScore / 5.0) * 5));
     }
 
     private Map<Integer, String> loadAnswers(String attemptId) throws Exception {

@@ -48,6 +48,32 @@ public class RabbitMqConfig {
     }
 
     @Bean
+    Queue aiReviewRequestQueue(
+            @Value("${app.rabbitmq.review-request-queue}") String queueName,
+            @Value("${app.rabbitmq.dead-letter-exchange}") String deadLetterExchange,
+            @Value("${app.rabbitmq.dead-letter-routing-key}") String deadLetterRoutingKey
+    ) {
+        return QueueBuilder.durable(queueName)
+                .deadLetterExchange(deadLetterExchange)
+                .deadLetterRoutingKey(deadLetterRoutingKey)
+                .build();
+    }
+
+    @Bean
+    Queue aiReviewCompletedQueue(
+            @Value("${app.rabbitmq.review-completed-queue}") String queueName
+    ) {
+        return QueueBuilder.durable(queueName).build();
+    }
+
+    @Bean
+    Queue aiReviewFailedQueue(
+            @Value("${app.rabbitmq.review-failed-queue}") String queueName
+    ) {
+        return QueueBuilder.durable(queueName).build();
+    }
+
+    @Bean
     Queue aiDeadLetterQueue(
             @Value("${app.rabbitmq.dead-letter-queue}") String queueName
     ) {
@@ -74,6 +100,33 @@ public class RabbitMqConfig {
         return BindingBuilder.bind(aiResultQueue)
                 .to(aiExchange)
                 .with(routingKey);
+    }
+
+    @Bean
+    Binding aiReviewRequestBinding(
+            Queue aiReviewRequestQueue,
+            DirectExchange aiExchange,
+            @Value("${app.rabbitmq.review-request-routing-key}") String routingKey
+    ) {
+        return BindingBuilder.bind(aiReviewRequestQueue).to(aiExchange).with(routingKey);
+    }
+
+    @Bean
+    Binding aiReviewCompletedBinding(
+            Queue aiReviewCompletedQueue,
+            DirectExchange aiExchange,
+            @Value("${app.rabbitmq.review-completed-routing-key}") String routingKey
+    ) {
+        return BindingBuilder.bind(aiReviewCompletedQueue).to(aiExchange).with(routingKey);
+    }
+
+    @Bean
+    Binding aiReviewFailedBinding(
+            Queue aiReviewFailedQueue,
+            DirectExchange aiExchange,
+            @Value("${app.rabbitmq.review-failed-routing-key}") String routingKey
+    ) {
+        return BindingBuilder.bind(aiReviewFailedQueue).to(aiExchange).with(routingKey);
     }
 
     @Bean

@@ -11,6 +11,8 @@ function LockedExamAudio({ src, onEnded, advancing, paused = false }) {
     const audio = audioRef.current;
     if (!audio) return undefined;
 
+    setAutoplayBlocked(false);
+    setPlaying(false);
     const playPromise = audio.play();
     if (playPromise) {
       playPromise
@@ -20,8 +22,6 @@ function LockedExamAudio({ src, onEnded, advancing, paused = false }) {
 
     return () => {
       audio.pause();
-      audio.removeAttribute("src");
-      audio.load();
     };
   }, [src]);
 
@@ -44,7 +44,12 @@ function LockedExamAudio({ src, onEnded, advancing, paused = false }) {
 
   const startAfterBrowserBlock = async () => {
     try {
-      await audioRef.current?.play();
+      const audio = audioRef.current;
+      if (!audio) return;
+      if (audio.error) {
+        audio.load();
+      }
+      await audio.play();
       setAutoplayBlocked(false);
       setPlaying(true);
     } catch {
@@ -61,6 +66,10 @@ function LockedExamAudio({ src, onEnded, advancing, paused = false }) {
         preload="auto"
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
+        onError={() => {
+          setPlaying(false);
+          setAutoplayBlocked(true);
+        }}
         onEnded={() => {
           setPlaying(false);
           onEnded();

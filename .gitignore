@@ -1,2 +1,3 @@
 backend/.env
 backend/src/main/resources/firebase/*.json
+/exports/

@@ -54,7 +54,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "PHOTO_DESCRIPTION",
+          "skillTags": [
+            "PHOTO_SCENE_RECOGNITION",
+            "IDENTIFYING_PEOPLE_AND_ACTIONS"
+          ],
+          "grammarTags": [],
+          "difficulty": "EASY"
         },
         {
           "questionNumber": 2,
@@ -102,7 +109,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "PHOTO_DESCRIPTION",
+          "skillTags": [
+            "PHOTO_SCENE_RECOGNITION",
+            "IDENTIFYING_PEOPLE_AND_ACTIONS"
+          ],
+          "grammarTags": [],
+          "difficulty": "EASY"
         },
         {
           "questionNumber": 3,
@@ -150,7 +164,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "PHOTO_DESCRIPTION",
+          "skillTags": [
+            "PHOTO_SCENE_RECOGNITION",
+            "IDENTIFYING_OBJECTS_AND_LOCATIONS"
+          ],
+          "grammarTags": [],
+          "difficulty": "EASY"
         },
         {
           "questionNumber": 4,
@@ -198,7 +219,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "PHOTO_DESCRIPTION",
+          "skillTags": [
+            "PHOTO_SCENE_RECOGNITION",
+            "IDENTIFYING_PEOPLE_AND_ACTIONS"
+          ],
+          "grammarTags": [],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 5,
@@ -246,7 +274,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "PHOTO_DESCRIPTION",
+          "skillTags": [
+            "PHOTO_SCENE_RECOGNITION",
+            "IDENTIFYING_PEOPLE_AND_ACTIONS"
+          ],
+          "grammarTags": [],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 6,
@@ -294,7 +329,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "PHOTO_DESCRIPTION",
+          "skillTags": [
+            "PHOTO_SCENE_RECOGNITION",
+            "IDENTIFYING_PEOPLE_AND_ACTIONS"
+          ],
+          "grammarTags": [],
+          "difficulty": "MEDIUM"
         }
       ]
     },
@@ -339,7 +381,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "ALTERNATIVE_QUESTION",
+          "skillTags": [
+            "IDENTIFYING_QUESTION_FOCUS",
+            "INTERPRETING_INDIRECT_RESPONSES"
+          ],
+          "grammarTags": [],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 8,
@@ -378,7 +427,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "WH_QUESTION",
+          "skillTags": [
+            "IDENTIFYING_QUESTION_FOCUS",
+            "INTERPRETING_RESPONSES"
+          ],
+          "grammarTags": [],
+          "difficulty": "EASY"
         },
         {
           "questionNumber": 9,
@@ -417,7 +473,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "ALTERNATIVE_QUESTION",
+          "skillTags": [
+            "IDENTIFYING_QUESTION_FOCUS",
+            "INTERPRETING_INDIRECT_RESPONSES"
+          ],
+          "grammarTags": [],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 10,
@@ -456,7 +519,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "YES_NO_QUESTION",
+          "skillTags": [
+            "IDENTIFYING_QUESTION_FOCUS",
+            "INTERPRETING_RESPONSES"
+          ],
+          "grammarTags": [],
+          "difficulty": "EASY"
         },
         {
           "questionNumber": 11,
@@ -495,7 +565,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "WH_QUESTION",
+          "skillTags": [
+            "IDENTIFYING_QUESTION_FOCUS",
+            "INTERPRETING_RESPONSES"
+          ],
+          "grammarTags": [],
+          "difficulty": "EASY"
         },
         {
           "questionNumber": 12,
@@ -534,7 +611,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "TAG_QUESTION",
+          "skillTags": [
+            "IDENTIFYING_QUESTION_FOCUS",
+            "INTERPRETING_INDIRECT_RESPONSES"
+          ],
+          "grammarTags": [],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 13,
@@ -573,7 +657,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "SUGGESTION",
+          "skillTags": [
+            "IDENTIFYING_QUESTION_FOCUS",
+            "INTERPRETING_RESPONSES"
+          ],
+          "grammarTags": [],
+          "difficulty": "EASY"
         },
         {
           "questionNumber": 14,
@@ -612,7 +703,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "TAG_QUESTION",
+          "skillTags": [
+            "IDENTIFYING_QUESTION_FOCUS",
+            "INTERPRETING_INDIRECT_RESPONSES"
+          ],
+          "grammarTags": [],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 15,
@@ -651,7 +749,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "WH_QUESTION",
+          "skillTags": [
+            "IDENTIFYING_QUESTION_FOCUS",
+            "INTERPRETING_RESPONSES"
+          ],
+          "grammarTags": [],
+          "difficulty": "EASY"
         },
         {
           "questionNumber": 16,
@@ -690,7 +795,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "WH_QUESTION",
+          "skillTags": [
+            "IDENTIFYING_QUESTION_FOCUS",
+            "INTERPRETING_RESPONSES"
+          ],
+          "grammarTags": [],
+          "difficulty": "EASY"
         },
         {
           "questionNumber": 17,
@@ -729,7 +841,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "STATEMENT_RESPONSE",
+          "skillTags": [
+            "IDENTIFYING_QUESTION_FOCUS",
+            "INTERPRETING_INDIRECT_RESPONSES"
+          ],
+          "grammarTags": [],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 18,
@@ -768,7 +887,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "WH_QUESTION",
+          "skillTags": [
+            "IDENTIFYING_QUESTION_FOCUS",
+            "INTERPRETING_RESPONSES"
+          ],
+          "grammarTags": [],
+          "difficulty": "EASY"
         },
         {
           "questionNumber": 19,
@@ -807,7 +933,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "STATEMENT_RESPONSE",
+          "skillTags": [
+            "IDENTIFYING_QUESTION_FOCUS",
+            "INTERPRETING_INDIRECT_RESPONSES"
+          ],
+          "grammarTags": [],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 20,
@@ -846,7 +979,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "WH_QUESTION",
+          "skillTags": [
+            "IDENTIFYING_QUESTION_FOCUS",
+            "INTERPRETING_RESPONSES"
+          ],
+          "grammarTags": [],
+          "difficulty": "EASY"
         },
         {
           "questionNumber": 21,
@@ -885,7 +1025,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "SUGGESTION",
+          "skillTags": [
+            "IDENTIFYING_QUESTION_FOCUS",
+            "INTERPRETING_RESPONSES"
+          ],
+          "grammarTags": [],
+          "difficulty": "EASY"
         },
         {
           "questionNumber": 22,
@@ -924,7 +1071,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "TAG_QUESTION",
+          "skillTags": [
+            "IDENTIFYING_QUESTION_FOCUS",
+            "INTERPRETING_INDIRECT_RESPONSES"
+          ],
+          "grammarTags": [],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 23,
@@ -963,7 +1117,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "WH_QUESTION",
+          "skillTags": [
+            "IDENTIFYING_QUESTION_FOCUS",
+            "INTERPRETING_RESPONSES"
+          ],
+          "grammarTags": [],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 24,
@@ -1002,7 +1163,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "NEGATIVE_QUESTION",
+          "skillTags": [
+            "IDENTIFYING_QUESTION_FOCUS",
+            "INTERPRETING_INDIRECT_RESPONSES"
+          ],
+          "grammarTags": [],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 25,
@@ -1041,7 +1209,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "STATEMENT_RESPONSE",
+          "skillTags": [
+            "IDENTIFYING_QUESTION_FOCUS",
+            "INTERPRETING_INDIRECT_RESPONSES"
+          ],
+          "grammarTags": [],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 26,
@@ -1080,7 +1255,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "WH_QUESTION",
+          "skillTags": [
+            "IDENTIFYING_QUESTION_FOCUS",
+            "INTERPRETING_RESPONSES"
+          ],
+          "grammarTags": [],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 27,
@@ -1119,7 +1301,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "ALTERNATIVE_QUESTION",
+          "skillTags": [
+            "IDENTIFYING_QUESTION_FOCUS",
+            "INTERPRETING_INDIRECT_RESPONSES"
+          ],
+          "grammarTags": [],
+          "difficulty": "HARD"
         },
         {
           "questionNumber": 28,
@@ -1158,7 +1347,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "WH_QUESTION",
+          "skillTags": [
+            "IDENTIFYING_QUESTION_FOCUS",
+            "INTERPRETING_RESPONSES"
+          ],
+          "grammarTags": [],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 29,
@@ -1197,7 +1393,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "WH_QUESTION",
+          "skillTags": [
+            "IDENTIFYING_QUESTION_FOCUS",
+            "INTERPRETING_RESPONSES"
+          ],
+          "grammarTags": [],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 30,
@@ -1236,7 +1439,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "NEGATIVE_QUESTION",
+          "skillTags": [
+            "IDENTIFYING_QUESTION_FOCUS",
+            "INTERPRETING_INDIRECT_RESPONSES"
+          ],
+          "grammarTags": [],
+          "difficulty": "HARD"
         },
         {
           "questionNumber": 31,
@@ -1275,7 +1485,14 @@
               }
             ]
           },
-          "detailedExplanation": null
+          "detailedExplanation": null,
+          "questionType": "TAG_QUESTION",
+          "skillTags": [
+            "IDENTIFYING_QUESTION_FOCUS",
+            "INTERPRETING_INDIRECT_RESPONSES"
+          ],
+          "grammarTags": [],
+          "difficulty": "HARD"
         }
       ]
     },
@@ -1333,7 +1550,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 33,
@@ -1378,7 +1601,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 34,
@@ -1423,7 +1652,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             }
           ],
           "transcriptTranslation": "W: Các chuyến giao hàng hôm nay thế nào?\nM: Không tệ, ngoại trừ ở tòa nhà chung cư mới trên phố South. Tôi phải gọi điện cho họ ra lấy đồ ăn. Ban đầu tôi thử gọi qua hệ thống liên lạc nội bộ của tòa nhà, nhưng nó vẫn bị hỏng.\nW: Anh không phải người đầu tiên nói vậy đâu. Tuần trước, một khách hàng gọi điện phàn nàn rằng đồ ăn của họ đã nguội khi họ tìm thấy.\nM: Có lẽ chúng ta không thể giao hàng ở đó cho đến khi chủ nhà sửa hệ thống liên lạc nội bộ.\nW: Tôi sẽ cập nhật hướng dẫn trên ứng dụng di động của chúng ta, bảo khách hàng ra gặp chúng ta ở cửa chính tòa nhà. Xem thử cách này có giúp không."
@@ -1478,7 +1713,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "INFERENCE",
+              "skillTags": [
+                "LISTENING_FOR_INFERENCE"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 36,
@@ -1523,7 +1764,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "SPEAKER_INTENT",
+              "skillTags": [
+                "INTERPRETING_SPEAKER_INTENT"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 37,
@@ -1568,7 +1815,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "MAIN_IDEA_OR_PURPOSE",
+              "skillTags": [
+                "LISTENING_FOR_MAIN_IDEA"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             }
           ],
           "transcriptTranslation": "W: Chúng ta đang đến gần thời điểm trong năm mà chúng ta cần bắt đầu lập kế hoạch cho chuỗi Theater in the Park cho mùa hè. Chúng ta có rất nhiều quyết định phải đưa ra về các buổi biểu diễn, ngày tháng, và người biểu diễn.\nM: Đúng vậy. Tôi sẽ sắp xếp một cuộc họp cho tháng này. Bạn biết đấy, tôi có một ý tưởng. Tại sao chúng ta không mời cư dân cộng đồng tình nguyện giúp đỡ xây dựng bối cảnh, sơn phết, và thiết lập sân khấu?\nW: Chúng ta có thể, nhưng tôi không biết liệu chúng ta có thể sử dụng tình nguyện viên năm nay không. Chúng ta sẽ cần sự phê duyệt để bắt đầu loại chương trình đó. Nó sẽ mất thời gian. Hãy kiểm tra điều đó cho năm sau."
@@ -1623,7 +1876,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 39,
@@ -1668,7 +1927,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 40,
@@ -1713,7 +1978,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "SPEAKER_INTENT",
+              "skillTags": [
+                "INTERPRETING_SPEAKER_INTENT"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             }
           ],
           "transcriptTranslation": "M: Trở lại với podcast của chúng ta cùng khách mời đặc biệt Kimberly Stuart, người hiện đang tư vấn cho thành phố chúng ta về các dự án phát triển kinh doanh. Trước giờ nghỉ, chúng ta đã hứa sẽ đề cập đến sự suy giảm mua sắm ở khu trung tâm.\nW: Vâng—và tình hình tồi tệ nhất là ở các cửa hàng bán mặt hàng độc đáo như đồ cổ và trang sức. Những mặt hàng này luôn được mua tại các cửa hàng truyền thống nhưng giờ chủ yếu được mua trực tuyến.\nM: Vậy, những cửa hàng đó có tương lai không?\nW: Tôi nghĩ là có, đặc biệt nếu chúng ta chú trọng tổ chức các hoạt động cộng đồng trực tiếp ở khu trung tâm, chẳng hạn như hòa nhạc hoặc lễ hội. Khi mọi người đi dạo quanh thị trấn, họ có khả năng ghé thăm các cửa hàng—và mua hàng."
@@ -1768,7 +2039,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 42,
@@ -1813,7 +2090,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "INFERENCE",
+              "skillTags": [
+                "LISTENING_FOR_INFERENCE"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 43,
@@ -1858,7 +2141,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             }
           ],
           "transcriptTranslation": "M: Công ty chúng ta đã chứng kiến sự tăng vọt về doanh số kể từ khi khởi động chương trình hoàn tiền cho khách hàng. Với hoàn tiền, khách hàng nhận lại tiền. Và họ đang kể cho bạn bè, tăng doanh số của chúng ta.\nW: Vâng. Chương trình hoàn tiền rất tốt cho công ty chúng ta vì giờ đây nhiều chủ nhà có động lực lắp đặt tấm pin mặt trời trên tài sản của họ, vì họ được thưởng cho điện mà tấm pin mặt trời sản xuất. Nhưng các kỹ thuật viên của chúng ta không theo kịp nhu cầu cao.\nM: Đúng vậy. Tôi đang lên kế hoạch thuê thêm kỹ thuật viên. Tôi đã nhận được một số sơ yếu lý lịch từ ứng viên tiềm năng."
@@ -1913,7 +2202,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 45,
@@ -1958,7 +2253,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 46,
@@ -2003,7 +2304,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "SPEAKER_INTENT",
+              "skillTags": [
+                "INTERPRETING_SPEAKER_INTENT"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             }
           ],
           "transcriptTranslation": "M: Fernanda, tôi vừa xem lịch công ty, và tôi nhận thấy hội chợ điện tử quốc gia sắp diễn ra.\nW: Ồ, đúng rồi! Đó sẽ là cơ hội tuyệt vời để chúng ta trưng bày sản phẩm mà chúng ta đang phát triển—máy hút bụi robot mới của chúng ta.\nM: Chúng ta cần quyết định ai chúng ta muốn gửi đi đại diện cho công ty tại hội chợ.\nW: Ừm, tôi biết chính xác người phù hợp—Kavi. Kavi làm tốt việc giải thích rõ ràng các khái niệm kỹ thuật cao cấp theo cách mà mọi người đều có thể hiểu."
@@ -2058,7 +2365,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "INFERENCE",
+              "skillTags": [
+                "LISTENING_FOR_INFERENCE"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 48,
@@ -2103,7 +2416,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 49,
@@ -2148,7 +2467,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "INFERENCE",
+              "skillTags": [
+                "LISTENING_FOR_INFERENCE"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             }
           ],
           "transcriptTranslation": "M: Bác sĩ Fuentes, xin lỗi vì làm gián đoạn. Bà có một phút không?\nW: Có. Bệnh nhân làm sạch răng lúc 9 giờ của tôi vừa hủy.\nM: Tôi biết bà đang tìm lễ tân mới. Tôi muốn giới thiệu ai đó cho vị trí đó.\nW: Ồ. Bà đang nghĩ đến ai?\nM: Ừm, một đồng nghiệp cũ của tôi vừa chuyển về thị trấn. Tên cô ấy là Kelly Graham, và cô ấy có vài năm kinh nghiệm.\nW: OK. Ông có thể bảo Kelly gửi sơ yếu lý lịch cho tôi không? Tôi sẽ vui lòng xem qua."
@@ -2203,7 +2528,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 51,
@@ -2248,7 +2579,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 52,
@@ -2293,7 +2630,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "SPEAKER_INTENT",
+              "skillTags": [
+                "INTERPRETING_SPEAKER_INTENT"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             }
           ],
           "transcriptTranslation": "M1: Cô Gao? Tôi là Hector, và đây là đồng nghiệp của tôi Sergey. Cảm ơn vì đã gặp chúng tôi.\nW: Rất vui được gặp cả hai. Tôi có thể giúp gì?\nM2: Chúng tôi đang làm một số video đào tạo cho khách hàng của chúng tôi, FiveStar Industries.\nM1: Chúng tôi tìm thấy quảng cáo của cô trong một ấn phẩm thương mại. Chúng tôi cần ai đó chọn địa điểm quay phim phù hợp tại các nhà máy FiveStar, và nói cô có nhiều kinh nghiệm tìm kiếm địa điểm công nghiệp.\nW: Chắc chắn. Tôi muốn bắt đầu bằng việc tham quan các nhà máy của họ. Các ông có thể sắp xếp thời gian cho tôi làm điều đó tuần tới không?\nM2: Có, tôi sẽ gọi họ hôm nay để sắp xếp."
@@ -2348,7 +2691,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 54,
@@ -2393,7 +2742,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 55,
@@ -2438,7 +2793,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "SPEAKER_INTENT",
+              "skillTags": [
+                "INTERPRETING_SPEAKER_INTENT"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             }
           ],
           "transcriptTranslation": "M: Công ty kỹ thuật của chúng ta được yêu cầu cắt giảm ngân sách du lịch doanh nghiệp 20%, nhưng sẽ không dễ dàng. Các tư vấn viên kỹ thuật phải du lịch để gặp khách hàng.\nW: Đúng, và họ thường du lịch đột xuất. Sắp xếp chuyến bay vào phút chót rất đắt, đặc biệt là chuyến bay thẳng. Sẽ rẻ hơn nếu họ bay chuyến tiếp.\nM: Vâng, nhưng điều đó có thể mất nhiều thời gian.\nW: Đúng. Có lẽ chúng ta có thể bù đắp chi phí chuyến bay bằng cách tiết kiệm khách sạn. Hãy xem xét điều đó."
@@ -2493,7 +2854,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "INFERENCE",
+              "skillTags": [
+                "LISTENING_FOR_INFERENCE"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 57,
@@ -2538,7 +2905,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 58,
@@ -2583,7 +2956,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "ACTION_OR_NEXT_STEP",
+              "skillTags": [
+                "TRACKING_FUTURE_ACTIONS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             }
           ],
           "transcriptTranslation": "M1: Cảm ơn vì đã gặp chúng tôi, cô Azuma. Đây là Scott Ajibade, một trong những quản lý dự án cấp cao của chúng tôi.\nM2: Tôi ngưỡng mộ công việc của cô, cô Azuma.\nW: Cảm ơn. Tôi ngạc nhiên vì lời mời của các ông. Tôi thường thiết kế trang sức, nhưng công ty của các ông nổi tiếng với việc làm máy tính và điện thoại di động.\nM1: Đội của Scott hiện đang làm việc trên đồng hồ thông minh. Nhưng có nhiều cạnh tranh, như cô biết.\nM2: Chúng tôi hy vọng cô có thể tạo ra thiết kế mới mẻ giúp sản phẩm của chúng tôi nổi bật.\nW: Các ông đã có ý tưởng về đồng hồ nên trông như thế nào chưa, hay chúng ta bắt đầu từ con số không?\nM2: Tôi có một số bản phác thảo sơ bộ chúng ta có thể xem, nhưng không cái nào dường như khá đúng."
@@ -2638,7 +3017,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 60,
@@ -2683,7 +3068,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 61,
@@ -2728,7 +3119,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             }
           ],
           "transcriptTranslation": "W: Xin chào. Tôi muốn mua thảm mới, dành cho phòng chờ tại tiệm làm tóc của tôi.\nM: Chúng tôi có nhiều kiểu khác nhau. Cô đang tìm cái gì khác biệt?\nW: Ừm, chúng tôi có nhiều khách hàng đi qua, và thảm hiện tại của chúng tôi có màu sáng.\nM: Dù màu gì, tất cả thảm của chúng tôi đều bền và có thể chịu lượng người đi lại cao. Đối với doanh nghiệp như của cô, tôi khuyên nên đặt thảm bảo vệ gần cửa.\nW: Đó là một ý hay.\nM: Ngoài ra, tôi cung cấp dịch vụ vệ sinh miễn phí trong một năm cho tất cả các mua hàng."
@@ -2783,7 +3180,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 63,
@@ -2828,7 +3231,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "GRAPHIC_INTEGRATION",
+              "skillTags": [
+                "INTEGRATING_AUDIO_AND_VISUAL"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 64,
@@ -2873,7 +3282,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             }
           ],
           "transcriptTranslation": "M: Tôi thực sự cần nghỉ ngơi uống cà phê. Cuộc họp sáng nay với khách hàng thật sự khó khăn.\nW: Các anh thảo luận gì vậy?\nM: Lịch trình dự án. Họ yêu cầu chúng tôi cung cấp thiết kế mẫu ba tuần sớm hơn kế hoạch ban đầu.\nW: Ừm. Vậy hôm nay tôi mời. Anh muốn loại nào?\nM: Thật tốt quá! Tôi sẽ lấy White Cloud Coffee. Tôi thích có chút sữa trong cà phê.\nW: Lựa chọn tốt. Vậy, tôi có tin tức để chia sẻ với anh. Anh có nghe về David không?\nM: Không, chuyện gì vậy?\nW: Có vẻ như anh ấy đang lên kế hoạch nghỉ hưu tháng tới."
@@ -2928,7 +3343,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "INFERENCE",
+              "skillTags": [
+                "LISTENING_FOR_INFERENCE"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 66,
@@ -2973,7 +3394,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 67,
@@ -3018,7 +3445,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "GRAPHIC_INTEGRATION",
+              "skillTags": [
+                "INTEGRATING_AUDIO_AND_VISUAL"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             }
           ],
           "transcriptTranslation": "M: Đây là Bradley từ Windows Galore. Tôi có thể giúp gì cho bạn?\nW: Xin chào! Tôi muốn thêm màn chắn vào cửa sổ nhà tôi. Tôi tự hỏi liệu bạn có thể ghé qua và xem không. Nhân tiện, tôi sống ở 42 West Third Street.\nM: OK—không xa lắm. Để tôi xem. Tôi có thể đến bất kỳ buổi sáng nào trong tuần này.\nW: Buổi chiều thì sao?\nM: Hmm. Tôi có thể sắp xếp lại cuộc hẹn chiều thứ Ba. Tôi sẽ kiểm tra và liên lạc lại với bạn—bây giờ tôi có số của bạn rồi. Và tên bạn là?\nW: Hoffman—Claudia Hoffman. Cảm ơn. Nói chuyện sau."
@@ -3073,7 +3506,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "INFERENCE",
+              "skillTags": [
+                "LISTENING_FOR_INFERENCE"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 69,
@@ -3118,7 +3557,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 70,
@@ -3163,7 +3608,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "GRAPHIC_INTEGRATION",
+              "skillTags": [
+                "INTEGRATING_AUDIO_AND_VISUAL"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             }
           ],
           "transcriptTranslation": "M: Cô Kwon, cảm ơn vì đã gửi tôi đến hội nghị robot sắp tới. Tôi không ngờ có cơ hội như thế này sớm sau khi được thuê ở đây.\nW: Điều quan trọng là bạn phải quen thuộc với các thiết kế robot hiện tại. Luôn có xu hướng và công nghệ mới xuất hiện, và tôi muốn bạn dẫn đầu sự phát triển trong ngành của chúng ta.\nM: Tôi đồng ý. Ngoài ra, nó sẽ cho tôi cơ hội giới thiệu bản thân với khách hàng tiềm năng.\nW: Ồ, về điều đó: đây là tài liệu tôi cung cấp cho tất cả nhân viên mới. Nó bao gồm một số mẹo hữu ích—đặc biệt là cái này. Bạn đã có danh thiếp chưa?\nM: Hmm. Tôi chưa nhận được, nhưng tôi sẽ gọi cho nhà in hôm nay để cập nhật."
@@ -3224,7 +3675,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "INFERENCE",
+              "skillTags": [
+                "LISTENING_FOR_INFERENCE"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 72,
@@ -3269,7 +3726,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 73,
@@ -3314,7 +3777,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "ACTION_OR_NEXT_STEP",
+              "skillTags": [
+                "TRACKING_FUTURE_ACTIONS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             }
           ],
           "transcriptTranslation": "M: Đội ngũ, xin vui lòng dừng sửa chữa chiếc xe tải đó một giây. Nhiều người trong các bạn phàn nàn về việc sử dụng thang nâng xe chậm và khó khăn như thế nào, vì vậy tôi đã mua cái mới và nó được giao sáng nay! Nó có thể nâng các phương tiện nặng hơn nhiều, và nhanh hơn. Vấn đề duy nhất là chúng ta đang thiếu các chai dầu thủy lực lẽ ra phải được bao gồm trong lô hàng. Vì vậy, chúng ta buộc phải sử dụng thang nâng xe cũ thêm vài ngày nữa. Ồ, và một điều nữa—khi nói chuyện với khách hàng, hãy nhớ đề cập rằng chúng ta đang giảm giá cho việc thay dầu nếu họ lên lịch kiểm tra xe với chúng ta."
@@ -3369,7 +3838,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 75,
@@ -3414,7 +3889,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 76,
@@ -3459,7 +3940,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             }
           ],
           "transcriptTranslation": "W: Như các bạn biết, chúng ta đã có một quý thứ tư cực kỳ thành công trong việc bán bàn ghế cho khách hàng doanh nghiệp ở Bờ Tây. Thực tế, chúng ta đã làm rất tốt nên chúng ta đang lên kế hoạch tặng mười phần trăm lợi nhuận tháng này cho một tổ chức từ thiện địa phương vào tháng Mười Hai. Họ có danh tiếng tốt trong việc dạy kỹ năng máy tính miễn phí cho trẻ em. Nếu bạn muốn xem clip về CEO của chúng ta nói về sáng kiến này, chỉ cần truy cập trang mạng xã hội của chúng ta."
@@ -3514,7 +4001,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "MAIN_IDEA_OR_PURPOSE",
+              "skillTags": [
+                "LISTENING_FOR_MAIN_IDEA"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 78,
@@ -3559,7 +4052,14 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "IMPLIED_MEANING",
+              "skillTags": [
+                "INTERPRETING_SPEAKER_INTENT",
+                "LISTENING_FOR_INFERENCE"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 79,
@@ -3604,7 +4104,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             }
           ],
           "transcriptTranslation": "M: Chào mừng đến với podcast của chúng tôi cùng khách mời đặc biệt Kimberly Stuart, người hiện đang tư vấn cho thành phố chúng ta về các dự án phát triển kinh doanh. Trước giờ nghỉ, chúng ta đã hứa sẽ đề cập đến sự suy giảm mua sắm ở khu trung tâm. Vâng—và tình hình tồi tệ nhất ở các cửa hàng bán các mặt hàng độc đáo như đồ cổ và trang sức. Những mặt hàng này luôn được mua tại các cửa hàng truyền thống nhưng giờ chủ yếu được mua trực tuyến. Vậy, những cửa hàng đó có tương lai không? Tôi nghĩ là có, đặc biệt nếu chúng ta chú trọng tổ chức các hoạt động cộng đồng trực tiếp ở khu trung tâm, chẳng hạn như hòa nhạc hoặc lễ hội. Khi mọi người đi dạo quanh thị trấn, họ có khả năng ghé thăm các cửa hàng—và mua hàng."
@@ -3659,7 +4165,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 81,
@@ -3704,7 +4216,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "ACTION_OR_NEXT_STEP",
+              "skillTags": [
+                "TRACKING_FUTURE_ACTIONS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 82,
@@ -3749,7 +4267,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             }
           ],
           "transcriptTranslation": "W: Là chủ tịch công ty, tôi rất hào hứng khi chia sẻ rằng chúng ta đã bán được số lượng kỷ lục thiết bị gia dụng trong hai năm liên tiếp, và tôi muốn thưởng cho sự làm việc chăm chỉ của các bạn. Đầu tiên, mọi người sẽ đủ điều kiện nhận thưởng tiền một lần. Người giám sát của bạn sẽ nói chuyện với bạn về cách tính và khi bạn nhận được. Ngoài ra, tôi muốn cung cấp thêm sự linh hoạt trong lịch trình của bạn, vì vậy tất cả nhân viên sẽ được phép làm việc từ xa hai lần một tuần. Bạn chỉ cần ghi chú những ngày đó trên lịch, để mọi người biết bạn ở đâu."
@@ -3804,7 +4328,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "MAIN_IDEA_OR_PURPOSE",
+              "skillTags": [
+                "LISTENING_FOR_MAIN_IDEA"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 84,
@@ -3849,7 +4379,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 85,
@@ -3894,7 +4430,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             }
           ],
           "transcriptTranslation": "M: Tôi gọi cuộc họp hôm nay vì tôi muốn nói về những thay đổi trong cách công ty chúng ta tuyển dụng nhân viên mới. Tôi chú ý rằng một số người bị bối rối khi đọc về những chính sách tuyển dụng mới này trong bản tin công ty mới nhất. Tôi đã đăng liên kết trong lời mời họp đến thông tin này, và tôi yêu cầu bạn mang theo laptop để các bạn có thể theo dõi trên màn hình của riêng mình. Sau khi chúng ta xem xét các chính sách, bạn có thể gặp Sumit ở phía sau phòng nếu bạn muốn một bản in. Anh ấy có vài bản."
@@ -3949,7 +4491,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 87,
@@ -3994,7 +4542,14 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "IMPLIED_MEANING",
+              "skillTags": [
+                "INTERPRETING_SPEAKER_INTENT",
+                "LISTENING_FOR_INFERENCE"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 88,
@@ -4039,7 +4594,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "ACTION_OR_NEXT_STEP",
+              "skillTags": [
+                "TRACKING_FUTURE_ACTIONS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             }
           ],
           "transcriptTranslation": "M: Là trưởng nhóm thiết kế sản phẩm, tôi có kết quả bán hàng từ quý trước, và chúng thật đáng thất vọng. Rõ ràng là người tiêu dùng không còn quan tâm đến loại đồ chơi và trò chơi mà chúng ta đã sản xuất. Tôi đoán là mọi người đang mệt mỏi với đồ điện tử ồn ào, nhấp nháy. Chúng ta có nhiều việc phải làm. Có xu hướng mới hướng đến đồ chơi và trò chơi ngoài trời, nơi mọi người có thể hoạt động thể chất. Tôi đã nghĩ ra một số mẫu thử của trò chơi mới. Tôi mang theo vài cái, và bây giờ tôi sẽ cho bạn thấy chúng hoạt động như thế nào."
@@ -4094,7 +4655,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "INFERENCE",
+              "skillTags": [
+                "LISTENING_FOR_INFERENCE"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 90,
@@ -4139,7 +4706,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 91,
@@ -4184,7 +4757,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             }
           ],
           "transcriptTranslation": "M: Xin chào. Bạn đã gọi đến Ji-Soo Yoon tại trung tâm du khách của Khu bảo tồn Thiên nhiên Pine Valley. Tôi hiện đang ra khỏi văn phòng. Xin lưu ý rằng việc tiếp cận công viên của du khách sẽ bị hạn chế trong tháng Ba trong khi cơ sở của chúng tôi đang được cải tạo. Nếu bạn gọi để lấy thông tin về việc giúp duy trì các đường mòn leo núi của chúng tôi, vui lòng tham khảo trang tình nguyện viên trên trang web của chúng tôi. Chúng tôi chào đón sự hỗ trợ của các cá nhân có động lực. Đối với tất cả các câu hỏi khác, vui lòng để lại tin nhắn sau tiếng bíp."
@@ -4239,7 +4818,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 93,
@@ -4284,7 +4869,14 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "IMPLIED_MEANING",
+              "skillTags": [
+                "INTERPRETING_SPEAKER_INTENT",
+                "LISTENING_FOR_INFERENCE"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 94,
@@ -4329,7 +4921,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "ACTION_OR_NEXT_STEP",
+              "skillTags": [
+                "TRACKING_FUTURE_ACTIONS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             }
           ],
           "transcriptTranslation": "W: Hôm nay, tôi sẽ phỏng vấn chủ sở hữu của Salazar Olive Oil, một trong những loại tốt nhất ở California trong hai thập kỷ qua. Bây giờ—nếu bạn nghe về loại dầu ô liu này lần đầu tiên, bạn không phải là người duy nhất. Gia đình Salazar đã giữ hoạt động nhỏ. Tôi quan tâm đến thảo luận về triết lý kinh doanh của họ cũng như dự án mới: lớp nếm dầu ô liu trên trang trại của họ. Bạn sẽ tìm hiểu cách đăng ký trong cuộc phỏng vấn để bạn có thể đăng ký!"
@@ -4384,7 +4982,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 96,
@@ -4429,7 +5033,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "GRAPHIC_INTEGRATION",
+              "skillTags": [
+                "INTEGRATING_AUDIO_AND_VISUAL"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 97,
@@ -4474,7 +5084,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "DETAIL",
+              "skillTags": [
+                "LISTENING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             }
           ],
           "transcriptTranslation": "W: Chào mừng đến Ga Abingdon Transit. Xin lưu ý rằng xe buýt Circle Route hiện không dừng tại lối vào ga vì một số công việc tái lát đường phố. Một điểm dừng xe buýt tạm thời đã được thiết lập quanh góc ở phía trước bưu điện. Các biển chỉ dẫn được đăng hướng dẫn bạn đến điểm dừng mới. Lịch trình xe buýt sẽ bị ảnh hưởng bởi sự thay đổi tuyến đường. Sử dụng ứng dụng điện thoại di động Abingdon Transit để xem cập nhật trực tiếp cho khi xe buýt tiếp theo đến hạn."
@@ -4529,7 +5145,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "INFERENCE",
+              "skillTags": [
+                "LISTENING_FOR_INFERENCE"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 99,
@@ -4574,7 +5196,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "GRAPHIC_INTEGRATION",
+              "skillTags": [
+                "INTEGRATING_AUDIO_AND_VISUAL"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 100,
@@ -4619,7 +5247,13 @@
                   }
                 ]
               },
-              "detailedExplanation": null
+              "detailedExplanation": null,
+              "questionType": "ACTION_OR_NEXT_STEP",
+              "skillTags": [
+                "TRACKING_FUTURE_ACTIONS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             }
           ],
           "transcriptTranslation": "M: Xin chào mọi người! Chúng tôi vui mừng thông báo rằng các hội thảo giáo dục liên tục tháng Hai tại trung tâm cộng đồng đã rất thành công. Cảm ơn bạn vì đã làm việc chăm chỉ để đảm bảo chúng diễn ra suôn sẻ. Mọi hội thảo đều đầy đủ. Thực tế, chúng tôi phải tạo danh sách chờ cho hội thảo tối thứ Hai. Bắt đầu từ tháng Ba, chúng tôi sẽ cung cấp hội thảo tương tự vào thứ Sáu. Bây giờ, nhiều người tham gia phàn nàn về việc thiếu máy bán hàng tự động trong tòa nhà. Bianca sẽ liên hệ với dịch vụ máy bán hàng tự động tuần tới để hỏi về giá cả."
@@ -4674,7 +5308,16 @@
               }
             ]
           },
-          "detailedExplanation": "engineered for + danh từ 1 + liên từ + danh từ 2. \"Maximum reliability\" và \"gas mileage\" là hai mục tiêu song song, bổ sung cho nhau. so: chỉ kết quả; but: chỉ tương phản; nor: dùng trong câu phủ định → and là liên từ phù hợp để nối hai danh từ đồng cấp."
+          "detailedExplanation": "engineered for + danh từ 1 + liên từ + danh từ 2. \"Maximum reliability\" và \"gas mileage\" là hai mục tiêu song song, bổ sung cho nhau. so: chỉ kết quả; but: chỉ tương phản; nor: dùng trong câu phủ định → and là liên từ phù hợp để nối hai danh từ đồng cấp.",
+          "questionType": "CONNECTOR_USAGE",
+          "skillTags": [
+            "LOGICAL_RELATIONSHIPS",
+            "TEXT_COHESION"
+          ],
+          "grammarTags": [
+            "COORDINATING_CONJUNCTIONS"
+          ],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 102,
@@ -4720,7 +5363,16 @@
               }
             ]
           },
-          "detailedExplanation": "Cấu trúc: grateful for + danh từ. Sau \"the\" và trước mệnh đề quan hệ \"that...\" → bắt buộc là danh từ. information (n): thông tin; informed (adj); informs/inform (v) → Chỉ information đúng."
+          "detailedExplanation": "Cấu trúc: grateful for + danh từ. Sau \"the\" và trước mệnh đề quan hệ \"that...\" → bắt buộc là danh từ. information (n): thông tin; informed (adj); informs/inform (v) → Chỉ information đúng.",
+          "questionType": "WORD_FORM",
+          "skillTags": [
+            "GRAMMATICAL_FORM",
+            "PART_OF_SPEECH_RECOGNITION"
+          ],
+          "grammarTags": [
+            "PARTS_OF_SPEECH"
+          ],
+          "difficulty": "EASY"
         },
         {
           "questionNumber": 103,
@@ -4766,7 +5418,14 @@
               }
             ]
           },
-          "detailedExplanation": "\"Held\" cần trạng từ chỉ cách thức/thời điểm. Liên quan đến thời gian họp → \"promptly\" là hợp lý nhất. barely: hầu như không; closely: chặt chẽ; evenly: đồng đều; promptly: đúng giờ, ngay lập tức."
+          "detailedExplanation": "\"Held\" cần trạng từ chỉ cách thức/thời điểm. Liên quan đến thời gian họp → \"promptly\" là hợp lý nhất. barely: hầu như không; closely: chặt chẽ; evenly: đồng đều; promptly: đúng giờ, ngay lập tức.",
+          "questionType": "VOCABULARY_IN_CONTEXT",
+          "skillTags": [
+            "VOCABULARY_IN_CONTEXT",
+            "COLLOCATION"
+          ],
+          "grammarTags": [],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 104,
@@ -4812,7 +5471,16 @@
               }
             ]
           },
-          "detailedExplanation": "Trước danh từ \"paycheck\" → cần tính từ sở hữu. you: đại từ chủ ngữ; your: tính từ sở hữu → đúng; yours: đại từ sở hữu; yourself: đại từ phản thân."
+          "detailedExplanation": "Trước danh từ \"paycheck\" → cần tính từ sở hữu. you: đại từ chủ ngữ; your: tính từ sở hữu → đúng; yours: đại từ sở hữu; yourself: đại từ phản thân.",
+          "questionType": "PRONOUN_USAGE",
+          "skillTags": [
+            "REFERENCE_TRACKING",
+            "GRAMMATICAL_ACCURACY"
+          ],
+          "grammarTags": [
+            "POSSESSIVE_DETERMINERS"
+          ],
+          "difficulty": "EASY"
         },
         {
           "questionNumber": 105,
@@ -4858,7 +5526,14 @@
               }
             ]
           },
-          "detailedExplanation": "\"Lead\" dùng như tính từ, nghĩa là chủ chốt/đứng đầu. each, front, most không đi với \"design engineer\"."
+          "detailedExplanation": "\"Lead\" dùng như tính từ, nghĩa là chủ chốt/đứng đầu. each, front, most không đi với \"design engineer\".",
+          "questionType": "VOCABULARY_IN_CONTEXT",
+          "skillTags": [
+            "VOCABULARY_IN_CONTEXT",
+            "COLLOCATION"
+          ],
+          "grammarTags": [],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 106,
@@ -4904,7 +5579,16 @@
               }
             ]
           },
-          "detailedExplanation": "Cấu trúc chuẩn TOEIC: decide + which/what/how + to V. buying: V-ing (sai cấu trúc); had bought: quá khứ hoàn thành (sai ngữ nghĩa); buy: thiếu \"to\"; to buy: đúng công thức."
+          "detailedExplanation": "Cấu trúc chuẩn TOEIC: decide + which/what/how + to V. buying: V-ing (sai cấu trúc); had bought: quá khứ hoàn thành (sai ngữ nghĩa); buy: thiếu \"to\"; to buy: đúng công thức.",
+          "questionType": "WORD_FORM",
+          "skillTags": [
+            "GRAMMATICAL_FORM",
+            "PART_OF_SPEECH_RECOGNITION"
+          ],
+          "grammarTags": [
+            "PARTS_OF_SPEECH"
+          ],
+          "difficulty": "EASY"
         },
         {
           "questionNumber": 107,
@@ -4950,7 +5634,16 @@
               }
             ]
           },
-          "detailedExplanation": "\"By + mốc thời gian\" = trước hoặc không muộn hơn thời điểm đó. Các giới từ khác không dùng cho deadline."
+          "detailedExplanation": "\"By + mốc thời gian\" = trước hoặc không muộn hơn thời điểm đó. Các giới từ khác không dùng cho deadline.",
+          "questionType": "PREPOSITION_USAGE",
+          "skillTags": [
+            "GRAMMATICAL_ACCURACY",
+            "SENTENCE_STRUCTURE"
+          ],
+          "grammarTags": [
+            "PREPOSITIONS"
+          ],
+          "difficulty": "EASY"
         },
         {
           "questionNumber": 108,
@@ -4996,7 +5689,16 @@
               }
             ]
           },
-          "detailedExplanation": "Danh từ \"plant\" cần tính từ đứng trước. \"Manufacturing plant\" là cụm cố định trong TOEIC."
+          "detailedExplanation": "Danh từ \"plant\" cần tính từ đứng trước. \"Manufacturing plant\" là cụm cố định trong TOEIC.",
+          "questionType": "WORD_FORM",
+          "skillTags": [
+            "GRAMMATICAL_FORM",
+            "PART_OF_SPEECH_RECOGNITION"
+          ],
+          "grammarTags": [
+            "PARTS_OF_SPEECH"
+          ],
+          "difficulty": "EASY"
         },
         {
           "questionNumber": 109,
@@ -5042,7 +5744,14 @@
               }
             ]
           },
-          "detailedExplanation": "must + V (nguyên mẫu). complete: hoàn thành → đi với \"tasks\"; proceed: tiếp tục (không đi với tasks); recover: hồi phục (sai nghĩa); enlist: ghi danh (sai ngữ cảnh)."
+          "detailedExplanation": "must + V (nguyên mẫu). complete: hoàn thành → đi với \"tasks\"; proceed: tiếp tục (không đi với tasks); recover: hồi phục (sai nghĩa); enlist: ghi danh (sai ngữ cảnh).",
+          "questionType": "VOCABULARY_IN_CONTEXT",
+          "skillTags": [
+            "VOCABULARY_IN_CONTEXT",
+            "COLLOCATION"
+          ],
+          "grammarTags": [],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 110,
@@ -5088,7 +5797,16 @@
               }
             ]
           },
-          "detailedExplanation": "tính từ sở hữu + danh từ. her: tính từ sở hữu → đúng; she: đại từ chủ ngữ; hers: đại từ sở hữu (không đi với danh từ); herself: đại từ phản thân."
+          "detailedExplanation": "tính từ sở hữu + danh từ. her: tính từ sở hữu → đúng; she: đại từ chủ ngữ; hers: đại từ sở hữu (không đi với danh từ); herself: đại từ phản thân.",
+          "questionType": "PRONOUN_USAGE",
+          "skillTags": [
+            "REFERENCE_TRACKING",
+            "GRAMMATICAL_ACCURACY"
+          ],
+          "grammarTags": [
+            "POSSESSIVE_DETERMINERS"
+          ],
+          "difficulty": "EASY"
         },
         {
           "questionNumber": 111,
@@ -5134,7 +5852,14 @@
               }
             ]
           },
-          "detailedExplanation": "be relieved to find = nhẹ nhõm khi biết. easy: không diễn tả cảm xúc; delightful: ít dùng cho người; absolute: sai nghĩa."
+          "detailedExplanation": "be relieved to find = nhẹ nhõm khi biết. easy: không diễn tả cảm xúc; delightful: ít dùng cho người; absolute: sai nghĩa.",
+          "questionType": "VOCABULARY_IN_CONTEXT",
+          "skillTags": [
+            "VOCABULARY_IN_CONTEXT",
+            "COLLOCATION"
+          ],
+          "grammarTags": [],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 112,
@@ -5180,7 +5905,17 @@
               }
             ]
           },
-          "detailedExplanation": "động từ + trạng từ. signify: động từ; significance: danh từ; significant: tính từ; significantly: trạng từ → đúng."
+          "detailedExplanation": "động từ + trạng từ. signify: động từ; significance: danh từ; significant: tính từ; significantly: trạng từ → đúng.",
+          "questionType": "WORD_FORM",
+          "skillTags": [
+            "GRAMMATICAL_FORM",
+            "PART_OF_SPEECH_RECOGNITION"
+          ],
+          "grammarTags": [
+            "PARTS_OF_SPEECH",
+            "ADVERBS"
+          ],
+          "difficulty": "EASY"
         },
         {
           "questionNumber": 113,
@@ -5226,7 +5961,14 @@
               }
             ]
           },
-          "detailedExplanation": "top priority = ưu tiên hàng đầu. Các đáp án khác không đi với \"top\"."
+          "detailedExplanation": "top priority = ưu tiên hàng đầu. Các đáp án khác không đi với \"top\".",
+          "questionType": "VOCABULARY_IN_CONTEXT",
+          "skillTags": [
+            "VOCABULARY_IN_CONTEXT",
+            "COLLOCATION"
+          ],
+          "grammarTags": [],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 114,
@@ -5272,7 +6014,16 @@
               }
             ]
           },
-          "detailedExplanation": "who + động từ chia thì. are covered: bị động (sai nghĩa); covering/to cover: không chia thì; cover: hiện tại đơn → đúng."
+          "detailedExplanation": "who + động từ chia thì. are covered: bị động (sai nghĩa); covering/to cover: không chia thì; cover: hiện tại đơn → đúng.",
+          "questionType": "WORD_FORM",
+          "skillTags": [
+            "GRAMMATICAL_FORM",
+            "PART_OF_SPEECH_RECOGNITION"
+          ],
+          "grammarTags": [
+            "PARTS_OF_SPEECH"
+          ],
+          "difficulty": "EASY"
         },
         {
           "questionNumber": 115,
@@ -5318,7 +6069,14 @@
               }
             ]
           },
-          "detailedExplanation": "động từ + trạng từ chỉ cách thức. thickly: dày; abruptly: đột ngột → đúng; formerly: trước đây; frequently: thường xuyên."
+          "detailedExplanation": "động từ + trạng từ chỉ cách thức. thickly: dày; abruptly: đột ngột → đúng; formerly: trước đây; frequently: thường xuyên.",
+          "questionType": "VOCABULARY_IN_CONTEXT",
+          "skillTags": [
+            "VOCABULARY_IN_CONTEXT",
+            "COLLOCATION"
+          ],
+          "grammarTags": [],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 116,
@@ -5364,7 +6122,16 @@
               }
             ]
           },
-          "detailedExplanation": "tính từ + danh từ. qualify/qualifies: động từ; qualifier: danh từ; qualified: tính từ → đúng."
+          "detailedExplanation": "tính từ + danh từ. qualify/qualifies: động từ; qualifier: danh từ; qualified: tính từ → đúng.",
+          "questionType": "WORD_FORM",
+          "skillTags": [
+            "GRAMMATICAL_FORM",
+            "PART_OF_SPEECH_RECOGNITION"
+          ],
+          "grammarTags": [
+            "PARTS_OF_SPEECH"
+          ],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 117,
@@ -5410,7 +6177,16 @@
               }
             ]
           },
-          "detailedExplanation": "danh từ chỉ vật + that. who: dùng cho người; what: không có tiền ngữ; it: không nối mệnh đề."
+          "detailedExplanation": "danh từ chỉ vật + that. who: dùng cho người; what: không có tiền ngữ; it: không nối mệnh đề.",
+          "questionType": "PRONOUN_USAGE",
+          "skillTags": [
+            "REFERENCE_TRACKING",
+            "GRAMMATICAL_ACCURACY"
+          ],
+          "grammarTags": [
+            "PRONOUNS"
+          ],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 118,
@@ -5456,7 +6232,14 @@
               }
             ]
           },
-          "detailedExplanation": "be composed of = bao gồm."
+          "detailedExplanation": "be composed of = bao gồm.",
+          "questionType": "VOCABULARY_IN_CONTEXT",
+          "skillTags": [
+            "VOCABULARY_IN_CONTEXT",
+            "COLLOCATION"
+          ],
+          "grammarTags": [],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 119,
@@ -5502,7 +6285,14 @@
               }
             ]
           },
-          "detailedExplanation": "xem tài liệu → rồi mới gặp khách. toward/further/lately: sai nghĩa; before: trước khi → đúng."
+          "detailedExplanation": "xem tài liệu → rồi mới gặp khách. toward/further/lately: sai nghĩa; before: trước khi → đúng.",
+          "questionType": "VOCABULARY_IN_CONTEXT",
+          "skillTags": [
+            "VOCABULARY_IN_CONTEXT",
+            "COLLOCATION"
+          ],
+          "grammarTags": [],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 120,
@@ -5548,7 +6338,16 @@
               }
             ]
           },
-          "detailedExplanation": "by the end of + mốc thời gian. identify: hiện tại đơn; identifying/to identify: không chia thì; will identify: tương lai đơn → đúng."
+          "detailedExplanation": "by the end of + mốc thời gian. identify: hiện tại đơn; identifying/to identify: không chia thì; will identify: tương lai đơn → đúng.",
+          "questionType": "WORD_FORM",
+          "skillTags": [
+            "GRAMMATICAL_FORM",
+            "PART_OF_SPEECH_RECOGNITION"
+          ],
+          "grammarTags": [
+            "PARTS_OF_SPEECH"
+          ],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 121,
@@ -5594,7 +6393,14 @@
               }
             ]
           },
-          "detailedExplanation": "Cụm cố định: unforeseen circumstances = tình huống không lường trước."
+          "detailedExplanation": "Cụm cố định: unforeseen circumstances = tình huống không lường trước.",
+          "questionType": "VOCABULARY_IN_CONTEXT",
+          "skillTags": [
+            "VOCABULARY_IN_CONTEXT",
+            "COLLOCATION"
+          ],
+          "grammarTags": [],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 122,
@@ -5640,7 +6446,16 @@
               }
             ]
           },
-          "detailedExplanation": "unlimited + danh từ đếm được số nhiều. transfer: số ít; transfers: số nhiều → đúng."
+          "detailedExplanation": "unlimited + danh từ đếm được số nhiều. transfer: số ít; transfers: số nhiều → đúng.",
+          "questionType": "WORD_FORM",
+          "skillTags": [
+            "GRAMMATICAL_FORM",
+            "PART_OF_SPEECH_RECOGNITION"
+          ],
+          "grammarTags": [
+            "PARTS_OF_SPEECH"
+          ],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 123,
@@ -5686,7 +6501,16 @@
               }
             ]
           },
-          "detailedExplanation": "be located + giới từ chỉ vị trí. near: gần → đúng; without: không có; since: từ khi; following: theo sau."
+          "detailedExplanation": "be located + giới từ chỉ vị trí. near: gần → đúng; without: không có; since: từ khi; following: theo sau.",
+          "questionType": "PREPOSITION_USAGE",
+          "skillTags": [
+            "GRAMMATICAL_ACCURACY",
+            "SENTENCE_STRUCTURE"
+          ],
+          "grammarTags": [
+            "PREPOSITIONS"
+          ],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 124,
@@ -5732,7 +6556,16 @@
               }
             ]
           },
-          "detailedExplanation": "so sánh hơn → adj + -er than. brief: nguyên cấp; briefly: trạng từ; briefer: so sánh hơn → đúng; briefest: so sánh nhất."
+          "detailedExplanation": "so sánh hơn → adj + -er than. brief: nguyên cấp; briefly: trạng từ; briefer: so sánh hơn → đúng; briefest: so sánh nhất.",
+          "questionType": "WORD_FORM",
+          "skillTags": [
+            "GRAMMATICAL_FORM",
+            "PART_OF_SPEECH_RECOGNITION"
+          ],
+          "grammarTags": [
+            "PARTS_OF_SPEECH"
+          ],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 125,
@@ -5778,7 +6611,14 @@
               }
             ]
           },
-          "detailedExplanation": "arrive/refund → cam kết với khách hàng. distribution: phân phối; guarantee: bảo đảm → đúng; exception: ngoại lệ; discount: giảm giá."
+          "detailedExplanation": "arrive/refund → cam kết với khách hàng. distribution: phân phối; guarantee: bảo đảm → đúng; exception: ngoại lệ; discount: giảm giá.",
+          "questionType": "VOCABULARY_IN_CONTEXT",
+          "skillTags": [
+            "VOCABULARY_IN_CONTEXT",
+            "COLLOCATION"
+          ],
+          "grammarTags": [],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 126,
@@ -5824,7 +6664,17 @@
               }
             ]
           },
-          "detailedExplanation": "động từ + trạng từ. note/noted/notable: sai loại từ; notably: trạng từ → đúng."
+          "detailedExplanation": "động từ + trạng từ. note/noted/notable: sai loại từ; notably: trạng từ → đúng.",
+          "questionType": "WORD_FORM",
+          "skillTags": [
+            "GRAMMATICAL_FORM",
+            "PART_OF_SPEECH_RECOGNITION"
+          ],
+          "grammarTags": [
+            "PARTS_OF_SPEECH",
+            "ADVERBS"
+          ],
+          "difficulty": "MEDIUM"
         },
         {
           "questionNumber": 127,
@@ -5870,7 +6720,14 @@
               }
             ]
           },
-          "detailedExplanation": "Collocation: unseasonably cold = lạnh trái mùa. deceptively/unnecessarily/irresponsibly: không đi với \"cold\"."
+          "detailedExplanation": "Collocation: unseasonably cold = lạnh trái mùa. deceptively/unnecessarily/irresponsibly: không đi với \"cold\".",
+          "questionType": "VOCABULARY_IN_CONTEXT",
+          "skillTags": [
+            "VOCABULARY_IN_CONTEXT",
+            "COLLOCATION"
+          ],
+          "grammarTags": [],
+          "difficulty": "HARD"
         },
         {
           "questionNumber": 128,
@@ -5916,7 +6773,14 @@
               }
             ]
           },
-          "detailedExplanation": "with + danh từ + to V/V-ing. against/namely/else: không dùng cho cấu trúc này; with: đúng cấu trúc."
+          "detailedExplanation": "with + danh từ + to V/V-ing. against/namely/else: không dùng cho cấu trúc này; with: đúng cấu trúc.",
+          "questionType": "VOCABULARY_IN_CONTEXT",
+          "skillTags": [
+            "VOCABULARY_IN_CONTEXT",
+            "COLLOCATION"
+          ],
+          "grammarTags": [],
+          "difficulty": "HARD"
         },
         {
           "questionNumber": 129,
@@ -5962,7 +6826,14 @@
               }
             ]
           },
-          "detailedExplanation": "Collocation: distinguish A from B = phân biệt A với B. participate: tham gia; overturn: lật đổ; revoke: thu hồi."
+          "detailedExplanation": "Collocation: distinguish A from B = phân biệt A với B. participate: tham gia; overturn: lật đổ; revoke: thu hồi.",
+          "questionType": "VOCABULARY_IN_CONTEXT",
+          "skillTags": [
+            "VOCABULARY_IN_CONTEXT",
+            "COLLOCATION"
+          ],
+          "grammarTags": [],
+          "difficulty": "HARD"
         },
         {
           "questionNumber": 130,
@@ -6008,7 +6879,16 @@
               }
             ]
           },
-          "detailedExplanation": "Though + mệnh đề nhượng bộ. As soon as: ngay khi; Because: bởi vì; When: khi."
+          "detailedExplanation": "Though + mệnh đề nhượng bộ. As soon as: ngay khi; Because: bởi vì; When: khi.",
+          "questionType": "CONNECTOR_USAGE",
+          "skillTags": [
+            "LOGICAL_RELATIONSHIPS",
+            "TEXT_COHESION"
+          ],
+          "grammarTags": [
+            "CAUSE_EFFECT_CONNECTORS"
+          ],
+          "difficulty": "HARD"
         }
       ]
     },
@@ -6066,7 +6946,16 @@
                   }
                 ]
               },
-              "detailedExplanation": "Now that: Bởi vì giờ đây; After all: Sau tất cả; Otherwise: Nếu không thì; Before long: Chẳng bao lâu sau"
+              "detailedExplanation": "Now that: Bởi vì giờ đây; After all: Sau tất cả; Otherwise: Nếu không thì; Before long: Chẳng bao lâu sau",
+              "questionType": "CONNECTOR_USAGE",
+              "skillTags": [
+                "LOGICAL_RELATIONSHIPS",
+                "TEXT_COHESION"
+              ],
+              "grammarTags": [
+                "SUBORDINATING_CONJUNCTIONS"
+              ],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 132,
@@ -6111,7 +7000,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Chọn (B) vì câu này tiếp nối ý chia sẻ bánh rộng rãi được nêu ở câu ngay trước đó, dẫn đến việc cô trở nên nổi tiếng khắp thị trấn."
+              "detailedExplanation": "Chọn (B) vì câu này tiếp nối ý chia sẻ bánh rộng rãi được nêu ở câu ngay trước đó, dẫn đến việc cô trở nên nổi tiếng khắp thị trấn.",
+              "questionType": "SENTENCE_INSERTION",
+              "skillTags": [
+                "TEXT_COHESION",
+                "UNDERSTANDING_CONTEXT"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 133,
@@ -6156,7 +7052,16 @@
                   }
                 ]
               },
-              "detailedExplanation": "Using (V-ing): dùng làm phân từ hiện tại rút gọn, diễn tả cách thức. Used: đã được sử dụng; Use: động từ nguyên mẫu; To use: để sử dụng."
+              "detailedExplanation": "Using (V-ing): dùng làm phân từ hiện tại rút gọn, diễn tả cách thức. Used: đã được sử dụng; Use: động từ nguyên mẫu; To use: để sử dụng.",
+              "questionType": "WORD_FORM",
+              "skillTags": [
+                "GRAMMATICAL_FORM",
+                "PART_OF_SPEECH_RECOGNITION"
+              ],
+              "grammarTags": [
+                "PARTS_OF_SPEECH"
+              ],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 134,
@@ -6201,7 +7106,16 @@
                   }
                 ]
               },
-              "detailedExplanation": "Creates (v): Tạo ra; Created (v-ed): Đã tạo ra; Creatively (adv): Một cách sáng tạo; Creations (n): Những tác phẩm/sản phẩm sáng tạo. Sau tính từ \"delicious\" cần một danh từ."
+              "detailedExplanation": "Creates (v): Tạo ra; Created (v-ed): Đã tạo ra; Creatively (adv): Một cách sáng tạo; Creations (n): Những tác phẩm/sản phẩm sáng tạo. Sau tính từ \"delicious\" cần một danh từ.",
+              "questionType": "WORD_FORM",
+              "skillTags": [
+                "GRAMMATICAL_FORM",
+                "PART_OF_SPEECH_RECOGNITION"
+              ],
+              "grammarTags": [
+                "PARTS_OF_SPEECH"
+              ],
+              "difficulty": "MEDIUM"
             }
           ]
         },
@@ -6255,7 +7169,16 @@
                   }
                 ]
               },
-              "detailedExplanation": "Prefer (v): Ưa thích; Preferring (v-ing): Đang thích; Preferable (adj): Đáng thích hơn; Preference (n): Sự ưu tiên. Cấu trúc: Those who + V (số nhiều)."
+              "detailedExplanation": "Prefer (v): Ưa thích; Preferring (v-ing): Đang thích; Preferable (adj): Đáng thích hơn; Preference (n): Sự ưu tiên. Cấu trúc: Those who + V (số nhiều).",
+              "questionType": "WORD_FORM",
+              "skillTags": [
+                "GRAMMATICAL_FORM",
+                "PART_OF_SPEECH_RECOGNITION"
+              ],
+              "grammarTags": [
+                "PARTS_OF_SPEECH"
+              ],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 136,
@@ -6300,7 +7223,16 @@
                   }
                 ]
               },
-              "detailedExplanation": "Its: của nó (tính từ sở hữu), dùng để chỉ công thức của loại xà phòng đang được nói tới. Such: như vậy; Some: một vài; None: không có cái nào."
+              "detailedExplanation": "Its: của nó (tính từ sở hữu), dùng để chỉ công thức của loại xà phòng đang được nói tới. Such: như vậy; Some: một vài; None: không có cái nào.",
+              "questionType": "PRONOUN_USAGE",
+              "skillTags": [
+                "REFERENCE_TRACKING",
+                "GRAMMATICAL_ACCURACY"
+              ],
+              "grammarTags": [
+                "POSSESSIVE_DETERMINERS"
+              ],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 137,
@@ -6345,7 +7277,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Chọn (D) vì đoạn văn đang nhấn mạnh vào yếu tố \"natural\" (tự nhiên) và \"unscented\" (không mùi) của sản phẩm."
+              "detailedExplanation": "Chọn (D) vì đoạn văn đang nhấn mạnh vào yếu tố \"natural\" (tự nhiên) và \"unscented\" (không mùi) của sản phẩm.",
+              "questionType": "SENTENCE_INSERTION",
+              "skillTags": [
+                "TEXT_COHESION",
+                "UNDERSTANDING_CONTEXT"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 138,
@@ -6390,7 +7329,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Equipment: Thiết bị; Fabric: Vải vóc; Issue: Vấn đề/Số báo; Item: Món hàng/Sản phẩm, phù hợp để chỉ chai xà phòng đang bán."
+              "detailedExplanation": "Equipment: Thiết bị; Fabric: Vải vóc; Issue: Vấn đề/Số báo; Item: Món hàng/Sản phẩm, phù hợp để chỉ chai xà phòng đang bán.",
+              "questionType": "VOCABULARY_IN_CONTEXT",
+              "skillTags": [
+                "VOCABULARY_IN_CONTEXT",
+                "COLLOCATION"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             }
           ]
         },
@@ -6444,7 +7390,16 @@
                   }
                 ]
               },
-              "detailedExplanation": "Offers: hiện tại; Offered: quá khứ; Will offer: tương lai; Is offering: hiện tại tiếp diễn. Câu đang kể lại sự việc Rowena mở quán trong quá khứ nên cần động từ chia quá khứ."
+              "detailedExplanation": "Offers: hiện tại; Offered: quá khứ; Will offer: tương lai; Is offering: hiện tại tiếp diễn. Câu đang kể lại sự việc Rowena mở quán trong quá khứ nên cần động từ chia quá khứ.",
+              "questionType": "VERB_FORM",
+              "skillTags": [
+                "GRAMMATICAL_FORM",
+                "SENTENCE_STRUCTURE"
+              ],
+              "grammarTags": [
+                "VERB_TENSE_AND_FORM"
+              ],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 140,
@@ -6489,7 +7444,16 @@
                   }
                 ]
               },
-              "detailedExplanation": "Field: lĩnh vực/cánh đồng; Clinic: phòng khám; Eatery: quán ăn/nhà hàng, đồng nghĩa với \"bistro\" đã nhắc ở câu trước; Theater: nhà hát."
+              "detailedExplanation": "Field: lĩnh vực/cánh đồng; Clinic: phòng khám; Eatery: quán ăn/nhà hàng, đồng nghĩa với \"bistro\" đã nhắc ở câu trước; Theater: nhà hát.",
+              "questionType": "CONNECTOR_USAGE",
+              "skillTags": [
+                "LOGICAL_RELATIONSHIPS",
+                "TEXT_COHESION"
+              ],
+              "grammarTags": [
+                "DISCOURSE_MARKERS"
+              ],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 141,
@@ -6534,7 +7498,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Chọn (D) vì câu trước đó nói bà đã làm trong ngành nhà hàng gần 50 năm và câu sau nói bà đã sẵn sàng sống chậm lại, nên câu điền vào cần nói về việc muốn thay đổi/làm điều mới."
+              "detailedExplanation": "Chọn (D) vì câu trước đó nói bà đã làm trong ngành nhà hàng gần 50 năm và câu sau nói bà đã sẵn sàng sống chậm lại, nên câu điền vào cần nói về việc muốn thay đổi/làm điều mới.",
+              "questionType": "SENTENCE_INSERTION",
+              "skillTags": [
+                "TEXT_COHESION",
+                "UNDERSTANDING_CONTEXT"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 142,
@@ -6579,7 +7550,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Fast-paced: nhịp độ nhanh/hối hả, phù hợp với việc bà muốn \"slow down\" (sống chậm lại). Comforting: an ủi; Widespread: lan rộng; Family-oriented: hướng về gia đình."
+              "detailedExplanation": "Fast-paced: nhịp độ nhanh/hối hả, phù hợp với việc bà muốn \"slow down\" (sống chậm lại). Comforting: an ủi; Widespread: lan rộng; Family-oriented: hướng về gia đình.",
+              "questionType": "VOCABULARY_IN_CONTEXT",
+              "skillTags": [
+                "VOCABULARY_IN_CONTEXT",
+                "COLLOCATION"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             }
           ]
         },
@@ -6633,7 +7611,16 @@
                   }
                 ]
               },
-              "detailedExplanation": "Any: bất kỳ; Several: một vài/nhiều, dùng cho danh từ đếm được số nhiều; Much: nhiều (không đếm được); Enough: đủ. \"Ways\" là danh từ đếm được số nhiều và đoạn sau liệt kê nhiều cách."
+              "detailedExplanation": "Any: bất kỳ; Several: một vài/nhiều, dùng cho danh từ đếm được số nhiều; Much: nhiều (không đếm được); Enough: đủ. \"Ways\" là danh từ đếm được số nhiều và đoạn sau liệt kê nhiều cách.",
+              "questionType": "PRONOUN_USAGE",
+              "skillTags": [
+                "REFERENCE_TRACKING",
+                "GRAMMATICAL_ACCURACY"
+              ],
+              "grammarTags": [
+                "PRONOUNS"
+              ],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 144,
@@ -6678,7 +7665,16 @@
                   }
                 ]
               },
-              "detailedExplanation": "Likewise: tương tự như vậy; Therefore: do đó; Regardless: bất kể; Alternatively: ngoài ra/hoặc là (đưa ra lựa chọn thay thế), phù hợp vì đây là phương án thứ hai sau phương án đầu (vá các điểm trũng)."
+              "detailedExplanation": "Likewise: tương tự như vậy; Therefore: do đó; Regardless: bất kể; Alternatively: ngoài ra/hoặc là (đưa ra lựa chọn thay thế), phù hợp vì đây là phương án thứ hai sau phương án đầu (vá các điểm trũng).",
+              "questionType": "CONNECTOR_USAGE",
+              "skillTags": [
+                "LOGICAL_RELATIONSHIPS",
+                "TEXT_COHESION"
+              ],
+              "grammarTags": [
+                "CAUSE_EFFECT_CONNECTORS"
+              ],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 145,
@@ -6723,7 +7719,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Chọn (B) vì câu tiếp theo giải thích lợi ích của lớp sỏi (giúp thoát nước), cho thấy phương án đó được khuyến khích sử dụng."
+              "detailedExplanation": "Chọn (B) vì câu tiếp theo giải thích lợi ích của lớp sỏi (giúp thoát nước), cho thấy phương án đó được khuyến khích sử dụng.",
+              "questionType": "SENTENCE_INSERTION",
+              "skillTags": [
+                "TEXT_COHESION",
+                "UNDERSTANDING_CONTEXT"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 146,
@@ -6768,7 +7771,16 @@
                   }
                 ]
               },
-              "detailedExplanation": "Yet: tuy nhiên; Whenever: bất cứ khi nào; Until: cho đến khi; Besides: bên cạnh đó. Collocation: whenever it is convenient = bất cứ khi nào thuận tiện."
+              "detailedExplanation": "Yet: tuy nhiên; Whenever: bất cứ khi nào; Until: cho đến khi; Besides: bên cạnh đó. Collocation: whenever it is convenient = bất cứ khi nào thuận tiện.",
+              "questionType": "CONNECTOR_USAGE",
+              "skillTags": [
+                "LOGICAL_RELATIONSHIPS",
+                "TEXT_COHESION"
+              ],
+              "grammarTags": [
+                "COORDINATING_CONJUNCTIONS"
+              ],
+              "difficulty": "MEDIUM"
             }
           ]
         }
@@ -6838,7 +7850,13 @@
                   }
                 ]
               },
-              "detailedExplanation": "Thông báo chỉ đề cập đến bài hát, video âm nhạc và danh sách phát tuyển chọn bởi người dùng khác, không nhắc đến các cuộc phỏng vấn âm thanh với nhạc sĩ. Context: \"you can access hundreds of songs, music videos, and playlists specially curated by other users\" (bạn có thể truy cập hàng trăm bài hát, video âm nhạc và các danh sách phát tuyển chọn đặc biệt bởi những người dùng khác.)"
+              "detailedExplanation": "Thông báo chỉ đề cập đến bài hát, video âm nhạc và danh sách phát tuyển chọn bởi người dùng khác, không nhắc đến các cuộc phỏng vấn âm thanh với nhạc sĩ. Context: \"you can access hundreds of songs, music videos, and playlists specially curated by other users\" (bạn có thể truy cập hàng trăm bài hát, video âm nhạc và các danh sách phát tuyển chọn đặc biệt bởi những người dùng khác.)",
+              "questionType": "DETAIL",
+              "skillTags": [
+                "READING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 148,
@@ -6883,7 +7901,13 @@
                   }
                 ]
               },
-              "detailedExplanation": "Đây là món quà đặc biệt dành cho người vừa mua điện thoại Gregerson Pro Phone 13. Context: \"Congratulations on your purchase of a Gregerson Pro Phone 13.\" (Chúc mừng bạn đã mua điện thoại Gregerson Pro Phone 13.) Terrence Furuta là tên người điền vào mẫu đăng ký này."
+              "detailedExplanation": "Đây là món quà đặc biệt dành cho người vừa mua điện thoại Gregerson Pro Phone 13. Context: \"Congratulations on your purchase of a Gregerson Pro Phone 13.\" (Chúc mừng bạn đã mua điện thoại Gregerson Pro Phone 13.) Terrence Furuta là tên người điền vào mẫu đăng ký này.",
+              "questionType": "DETAIL",
+              "skillTags": [
+                "READING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             }
           ]
         },
@@ -6947,7 +7971,13 @@
                   }
                 ]
               },
-              "detailedExplanation": "Công ty vừa sáp nhập với Frantum Corporation nên tên công ty sẽ thay đổi, dẫn đến việc phải làm lại danh thiếp. Context: \"As a result of our merger with Frantum Corporation, printed business cards for all Ketola Enterprises employees will be replaced.\" (Kết quả của việc sáp nhập với Frantum Corporation, danh thiếp in cho tất cả nhân viên của Ketola Enterprises sẽ được thay thế.)"
+              "detailedExplanation": "Công ty vừa sáp nhập với Frantum Corporation nên tên công ty sẽ thay đổi, dẫn đến việc phải làm lại danh thiếp. Context: \"As a result of our merger with Frantum Corporation, printed business cards for all Ketola Enterprises employees will be replaced.\" (Kết quả của việc sáp nhập với Frantum Corporation, danh thiếp in cho tất cả nhân viên của Ketola Enterprises sẽ được thay thế.)",
+              "questionType": "DETAIL",
+              "skillTags": [
+                "READING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 150,
@@ -6992,7 +8022,13 @@
                   }
                 ]
               },
-              "detailedExplanation": "Tất cả nhân viên sẽ nhận được danh thiếp mới trước ngày 1 tháng 5, suy ra chúng phải được in trong tháng 4. Context: \"All employees should receive the new business cards by May 1.\" (Tất cả nhân viên sẽ nhận được danh thiếp mới trước ngày 1 tháng 5.)"
+              "detailedExplanation": "Tất cả nhân viên sẽ nhận được danh thiếp mới trước ngày 1 tháng 5, suy ra chúng phải được in trong tháng 4. Context: \"All employees should receive the new business cards by May 1.\" (Tất cả nhân viên sẽ nhận được danh thiếp mới trước ngày 1 tháng 5.)",
+              "questionType": "INFERENCE",
+              "skillTags": [
+                "READING_FOR_INFERENCE"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             }
           ]
         },
@@ -7056,7 +8092,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Ở tin nhắn 9:03, ông Oxley hỏi bà Begani liệu có còn dự định tham gia hội thảo kỹ năng quản lý (kéo dài gần trọn ngày 4 tháng Chín) hay không. Bà trả lời \"I wouldn't miss it!\" nghĩa là bà chắc chắn sẽ có mặt tại hội thảo đó."
+              "detailedExplanation": "Ở tin nhắn 9:03, ông Oxley hỏi bà Begani liệu có còn dự định tham gia hội thảo kỹ năng quản lý (kéo dài gần trọn ngày 4 tháng Chín) hay không. Bà trả lời \"I wouldn't miss it!\" nghĩa là bà chắc chắn sẽ có mặt tại hội thảo đó.",
+              "questionType": "IMPLIED_MEANING",
+              "skillTags": [
+                "INTERPRETING_IMPLIED_MEANING",
+                "READING_FOR_INFERENCE"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 152,
@@ -7101,7 +8144,13 @@
                   }
                 ]
               },
-              "detailedExplanation": "Bà Begani chỉ có mặt ở văn phòng vào các ngày 2, 3 và 4 tháng Chín. Ngày 4 bà bận tham dự hội thảo gần trọn ngày. Ngày 2 văn phòng đóng cửa buổi sáng để bảo trì, và lần bảo trì trước văn phòng đã đóng cửa cả ngày nên ngày 2 cũng không chắc chắn. Do đó chỉ còn ngày 3 tháng Chín là ngày chắc chắn có thể tổ chức cuộc họp kế toán."
+              "detailedExplanation": "Bà Begani chỉ có mặt ở văn phòng vào các ngày 2, 3 và 4 tháng Chín. Ngày 4 bà bận tham dự hội thảo gần trọn ngày. Ngày 2 văn phòng đóng cửa buổi sáng để bảo trì, và lần bảo trì trước văn phòng đã đóng cửa cả ngày nên ngày 2 cũng không chắc chắn. Do đó chỉ còn ngày 3 tháng Chín là ngày chắc chắn có thể tổ chức cuộc họp kế toán.",
+              "questionType": "INFERENCE",
+              "skillTags": [
+                "READING_FOR_INFERENCE"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             }
           ]
         },
@@ -7165,7 +8214,13 @@
                   }
                 ]
               },
-              "detailedExplanation": "Email được gửi đến tất cả nhân viên chưa ký trang chấp thuận Sổ tay nhân viên và nhắc lại yêu cầu này đã được gửi trước đó vào ngày 1 tháng 5. Context: \"This e-mail is being sent to all employees who have not yet signed the Faeber Electric Employee Handbook acceptance page... and was requested in an e-mail I sent on May 1.\""
+              "detailedExplanation": "Email được gửi đến tất cả nhân viên chưa ký trang chấp thuận Sổ tay nhân viên và nhắc lại yêu cầu này đã được gửi trước đó vào ngày 1 tháng 5. Context: \"This e-mail is being sent to all employees who have not yet signed the Faeber Electric Employee Handbook acceptance page... and was requested in an e-mail I sent on May 1.\"",
+              "questionType": "MAIN_IDEA_OR_PURPOSE",
+              "skillTags": [
+                "READING_FOR_MAIN_IDEA"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 154,
@@ -7210,7 +8265,13 @@
                   }
                 ]
               },
-              "detailedExplanation": "Bà Watkins tự nhắc lại rằng bà đã yêu cầu việc ký tên qua một email gửi trước đó vào ngày 1/5. Context: \"...was requested in an e-mail I sent on May 1.\""
+              "detailedExplanation": "Bà Watkins tự nhắc lại rằng bà đã yêu cầu việc ký tên qua một email gửi trước đó vào ngày 1/5. Context: \"...was requested in an e-mail I sent on May 1.\"",
+              "questionType": "DETAIL",
+              "skillTags": [
+                "READING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 155,
@@ -7255,7 +8316,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "\"Key points\" ở đây chỉ những nội dung/chi tiết quan trọng được tóm tắt trong sổ tay, nên nghĩa gần nhất là \"details\" (chi tiết)."
+              "detailedExplanation": "\"Key points\" ở đây chỉ những nội dung/chi tiết quan trọng được tóm tắt trong sổ tay, nên nghĩa gần nhất là \"details\" (chi tiết).",
+              "questionType": "VOCABULARY_IN_CONTEXT",
+              "skillTags": [
+                "VOCABULARY_IN_CONTEXT",
+                "USING_CONTEXT_CLUES"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             }
           ]
         },
@@ -7319,7 +8387,13 @@
                   }
                 ]
               },
-              "detailedExplanation": "Tạp chí gửi cho các quản lý đại lý sở hữu đội xe từ 25 chiếc trở lên dùng để vận chuyển hàng hóa, phù hợp với ngành vận tải hàng hóa thương mại. Context: \"...sent free upon request to mid- and upper-level managers of dealerships with fleets of 25 or more vehicles for transporting goods nationwide.\""
+              "detailedExplanation": "Tạp chí gửi cho các quản lý đại lý sở hữu đội xe từ 25 chiếc trở lên dùng để vận chuyển hàng hóa, phù hợp với ngành vận tải hàng hóa thương mại. Context: \"...sent free upon request to mid- and upper-level managers of dealerships with fleets of 25 or more vehicles for transporting goods nationwide.\"",
+              "questionType": "INFERENCE",
+              "skillTags": [
+                "READING_FOR_INFERENCE"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 157,
@@ -7364,7 +8438,13 @@
                   }
                 ]
               },
-              "detailedExplanation": "Trang web nói rõ thông tin cá nhân của người đăng ký sẽ được dùng để cung cấp thêm thông tin về sản phẩm/dịch vụ của Lorne. Context: \"Your personally identifiable information will be used to provide you with additional information about Lorne's products and services.\""
+              "detailedExplanation": "Trang web nói rõ thông tin cá nhân của người đăng ký sẽ được dùng để cung cấp thêm thông tin về sản phẩm/dịch vụ của Lorne. Context: \"Your personally identifiable information will be used to provide you with additional information about Lorne's products and services.\"",
+              "questionType": "DETAIL",
+              "skillTags": [
+                "READING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             }
           ]
         },
@@ -7428,7 +8508,13 @@
                   }
                 ]
               },
-              "detailedExplanation": "Các dịch vụ được liệt kê gồm cải tạo bếp và phòng tắm, chuyển đổi tầng hầm/nhà để xe thành phòng giải trí hoặc văn phòng tại nhà, và xây dựng phần mở rộng nhà ở; không có việc lắp đặt sân hiên (patio). Context: \"Our specialties are renovating kitchens and bathrooms, converting basements and garages into recreation rooms or home offices, and building home additions.\""
+              "detailedExplanation": "Các dịch vụ được liệt kê gồm cải tạo bếp và phòng tắm, chuyển đổi tầng hầm/nhà để xe thành phòng giải trí hoặc văn phòng tại nhà, và xây dựng phần mở rộng nhà ở; không có việc lắp đặt sân hiên (patio). Context: \"Our specialties are renovating kitchens and bathrooms, converting basements and garages into recreation rooms or home offices, and building home additions.\"",
+              "questionType": "DETAIL",
+              "skillTags": [
+                "READING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 159,
@@ -7473,7 +8559,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "\"We can assure you that...\" mang nghĩa cam kết/hứa chắc chắn với khách hàng về chất lượng sản phẩm, gần nghĩa với \"promise\" (hứa hẹn)."
+              "detailedExplanation": "\"We can assure you that...\" mang nghĩa cam kết/hứa chắc chắn với khách hàng về chất lượng sản phẩm, gần nghĩa với \"promise\" (hứa hẹn).",
+              "questionType": "VOCABULARY_IN_CONTEXT",
+              "skillTags": [
+                "VOCABULARY_IN_CONTEXT",
+                "USING_CONTEXT_CLUES"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 160,
@@ -7518,7 +8611,13 @@
                   }
                 ]
               },
-              "detailedExplanation": "Tính năng mới nhất được nhắc đến là \"trợ lý cải tạo nhà ảo\" giúp khách xây dựng một căn phòng ảo để hình dung trước kết quả cải tạo, đây chính là một công cụ hình dung (visualization tool). Context: \"our latest feature: a virtual home renovation assistant. Our online assistants can help you build a virtual room...\""
+              "detailedExplanation": "Tính năng mới nhất được nhắc đến là \"trợ lý cải tạo nhà ảo\" giúp khách xây dựng một căn phòng ảo để hình dung trước kết quả cải tạo, đây chính là một công cụ hình dung (visualization tool). Context: \"our latest feature: a virtual home renovation assistant. Our online assistants can help you build a virtual room...\"",
+              "questionType": "DETAIL",
+              "skillTags": [
+                "READING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             }
           ]
         },
@@ -7582,7 +8681,13 @@
                   }
                 ]
               },
-              "detailedExplanation": "Email gợi ý các món đồ khác phù hợp với sở thích của khách hàng thông qua mã cá nhân hóa, nên mục đích chính là chia sẻ gợi ý trang phục cá nhân hóa. Context: \"We wanted to take the opportunity to suggest some other items you might like... to see a list of suggestions curated especially for you.\""
+              "detailedExplanation": "Email gợi ý các món đồ khác phù hợp với sở thích của khách hàng thông qua mã cá nhân hóa, nên mục đích chính là chia sẻ gợi ý trang phục cá nhân hóa. Context: \"We wanted to take the opportunity to suggest some other items you might like... to see a list of suggestions curated especially for you.\"",
+              "questionType": "MAIN_IDEA_OR_PURPOSE",
+              "skillTags": [
+                "READING_FOR_MAIN_IDEA"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 162,
@@ -7627,7 +8732,13 @@
                   }
                 ]
               },
-              "detailedExplanation": "Email nhắc đến việc bà đã mua hàng gần đây và đã là khách hàng lâu năm của Honey Canyon. Context: \"Thank you for your recent purchase!... to thank you for being a Honey Canyon customer for so many years.\""
+              "detailedExplanation": "Email nhắc đến việc bà đã mua hàng gần đây và đã là khách hàng lâu năm của Honey Canyon. Context: \"Thank you for your recent purchase!... to thank you for being a Honey Canyon customer for so many years.\"",
+              "questionType": "DETAIL",
+              "skillTags": [
+                "READING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 163,
@@ -7672,7 +8783,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Câu này nói về việc giảm giá được tự động áp dụng khi thanh toán, nên phù hợp nhất đặt ngay sau câu thông báo về khoản giảm giá 20% ở vị trí [4]."
+              "detailedExplanation": "Câu này nói về việc giảm giá được tự động áp dụng khi thanh toán, nên phù hợp nhất đặt ngay sau câu thông báo về khoản giảm giá 20% ở vị trí [4].",
+              "questionType": "SENTENCE_INSERTION",
+              "skillTags": [
+                "TEXT_COHESION",
+                "UNDERSTANDING_CONTEXT"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             }
           ]
         },
@@ -7736,7 +8854,13 @@
                   }
                 ]
               },
-              "detailedExplanation": "Xe được quảng cáo là có thể đi từ bãi biển đến những con đường rừng sâu, và đem lại chuyến đi êm ái ngay cả trên địa hình gồ ghề nhất. Context: \"Wherever you want to go, from the beach to the backwoods, the Nibora XC-35 can take you there!... offers a smooth ride even on the roughest terrain.\""
+              "detailedExplanation": "Xe được quảng cáo là có thể đi từ bãi biển đến những con đường rừng sâu, và đem lại chuyến đi êm ái ngay cả trên địa hình gồ ghề nhất. Context: \"Wherever you want to go, from the beach to the backwoods, the Nibora XC-35 can take you there!... offers a smooth ride even on the roughest terrain.\"",
+              "questionType": "INFERENCE",
+              "skillTags": [
+                "READING_FOR_INFERENCE"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 165,
@@ -7781,7 +8905,13 @@
                   }
                 ]
               },
-              "detailedExplanation": "Context: \"All vehicles come standard with all-wheel drive and a navigation system with phone pairing.\" (Tất cả các xe đều được trang bị sẵn hệ dẫn động bốn bánh tiêu chuẩn.) Sunroof và cruise control chỉ là tùy chọn thêm."
+              "detailedExplanation": "Context: \"All vehicles come standard with all-wheel drive and a navigation system with phone pairing.\" (Tất cả các xe đều được trang bị sẵn hệ dẫn động bốn bánh tiêu chuẩn.) Sunroof và cruise control chỉ là tùy chọn thêm.",
+              "questionType": "DETAIL",
+              "skillTags": [
+                "READING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 166,
@@ -7826,7 +8956,13 @@
                   }
                 ]
               },
-              "detailedExplanation": "Context: \"To save on the options you love, visit your nearby Nibora dealer to see what kinds of value packages they offer.\" (Để tiết kiệm chi phí cho những tùy chọn yêu thích của bạn, hãy ghé đại lý để tìm hiểu về các gói giá trị.) Điều này cho thấy mua theo gói có thể được giảm giá."
+              "detailedExplanation": "Context: \"To save on the options you love, visit your nearby Nibora dealer to see what kinds of value packages they offer.\" (Để tiết kiệm chi phí cho những tùy chọn yêu thích của bạn, hãy ghé đại lý để tìm hiểu về các gói giá trị.) Điều này cho thấy mua theo gói có thể được giảm giá.",
+              "questionType": "DETAIL",
+              "skillTags": [
+                "READING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 167,
@@ -7871,7 +9007,13 @@
                   }
                 ]
               },
-              "detailedExplanation": "Context: \"go to www.nibora.com/build and customize the look of your new Nibora XC-35 by choosing exterior color, upholstery style, and graphic decals.\" (truy cập trang web để tùy chỉnh ngoại hình xe bằng cách chọn màu sơn, kiểu bọc ghế và họa tiết decal.)"
+              "detailedExplanation": "Context: \"go to www.nibora.com/build and customize the look of your new Nibora XC-35 by choosing exterior color, upholstery style, and graphic decals.\" (truy cập trang web để tùy chỉnh ngoại hình xe bằng cách chọn màu sơn, kiểu bọc ghế và họa tiết decal.)",
+              "questionType": "DETAIL",
+              "skillTags": [
+                "READING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             }
           ]
         },
@@ -7935,7 +9077,13 @@
                   }
                 ]
               },
-              "detailedExplanation": "Quảng cáo mở đầu bằng câu \"It's never too late to learn to play an instrument\" và cung cấp khóa học guitar/violin dành cho người mới bắt đầu (beginners), cho thấy đối tượng nhắm đến là những người chưa có kinh nghiệm âm nhạc."
+              "detailedExplanation": "Quảng cáo mở đầu bằng câu \"It's never too late to learn to play an instrument\" và cung cấp khóa học guitar/violin dành cho người mới bắt đầu (beginners), cho thấy đối tượng nhắm đến là những người chưa có kinh nghiệm âm nhạc.",
+              "questionType": "INFERENCE",
+              "skillTags": [
+                "READING_FOR_INFERENCE"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 169,
@@ -7980,7 +9128,13 @@
                   }
                 ]
               },
-              "detailedExplanation": "Context: \"All our instructors hold at least a bachelor's degree in music and have performance experience in orchestras or bands.\" (Tất cả giảng viên đều sở hữu ít nhất bằng cử nhân âm nhạc.)"
+              "detailedExplanation": "Context: \"All our instructors hold at least a bachelor's degree in music and have performance experience in orchestras or bands.\" (Tất cả giảng viên đều sở hữu ít nhất bằng cử nhân âm nhạc.)",
+              "questionType": "DETAIL",
+              "skillTags": [
+                "READING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 170,
@@ -8025,7 +9179,13 @@
                   }
                 ]
               },
-              "detailedExplanation": "Context: \"You can request the instructor of your choice, or we can match you with an instructor. An instructor will contact you within 48 hours.\" (Một giáo viên sẽ liên lạc với bạn trong vòng 48 giờ.)"
+              "detailedExplanation": "Context: \"You can request the instructor of your choice, or we can match you with an instructor. An instructor will contact you within 48 hours.\" (Một giáo viên sẽ liên lạc với bạn trong vòng 48 giờ.)",
+              "questionType": "DETAIL",
+              "skillTags": [
+                "READING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 171,
@@ -8070,7 +9230,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Câu này nói về một hình thức học thay thế (học trực tuyến), phù hợp đặt ngay sau câu nói về việc có thể sắp xếp dạy trực tiếp tại văn phòng hoặc nhà học viên, ở vị trí [2]."
+              "detailedExplanation": "Câu này nói về một hình thức học thay thế (học trực tuyến), phù hợp đặt ngay sau câu nói về việc có thể sắp xếp dạy trực tiếp tại văn phòng hoặc nhà học viên, ở vị trí [2].",
+              "questionType": "SENTENCE_INSERTION",
+              "skillTags": [
+                "TEXT_COHESION",
+                "UNDERSTANDING_CONTEXT"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             }
           ]
         },
@@ -8134,7 +9301,13 @@
                   }
                 ]
               },
-              "detailedExplanation": "Context: \"I just want to make sure that we're on the same page about the new marketing campaign.\" (Tôi chỉ muốn đảm bảo rằng tất cả chúng ta đều thống nhất về chiến dịch marketing mới.) Chiến dịch này dành cho dòng giày mùa hè - một sản phẩm cụ thể."
+              "detailedExplanation": "Context: \"I just want to make sure that we're on the same page about the new marketing campaign.\" (Tôi chỉ muốn đảm bảo rằng tất cả chúng ta đều thống nhất về chiến dịch marketing mới.) Chiến dịch này dành cho dòng giày mùa hè - một sản phẩm cụ thể.",
+              "questionType": "DETAIL",
+              "skillTags": [
+                "READING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 173,
@@ -8179,7 +9352,13 @@
                   }
                 ]
               },
-              "detailedExplanation": "Context: \"It starts at 3:00 in the boardroom. You don't need to be there. It's only for people involved in the graphics.\" (Cuộc họp này bắt đầu lúc 3 giờ, chỉ cần có mặt nếu bạn tham gia vào phần đồ họa.)"
+              "detailedExplanation": "Context: \"It starts at 3:00 in the boardroom. You don't need to be there. It's only for people involved in the graphics.\" (Cuộc họp này bắt đầu lúc 3 giờ, chỉ cần có mặt nếu bạn tham gia vào phần đồ họa.)",
+              "questionType": "DETAIL",
+              "skillTags": [
+                "READING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             },
             {
               "questionNumber": 174,
@@ -8224,7 +9403,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Trước đó bà Au nói mình đã kiểm tra lịch nhưng không thấy cuộc họp bán hàng đâu (4:50). Sau khi ông Hines xác nhận rằng bà không cần tham dự cuộc họp đó (4:51), bà Au thốt lên \"What a relief!\" nghĩa là bà nhẹ nhõm vì lịch của mình vốn dĩ đúng (không bị bỏ sót cuộc họp nào)."
+              "detailedExplanation": "Trước đó bà Au nói mình đã kiểm tra lịch nhưng không thấy cuộc họp bán hàng đâu (4:50). Sau khi ông Hines xác nhận rằng bà không cần tham dự cuộc họp đó (4:51), bà Au thốt lên \"What a relief!\" nghĩa là bà nhẹ nhõm vì lịch của mình vốn dĩ đúng (không bị bỏ sót cuộc họp nào).",
+              "questionType": "IMPLIED_MEANING",
+              "skillTags": [
+                "INTERPRETING_IMPLIED_MEANING",
+                "READING_FOR_INFERENCE"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 175,
@@ -8269,7 +9455,13 @@
                   }
                 ]
               },
-              "detailedExplanation": "Context: \"I'll see you both tomorrow at 1:30 in the lobby.\" (Tôi sẽ gặp cả hai vào lúc 1:30 chiều mai ở sảnh.)"
+              "detailedExplanation": "Context: \"I'll see you both tomorrow at 1:30 in the lobby.\" (Tôi sẽ gặp cả hai vào lúc 1:30 chiều mai ở sảnh.)",
+              "questionType": "DETAIL",
+              "skillTags": [
+                "READING_FOR_DETAILS"
+              ],
+              "grammarTags": [],
+              "difficulty": "MEDIUM"
             }
           ]
         },
@@ -8341,7 +9533,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Hóa đơn ghi rõ đây là công việc kinh doanh nhỏ của gia đình. Context: \"Thank you for your order and for supporting our family's small business.\" (Cảm ơn bạn đã đặt hàng và ủng hộ doanh nghiệp nhỏ của gia đình chúng tôi.)"
+              "detailedExplanation": "Hóa đơn ghi rõ đây là công việc kinh doanh nhỏ của gia đình. Context: \"Thank you for your order and for supporting our family's small business.\" (Cảm ơn bạn đã đặt hàng và ủng hộ doanh nghiệp nhỏ của gia đình chúng tôi.)",
+              "questionType": "DETAIL",
+              "skillTags": [
+                "READING_FOR_DETAILS",
+                "CROSS_TEXT_INTEGRATION"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 177,
@@ -8386,7 +9585,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Bà Grant yêu cầu báo giá cho rèm cửa may theo yêu cầu (custom curtains). Context: \"I would like to get a quote for custom curtains for my dining room using the Manchester fabric.\" (Tôi muốn nhận báo giá cho rèm cửa may theo yêu cầu cho phòng ăn của mình bằng loại vải Manchester.)"
+              "detailedExplanation": "Bà Grant yêu cầu báo giá cho rèm cửa may theo yêu cầu (custom curtains). Context: \"I would like to get a quote for custom curtains for my dining room using the Manchester fabric.\" (Tôi muốn nhận báo giá cho rèm cửa may theo yêu cầu cho phòng ăn của mình bằng loại vải Manchester.)",
+              "questionType": "DETAIL",
+              "skillTags": [
+                "READING_FOR_DETAILS",
+                "CROSS_TEXT_INTEGRATION"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 178,
@@ -8431,7 +9637,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Trong email, bà Grant nói các mẫu vải bà nhận được (gồm Cambridge, Manchester, Oxford, Windsor) đều có tông xanh dương không hợp với phòng khách: \"the shades of blue in the samples I received do not work well in that space.\" Vì Manchester đã được chọn dùng cho phòng ăn, nên Cambridge (một trong 4 mẫu còn lại) suy ra là màu xanh dương (blue)."
+              "detailedExplanation": "Trong email, bà Grant nói các mẫu vải bà nhận được (gồm Cambridge, Manchester, Oxford, Windsor) đều có tông xanh dương không hợp với phòng khách: \"the shades of blue in the samples I received do not work well in that space.\" Vì Manchester đã được chọn dùng cho phòng ăn, nên Cambridge (một trong 4 mẫu còn lại) suy ra là màu xanh dương (blue).",
+              "questionType": "INFERENCE",
+              "skillTags": [
+                "READING_FOR_INFERENCE",
+                "CROSS_TEXT_INTEGRATION"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 179,
@@ -8476,7 +9689,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Bà Grant nhắc đến việc thanh toán được lưu trong \"online profile\" từ đơn hàng 19842. Context: \"Feel free to charge the credit card I saved to my online profile during my last order on 23 July.\" (Bạn có thể trừ tiền vào thẻ tín dụng mà tôi đã lưu vào hồ sơ trực tuyến của mình trong đơn hàng cuối cùng vào ngày 23 tháng 7.) → gợi ý đơn hàng này được đặt trực tuyến."
+              "detailedExplanation": "Bà Grant nhắc đến việc thanh toán được lưu trong \"online profile\" từ đơn hàng 19842. Context: \"Feel free to charge the credit card I saved to my online profile during my last order on 23 July.\" (Bạn có thể trừ tiền vào thẻ tín dụng mà tôi đã lưu vào hồ sơ trực tuyến của mình trong đơn hàng cuối cùng vào ngày 23 tháng 7.) → gợi ý đơn hàng này được đặt trực tuyến.",
+              "questionType": "INFERENCE",
+              "skillTags": [
+                "READING_FOR_INFERENCE",
+                "CROSS_TEXT_INTEGRATION"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 180,
@@ -8521,7 +9741,15 @@
                   }
                 ]
               },
-              "detailedExplanation": "\"my last order on 23 July\" = đơn hàng gần đây nhất/trước đó của tôi vào ngày 23/7. Ở đây \"last\" mang nghĩa \"trước đó, ngay trước\" chứ không phải \"cuối cùng\" (final) hay \"còn lại\" (remaining) → gần nghĩa nhất với \"previous\"."
+              "detailedExplanation": "\"my last order on 23 July\" = đơn hàng gần đây nhất/trước đó của tôi vào ngày 23/7. Ở đây \"last\" mang nghĩa \"trước đó, ngay trước\" chứ không phải \"cuối cùng\" (final) hay \"còn lại\" (remaining) → gần nghĩa nhất với \"previous\".",
+              "questionType": "VOCABULARY_IN_CONTEXT",
+              "skillTags": [
+                "VOCABULARY_IN_CONTEXT",
+                "USING_CONTEXT_CLUES",
+                "CROSS_TEXT_INTEGRATION"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             }
           ]
         },
@@ -8593,7 +9821,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Context: \"a nonprofit environmental organization working to preserve our city's parks and green spaces since 1981.\" (một tổ chức phi lợi nhuận về môi trường hoạt động bảo tồn công viên và không gian xanh của thành phố từ năm 1981.)"
+              "detailedExplanation": "Context: \"a nonprofit environmental organization working to preserve our city's parks and green spaces since 1981.\" (một tổ chức phi lợi nhuận về môi trường hoạt động bảo tồn công viên và không gian xanh của thành phố từ năm 1981.)",
+              "questionType": "DETAIL",
+              "skillTags": [
+                "READING_FOR_DETAILS",
+                "CROSS_TEXT_INTEGRATION"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 182,
@@ -8638,7 +9873,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Context: \"At Golden Owl Hall, 926 Hope Street, Portland, OR 97035\" — Golden Owl Hall là một sảnh tiệc (banquet hall)."
+              "detailedExplanation": "Context: \"At Golden Owl Hall, 926 Hope Street, Portland, OR 97035\" — Golden Owl Hall là một sảnh tiệc (banquet hall).",
+              "questionType": "DETAIL",
+              "skillTags": [
+                "READING_FOR_DETAILS",
+                "CROSS_TEXT_INTEGRATION"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 183,
@@ -8683,7 +9925,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Context: \"would you be open to donating another piece of sculpture to this year's fund-raiser\" (bà có sẵn lòng quyên góp thêm một tác phẩm điêu khắc khác cho buổi gây quỹ năm nay không?) → yêu cầu đóng góp."
+              "detailedExplanation": "Context: \"would you be open to donating another piece of sculpture to this year's fund-raiser\" (bà có sẵn lòng quyên góp thêm một tác phẩm điêu khắc khác cho buổi gây quỹ năm nay không?) → yêu cầu đóng góp.",
+              "questionType": "MAIN_IDEA_OR_PURPOSE",
+              "skillTags": [
+                "READING_FOR_MAIN_IDEA",
+                "CROSS_TEXT_INTEGRATION"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 184,
@@ -8728,7 +9977,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Announcement: \"a three-course vegetarian dinner prepared by Green Earth Provisions\"; Email: \"We are working with a new catering company this year\" → Green Earth Provisions là công ty catering mới, lần đầu cung cấp thức ăn cho sự kiện."
+              "detailedExplanation": "Announcement: \"a three-course vegetarian dinner prepared by Green Earth Provisions\"; Email: \"We are working with a new catering company this year\" → Green Earth Provisions là công ty catering mới, lần đầu cung cấp thức ăn cho sự kiện.",
+              "questionType": "INFERENCE",
+              "skillTags": [
+                "READING_FOR_INFERENCE",
+                "CROSS_TEXT_INTEGRATION"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 185,
@@ -8773,7 +10029,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Context: \"I am the new head of fund-raising operations... I know you worked with Stefano Cleary, who was the head of fund-raising operations...\" → Cleary từng là head of fund-raising operations, vị trí mà Nguyen hiện đang đảm nhận."
+              "detailedExplanation": "Context: \"I am the new head of fund-raising operations... I know you worked with Stefano Cleary, who was the head of fund-raising operations...\" → Cleary từng là head of fund-raising operations, vị trí mà Nguyen hiện đang đảm nhận.",
+              "questionType": "DETAIL",
+              "skillTags": [
+                "READING_FOR_DETAILS",
+                "CROSS_TEXT_INTEGRATION"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             }
           ]
         },
@@ -8853,7 +10116,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Context: \"individual pieces are displayed on a rotating basis and are on view for a limited time only\" (các tác phẩm riêng lẻ được trưng bày theo hình thức luân phiên và chỉ được xem trong thời gian giới hạn) → thay đổi thường xuyên."
+              "detailedExplanation": "Context: \"individual pieces are displayed on a rotating basis and are on view for a limited time only\" (các tác phẩm riêng lẻ được trưng bày theo hình thức luân phiên và chỉ được xem trong thời gian giới hạn) → thay đổi thường xuyên.",
+              "questionType": "DETAIL",
+              "skillTags": [
+                "READING_FOR_DETAILS",
+                "CROSS_TEXT_INTEGRATION"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 187,
@@ -8898,7 +10168,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Email 1: \"Since Art 103 focuses on studying and drawing the human form, the statues will be getting most of our attention.\" Web page: \"Classical Greece and Beyond... features statues of human subjects...\" tại Techtmann Gallery → lớp sẽ dành thời gian chủ yếu ở đây."
+              "detailedExplanation": "Email 1: \"Since Art 103 focuses on studying and drawing the human form, the statues will be getting most of our attention.\" Web page: \"Classical Greece and Beyond... features statues of human subjects...\" tại Techtmann Gallery → lớp sẽ dành thời gian chủ yếu ở đây.",
+              "questionType": "INFERENCE",
+              "skillTags": [
+                "READING_FOR_INFERENCE",
+                "CROSS_TEXT_INTEGRATION"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 188,
@@ -8943,7 +10220,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Context: \"Your colleague was correct: the museum does indeed provide that service.\" — \"that service\" chỉ về việc \"the Delta City Art Museum provides tours for local art students\" được nêu trong email 1."
+              "detailedExplanation": "Context: \"Your colleague was correct: the museum does indeed provide that service.\" — \"that service\" chỉ về việc \"the Delta City Art Museum provides tours for local art students\" được nêu trong email 1.",
+              "questionType": "DETAIL",
+              "skillTags": [
+                "READING_FOR_DETAILS",
+                "CROSS_TEXT_INTEGRATION"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 189,
@@ -8988,7 +10272,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Context: \"A staff member will contact you by phone with more details.\" → bà Desnoyers sẽ nhận được cuộc gọi điện thoại."
+              "detailedExplanation": "Context: \"A staff member will contact you by phone with more details.\" → bà Desnoyers sẽ nhận được cuộc gọi điện thoại.",
+              "questionType": "INFERENCE",
+              "skillTags": [
+                "READING_FOR_INFERENCE",
+                "CROSS_TEXT_INTEGRATION"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 190,
@@ -9033,7 +10324,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Context: \"the use of paints, including watercolors, is prohibited in all museum galleries.\" (việc sử dụng sơn, bao gồm cả màu nước, bị cấm trong tất cả các phòng trưng bày của bảo tàng.)"
+              "detailedExplanation": "Context: \"the use of paints, including watercolors, is prohibited in all museum galleries.\" (việc sử dụng sơn, bao gồm cả màu nước, bị cấm trong tất cả các phòng trưng bày của bảo tàng.)",
+              "questionType": "DETAIL",
+              "skillTags": [
+                "READING_FOR_DETAILS",
+                "CROSS_TEXT_INTEGRATION"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             }
           ]
         },
@@ -9113,7 +10411,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Context: \"Collapsible toothpaste tubes continue to lead the market overall, but because they are composed of multiple layers, they are nearly impossible to recycle.\" (tuýp kem đánh răng có thể gấp lại vẫn tiếp tục dẫn đầu thị trường tổng thể, nhưng vì chúng được cấu thành từ nhiều lớp vật liệu, nên gần như không thể tái chế được.)"
+              "detailedExplanation": "Context: \"Collapsible toothpaste tubes continue to lead the market overall, but because they are composed of multiple layers, they are nearly impossible to recycle.\" (tuýp kem đánh răng có thể gấp lại vẫn tiếp tục dẫn đầu thị trường tổng thể, nhưng vì chúng được cấu thành từ nhiều lớp vật liệu, nên gần như không thể tái chế được.)",
+              "questionType": "DETAIL",
+              "skillTags": [
+                "READING_FOR_DETAILS",
+                "CROSS_TEXT_INTEGRATION"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 192,
@@ -9158,7 +10463,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Context: \"Thank you for allowing me to speak with you and your team about Green Globe All-Natural Toothpaste. As I explained during our meeting...\" → bức thư nhằm theo dõi/tiếp nối sau buổi gặp và thuyết trình bán hàng trước đó."
+              "detailedExplanation": "Context: \"Thank you for allowing me to speak with you and your team about Green Globe All-Natural Toothpaste. As I explained during our meeting...\" → bức thư nhằm theo dõi/tiếp nối sau buổi gặp và thuyết trình bán hàng trước đó.",
+              "questionType": "MAIN_IDEA_OR_PURPOSE",
+              "skillTags": [
+                "READING_FOR_MAIN_IDEA",
+                "CROSS_TEXT_INTEGRATION"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 193,
@@ -9203,7 +10515,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Article: \"They [collapsible tubes] are beginning to lose a small part of their market share to recyclable forms of packaging, including jars, bottles, and refillable pump dispensers.\" Green Globe dùng jars (lọ thủy tinh) — một dạng bao bì tái chế được, đang giành thêm thị phần → thị phần đang tăng."
+              "detailedExplanation": "Article: \"They [collapsible tubes] are beginning to lose a small part of their market share to recyclable forms of packaging, including jars, bottles, and refillable pump dispensers.\" Green Globe dùng jars (lọ thủy tinh) — một dạng bao bì tái chế được, đang giành thêm thị phần → thị phần đang tăng.",
+              "questionType": "DETAIL",
+              "skillTags": [
+                "READING_FOR_DETAILS",
+                "CROSS_TEXT_INTEGRATION"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 194,
@@ -9248,7 +10567,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Context: \"It is currently sold in stores throughout the United States and Canada.\" (Hiện tại sản phẩm đang được bán tại các cửa hàng khắp Hoa Kỳ và Canada.) → có mặt tại 2 quốc gia."
+              "detailedExplanation": "Context: \"It is currently sold in stores throughout the United States and Canada.\" (Hiện tại sản phẩm đang được bán tại các cửa hàng khắp Hoa Kỳ và Canada.) → có mặt tại 2 quốc gia.",
+              "questionType": "DETAIL",
+              "skillTags": [
+                "READING_FOR_DETAILS",
+                "CROSS_TEXT_INTEGRATION"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 195,
@@ -9293,7 +10619,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Letter: \"I understand that you would like to purchase two cases initially to test sales in a single store.\" Invoice: đơn hàng 673348 gồm 2 cases — khớp với đơn hàng thử nghiệm bán hàng ban đầu tại một cửa hàng."
+              "detailedExplanation": "Letter: \"I understand that you would like to purchase two cases initially to test sales in a single store.\" Invoice: đơn hàng 673348 gồm 2 cases — khớp với đơn hàng thử nghiệm bán hàng ban đầu tại một cửa hàng.",
+              "questionType": "INFERENCE",
+              "skillTags": [
+                "READING_FOR_INFERENCE",
+                "CROSS_TEXT_INTEGRATION"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             }
           ]
         },
@@ -9373,7 +10706,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Context: \"Could you please clarify how best to get to the hotel?\" (Quý vị có thể vui lòng làm rõ cách tốt nhất để đến khách sạn không?) → mục đích là hỏi đường đi rõ ràng đến khách sạn."
+              "detailedExplanation": "Context: \"Could you please clarify how best to get to the hotel?\" (Quý vị có thể vui lòng làm rõ cách tốt nhất để đến khách sạn không?) → mục đích là hỏi đường đi rõ ràng đến khách sạn.",
+              "questionType": "MAIN_IDEA_OR_PURPOSE",
+              "skillTags": [
+                "READING_FOR_MAIN_IDEA",
+                "CROSS_TEXT_INTEGRATION"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 197,
@@ -9418,7 +10758,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Context: \"I am looking forward to spending a couple of nights right by the beach.\" (Tôi rất mong chờ được nghỉ ngơi vài đêm cạnh bãi biển.) → khách sạn nằm gần biển."
+              "detailedExplanation": "Context: \"I am looking forward to spending a couple of nights right by the beach.\" (Tôi rất mong chờ được nghỉ ngơi vài đêm cạnh bãi biển.) → khách sạn nằm gần biển.",
+              "questionType": "INFERENCE",
+              "skillTags": [
+                "READING_FOR_INFERENCE",
+                "CROSS_TEXT_INTEGRATION"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 198,
@@ -9463,7 +10810,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Email: \"the Dalton light-rail station, which you specifically mention as the station where hotel guests should disembark.\" Review: \"I then boarded a light-rail train and rode it to the station directly across the street from the hotel.\" → Dalton station nằm đối diện đường với khách sạn."
+              "detailedExplanation": "Email: \"the Dalton light-rail station, which you specifically mention as the station where hotel guests should disembark.\" Review: \"I then boarded a light-rail train and rode it to the station directly across the street from the hotel.\" → Dalton station nằm đối diện đường với khách sạn.",
+              "questionType": "INFERENCE",
+              "skillTags": [
+                "READING_FOR_INFERENCE",
+                "CROSS_TEXT_INTEGRATION"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 199,
@@ -9508,7 +10862,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Review: \"First, I took the 4:05 P.M. train out of Johnstown.\" Schedule: chuyến 4:05 P.M. khởi hành từ Johnstown đến Charlesville lúc 5:41 P.M."
+              "detailedExplanation": "Review: \"First, I took the 4:05 P.M. train out of Johnstown.\" Schedule: chuyến 4:05 P.M. khởi hành từ Johnstown đến Charlesville lúc 5:41 P.M.",
+              "questionType": "INFERENCE",
+              "skillTags": [
+                "READING_FOR_INFERENCE",
+                "CROSS_TEXT_INTEGRATION"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             },
             {
               "questionNumber": 200,
@@ -9553,7 +10914,14 @@
                   }
                 ]
               },
-              "detailedExplanation": "Context: \"I had just finished an exhilarating three-day professional conference\" và \"I felt so relaxed when I finally returned to my office and got back to work.\" → ông Cho vừa hoàn thành một chuyến công tác/hội nghị chuyên môn."
+              "detailedExplanation": "Context: \"I had just finished an exhilarating three-day professional conference\" và \"I felt so relaxed when I finally returned to my office and got back to work.\" → ông Cho vừa hoàn thành một chuyến công tác/hội nghị chuyên môn.",
+              "questionType": "DETAIL",
+              "skillTags": [
+                "READING_FOR_DETAILS",
+                "CROSS_TEXT_INTEGRATION"
+              ],
+              "grammarTags": [],
+              "difficulty": "HARD"
             }
           ]
         }

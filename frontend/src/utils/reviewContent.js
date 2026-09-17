@@ -51,3 +51,28 @@ export function formatListeningTranscript(value, partNumber) {
 
   return formatted.replace(/\n{3,}/g, "\n\n").trim();
 }
+
+export function formatPartTwoTranscript(value) {
+  if (!value || !value.trim()) {
+    return "";
+  }
+
+  return value
+    .replace(/\r\n?/g, "\n")
+    .replace(/[ \t\n]+\(([A-D])\)\s*/gi, "\n$1. ")
+    .trim();
+}
+
+export function formatTranslatedTranscript(questionTranslation, answerTranslation) {
+  const translatedQuestion = typeof questionTranslation === "string"
+    ? questionTranslation.trim()
+    : "";
+  const translatedAnswers = typeof answerTranslation === "string"
+    ? answerTranslation
+      .split(/\n+/)
+      .map((line) => line.trim().replace(/^\(([A-D])\)\s*/i, "$1. "))
+      .filter(Boolean)
+    : [];
+
+  return [translatedQuestion, ...translatedAnswers].filter(Boolean).join("\n");
+}

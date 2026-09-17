@@ -39,6 +39,9 @@ public class Attempt {
 
     private Integer score;
     private Map<String, Object> result;
+    private String aiAnalysisStatus;
+    private String aiAnalysisId;
+    private Long aiAnalysisRequestedAt;
 
     // Giữ field này để đọc được các attempt Part 5 cũ. Full Test lưu đáp án
     // trong attempts/{attemptId}/answers/{questionNumber}.

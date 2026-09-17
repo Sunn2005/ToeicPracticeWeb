@@ -112,6 +112,26 @@ class TestServiceTests {
     }
 
     @Test
+    void providesDetailedExplanationsForEveryPartThreeAndFourQuestion() throws Exception {
+        List<com.toeic.model.Question> listeningGroupQuestions = sourceTest.getParts().stream()
+                .filter(part -> part.getPartNumber() == 3 || part.getPartNumber() == 4)
+                .flatMap(part -> part.getGroups().stream())
+                .flatMap(group -> group.getQuestions().stream())
+                .toList();
+
+        assertEquals(69, listeningGroupQuestions.size());
+        assertTrue(listeningGroupQuestions.stream().allMatch(question ->
+                question.getDetailedExplanation() != null
+                        && !question.getDetailedExplanation().isBlank()
+        ));
+
+        String serialized = new ObjectMapper().writeValueAsString(
+                testService.getReviewTest(testId)
+        );
+        assertTrue(serialized.contains("our company's line of cheeses"));
+    }
+
+    @Test
     void listsLegacyTestsAsApprovedForBackwardCompatibility() throws Exception {
         TestDao testDao = mock(TestDao.class);
         ObjectMapper objectMapper = new ObjectMapper();

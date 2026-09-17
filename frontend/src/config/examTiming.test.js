@@ -7,6 +7,7 @@ import {
   getSuggestedPartDuration,
   getTimerSeconds,
   getTimerType,
+  shouldDisableSubmit,
   shouldSubmitAfterListeningAudio,
 } from "./examTiming.js";
 
@@ -56,4 +57,23 @@ test("full, listening and reading retain their standard countdowns", () => {
   assert.equal(getExamDuration("FULL"), 120 * 60);
   assert.equal(getExamDuration("LISTENING"), 45 * 60);
   assert.equal(getExamDuration("READING"), 75 * 60);
+});
+
+test("full test locks submit during Listening and unlocks it in Reading", () => {
+  assert.equal(
+    shouldDisableSubmit({ mode: "FULL", currentSection: "LISTENING" }),
+    true,
+  );
+  assert.equal(
+    shouldDisableSubmit({ mode: "FULL", currentSection: "READING" }),
+    false,
+  );
+  assert.equal(
+    shouldDisableSubmit({ mode: "LISTENING", currentSection: "LISTENING" }),
+    false,
+  );
+  assert.equal(
+    shouldDisableSubmit({ mode: "FULL", currentSection: "READING" }, true),
+    true,
+  );
 });

@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 
 import {
   formatListeningTranscript,
+  formatPartTwoTranscript,
+  formatTranslatedTranscript,
   getReviewParagraphs,
 } from "./reviewContent.js";
 
@@ -49,5 +51,31 @@ test("puts every Part 4 sentence in a separate paragraph", () => {
       4,
     ),
     "Attention, passengers.\n\nAll trains are delayed.\n\nPlease wait here.",
+  );
+});
+
+test("formats Part 2 transcript choices as readable labelled lines", () => {
+  assert.equal(
+    formatPartTwoTranscript(
+      "Where is the conference being held? (A) A three-day vacation. (B) At the Riverview Hotel. (C) In the supply cabinet.",
+    ),
+    "Where is the conference being held?\nA. A three-day vacation.\nB. At the Riverview Hotel.\nC. In the supply cabinet.",
+  );
+});
+
+test("combines a translated listening prompt and labelled answers", () => {
+  assert.equal(
+    formatTranslatedTranscript(
+      "Hội nghị được tổ chức ở đâu?",
+      "(A) Một kỳ nghỉ ba ngày.\n(B) Tại khách sạn Riverview.\n(C) Trong tủ đựng vật tư.",
+    ),
+    "Hội nghị được tổ chức ở đâu?\nA. Một kỳ nghỉ ba ngày.\nB. Tại khách sạn Riverview.\nC. Trong tủ đựng vật tư.",
+  );
+});
+
+test("Part 1 translated transcript can contain answer lines only", () => {
+  assert.equal(
+    formatTranslatedTranscript(null, "(A) Người phụ nữ đang bê một khay thức ăn."),
+    "A. Người phụ nữ đang bê một khay thức ăn.",
   );
 });

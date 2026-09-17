@@ -12,6 +12,7 @@ import {
   TIMER_TYPES,
   getTimerSeconds,
   getTimerType,
+  shouldDisableSubmit,
   shouldSubmitAfterListeningAudio,
 } from "../config/examTiming";
 import {
@@ -665,7 +666,7 @@ function FullTestExam() {
                     nextDisabled={isListening
                       ? busy || (Boolean(mediaAudio) && !audioAdvanceError)
                       : nextReadingQuestion === null || busy}
-                    submitDisabled={busy}
+                    submitDisabled={shouldDisableSubmit(attempt, busy)}
                     previousTitle={isListening
                       ? t("listeningLocked")
                       : undefined}

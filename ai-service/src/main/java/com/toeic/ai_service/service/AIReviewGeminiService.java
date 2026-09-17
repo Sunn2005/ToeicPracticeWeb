@@ -1,0 +1,345 @@
+package com.toeic.ai_service.service;
+
+import com.toeic.ai_service.model.GeminiAnalysis;
+import com.toeic.ai_service.model.ReviewInput;
+import com.toeic.ai_service.model.ReviewStatistics;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
+
+import java.util.Objects;
+import java.util.List;
+
+@Service
+public class AIReviewGeminiService {
+
+    private static final String SYSTEM_PROMPT = """
+            Bạn là trợ lý phân tích kết quả TOEIC Listening và Reading.
+
+            Chỉ nhận xét dựa trên dữ liệu được cung cấp.
+            Không tự tạo điểm số, số câu đúng hoặc sai, question number, skill tag,
+            grammar tag, thời gian làm bài hoặc bằng chứng không có trong input.
+            Mỗi điểm mạnh và điểm yếu phải có evidence.
+            Nếu sampleSize nhỏ hơn 3, không được kết luận chắc chắn và confidence phải là LOW.
+            Không suy đoán trạng thái tâm lý hoặc nguyên nhân cá nhân của người học.
+            Sử dụng tiếng Việt rõ ràng, thân thiện và dễ hiểu.
+            Ưu tiên lời khuyên cụ thể, có thể thực hiện và phù hợp với kết quả bài làm.
+            Không có dữ liệu điểm mục tiêu: targetScore và scoreGap phải là null.
+            Không có dữ liệu thời gian từng Part: timeManagement.available phải là false,
+            status phải là INSUFFICIENT_DATA và recommendations phải là mảng rỗng.
+            partAnalysis phải có đủ và chỉ một mục cho từng Part 1 đến 7.
+            priorityTopics phải có đúng 3 mục. studyPlan phải có đúng 7 ngày.
+            Không được bỏ sót field trong bất kỳ object nào. Các field số và boolean
+            bắt buộc phải có giá trị; field không có dữ liệu nhưng cho phép null thì trả về null;
+            field dạng danh sách không có dữ liệu thì trả về mảng rỗng.
+            Mỗi evidence bắt buộc có correct, total, accuracy, questionNumbers
+            và wrongQuestionNumbers lấy đúng từ input.
+            Chỉ sử dụng tag có trong input.
+            Chỉ trả về JSON đúng schema được cung cấp.
+            """;
+
+    private final ChatClient chatClient;
+    private final ObjectMapper objectMapper;
+    private final AIReviewValidator validator;
+    private final int maxAttempts;
+    private final long initialBackoffMs;
+
+    public AIReviewGeminiService(
+            ChatClient.Builder builder,
+            ObjectMapper objectMapper,
+            AIReviewValidator validator,
+            @Value("${app.ai.review.max-attempts:3}") int maxAttempts,
+            @Value("${app.ai.review.initial-backoff-ms:1000}") long initialBackoffMs
+    ) {
+        this.chatClient = builder.build();
+        this.objectMapper = objectMapper;
+        this.validator = validator;
+        this.maxAttempts = Math.max(1, maxAttempts);
+        this.initialBackoffMs = Math.max(0, initialBackoffMs);
+    }
+
+    public Generation analyze(ReviewInput input, ReviewStatistics statistics) {
+        List<EvidenceQuestion> evidenceQuestions = input.questions().stream()
+                .map(question -> new EvidenceQuestion(
+                        question.questionNumber(),
+                        question.partNumber(),
+                        question.questionType(),
+                        question.skillTags(),
+                        question.grammarTags(),
+                        question.difficulty(),
+                        question.correct(),
+                        question.unanswered()
+                ))
+                .toList();
+        String payload = serialize(new PromptInput(statistics, evidenceQuestions));
+        RuntimeException lastFailure = null;
+        boolean usedSchemaRepair = false;
+        int attemptsMade = 0;
+        String repairInstruction = "";
+
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            attemptsMade = attempt;
+            try {
+                GeminiAnalysis analysis = chatClient.prompt()
+                        .system(SYSTEM_PROMPT)
+                        .user("Dữ liệu đã được hệ thống tính và kiểm chứng:\n"
+                                + payload + repairInstruction)
+                        .call()
+                        .entity(GeminiAnalysis.class, spec -> spec.useProviderStructuredOutput());
+                analysis = Objects.requireNonNull(analysis, "Gemini trả về kết quả rỗng");
+                analysis = normalizeDeterministicFields(analysis, statistics);
+                validator.validate(analysis, input, statistics);
+                return new Generation(analysis, attempt - 1);
+            } catch (AIReviewValidator.InvalidAIAnalysisException exception) {
+                lastFailure = exception;
+                if (usedSchemaRepair) {
+                    break;
+                }
+                usedSchemaRepair = true;
+                repairInstruction = repairInstruction(exception);
+            } catch (RuntimeException exception) {
+                lastFailure = exception;
+                if (isInvalidOutput(exception)) {
+                    if (usedSchemaRepair) {
+                        break;
+                    }
+                    usedSchemaRepair = true;
+                    repairInstruction = repairInstruction(exception);
+                    continue;
+                }
+                if (!isTransient(exception) || attempt == maxAttempts) {
+                    break;
+                }
+                sleep(backoff(attempt));
+            }
+        }
+        throw new AIReviewGenerationException(
+                errorCode(lastFailure), Math.max(0, attemptsMade - 1), lastFailure
+        );
+    }
+
+    private String serialize(Object value) {
+        try {
+            return objectMapper.writeValueAsString(value);
+        } catch (Exception exception) {
+            throw new IllegalArgumentException("Không thể tạo Gemini input", exception);
+        }
+    }
+
+    private GeminiAnalysis normalizeDeterministicFields(
+            GeminiAnalysis analysis,
+            ReviewStatistics statistics
+    ) {
+        GeminiAnalysis.Summary summary = analysis.summary() == null ? null
+                : new GeminiAnalysis.Summary(
+                        analysis.summary().headline(),
+                        analysis.summary().overallComment(),
+                        statistics.totalScore(),
+                        null,
+                        null
+                );
+
+        List<GeminiAnalysis.Strength> strengths = analysis.strengths() == null ? null
+                : analysis.strengths().stream()
+                .map(item -> new GeminiAnalysis.Strength(
+                        item.title(), item.category(), item.part(), item.tag(), item.message(),
+                        normalizeEvidence(item.evidence(), item.tag(), item.part(), statistics),
+                        item.confidence()
+                ))
+                .toList();
+        List<GeminiAnalysis.Weakness> weaknesses = analysis.weaknesses() == null ? null
+                : analysis.weaknesses().stream()
+                .map(item -> new GeminiAnalysis.Weakness(
+                        item.title(), item.category(), item.part(), item.tag(), item.priority(),
+                        item.message(),
+                        normalizeEvidence(item.evidence(), item.tag(), item.part(), statistics),
+                        item.recommendation(), item.confidence()
+                ))
+                .toList();
+        List<GeminiAnalysis.PartAnalysis> partAnalysis = analysis.partAnalysis() == null ? null
+                : analysis.partAnalysis().stream()
+                .map(item -> {
+                    ReviewStatistics.Metric metric = statistics.byPart()
+                            .get(String.valueOf(item.part()));
+                    return new GeminiAnalysis.PartAnalysis(
+                            item.part(), metric == null ? item.accuracy() : metric.accuracy(),
+                            item.level(), item.summary(), item.strongTags(), item.weakTags()
+                    );
+                })
+                .toList();
+        List<GeminiAnalysis.KnowledgeGap> knowledgeGaps = analysis.knowledgeGaps() == null ? null
+                : analysis.knowledgeGaps().stream()
+                .map(item -> {
+                    ReviewStatistics.Metric metric = metricFor(item.tag(), null, statistics);
+                    return new GeminiAnalysis.KnowledgeGap(
+                            item.category(), item.name(), item.tag(), item.priority(),
+                            metric == null ? item.currentAccuracy() : metric.accuracy(),
+                            item.targetAccuracy(), item.explanation(), item.topicsToReview()
+                    );
+                })
+                .toList();
+        GeminiAnalysis.TimeManagement timeManagement = new GeminiAnalysis.TimeManagement(
+                false,
+                "INSUFFICIENT_DATA",
+                analysis.timeManagement() == null ? "Không có dữ liệu thời gian theo Part."
+                        : analysis.timeManagement().summary(),
+                List.of()
+        );
+
+        return new GeminiAnalysis(
+                summary,
+                strengths,
+                weaknesses,
+                partAnalysis,
+                knowledgeGaps,
+                timeManagement,
+                analysis.priorityTopics(),
+                analysis.studyPlan(),
+                analysis.nextActions(),
+                analysis.overallConfidence(),
+                analysis.limitations()
+        );
+    }
+
+    private GeminiAnalysis.Evidence normalizeEvidence(
+            GeminiAnalysis.Evidence evidence,
+            String tag,
+            Integer part,
+            ReviewStatistics statistics
+    ) {
+        if (evidence == null) {
+            return null;
+        }
+        ReviewStatistics.Metric metric = metricFor(tag, part, statistics);
+        if (metric == null) {
+            return evidence;
+        }
+        return new GeminiAnalysis.Evidence(
+                metric.correct(),
+                metric.sampleSize(),
+                metric.accuracy(),
+                List.of(),
+                List.of()
+        );
+    }
+
+    private ReviewStatistics.Metric metricFor(
+            String tag,
+            Integer part,
+            ReviewStatistics statistics
+    ) {
+        if (tag != null && !tag.isBlank()) {
+            for (java.util.Map<String, ReviewStatistics.Metric> metrics : List.of(
+                    statistics.byQuestionType(), statistics.bySkillTag(),
+                    statistics.byGrammarTag(), statistics.byDifficulty()
+            )) {
+                if (metrics.containsKey(tag)) {
+                    return metrics.get(tag);
+                }
+            }
+        }
+        return part == null ? null : statistics.byPart().get(String.valueOf(part));
+    }
+
+    boolean isTransient(Throwable throwable) {
+        Throwable current = throwable;
+        while (current != null) {
+            String value = (current.getClass().getName() + " " + current.getMessage()).toLowerCase();
+            if (value.contains("429") || value.contains("500") || value.contains("502")
+                    || value.contains("503") || value.contains("504") || value.contains("timeout")
+                    || value.contains("connection") || value.contains("temporarily unavailable")) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
+    }
+
+    boolean isInvalidOutput(Throwable throwable) {
+        Throwable current = throwable;
+        while (current != null) {
+            if (current instanceof tools.jackson.databind.DatabindException) {
+                return true;
+            }
+            String className = current.getClass().getName();
+            if (className.contains("BeanOutputConverter")
+                    || className.contains("StructuredOutput")) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
+    }
+
+    private String repairInstruction(Throwable failure) {
+        String detail = failure.getMessage();
+        if (detail == null || detail.isBlank()) {
+            detail = failure.getClass().getSimpleName();
+        }
+        detail = detail.length() > 500 ? detail.substring(0, 500) : detail;
+        return "\n\nJSON ở lần trước không hợp lệ: " + detail
+                + "\nHãy tạo lại toàn bộ JSON, điền đủ mọi field theo schema."
+                + " Không dùng null cho field số, boolean hoặc danh sách.";
+    }
+
+    private String errorCode(Throwable throwable) {
+        if (throwable instanceof AIReviewValidator.InvalidAIAnalysisException) {
+            return "INVALID_GEMINI_OUTPUT";
+        }
+        return isTransient(throwable) ? "GEMINI_UNAVAILABLE" : "GEMINI_REQUEST_FAILED";
+    }
+
+    private long backoff(int attempt) {
+        return Math.min(10_000L, initialBackoffMs * (1L << Math.max(0, attempt - 1)));
+    }
+
+    private void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new AIReviewGenerationException("PROCESSING_INTERRUPTED", 0, exception);
+        }
+    }
+
+    private record PromptInput(
+            ReviewStatistics statistics,
+            List<EvidenceQuestion> questions
+    ) {
+    }
+
+    private record EvidenceQuestion(
+            int questionNumber,
+            int partNumber,
+            String questionType,
+            List<String> skillTags,
+            List<String> grammarTags,
+            String difficulty,
+            boolean correct,
+            boolean unanswered
+    ) {
+    }
+
+    public record Generation(GeminiAnalysis analysis, int retryCount) {
+    }
+
+    public static class AIReviewGenerationException extends RuntimeException {
+        private final String errorCode;
+        private final int retryCount;
+
+        public AIReviewGenerationException(String errorCode, int retryCount, Throwable cause) {
+            super(errorCode, cause);
+            this.errorCode = errorCode;
+            this.retryCount = retryCount;
+        }
+
+        public String errorCode() {
+            return errorCode;
+        }
+
+        public int retryCount() {
+            return retryCount;
+        }
+    }
+}

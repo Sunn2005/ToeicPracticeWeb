@@ -37,4 +37,8 @@ public class Question {
     private String explanation;
     private String transcript;
     private String grammarTopic;
+    private String questionType;
+    private List<String> skillTags;
+    private List<String> grammarTags;
+    private String difficulty;
 }

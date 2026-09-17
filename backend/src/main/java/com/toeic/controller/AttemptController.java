@@ -5,6 +5,7 @@ import com.toeic.dto.SaveAnswerRequest;
 import com.toeic.dto.UpdatePositionRequest;
 import com.toeic.security.ToeicUserPrincipal;
 import com.toeic.service.AttemptService;
+import com.toeic.service.AIReviewService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -31,9 +32,11 @@ import java.util.Map;
 public class AttemptController {
 
     private final AttemptService attemptService;
+    private final AIReviewService aiReviewService;
 
-    public AttemptController(AttemptService attemptService) {
+    public AttemptController(AttemptService attemptService, AIReviewService aiReviewService) {
         this.attemptService = attemptService;
+        this.aiReviewService = aiReviewService;
     }
 
     // Tương thích với frontend cũ. Full Test mới ưu tiên
@@ -150,5 +153,21 @@ public class AttemptController {
             @AuthenticationPrincipal ToeicUserPrincipal principal
     ) throws Exception {
         return attemptService.getReview(principal.uid(), attemptId);
+    }
+
+    @PostMapping("/{attemptId}/ai-analysis")
+    public Map<String, Object> requestAIAnalysis(
+            @PathVariable String attemptId,
+            @AuthenticationPrincipal ToeicUserPrincipal principal
+    ) throws Exception {
+        return aiReviewService.requestAnalysis(principal.uid(), attemptId);
+    }
+
+    @GetMapping("/{attemptId}/ai-analysis")
+    public Map<String, Object> getAIAnalysis(
+            @PathVariable String attemptId,
+            @AuthenticationPrincipal ToeicUserPrincipal principal
+    ) throws Exception {
+        return aiReviewService.getAnalysis(principal.uid(), attemptId);
     }
 }
