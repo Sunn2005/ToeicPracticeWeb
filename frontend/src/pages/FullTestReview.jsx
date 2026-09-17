@@ -7,6 +7,7 @@ import QuestionCard from "../components/QuestionCard";
 import QuestionNavigatorDrawer from "../components/QuestionNavigatorDrawer";
 import ResizableExamLayout from "../components/ResizableExamLayout";
 import ReviewTogglePanel from "../components/ReviewTogglePanel";
+import LoadingScreen from "../components/LoadingScreen";
 import { getAllQuestions } from "../utils/testData";
 import {
   formatListeningTranscript,
@@ -236,7 +237,7 @@ function FullTestReview() {
   ), [allQuestions]);
 
   if (!data && !error) {
-    return <div className="flex min-h-screen items-center justify-center bg-slate-50">{t("loadingReview")}</div>;
+    return <LoadingScreen message={t("loadingReview")} />;
   }
 
   if (error) {

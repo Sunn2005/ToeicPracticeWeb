@@ -11,6 +11,7 @@ import { useLanguage } from "../i18n/LanguageContext";
 import AttemptHistoryDrawer from "../components/AttemptHistoryDrawer";
 import { deleteAttempt, getAttemptHistory } from "../api/userLearning";
 import { getHistoryStats, getSubmittedAttempts } from "../utils/attemptHistory";
+import BrandLogo from "../components/BrandLogo";
 
 function UserAvatar({ user, displayName, size = "large" }) {
   const sizeClasses =
@@ -86,7 +87,8 @@ function Welcome({ user }) {
         if (active) setAttempts(getSubmittedAttempts(history));
       })
       .catch((requestError) => {
-        if (active) setHistoryError(requestError.message || t("historyLoadError"));
+        if (active)
+          setHistoryError(requestError.message || t("historyLoadError"));
       })
       .finally(() => {
         if (active) setHistoryLoading(false);
@@ -110,7 +112,13 @@ function Welcome({ user }) {
     }
   };
 
-  const handleStartExam = async ({ mode, part, parts, durationMinutes, experience }) => {
+  const handleStartExam = async ({
+    mode,
+    part,
+    parts,
+    durationMinutes,
+    experience,
+  }) => {
     const attempt = await apiFetch(`/api/tests/${selectedTest.id}/attempts`, {
       method: "POST",
       forceRefresh: true,
@@ -132,7 +140,9 @@ function Welcome({ user }) {
 
   const handleDeleteAttempt = async (attemptId) => {
     await deleteAttempt(attemptId);
-    setAttempts((current) => current.filter((attempt) => attempt.id !== attemptId));
+    setAttempts((current) =>
+      current.filter((attempt) => attempt.id !== attemptId),
+    );
   };
 
   const openAttemptReview = async (attempt, filter = "") => {
@@ -160,12 +170,10 @@ function Welcome({ user }) {
             className="flex items-center gap-3 rounded-xl text-left focus:outline-none focus:ring-4 focus:ring-sky-100"
             aria-label={t("goToDashboard")}
           >
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-500 font-bold text-white shadow-lg shadow-sky-200">
-              TP
-            </span>
+            <BrandLogo className="h-12 w-12 rounded-2xl border border-sky-100 bg-white shadow-lg shadow-sky-200" />
             <span className="hidden sm:block">
               <span className="block text-lg font-bold leading-tight text-slate-950">
-                TOEIC Practice
+                CapyTOEIC
               </span>
               <span className="hidden text-xs text-slate-500 sm:block">
                 {t("smarterPractice")}
@@ -210,12 +218,20 @@ function Welcome({ user }) {
           <aside className="space-y-6">
             <section className="overflow-hidden rounded-3xl bg-sky-500 p-6 text-white shadow-xl shadow-sky-200/70 sm:p-7">
               <UserAvatar user={user} displayName={displayName} />
-              <p className="mt-6 text-sm font-medium text-sky-100">{t("hello")}</p>
-              <h1 className="mt-1 break-words text-2xl font-bold">{displayName}</h1>
-              <p className="mt-2 break-all text-sm text-sky-100">{user?.email}</p>
+              <p className="mt-6 text-sm font-medium text-sky-100">
+                {t("hello")}
+              </p>
+              <h1 className="mt-1 break-words text-2xl font-bold">
+                {displayName}
+              </h1>
+              <p className="mt-2 break-all text-sm text-sky-100">
+                {user?.email}
+              </p>
 
               <div className="mt-7 rounded-2xl bg-white/15 p-5 ring-1 ring-white/20">
-                <p className="text-sm font-medium text-sky-100">{t("weeklyGoal")}</p>
+                <p className="text-sm font-medium text-sky-100">
+                  {t("weeklyGoal")}
+                </p>
                 <p className="mt-2 text-3xl font-bold">{t("goalPoints")}</p>
                 <p className="mt-3 text-sm leading-6 text-sky-50">
                   {t("goalDescription")}
@@ -224,7 +240,9 @@ function Welcome({ user }) {
             </section>
 
             <section className="rounded-3xl border border-white bg-white/80 p-6 shadow-lg shadow-sky-100/70 backdrop-blur">
-              <p className="text-sm font-semibold text-slate-900">{t("todaySuggestions")}</p>
+              <p className="text-sm font-semibold text-slate-900">
+                {t("todaySuggestions")}
+              </p>
               <ul className="mt-4 space-y-3 text-sm text-slate-600">
                 <li className="flex gap-3">
                   <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-sky-400" />
@@ -265,7 +283,10 @@ function Welcome({ user }) {
                 {[
                   [String(learningStats.completed), t("testsCompleted")],
                   [`${learningStats.accuracy}%`, t("accuracy")],
-                  [`${learningStats.streak} ${learningStats.streak === 1 ? t("day") : t("days")}`, t("studyStreak")],
+                  [
+                    `${learningStats.streak} ${learningStats.streak === 1 ? t("day") : t("days")}`,
+                    t("studyStreak"),
+                  ],
                 ].map(([value, label]) => (
                   <div
                     key={label}
@@ -292,7 +313,8 @@ function Welcome({ user }) {
                   </p>
                 </div>
                 <span className="w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                  {tests.filter((test) => test.available).length} {t("testsReady")}
+                  {tests.filter((test) => test.available).length}{" "}
+                  {t("testsReady")}
                 </span>
               </div>
 
@@ -318,7 +340,9 @@ function Welcome({ user }) {
 
       <AttemptHistoryDrawer
         open={Boolean(historyTest)}
-        attempts={attempts.filter((attempt) => attempt.testId === historyTest?.id)}
+        attempts={attempts.filter(
+          (attempt) => attempt.testId === historyTest?.id,
+        )}
         tests={tests}
         selectedTest={historyTest}
         loading={historyLoading}

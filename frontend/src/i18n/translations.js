@@ -46,7 +46,7 @@ export const translations = {
     noDataYet: "No data yet",
     loading: "Loading...",
     noDataAvailable: "No data available.",
-    loginTagline: "Smarter TOEIC practice every day",
+    loginTagline: "Smarter CapyTOEIC every day",
     loginDescription: "Build stronger English skills with focused practice, a clean learning experience, and clear progress tracking.",
     progress: "Progress",
     trackYourScore: "Track your score",

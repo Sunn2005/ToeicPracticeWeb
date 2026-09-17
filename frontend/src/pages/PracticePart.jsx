@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { auth } from "../firebase";
 import LanguageSwitcher from "../components/LanguageSwitcher";
+import LoadingScreen from "../components/LoadingScreen";
 import { useLanguage } from "../i18n/LanguageContext";
 
 const API_BASE_URL =
@@ -99,7 +100,7 @@ function PracticePart() {
   };
 
   if (loading) {
-    return <p>{t("loading")}</p>;
+    return <LoadingScreen message={t("loading")} />;
   }
 
   if (!part) {

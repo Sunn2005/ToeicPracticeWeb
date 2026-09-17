@@ -1,12 +1,10 @@
-import {
-  GoogleAuthProvider,
-  signInWithPopup,
-} from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import { useLanguage } from "../i18n/LanguageContext";
+import BrandLogo from "../components/BrandLogo";
 
 function Login() {
   const { t } = useLanguage();
@@ -28,13 +26,9 @@ function Login() {
       console.error(error);
 
       if (error.code === "auth/unauthorized-domain") {
-        setErrorMessage(
-          t("unauthorizedDomain"),
-        );
+        setErrorMessage(t("unauthorizedDomain"));
       } else if (error.message?.includes("Database is closing/hidden")) {
-        setErrorMessage(
-          t("sessionSaveError"),
-        );
+        setErrorMessage(t("sessionSaveError"));
       } else {
         setErrorMessage(
           `${t("googleSignInError")} ${error.code || error.message}`,
@@ -58,7 +52,7 @@ function Login() {
 
             <div className="space-y-5">
               <h1 className="max-w-2xl text-4xl font-bold leading-tight tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
-                TOEIC Practice
+                CapyTOEIC
               </h1>
               <p className="max-w-xl text-lg leading-8 text-slate-600">
                 {t("loginDescription")}
@@ -75,7 +69,9 @@ function Login() {
                   key={title}
                   className="rounded-2xl border border-white/80 bg-white/60 p-4 shadow-sm backdrop-blur"
                 >
-                  <p className="text-sm font-semibold text-slate-900">{title}</p>
+                  <p className="text-sm font-semibold text-slate-900">
+                    {title}
+                  </p>
                   <p className="mt-1 text-xs text-slate-500">{desc}</p>
                 </div>
               ))}
@@ -86,14 +82,14 @@ function Login() {
             <div className="rounded-4xl border border-white/80 bg-white/85 p-7 shadow-2xl shadow-sky-200/70 backdrop-blur-xl sm:p-8">
               <div className="mb-8 flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-sky-600">{t("welcome")}</p>
+                  <p className="text-sm font-medium text-sky-600">
+                    {t("welcome")}
+                  </p>
                   <h2 className="mt-2 text-2xl font-bold text-slate-950">
                     {t("signInToStart")}
                   </h2>
                 </div>
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-sky-100 text-xl font-bold text-sky-600 shadow-inner">
-                  TP
-                </div>
+                <BrandLogo className="h-16 w-16 rounded-2xl border border-sky-100 bg-white shadow-md" />
               </div>
 
               <button
@@ -119,14 +115,16 @@ function Login() {
                   {t("practiceToday")}
                 </p>
                 <div className="mt-4 space-y-3">
-                  {[t("miniTest"), t("topicVocabulary"), t("reviewIncorrectAnswers")].map(
-                    (item) => (
-                      <div key={item} className="flex items-center gap-3">
-                        <span className="h-2.5 w-2.5 rounded-full bg-sky-400" />
-                        <span className="text-sm text-slate-600">{item}</span>
-                      </div>
-                    ),
-                  )}
+                  {[
+                    t("miniTest"),
+                    t("topicVocabulary"),
+                    t("reviewIncorrectAnswers"),
+                  ].map((item) => (
+                    <div key={item} className="flex items-center gap-3">
+                      <span className="h-2.5 w-2.5 rounded-full bg-sky-400" />
+                      <span className="text-sm text-slate-600">{item}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

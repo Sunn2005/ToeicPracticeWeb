@@ -4,6 +4,8 @@ import { ApiError, apiFetch, publicApiFetch } from "../api/client";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getTestName, getTestTitle } from "../data/testCatalog";
+import BrandLogo from "../components/BrandLogo";
+import LoadingScreen from "../components/LoadingScreen";
 
 function FullTestIntro() {
   const { t } = useLanguage();
@@ -20,14 +22,14 @@ function FullTestIntro() {
 
     Promise.all([
       publicApiFetch(`/api/tests/${testId}`),
-      apiFetch(`/api/attempts/current?testId=${encodeURIComponent(testId)}`).catch(
-        (requestError) => {
-          if (requestError instanceof ApiError && requestError.status === 404) {
-            return null;
-          }
-          throw requestError;
-        },
-      ),
+      apiFetch(
+        `/api/attempts/current?testId=${encodeURIComponent(testId)}`,
+      ).catch((requestError) => {
+        if (requestError instanceof ApiError && requestError.status === 404) {
+          return null;
+        }
+        throw requestError;
+      }),
     ])
       .then(([testData, attemptData]) => {
         if (!active) return;
@@ -64,11 +66,7 @@ function FullTestIntro() {
   };
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 text-sky-700">
-        {t("loadingTestInfo")}
-      </div>
-    );
+    return <LoadingScreen message={t("loadingTestInfo")} />;
   }
 
   return (
@@ -80,10 +78,8 @@ function FullTestIntro() {
             onClick={() => navigate("/dashboard")}
             className="flex items-center gap-3 font-bold text-slate-950"
           >
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500 text-sm text-white">
-              TP
-            </span>
-            <span className="hidden sm:inline">TOEIC Practice</span>
+            <BrandLogo className="h-11 w-11 rounded-xl border border-sky-100 bg-white shadow-sm" />
+            <span className="hidden sm:inline">CapyTOEIC</span>
           </button>
           <div className="flex items-center gap-2">
             <LanguageSwitcher />
@@ -120,13 +116,17 @@ function FullTestIntro() {
 
           <div className="grid gap-8 p-6 sm:p-10 lg:grid-cols-[1fr_340px]">
             <div>
-              <h2 className="text-xl font-bold text-slate-950">{t("testStructure")}</h2>
+              <h2 className="text-xl font-bold text-slate-950">
+                {t("testStructure")}
+              </h2>
               <div className="mt-5 grid gap-4 sm:grid-cols-2">
                 <div className="rounded-2xl border border-sky-100 bg-sky-50 p-5">
                   <p className="text-xs font-bold uppercase tracking-wider text-sky-600">
                     {t("listening")}
                   </p>
-                  <p className="mt-2 text-2xl font-bold">{t("listeningSummary")}</p>
+                  <p className="mt-2 text-2xl font-bold">
+                    {t("listeningSummary")}
+                  </p>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
                     {t("listeningInstructions")}
                   </p>
@@ -135,7 +135,9 @@ function FullTestIntro() {
                   <p className="text-xs font-bold uppercase tracking-wider text-violet-600">
                     {t("reading")}
                   </p>
-                  <p className="mt-2 text-2xl font-bold">{t("readingSummary")}</p>
+                  <p className="mt-2 text-2xl font-bold">
+                    {t("readingSummary")}
+                  </p>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
                     {t("readingInstructions")}
                   </p>
@@ -154,24 +156,38 @@ function FullTestIntro() {
             </div>
 
             <aside className="h-fit rounded-3xl border border-slate-200 bg-slate-50 p-6">
-              <p className="text-sm font-semibold text-slate-500">{t("overview")}</p>
+              <p className="text-sm font-semibold text-slate-500">
+                {t("overview")}
+              </p>
               <dl className="mt-5 space-y-4">
                 {[
                   [t("questions"), `${test?.totalQuestions || 200}`],
-                  [t("totalTime"), `${test?.totalMinutes || 120} ${t("minutes")}`],
+                  [
+                    t("totalTime"),
+                    `${test?.totalMinutes || 120} ${t("minutes")}`,
+                  ],
                   [t("format"), t("fullTest")],
                   [t("results"), t("automaticallyScored")],
                 ].map(([label, value]) => (
-                  <div key={label} className="flex justify-between gap-4 border-b border-slate-200 pb-3">
+                  <div
+                    key={label}
+                    className="flex justify-between gap-4 border-b border-slate-200 pb-3"
+                  >
                     <dt className="text-sm text-slate-500">{label}</dt>
-                    <dd className="text-sm font-bold text-slate-900">{value}</dd>
+                    <dd className="text-sm font-bold text-slate-900">
+                      {value}
+                    </dd>
                   </div>
                 ))}
               </dl>
 
               {currentAttempt && (
                 <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
-                  {t("activeAttemptPrefix")} {currentAttempt.currentSection === "LISTENING" ? t("listening") : t("reading")}{t("activeAttemptSuffix")}
+                  {t("activeAttemptPrefix")}{" "}
+                  {currentAttempt.currentSection === "LISTENING"
+                    ? t("listening")
+                    : t("reading")}
+                  {t("activeAttemptSuffix")}
                 </div>
               )}
 

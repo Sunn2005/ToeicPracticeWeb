@@ -1,4 +1,4 @@
-# TOEIC Practice Web — Frontend
+# CapyTOEIC Web — Frontend
 
 Frontend của hệ thống luyện thi TOEIC, xây dựng bằng React, Vite, Tailwind CSS và Firebase Authentication.
 
@@ -61,9 +61,9 @@ Nên dùng `npm ci` khi mới clone hoặc khi đồng bộ code từ nhóm. Ch�
 
 Frontend hiện dùng một biến môi trường:
 
-| Biến | Bắt buộc | Ý nghĩa |
-| --- | --- | --- |
-| `VITE_API_BASE_URL` | Có | URL gốc của Spring Boot backend, không có dấu `/` ở cuối |
+| Biến                | Bắt buộc | Ý nghĩa                                                  |
+| ------------------- | -------- | -------------------------------------------------------- |
+| `VITE_API_BASE_URL` | Có       | URL gốc của Spring Boot backend, không có dấu `/` ở cuối |
 
 Tạo file cấu hình cá nhân từ file mẫu:
 
@@ -159,11 +159,11 @@ Không có username/password mặc định trong repository và không được 
 
 ### Các quyền người dùng
 
-| Role | Dùng để kiểm thử | Cách nhận quyền |
-| --- | --- | --- |
-| `USER` | Xem đề, bắt đầu thi, làm bài, xem kết quả và lịch sử | Tài khoản Google thông thường; đây là quyền mặc định |
-| `EMPLOYEE` | Tạo, sửa, xóa, preview và gửi đề để duyệt | Gửi email Google cho trưởng nhóm để được cấp quyền |
-| `ADMIN` | Xem hàng đợi, duyệt/từ chối đề và xem lịch sử duyệt | Gửi email Google cho trưởng nhóm để được cấp quyền |
+| Role       | Dùng để kiểm thử                                     | Cách nhận quyền                                      |
+| ---------- | ---------------------------------------------------- | ---------------------------------------------------- |
+| `USER`     | Xem đề, bắt đầu thi, làm bài, xem kết quả và lịch sử | Tài khoản Google thông thường; đây là quyền mặc định |
+| `EMPLOYEE` | Tạo, sửa, xóa, preview và gửi đề để duyệt            | Gửi email Google cho trưởng nhóm để được cấp quyền   |
+| `ADMIN`    | Xem hàng đợi, duyệt/từ chối đề và xem lịch sử duyệt  | Gửi email Google cho trưởng nhóm để được cấp quyền   |
 
 Quyền `EMPLOYEE` và `ADMIN` được backend kiểm tra bằng Spring Security, không được giả lập bằng cách sửa state hoặc local storage trên frontend. Firestore `users/{uid}.role` là nguồn role duy nhất.
 
@@ -181,12 +181,12 @@ Kiểm tra theo thứ tự:
 
 ## 6. Các lệnh thường dùng
 
-| Lệnh | Chức năng |
-| --- | --- |
-| `npm run dev` | Chạy development server tại cổng 5173 |
-| `npm run lint` | Kiểm tra ESLint |
-| `npm test` | Chạy automated tests |
-| `npm run build` | Tạo production build trong `dist/` |
+| Lệnh                             | Chức năng                                                 |
+| -------------------------------- | --------------------------------------------------------- |
+| `npm run dev`                    | Chạy development server tại cổng 5173                     |
+| `npm run lint`                   | Kiểm tra ESLint                                           |
+| `npm test`                       | Chạy automated tests                                      |
+| `npm run build`                  | Tạo production build trong `dist/`                        |
 | `npm run preview -- --port 5173` | Xem production build trên cổng được backend cho phép CORS |
 
 Trước khi push hoặc mở pull request, bắt buộc chạy:
@@ -307,14 +307,14 @@ Client đã hỗ trợ cả JSON và `FormData`. Khi Member 3 triển khai uploa
 
 ### Nhóm endpoint chính
 
-| Nhóm | Endpoint tiêu biểu | Quyền |
-| --- | --- | --- |
-| Test catalog | `GET /api/tests`, `GET /api/tests/{testId}` | Public |
-| Current user | `GET /api/me` | Đã đăng nhập |
-| Learning | `GET /api/users/me/attempts`, `GET /api/users/me/statistics` | `USER` trở lên |
-| Exam | `/api/tests/{testId}/attempts`, `/api/attempts/{attemptId}/...` | Đã đăng nhập |
-| Employee | `/api/employee/tests`, `/api/employee/media` | `EMPLOYEE` hoặc `ADMIN` |
-| Admin review | `/api/admin/test-submissions`, `/api/admin/review-history` | `ADMIN` |
+| Nhóm         | Endpoint tiêu biểu                                              | Quyền                   |
+| ------------ | --------------------------------------------------------------- | ----------------------- |
+| Test catalog | `GET /api/tests`, `GET /api/tests/{testId}`                     | Public                  |
+| Current user | `GET /api/me`                                                   | Đã đăng nhập            |
+| Learning     | `GET /api/users/me/attempts`, `GET /api/users/me/statistics`    | `USER` trở lên          |
+| Exam         | `/api/tests/{testId}/attempts`, `/api/attempts/{attemptId}/...` | Đã đăng nhập            |
+| Employee     | `/api/employee/tests`, `/api/employee/media`                    | `EMPLOYEE` hoặc `ADMIN` |
+| Admin review | `/api/admin/test-submissions`, `/api/admin/review-history`      | `ADMIN`                 |
 
 ## 10. Phân chia công việc frontend
 
