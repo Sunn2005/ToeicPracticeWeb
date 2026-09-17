@@ -51,8 +51,12 @@ function Login() {
             </div>
 
             <div className="space-y-5">
-              <h1 className="max-w-2xl text-4xl font-bold leading-tight tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
-                CapyTOEIC
+              <h1 className="max-w-2xl">
+                <img
+                  src="/brand/capyToeic.png"
+                  alt="CapyTOEIC"
+                  className="h-auto w-full max-w-[420px]"
+                />
               </h1>
               <p className="max-w-xl text-lg leading-8 text-slate-600">
                 {t("loginDescription")}

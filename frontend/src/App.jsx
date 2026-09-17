@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase";
+import { apiFetch } from "./api/client";
 import Login from "./pages/Login";
 import PracticePart from "./pages/PracticePart";
 import Welcome from "./pages/Welcome";
@@ -16,10 +17,12 @@ import FullTestResult from "./pages/FullTestResult";
 import FullTestReview from "./pages/FullTestReview";
 import { LanguageProvider } from "./i18n/LanguageContext";
 import LoadingScreen from "./components/LoadingScreen";
+import FloatingPet from "./components/FloatingPet";
 
 function AppRoutes() {
   const [user, setUser] = useState(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [roleInfo, setRoleInfo] = useState({ uid: null, role: null });
 
   useEffect(() => {
     return onAuthStateChanged(auth, (currentUser) => {
@@ -28,12 +31,44 @@ function AppRoutes() {
     });
   }, []);
 
+  useEffect(() => {
+    let active = true;
+
+    if (!user) {
+      return () => {
+        active = false;
+      };
+    }
+
+    const resolveRole = async () => {
+      try {
+        const profile = await apiFetch("/api/me");
+        if (active) {
+          setRoleInfo({
+            uid: user.uid,
+            role: String(profile?.role || "").toUpperCase() || "UNKNOWN",
+          });
+        }
+      } catch {
+        // Keep the pet hidden when the role cannot be verified. This prevents
+        // management accounts from briefly seeing it during a failed request.
+        if (active) setRoleInfo({ uid: user.uid, role: "UNKNOWN" });
+      }
+    };
+
+    resolveRole();
+    return () => {
+      active = false;
+    };
+  }, [user]);
+
   if (checkingAuth) {
     return <LoadingScreen />;
   }
 
   return (
-    <Routes>
+    <>
+      <Routes>
       <Route
         path="/"
         element={<Navigate to={user ? "/dashboard" : "/login"} replace />}
@@ -70,7 +105,12 @@ function AppRoutes() {
         path="*"
         element={<Navigate to={user ? "/dashboard" : "/login"} replace />}
       />
-    </Routes>
+      </Routes>
+      <FloatingPet
+        user={user}
+        role={roleInfo.uid === user?.uid ? roleInfo.role : null}
+      />
+    </>
   );
 }
 

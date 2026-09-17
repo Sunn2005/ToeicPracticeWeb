@@ -44,6 +44,92 @@ body {
   }
 }
 
+@keyframes floating-pet-sprite {
+  0%,
+  12.499% {
+    background-position: 0 50%;
+  }
+
+  12.5%,
+  24.999% {
+    background-position: 14.285714% 50%;
+  }
+
+  25%,
+  37.499% {
+    background-position: 28.571429% 50%;
+  }
+
+  37.5%,
+  49.999% {
+    background-position: 42.857143% 50%;
+  }
+
+  50%,
+  62.499% {
+    background-position: 57.142857% 50%;
+  }
+
+  62.5%,
+  74.999% {
+    background-position: 71.428571% 50%;
+  }
+
+  75%,
+  87.499% {
+    background-position: 85.714286% 50%;
+  }
+
+  87.5%,
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+.floating-pet {
+  position: fixed;
+  z-index: 40;
+  display: grid;
+  width: 120px;
+  height: 170px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  transition: filter 150ms ease, transform 150ms ease;
+}
+
+.floating-pet:hover,
+.floating-pet:focus-visible {
+  filter: drop-shadow(0 10px 12px rgb(14 165 233 / 0.22));
+  transform: translateY(-3px);
+}
+
+.floating-pet:focus-visible {
+  outline: 3px solid rgb(14 165 233 / 0.55);
+  outline-offset: 4px;
+}
+
+.floating-pet--dragging,
+.floating-pet--dragging:hover {
+  cursor: grabbing;
+  filter: drop-shadow(0 14px 16px rgb(14 165 233 / 0.28));
+  transform: scale(1.04);
+}
+
+.floating-pet__sprite {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-image: url("/brand/petSprite.png");
+  background-position: 0 50%;
+  background-repeat: no-repeat;
+  background-size: 800% auto;
+  animation: floating-pet-sprite 1.25s linear infinite;
+}
+
 .brand-loader-frame {
   position: relative;
   display: grid;
@@ -80,8 +166,16 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .brand-loader-frame,
-  .brand-loader-dot {
+  .brand-loader-dot,
+  .floating-pet__sprite {
     animation: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .floating-pet {
+    width: 96px;
+    height: 136px;
   }
 }
 
