@@ -66,6 +66,23 @@ class AIReviewServiceTests {
     }
 
     @Test
+    void allowsUserToRefreshACompletedAnalysis() throws Exception {
+        Attempt attempt = attempt("FULL_TEST", "FULL", "COMPLETED", "user-1");
+        attempt.setAiAnalysisStatus("COMPLETED");
+        attempt.setAiAnalysisId("attempt-1");
+        when(attemptDao.findById("attempt-1")).thenReturn(Optional.of(attempt));
+
+        Map<String, Object> response = service.requestAnalysis("user-1", "attempt-1", true);
+
+        assertEquals("PENDING", response.get("status"));
+        assertEquals(null, attempt.getAiAnalysisId());
+        verify(attemptDao).save(attempt);
+        verify(publisher).publish(new com.toeic.dto.ai.AIReviewRequest(
+                "attempt-1", "user-1", true
+        ));
+    }
+
+    @Test
     void completedMessageIsIdempotentAndRequiresStoredAnalysis() throws Exception {
         Attempt attempt = attempt("FULL_TEST", "FULL", "COMPLETED", "user-1");
         attempt.setAiAnalysisStatus("PROCESSING");

@@ -7,3 +7,7 @@ export function shouldPollAIAnalysis(status) {
 export function canRequestAIAnalysis(result) {
   return result?.type === "FULL_TEST" && result?.mode === "FULL";
 }
+
+export function selectAIAnalysisResult(storedResult, language) {
+  return storedResult?.[language] || storedResult;
+}

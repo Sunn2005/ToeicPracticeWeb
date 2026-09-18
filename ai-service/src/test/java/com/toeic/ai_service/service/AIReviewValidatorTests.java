@@ -10,8 +10,34 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AIReviewValidatorTests {
+
+    @Test
+    void acceptsVietnameseNarrativeWithToeicTermsAndRejectsEnglishExplanation() {
+        assertTrue(AIReviewValidator.isAcceptableVietnameseText(
+                "Bạn nhận diện tốt bối cảnh trong Part 1 và nên tiếp tục luyện nghe các chi tiết mô tả hành động.",
+                15
+        ));
+        assertFalse(AIReviewValidator.isAcceptableVietnameseText(
+                "You are good at identifying photo scenes but need more practice with details.",
+                8
+        ));
+        assertFalse(AIReviewValidator.isAcceptableVietnameseText(
+                "Nhận diện Part 1 tốt.",
+                8
+        ));
+        assertTrue(AIReviewValidator.isAcceptableEnglishText(
+                "You identify photo details accurately and should continue practicing action descriptions in Part 1.",
+                12
+        ));
+        assertFalse(AIReviewValidator.isAcceptableEnglishText(
+                "Bạn nhận diện bối cảnh tốt nhưng cần luyện thêm các chi tiết mô tả hành động.",
+                10
+        ));
+    }
 
     @Test
     void rejectsInventedScoreAndHighConfidenceForSmallSample() {

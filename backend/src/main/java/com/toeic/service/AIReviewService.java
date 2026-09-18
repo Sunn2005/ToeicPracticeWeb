@@ -40,11 +40,19 @@ public class AIReviewService {
     }
 
     public Map<String, Object> requestAnalysis(String userId, String attemptId) throws Exception {
+        return requestAnalysis(userId, attemptId, false);
+    }
+
+    public Map<String, Object> requestAnalysis(
+            String userId,
+            String attemptId,
+            boolean refresh
+    ) throws Exception {
         Attempt attempt = ownedAttempt(userId, attemptId);
         requireEligible(attempt);
 
         String currentStatus = status(attempt);
-        if (ACTIVE_STATUSES.contains(currentStatus) || COMPLETED.equals(currentStatus)) {
+        if (ACTIVE_STATUSES.contains(currentStatus) || (COMPLETED.equals(currentStatus) && !refresh)) {
             return statusResponse(attempt, currentStatus, currentStatus.equals(COMPLETED)
                     ? "Bài làm đã được phân tích."
                     : "Yêu cầu phân tích đang được xử lý.");
@@ -58,7 +66,7 @@ public class AIReviewService {
         attemptDao.save(attempt);
 
         try {
-            publisher.publish(new AIReviewRequest(attemptId, userId));
+            publisher.publish(new AIReviewRequest(attemptId, userId, refresh));
         } catch (RuntimeException exception) {
             attempt.setAiAnalysisStatus(FAILED);
             attempt.setUpdatedAt(System.currentTimeMillis());

@@ -8,13 +8,46 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Component
 public class AIReviewValidator {
 
+    private static final Pattern VIETNAMESE_MARKER = Pattern.compile(
+            "[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡ"
+                    + "ùúụủũưừứựửữỳýỵỷỹđ]"
+                    + "|\\b(bạn|câu|phần|nghe|đọc|đúng|sai|luyện|học|cần|nên|với|theo|trong|và|của|không|mục|tiêu|kết|quả|khả|năng)\\b",
+            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE
+    );
+    private static final Pattern ENGLISH_COMMON_WORD = Pattern.compile(
+            "\\b(the|you|your|are|is|have|has|with|and|but|need|needs|improve|improvement|"
+                    + "difficulty|questions|performance|struggle|struggling|identify|identifying|"
+                    + "consistently)\\b",
+            Pattern.CASE_INSENSITIVE
+    );
+    private static final Pattern ENGLISH_MARKER = Pattern.compile(
+            "\\b(the|you|your|are|is|have|has|with|and|but|need|needs|improve|improvement|"
+                    + "difficulty|questions|performance|struggle|struggling|identify|identifying|"
+                    + "review|practice|focus|building|advanced|consistently|photo|description|"
+                    + "grammar|vocabulary|listening|reading|response|inference|skill|accuracy|"
+                    + "cohesion|word|forms|context|study|answer|sentence|detail)\\b",
+            Pattern.CASE_INSENSITIVE
+    );
+
     public void validate(GeminiAnalysis analysis, ReviewInput input, ReviewStatistics statistics) {
+        validate(analysis, input, statistics, "vi");
+    }
+
+    public void validate(
+            GeminiAnalysis analysis,
+            ReviewInput input,
+            ReviewStatistics statistics,
+            String locale
+    ) {
         if (analysis == null || analysis.summary() == null) {
             throw new InvalidAIAnalysisException("Thiếu summary");
         }
@@ -53,6 +86,7 @@ public class AIReviewValidator {
         if (!Set.of("LOW", "MEDIUM", "HIGH").contains(analysis.overallConfidence())) {
             throw new InvalidAIAnalysisException("overallConfidence không hợp lệ");
         }
+        validateLocalizedContent(analysis, locale);
 
         Set<Integer> validQuestions = new HashSet<>();
         Set<String> validTags = new HashSet<>();
@@ -108,6 +142,103 @@ public class AIReviewValidator {
                 validateTag(task.skillTag(), validTags);
             }
         }
+    }
+
+    private void validateLocalizedContent(GeminiAnalysis analysis, String locale) {
+        requireLanguage(analysis.summary().headline(), "summary.headline", 3, locale);
+        requireLanguage(analysis.summary().overallComment(), "summary.overallComment", 25, locale);
+
+        for (GeminiAnalysis.Strength item : analysis.strengths()) {
+            requireLanguage(item.title(), "strength.title", 2, locale);
+            requireLanguage(item.message(), "strength.message", 15, locale);
+        }
+        for (GeminiAnalysis.Weakness item : analysis.weaknesses()) {
+            requireLanguage(item.title(), "weakness.title", 2, locale);
+            requireLanguage(item.message(), "weakness.message", 15, locale);
+            requireLanguage(item.recommendation(), "weakness.recommendation", 12, locale);
+        }
+        for (GeminiAnalysis.PartAnalysis item : analysis.partAnalysis()) {
+            requireLanguage(item.summary(), "partAnalysis[" + item.part() + "].summary", 18, locale);
+        }
+        for (GeminiAnalysis.KnowledgeGap item : analysis.knowledgeGaps()) {
+            requireLanguage(item.name(), "knowledgeGap.name", 2, locale);
+            requireLanguage(item.explanation(), "knowledgeGap.explanation", 12, locale);
+            requireList(item.topicsToReview(), "knowledgeGap.topicsToReview");
+            for (String topic : item.topicsToReview()) {
+                requireLanguage(topic, "knowledgeGap.topicsToReview", 2, locale);
+            }
+        }
+        requireLanguage(analysis.timeManagement().summary(), "timeManagement.summary", 5, locale);
+        for (GeminiAnalysis.PriorityTopic item : analysis.priorityTopics()) {
+            requireLanguage(item.title(), "priorityTopic.title", 2, locale);
+            requireLanguage(item.reason(), "priorityTopic.reason", 12, locale);
+            requireLanguage(item.goal(), "priorityTopic.goal", 8, locale);
+        }
+        for (GeminiAnalysis.StudyDay day : analysis.studyPlan()) {
+            requireLanguage(day.title(), "studyPlan.title", 2, locale);
+            requireList(day.tasks(), "studyPlan.tasks");
+            for (GeminiAnalysis.StudyTask task : day.tasks()) {
+                requireLanguage(task.title(), "studyPlan.task.title", 3, locale);
+            }
+        }
+        for (GeminiAnalysis.NextAction action : analysis.nextActions()) {
+            requireLanguage(action.label(), "nextAction.label", 5, locale);
+        }
+        for (String limitation : analysis.limitations()) {
+            requireLanguage(limitation, "limitations", 5, locale);
+        }
+    }
+
+    private void requireLanguage(String value, String field, int minimumWords, String locale) {
+        boolean valid = "en".equals(locale)
+                ? isAcceptableEnglishText(value, minimumWords)
+                : isAcceptableVietnameseText(value, minimumWords);
+        if (!valid) {
+            throw new InvalidAIAnalysisException(
+                    field + " phải dùng đúng ngôn ngữ " + locale
+                            + " và đủ chi tiết (tối thiểu " + minimumWords + " từ)"
+            );
+        }
+    }
+
+    static boolean isAcceptableVietnameseText(String value, int minimumWords) {
+        if (value == null || value.isBlank()) {
+            return false;
+        }
+        String normalized = value.trim().toLowerCase(Locale.ROOT);
+        if (normalized.split("\\s+").length < minimumWords
+                || !VIETNAMESE_MARKER.matcher(normalized).find()) {
+            return false;
+        }
+        Matcher englishWords = ENGLISH_COMMON_WORD.matcher(normalized);
+        int englishWordCount = 0;
+        while (englishWords.find()) {
+            englishWordCount++;
+            if (englishWordCount >= 3) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    static boolean isAcceptableEnglishText(String value, int minimumWords) {
+        if (value == null || value.isBlank()) {
+            return false;
+        }
+        String normalized = value.trim().toLowerCase(Locale.ROOT);
+        if (normalized.split("\\s+").length < minimumWords
+                || !ENGLISH_MARKER.matcher(normalized).find()) {
+            return false;
+        }
+        Matcher vietnameseWords = VIETNAMESE_MARKER.matcher(normalized);
+        int vietnameseWordCount = 0;
+        while (vietnameseWords.find()) {
+            vietnameseWordCount++;
+            if (vietnameseWordCount >= 3) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void validateEvidence(

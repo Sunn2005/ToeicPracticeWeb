@@ -2,6 +2,7 @@ package com.toeic.ai_service.service;
 
 import com.toeic.ai_service.model.AIReviewRequest;
 import com.toeic.ai_service.model.GeminiAnalysis;
+import com.toeic.ai_service.model.GeminiAnalysisBundle;
 import com.toeic.ai_service.model.ReviewInput;
 import com.toeic.ai_service.model.ReviewStatistics;
 import org.junit.jupiter.api.Test;
@@ -46,16 +47,18 @@ class AIReviewProcessorTests {
                 List.of(), List.of(), List.of(), "LOW", List.of()
         );
 
-        when(repository.claim("attempt-1", "user-1", false))
+        when(repository.claim("attempt-1", "user-1", false, false))
                 .thenReturn(FirestoreReviewRepository.ClaimResult.CLAIMED);
         when(repository.load("attempt-1", "user-1")).thenReturn(input);
         when(statisticsService.calculate(input)).thenReturn(statistics);
         when(geminiService.analyze(input, statistics))
-                .thenReturn(new AIReviewGeminiService.Generation(analysis, 0));
+                .thenReturn(new AIReviewGeminiService.Generation(
+                        new GeminiAnalysisBundle(analysis, analysis), 0
+                ));
         when(objectMapper.convertValue(any(), any(TypeReference.class)))
                 .thenReturn(new LinkedHashMap<>());
 
-        processor.process(new AIReviewRequest("attempt-1", "user-1"));
+        processor.process(new AIReviewRequest("attempt-1", "user-1", false));
 
         InOrder order = inOrder(repository, publisher);
         order.verify(repository).saveCompleted(
@@ -82,7 +85,7 @@ class AIReviewProcessorTests {
                 new ReviewStatistics.TimeManagement(false, Map.of())
         );
 
-        when(repository.claim("attempt-1", "user-1", false))
+        when(repository.claim("attempt-1", "user-1", false, false))
                 .thenReturn(FirestoreReviewRepository.ClaimResult.CLAIMED);
         when(repository.load("attempt-1", "user-1")).thenReturn(input);
         when(statisticsService.calculate(input)).thenReturn(statistics);
@@ -92,7 +95,7 @@ class AIReviewProcessorTests {
                 )
         );
 
-        processor.process(new AIReviewRequest("attempt-1", "user-1"));
+        processor.process(new AIReviewRequest("attempt-1", "user-1", false));
 
         verify(repository).saveFailed("attempt-1", "user-1", "GEMINI_UNAVAILABLE", 2);
         verify(publisher).failed("attempt-1", "user-1", "GEMINI_UNAVAILABLE");

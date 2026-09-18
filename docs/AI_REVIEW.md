@@ -11,7 +11,7 @@ Chức năng chỉ nhận yêu cầu do người dùng đã đăng nhập chủ 
 3. BE-Core kiểm tra quyền sở hữu và điều kiện, lưu `PENDING`, rồi publish message định danh.
 4. AI Service claim job bằng Firestore transaction, lưu `PROCESSING`, đọc Attempt, answers và đề thi.
 5. AI Service ghép đủ 200 câu, tính toàn bộ số liệu xác định bằng code rồi chỉ gửi dữ liệu cần thiết (không có danh tính hay audio) sang Gemini Structured Output.
-6. Kết quả Gemini được kiểm tra lại với score, tag, question number, evidence, Part 1–7, ba ưu tiên, kế hoạch 7 ngày và giới hạn dữ liệu thời gian.
+6. Gemini tạo đồng thời hai bản `vi` và `en`. Cả hai được kiểm tra lại với score, tag, question number, evidence, Part 1–7, ba ưu tiên, kế hoạch 7 ngày, giới hạn dữ liệu thời gian, đúng ngôn ngữ và độ chi tiết tối thiểu của các phần giải thích.
 7. AI Service lưu `aiAnalyses/{attemptId}` trước, sau đó mới publish `ai.review.completed`.
 8. BE-Core consume message định danh và cập nhật Attempt. Frontend poll endpoint GET; kết quả hoàn chỉnh luôn đi qua BE-Core, không đọc Firestore trực tiếp.
 9. Khi thất bại sau retry, AI Service lưu `FAILED`, publish `ai.review.failed`, rồi reject message để RabbitMQ đưa vào DLQ.
@@ -33,7 +33,7 @@ Request queue dùng dead-letter exchange `toeic.ai.dlx`, DLQ `toeic.ai.request.d
 Payload request:
 
 ```json
-{"attemptId":"attempt-123","userId":"user-001"}
+{"attemptId":"attempt-123","userId":"user-001","refresh":false}
 ```
 
 Payload completed:
@@ -57,7 +57,7 @@ Các message không chứa câu hỏi, đáp án, nội dung nhận xét, stack 
 - `tests/{testId}/parts/part1..part7` là nguồn câu hỏi và metadata.
 - `aiAnalyses/{attemptId}` giữ toàn bộ analysis với các field `analysisId`, `attemptId`, `userId`, `status`, `provider`, `model`, `promptVersion`, `schemaVersion`, `result`, `retryCount`, `error`, `requestedAt`, `processingStartedAt`, `completedAt`.
 
-`result` chứa `summary`, `strengths`, `weaknesses`, `partAnalysis`, `knowledgeGaps`, `timeManagement`, `priorityTopics`, `studyPlan`, `nextActions`, `overallConfidence`, `limitations` và `statistics`. `statistics` là kết quả code, không phải số liệu Gemini tự tính.
+`result.vi` và `result.en` đều chứa `summary`, `strengths`, `weaknesses`, `partAnalysis`, `knowledgeGaps`, `timeManagement`, `priorityTopics`, `studyPlan`, `nextActions`, `overallConfidence`, `limitations` và `statistics`. `statistics` là kết quả code, không phải số liệu Gemini tự tính. Frontend chọn bản tương ứng ngay khi người dùng chuyển EN/VI, không gọi lại Gemini.
 
 ## Biến môi trường
 
@@ -104,6 +104,15 @@ curl -X POST 'http://localhost:8080/api/attempts/attempt-123/ai-analysis' \
   "message": "Yêu cầu phân tích đã được tiếp nhận."
 }
 ```
+
+Tạo lại nhận xét đã hoàn thành bằng prompt mới:
+
+```bash
+curl -X POST 'http://localhost:8080/api/attempts/attempt-123/ai-analysis?refresh=true' \
+  -H 'Authorization: Bearer <firebase-id-token>'
+```
+
+Khi `refresh=true`, BE-Core đưa Attempt về `PENDING` và AI Service ghi đè kết quả đã lưu. Message được giao lại sau khi kết quả đã lưu vẫn chỉ phát lại completion, không gọi Gemini lần nữa.
 
 Đọc trạng thái/kết quả:
 

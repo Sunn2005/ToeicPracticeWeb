@@ -11,6 +11,7 @@ import {
 } from "../api/aiAnalysis";
 import {
   canRequestAIAnalysis,
+  selectAIAnalysisResult,
   shouldPollAIAnalysis,
 } from "../utils/aiAnalysis";
 
@@ -29,7 +30,16 @@ function Metric({ label, value, tone = "slate" }) {
   );
 }
 
-function InsightList({ items, emptyText }) {
+function formatConfidence(value, t) {
+  const labels = {
+    HIGH: t("confidenceHigh"),
+    MEDIUM: t("confidenceMedium"),
+    LOW: t("confidenceLow"),
+  };
+  return labels[value] || value;
+}
+
+function InsightList({ items, emptyText, t }) {
   if (!items?.length) {
     return <p className="text-sm text-slate-500">{emptyText}</p>;
   }
@@ -40,18 +50,31 @@ function InsightList({ items, emptyText }) {
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="font-bold text-slate-900">{item.title}</h3>
             {item.tag && <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">{item.tag}</span>}
-            {item.confidence && <span className="text-xs font-semibold text-slate-500">{item.confidence}</span>}
+            {item.confidence && <span className="text-xs font-semibold text-slate-500">{formatConfidence(item.confidence, t)}</span>}
           </div>
           <p className="mt-2 text-sm leading-6 text-slate-600">{item.message || item.explanation || item.reason}</p>
           {item.recommendation && <p className="mt-2 text-sm font-medium text-sky-700">{item.recommendation}</p>}
+          {item.goal && <p className="mt-2 text-sm font-medium text-violet-700"><strong>{t("learningGoal")}:</strong> {item.goal}</p>}
+          {item.topicsToReview?.length > 0 && (
+            <p className="mt-2 text-sm text-slate-600">
+              <strong>{t("topicsToReview")}:</strong> {item.topicsToReview.join(" · ")}
+            </p>
+          )}
+          {item.evidence && (
+            <p className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-xs font-medium text-slate-500">
+              {t("evidenceLabel")}: {item.evidence.correct}/{item.evidence.total} {t("questionsCorrect")}
+              {Number.isFinite(Number(item.evidence.accuracy)) ? ` · ${item.evidence.accuracy}%` : ""}
+            </p>
+          )}
         </article>
       ))}
     </div>
   );
 }
 
-function AIAnalysisPanel({ analysis, status, busy, error, onRequest, t }) {
-  const result = analysis?.result;
+function AIAnalysisPanel({ analysis, status, busy, error, onRequest, language, t }) {
+  const storedResult = analysis?.result;
+  const result = selectAIAnalysisResult(storedResult, language);
   const summary = result?.summary;
   const statistics = result?.statistics;
 
@@ -62,14 +85,20 @@ function AIAnalysisPanel({ analysis, status, busy, error, onRequest, t }) {
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-violet-600">AI TOEIC Coach</p>
           <h2 className="mt-1 text-2xl font-bold text-slate-950">{t("aiAnalysisOverview")}</h2>
         </div>
-        {(status === "NOT_REQUESTED" || status === "FAILED") && (
+        {(status === "NOT_REQUESTED" || status === "FAILED" || status === "COMPLETED") && (
           <button
             type="button"
             disabled={busy}
-            onClick={onRequest}
+            onClick={() => onRequest(status === "COMPLETED")}
             className="rounded-xl bg-violet-600 px-5 py-3 font-semibold text-white shadow-lg shadow-violet-200 hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {busy ? t("aiAnalysisProcessing") : status === "FAILED" ? t("retryAIAnalysis") : t("requestAIAnalysis")}
+            {busy
+              ? t("aiAnalysisProcessing")
+              : status === "FAILED"
+                ? t("retryAIAnalysis")
+                : status === "COMPLETED"
+                  ? t("refreshAIAnalysis")
+                  : t("requestAIAnalysis")}
           </button>
         )}
       </div>
@@ -86,9 +115,9 @@ function AIAnalysisPanel({ analysis, status, busy, error, onRequest, t }) {
             <p className="mt-3 text-sm leading-7 text-slate-600">{summary?.overallComment}</p>
             {statistics && (
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                <Metric label="Listening" value={statistics.listeningScore} tone="sky" />
-                <Metric label="Reading" value={statistics.readingScore} tone="violet" />
-                <Metric label="Total" value={statistics.totalScore} tone="emerald" />
+                <Metric label={t("listening")} value={statistics.listeningScore} tone="sky" />
+                <Metric label={t("reading")} value={statistics.readingScore} tone="violet" />
+                <Metric label={t("totalScore")} value={statistics.totalScore} tone="emerald" />
               </div>
             )}
           </section>
@@ -96,17 +125,17 @@ function AIAnalysisPanel({ analysis, status, busy, error, onRequest, t }) {
           <div className="grid gap-5 lg:grid-cols-2">
             <section>
               <h3 className="mb-3 text-lg font-bold text-emerald-800">{t("strengths")}</h3>
-              <InsightList items={result.strengths} emptyText="Chưa có kết luận đủ tin cậy." />
+              <InsightList items={result.strengths} emptyText={t("noReliableConclusion")} t={t} />
             </section>
             <section>
               <h3 className="mb-3 text-lg font-bold text-rose-800">{t("weaknesses")}</h3>
-              <InsightList items={result.weaknesses} emptyText="Chưa có kết luận đủ tin cậy." />
+              <InsightList items={result.weaknesses} emptyText={t("noReliableConclusion")} t={t} />
             </section>
           </div>
 
           <section>
             <h3 className="mb-3 text-lg font-bold text-slate-900">{t("partAnalysis")}</h3>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {(result.partAnalysis || []).map((part) => (
                 <article key={part.part} className="rounded-2xl border border-slate-200 bg-white p-4">
                   <div className="flex items-center justify-between gap-2">
@@ -114,6 +143,16 @@ function AIAnalysisPanel({ analysis, status, busy, error, onRequest, t }) {
                     <span className="text-sm font-bold text-violet-700">{part.accuracy}%</span>
                   </div>
                   <p className="mt-2 text-sm leading-6 text-slate-600">{part.summary}</p>
+                  {part.strongTags?.length > 0 && (
+                    <p className="mt-3 text-xs leading-5 text-emerald-700">
+                      <strong>{t("strongSkills")}:</strong> {part.strongTags.join(" · ")}
+                    </p>
+                  )}
+                  {part.weakTags?.length > 0 && (
+                    <p className="mt-1 text-xs leading-5 text-rose-700">
+                      <strong>{t("skillsToImprove")}:</strong> {part.weakTags.join(" · ")}
+                    </p>
+                  )}
                 </article>
               ))}
             </div>
@@ -121,12 +160,12 @@ function AIAnalysisPanel({ analysis, status, busy, error, onRequest, t }) {
 
           <section>
             <h3 className="mb-3 text-lg font-bold text-slate-900">{t("knowledgeGaps")}</h3>
-            <InsightList items={result.knowledgeGaps} emptyText={t("noKnowledgeGaps")} />
+            <InsightList items={result.knowledgeGaps} emptyText={t("noKnowledgeGaps")} t={t} />
           </section>
 
           <section>
             <h3 className="mb-3 text-lg font-bold text-slate-900">{t("priorityTopics")}</h3>
-            <InsightList items={(result.priorityTopics || []).slice(0, 3)} emptyText="Chưa có chủ đề ưu tiên." />
+            <InsightList items={(result.priorityTopics || []).slice(0, 3)} emptyText={t("noPriorityTopics")} t={t} />
           </section>
 
           <section>
@@ -134,10 +173,10 @@ function AIAnalysisPanel({ analysis, status, busy, error, onRequest, t }) {
             <div className="grid gap-3 md:grid-cols-2">
               {(result.studyPlan || []).map((day) => (
                 <article key={day.day} className="rounded-2xl border border-slate-200 bg-white p-4">
-                  <p className="text-xs font-bold uppercase tracking-wider text-violet-600">Ngày {day.day} · {day.estimatedMinutes} phút</p>
+                  <p className="text-xs font-bold uppercase tracking-wider text-violet-600">{t("day")} {day.day} · {day.estimatedMinutes} {t("minuteShort")}</p>
                   <h4 className="mt-1 font-bold">{day.title}</h4>
                   <ul className="mt-2 space-y-1 text-sm text-slate-600">
-                    {(day.tasks || []).map((task, index) => <li key={index}>• {task.title} ({task.durationMinutes} phút)</li>)}
+                    {(day.tasks || []).map((task, index) => <li key={index}>• {task.title} ({task.durationMinutes} {t("minuteShort")})</li>)}
                   </ul>
                 </article>
               ))}
@@ -155,7 +194,7 @@ function AIAnalysisPanel({ analysis, status, busy, error, onRequest, t }) {
             </div>
             <div>
               <h3 className="mb-3 text-lg font-bold text-slate-900">{t("confidenceAndLimits")}</h3>
-              <p className="text-sm font-semibold text-slate-700">{result.overallConfidence}</p>
+              <p className="text-sm font-semibold text-slate-700">{formatConfidence(result.overallConfidence, t)}</p>
               <ul className="mt-2 space-y-1 text-sm text-slate-600">
                 {(result.limitations || []).map((item, index) => <li key={index}>• {item}</li>)}
               </ul>
@@ -168,7 +207,7 @@ function AIAnalysisPanel({ analysis, status, busy, error, onRequest, t }) {
 }
 
 function FullTestResult() {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const { attemptId } = useParams();
   const navigate = useNavigate();
   const [result, setResult] = useState(null);
@@ -227,11 +266,11 @@ function FullTestResult() {
     };
   }, [aiEligible, aiStatus, attemptId, aiAnalysis]);
 
-  const requestAIAnalysis = async () => {
+  const requestAIAnalysis = async (refresh = false) => {
     setAIRequesting(true);
     setAIError("");
     try {
-      const data = await requestAttemptAIAnalysis(attemptId);
+      const data = await requestAttemptAIAnalysis(attemptId, { refresh });
       setAIAnalysis(data);
     } catch (requestError) {
       setAIError(requestError.message);
@@ -338,6 +377,7 @@ function FullTestResult() {
                     busy={aiRequesting}
                     error={aiError}
                     onRequest={requestAIAnalysis}
+                    language={language}
                     t={t}
                   />
                 )}

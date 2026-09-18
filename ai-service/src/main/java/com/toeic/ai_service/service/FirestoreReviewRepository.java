@@ -27,10 +27,19 @@ public class FirestoreReviewRepository {
     }
 
     public ClaimResult claim(String attemptId, String userId) throws Exception {
-        return claim(attemptId, userId, false);
+        return claim(attemptId, userId, false, false);
     }
 
     public ClaimResult claim(String attemptId, String userId, boolean redelivered) throws Exception {
+        return claim(attemptId, userId, redelivered, false);
+    }
+
+    public ClaimResult claim(
+            String attemptId,
+            String userId,
+            boolean redelivered,
+            boolean refresh
+    ) throws Exception {
         DocumentReference attemptReference = firestore.collection("attempts").document(attemptId);
         DocumentReference analysisReference = firestore.collection("aiAnalyses").document(attemptId);
         long now = System.currentTimeMillis();
@@ -44,7 +53,7 @@ public class FirestoreReviewRepository {
             if (analysis.exists()) {
                 String status = analysis.getString("status");
                 Long startedAt = analysis.getLong("processingStartedAt");
-                if ("COMPLETED".equals(status)) {
+                if ("COMPLETED".equals(status) && (!refresh || redelivered)) {
                     return ClaimResult.ALREADY_COMPLETED;
                 }
                 if (!redelivered && "PROCESSING".equals(status) && startedAt != null

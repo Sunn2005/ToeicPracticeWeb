@@ -158,9 +158,10 @@ public class AttemptController {
     @PostMapping("/{attemptId}/ai-analysis")
     public Map<String, Object> requestAIAnalysis(
             @PathVariable String attemptId,
+            @RequestParam(defaultValue = "false") boolean refresh,
             @AuthenticationPrincipal ToeicUserPrincipal principal
     ) throws Exception {
-        return aiReviewService.requestAnalysis(principal.uid(), attemptId);
+        return aiReviewService.requestAnalysis(principal.uid(), attemptId, refresh);
     }
 
     @GetMapping("/{attemptId}/ai-analysis")

@@ -1,6 +1,7 @@
 package com.toeic.ai_service.service;
 
 import com.toeic.ai_service.model.AIReviewRequest;
+import com.toeic.ai_service.model.GeminiAnalysis;
 import com.toeic.ai_service.model.ReviewInput;
 import com.toeic.ai_service.model.ReviewStatistics;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,7 +55,7 @@ public class AIReviewProcessor {
     public void process(AIReviewRequest request, boolean redelivered) throws Exception {
         validate(request);
         FirestoreReviewRepository.ClaimResult claim = repository.claim(
-                request.attemptId(), request.userId(), redelivered
+                request.attemptId(), request.userId(), redelivered, request.refresh()
         );
         if (claim == FirestoreReviewRepository.ClaimResult.ALREADY_PROCESSING) {
             return;
@@ -71,17 +72,15 @@ public class AIReviewProcessor {
             AIReviewGeminiService.Generation generation = geminiService.analyze(input, statistics);
             retryCount = generation.retryCount();
 
-            Map<String, Object> result = objectMapper.convertValue(
-                    generation.analysis(),
-                    new TypeReference<Map<String, Object>>() {
-                    }
+            Map<String, Object> viResult = localizedResult(
+                    generation.analysis().vi(), statistics
             );
-            result = new LinkedHashMap<>(result);
-            result.put("statistics", objectMapper.convertValue(
-                    statistics,
-                    new TypeReference<Map<String, Object>>() {
-                    }
-            ));
+            Map<String, Object> enResult = localizedResult(
+                    generation.analysis().en(), statistics
+            );
+            Map<String, Object> result = new LinkedHashMap<>();
+            result.put("vi", viResult);
+            result.put("en", enResult);
 
             repository.saveCompleted(
                     input, result, model, promptVersion, schemaVersion, retryCount
@@ -100,6 +99,25 @@ public class AIReviewProcessor {
 
         // Thứ tự bắt buộc: validate -> save Firestore -> publish completed.
         notificationPublisher.completed(request.attemptId(), request.userId());
+    }
+
+    private Map<String, Object> localizedResult(
+            GeminiAnalysis analysis,
+            ReviewStatistics statistics
+    ) {
+        Map<String, Object> result = objectMapper.convertValue(
+                analysis,
+                new TypeReference<Map<String, Object>>() {
+                }
+        );
+        result = new LinkedHashMap<>(result);
+        result.put("statistics", objectMapper.convertValue(
+                statistics,
+                new TypeReference<Map<String, Object>>() {
+                }
+        ));
+
+        return result;
     }
 
     private void validate(AIReviewRequest request) {
