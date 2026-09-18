@@ -37,6 +37,11 @@ class AIReviewValidatorTests {
                 "Bạn nhận diện bối cảnh tốt nhưng cần luyện thêm các chi tiết mô tả hành động.",
                 10
         ));
+        assertTrue(AIReviewValidator.isAcceptableVietnameseText("Luyện nghe", 2));
+        assertTrue(AIReviewValidator.isAcceptableVietnameseText(
+                "Tăng độ chính xác khi nghe",
+                5
+        ));
     }
 
     @Test

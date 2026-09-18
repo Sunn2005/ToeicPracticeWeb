@@ -39,8 +39,8 @@ public class AIReviewGeminiService {
             - Mỗi partAnalysis.summary tối thiểu 18 từ và phải gồm: nhận định theo accuracy,
               kỹ năng/tag nổi bật hoặc còn yếu nếu dữ liệu có, cùng một bước luyện tiếp theo.
             - Mỗi knowledgeGap.explanation và priorityTopic.reason tối thiểu 12 từ;
-              priorityTopic.goal tối thiểu 8 từ. Kế hoạch học và hành động tiếp theo phải cụ thể,
-              có thể thực hiện và dùng đúng ngôn ngữ của từng bản.
+              priorityTopic.goal tối thiểu 5 từ và nextAction.label tối thiểu 2 từ. Kế hoạch học
+              và hành động tiếp theo phải cụ thể, có thể thực hiện và dùng đúng ngôn ngữ của từng bản.
 
             Chỉ nhận xét dựa trên dữ liệu được cung cấp.
             Không tự tạo điểm số, số câu đúng hoặc sai, question number, skill tag,
@@ -122,7 +122,6 @@ public class AIReviewGeminiService {
             String locale
     ) {
         RuntimeException lastFailure = null;
-        boolean usedSchemaRepair = false;
         int attemptsMade = 0;
         String repairInstruction = "";
 
@@ -145,18 +144,16 @@ public class AIReviewGeminiService {
                 return new LocalizedGeneration(analysis, attempt - 1);
             } catch (AIReviewValidator.InvalidAIAnalysisException exception) {
                 lastFailure = exception;
-                if (usedSchemaRepair) {
+                if (attempt == maxAttempts) {
                     break;
                 }
-                usedSchemaRepair = true;
                 repairInstruction = repairInstruction(exception, locale);
             } catch (RuntimeException exception) {
                 lastFailure = exception;
                 if (isInvalidOutput(exception)) {
-                    if (usedSchemaRepair) {
+                    if (attempt == maxAttempts) {
                         break;
                     }
-                    usedSchemaRepair = true;
                     repairInstruction = repairInstruction(exception, locale);
                     continue;
                 }

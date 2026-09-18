@@ -172,7 +172,7 @@ public class AIReviewValidator {
         for (GeminiAnalysis.PriorityTopic item : analysis.priorityTopics()) {
             requireLanguage(item.title(), "priorityTopic.title", 2, locale);
             requireLanguage(item.reason(), "priorityTopic.reason", 12, locale);
-            requireLanguage(item.goal(), "priorityTopic.goal", 8, locale);
+            requireLanguage(item.goal(), "priorityTopic.goal", 5, locale);
         }
         for (GeminiAnalysis.StudyDay day : analysis.studyPlan()) {
             requireLanguage(day.title(), "studyPlan.title", 2, locale);
@@ -182,7 +182,7 @@ public class AIReviewValidator {
             }
         }
         for (GeminiAnalysis.NextAction action : analysis.nextActions()) {
-            requireLanguage(action.label(), "nextAction.label", 5, locale);
+            requireLanguage(action.label(), "nextAction.label", 2, locale);
         }
         for (String limitation : analysis.limitations()) {
             requireLanguage(limitation, "limitations", 5, locale);
