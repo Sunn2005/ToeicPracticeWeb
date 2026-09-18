@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ApiError, apiFetch, publicApiFetch } from "../api/client";
 import LanguageSwitcher from "../components/LanguageSwitcher";
@@ -6,6 +6,7 @@ import { useLanguage } from "../i18n/LanguageContext";
 import { getTestName, getTestTitle } from "../data/testCatalog";
 import BrandLogo from "../components/BrandLogo";
 import LoadingScreen from "../components/LoadingScreen";
+import { buildListeningUnits, findUnit } from "../utils/testData";
 
 function FullTestIntro() {
   const { t } = useLanguage();
@@ -16,6 +17,7 @@ function FullTestIntro() {
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState("");
+  const mediaPreloadRef = useRef(null);
 
   useEffect(() => {
     let active = true;
@@ -47,6 +49,32 @@ function FullTestIntro() {
       active = false;
     };
   }, [testId]);
+
+  useEffect(() => {
+    if (!test || (currentAttempt && currentAttempt.currentSection !== "LISTENING")) return;
+
+    const listeningUnits = buildListeningUnits(test);
+    const unit = currentAttempt
+      ? findUnit(listeningUnits, currentAttempt.currentQuestionNumber)
+      : listeningUnits[0];
+    if (!unit || mediaPreloadRef.current?.key === unit.key) return;
+
+    const image = unit.imageUrl ? new Image() : null;
+    if (image) {
+      image.decoding = "async";
+      image.fetchPriority = "high";
+      image.src = unit.imageUrl;
+    }
+
+    const audio = unit.audioUrl ? document.createElement("audio") : null;
+    if (audio) {
+      audio.preload = "auto";
+      audio.src = unit.audioUrl;
+      audio.load();
+    }
+
+    mediaPreloadRef.current = { key: unit.key, image, audio };
+  }, [currentAttempt, test]);
 
   const startTest = async () => {
     setStarting(true);

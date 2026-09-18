@@ -102,6 +102,10 @@ function FullTestExam() {
   const timeoutHandled = useRef(false);
   const readingContentRef = useRef(null);
   const readingQuestionsRef = useRef(null);
+  const nextMediaPreloadRef = useRef(null);
+  const [loadedListeningImageUrl, setLoadedListeningImageUrl] = useState(null);
+  const [failedListeningImageUrl, setFailedListeningImageUrl] = useState(null);
+  const [listeningImageRetryKey, setListeningImageRetryKey] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -160,6 +164,15 @@ function FullTestExam() {
   const currentQuestion = attempt?.currentQuestionNumber || 1;
   const currentUnits = attempt?.currentSection === "LISTENING" ? listeningUnits : readingUnits;
   const currentUnit = findUnit(currentUnits, currentQuestion);
+  const currentListeningImageUrl = attempt?.currentSection === "LISTENING"
+    ? currentUnit?.imageUrl
+    : null;
+  const listeningImageReady = !currentListeningImageUrl
+    || loadedListeningImageUrl === currentListeningImageUrl;
+  const listeningImageFailed = Boolean(
+    currentListeningImageUrl
+    && failedListeningImageUrl === currentListeningImageUrl,
+  );
   const navigatorGroups = useMemo(() => {
     const grouped = new Map();
     currentUnits.forEach((unit) => {
@@ -202,6 +215,40 @@ function FullTestExam() {
     readingContentRef.current?.scrollTo({ top: 0 });
     readingQuestionsRef.current?.scrollTo({ top: 0 });
   }, [currentUnit?.key]);
+
+  useEffect(() => {
+    if (attempt?.currentSection !== "LISTENING" || !currentUnit) return;
+
+    const currentIndex = listeningUnits.findIndex((unit) => unit.key === currentUnit.key);
+    const nextUnit = listeningUnits[currentIndex + 1];
+    if (!nextUnit || nextMediaPreloadRef.current?.key === nextUnit.key) return;
+
+    const image = nextUnit.imageUrl ? new Image() : null;
+    if (image) {
+      image.decoding = "async";
+      image.fetchPriority = "low";
+      image.src = nextUnit.imageUrl;
+    }
+
+    const audio = nextUnit.audioUrl ? document.createElement("audio") : null;
+    if (audio) {
+      audio.preload = "auto";
+      audio.src = nextUnit.audioUrl;
+      audio.load();
+    }
+
+    nextMediaPreloadRef.current = { key: nextUnit.key, image, audio };
+  }, [attempt?.currentSection, currentUnit, listeningUnits]);
+
+  useEffect(() => () => {
+    const preloadedAudio = nextMediaPreloadRef.current?.audio;
+    if (preloadedAudio) {
+      preloadedAudio.pause();
+      preloadedAudio.removeAttribute("src");
+      preloadedAudio.load();
+    }
+    nextMediaPreloadRef.current = null;
+  }, []);
 
   useEffect(() => {
     if (attempt?.currentSection !== "READING") return;
@@ -453,6 +500,23 @@ function FullTestExam() {
     if (shouldExit) navigate("/dashboard");
   };
 
+  const markListeningImageReady = async (event) => {
+    const image = event.currentTarget;
+    const imageUrl = mediaImage;
+
+    try {
+      await image.decode();
+    } catch {
+      if (!image.complete || image.naturalWidth === 0) {
+        setFailedListeningImageUrl(imageUrl);
+        return;
+      }
+    }
+
+    setFailedListeningImageUrl((current) => current === imageUrl ? null : current);
+    setLoadedListeningImageUrl(imageUrl);
+  };
+
   if (error && !payload) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
@@ -578,6 +642,7 @@ function FullTestExam() {
                           src={mediaAudio}
                           advancing={busy}
                           paused={showSubmit}
+                          ready={listeningImageReady}
                           onEnded={advanceListeningAfterAudio}
                         />
                       ) : (
@@ -587,11 +652,41 @@ function FullTestExam() {
                       )}
 
                       {mediaImage && (
-                        <div className="rounded-xl border border-slate-200 bg-white p-3 text-center">
+                        <div className="relative min-h-72 overflow-hidden rounded-xl border border-slate-200 bg-white p-3 text-center">
+                          {!listeningImageReady && !listeningImageFailed && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-slate-50 px-6 text-sm font-semibold text-slate-600" role="status">
+                              <span className="mr-3 h-5 w-5 animate-spin rounded-full border-2 border-sky-200 border-t-sky-600" />
+                              {t("imagePreparing")}
+                            </div>
+                          )}
+
+                          {listeningImageFailed && (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-red-50 px-6 text-sm text-red-700" role="alert">
+                              <p className="font-semibold">{t("imageLoadFailed")}</p>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setFailedListeningImageUrl(null);
+                                  setLoadedListeningImageUrl(null);
+                                  setListeningImageRetryKey((current) => current + 1);
+                                }}
+                                className="rounded-xl bg-white px-4 py-2 font-bold text-red-700 shadow-sm ring-1 ring-red-200 hover:bg-red-100"
+                              >
+                                {t("retryImage")}
+                              </button>
+                            </div>
+                          )}
+
                           <img
+                            key={`${mediaImage}-${listeningImageRetryKey}`}
                             src={mediaImage}
                             alt={`Graphic for questions ${currentUnit.start} to ${currentUnit.end}`}
-                            className="mx-auto h-auto max-h-[65vh] max-w-full rounded-xl object-contain"
+                            loading="eager"
+                            decoding="async"
+                            fetchPriority="high"
+                            onLoad={markListeningImageReady}
+                            onError={() => setFailedListeningImageUrl(mediaImage)}
+                            className={`mx-auto h-auto max-h-[65vh] max-w-full rounded-xl object-contain transition-opacity ${listeningImageReady ? "opacity-100" : "opacity-0"}`}
                           />
                         </div>
                       )}

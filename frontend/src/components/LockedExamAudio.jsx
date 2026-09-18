@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "../i18n/LanguageContext";
 
-function LockedExamAudio({ src, onEnded, advancing, paused = false }) {
+function LockedExamAudio({ src, onEnded, advancing, paused = false, ready = true }) {
   const { t } = useLanguage();
   const audioRef = useRef(null);
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
@@ -13,13 +13,6 @@ function LockedExamAudio({ src, onEnded, advancing, paused = false }) {
 
     setAutoplayBlocked(false);
     setPlaying(false);
-    const playPromise = audio.play();
-    if (playPromise) {
-      playPromise
-        .then(() => setPlaying(true))
-        .catch(() => setAutoplayBlocked(true));
-    }
-
     return () => {
       audio.pause();
     };
@@ -29,7 +22,7 @@ function LockedExamAudio({ src, onEnded, advancing, paused = false }) {
     const audio = audioRef.current;
     if (!audio || audio.ended) return;
 
-    if (paused) {
+    if (paused || !ready) {
       audio.pause();
       return;
     }
@@ -40,7 +33,7 @@ function LockedExamAudio({ src, onEnded, advancing, paused = false }) {
         .then(() => setAutoplayBlocked(false))
         .catch(() => setAutoplayBlocked(true));
     }
-  }, [paused]);
+  }, [paused, ready, src]);
 
   const startAfterBrowserBlock = async () => {
     try {
@@ -62,7 +55,6 @@ function LockedExamAudio({ src, onEnded, advancing, paused = false }) {
       <audio
         ref={audioRef}
         src={src}
-        autoPlay
         preload="auto"
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
@@ -88,19 +80,23 @@ function LockedExamAudio({ src, onEnded, advancing, paused = false }) {
                 ? t("audioSavingAdvance")
                 : paused
                   ? t("audioPaused")
-                  : playing
-                    ? t("audioPlaying")
-                    : t("audioPreparing")}
+                  : !ready
+                    ? t("waitingForImage")
+                    : playing
+                      ? t("audioPlaying")
+                      : t("audioPreparing")}
             </p>
             <p className="mt-0.5 text-xs leading-5 text-sky-700">
               {paused
                 ? t("audioResumeNote")
-                : t("audioOnceNote")}
+                : !ready
+                  ? t("audioStartsAfterImage")
+                  : t("audioOnceNote")}
             </p>
           </div>
         </div>
 
-        {autoplayBlocked && !paused && (
+        {autoplayBlocked && !paused && ready && (
           <button
             type="button"
             onClick={startAfterBrowserBlock}
