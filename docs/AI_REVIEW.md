@@ -11,7 +11,7 @@ Chức năng chỉ nhận yêu cầu do người dùng đã đăng nhập chủ 
 3. BE-Core kiểm tra quyền sở hữu và điều kiện, lưu `PENDING`, rồi publish message định danh.
 4. AI Service claim job bằng Firestore transaction, lưu `PROCESSING`, đọc Attempt, answers và đề thi.
 5. AI Service ghép đủ 200 câu, tính toàn bộ số liệu xác định bằng code rồi chỉ gửi dữ liệu cần thiết (không có danh tính hay audio) sang Gemini Structured Output.
-6. Gemini tạo đồng thời hai bản `vi` và `en`. Cả hai được kiểm tra lại với score, tag, question number, evidence, Part 1–7, ba ưu tiên, kế hoạch 7 ngày, giới hạn dữ liệu thời gian, đúng ngôn ngữ và độ chi tiết tối thiểu của các phần giải thích.
+6. AI Service gọi Gemini riêng cho bản `vi` và bản `en` để giảm kích thước structured output và cô lập lỗi parse theo từng ngôn ngữ. Cả hai được kiểm tra lại với score, tag, question number, evidence, Part 1–7, ba ưu tiên, kế hoạch 7 ngày, giới hạn dữ liệu thời gian, đúng ngôn ngữ và độ chi tiết tối thiểu của các phần giải thích.
 7. AI Service lưu `aiAnalyses/{attemptId}` trước, sau đó mới publish `ai.review.completed`.
 8. BE-Core consume message định danh và cập nhật Attempt. Frontend poll endpoint GET; kết quả hoàn chỉnh luôn đi qua BE-Core, không đọc Firestore trực tiếp.
 9. Khi thất bại sau retry, AI Service lưu `FAILED`, publish `ai.review.failed`, rồi reject message để RabbitMQ đưa vào DLQ.
@@ -122,6 +122,8 @@ curl 'http://localhost:8080/api/attempts/attempt-123/ai-analysis' \
 ```
 
 Khi chưa xong, `result` là `null`. Khi hoàn thành, `status` và `aiAnalysisStatus` là `COMPLETED`, còn `result` chứa toàn bộ cấu trúc nhận xét.
+
+Khi thất bại, response có `status=FAILED`, `result=null` và `errorCode`. Các lỗi JSON/schema từ Gemini được chuẩn hóa thành `INVALID_GEMINI_OUTPUT`; frontend ánh xạ mã lỗi sang thông báo cụ thể và vẫn hiển thị mã để hỗ trợ chẩn đoán.
 
 ## Chạy local
 

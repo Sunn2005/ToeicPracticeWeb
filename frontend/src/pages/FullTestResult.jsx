@@ -11,6 +11,7 @@ import {
 } from "../api/aiAnalysis";
 import {
   canRequestAIAnalysis,
+  getAIAnalysisErrorKey,
   selectAIAnalysisResult,
   shouldPollAIAnalysis,
 } from "../utils/aiAnalysis";
@@ -106,7 +107,14 @@ function AIAnalysisPanel({ analysis, status, busy, error, onRequest, language, t
       {error && <p className="mt-4 rounded-xl bg-red-50 p-4 text-sm text-red-700">{error}</p>}
       {status === "PENDING" && <p className="mt-5 rounded-xl bg-white p-4 text-sm text-violet-700">{t("aiAnalysisPending")}</p>}
       {status === "PROCESSING" && <p className="mt-5 rounded-xl bg-white p-4 text-sm text-violet-700">{t("aiAnalysisProcessing")}</p>}
-      {status === "FAILED" && <p className="mt-5 rounded-xl bg-red-50 p-4 text-sm text-red-700">{t("aiAnalysisFailed")}</p>}
+      {status === "FAILED" && (
+        <div className="mt-5 rounded-xl bg-red-50 p-4 text-sm text-red-700">
+          <p>{t(getAIAnalysisErrorKey(analysis?.errorCode))}</p>
+          {analysis?.errorCode && (
+            <p className="mt-2 font-mono text-xs text-red-500">{analysis.errorCode}</p>
+          )}
+        </div>
+      )}
 
       {status === "COMPLETED" && result && (
         <div className="mt-6 space-y-6">

@@ -102,6 +102,23 @@ class AIReviewServiceTests {
         verify(attemptDao).save(attempt);
     }
 
+    @Test
+    void returnsStoredErrorCodeForFailedAnalysis() throws Exception {
+        Attempt attempt = attempt("FULL_TEST", "FULL", "COMPLETED", "user-1");
+        attempt.setAiAnalysisStatus("FAILED");
+        when(attemptDao.findById("attempt-1")).thenReturn(Optional.of(attempt));
+        when(analysisDao.findByAttemptId("attempt-1")).thenReturn(Optional.of(Map.of(
+                "userId", "user-1",
+                "error", "INVALID_GEMINI_OUTPUT"
+        )));
+
+        Map<String, Object> response = service.getAnalysis("user-1", "attempt-1");
+
+        assertEquals("FAILED", response.get("status"));
+        assertEquals("INVALID_GEMINI_OUTPUT", response.get("errorCode"));
+        assertEquals(null, response.get("result"));
+    }
+
     private Attempt attempt(String type, String mode, String status, String userId) {
         Attempt attempt = new Attempt();
         attempt.setId(type.equals("PRACTICE") ? "practice" : "attempt-1");

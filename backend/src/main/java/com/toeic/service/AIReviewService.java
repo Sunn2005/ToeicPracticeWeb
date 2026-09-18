@@ -95,6 +95,14 @@ public class AIReviewService {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền xem phân tích này");
             }
             response.put("result", analysis.get("result"));
+        } else if (FAILED.equals(currentStatus)) {
+            String errorCode = analysisDao.findByAttemptId(attemptId)
+                    .filter(analysis -> userId.equals(String.valueOf(analysis.get("userId"))))
+                    .map(analysis -> analysis.get("error"))
+                    .map(String::valueOf)
+                    .filter(value -> !value.isBlank() && !"null".equals(value))
+                    .orElse("AI_REVIEW_FAILED");
+            response.put("errorCode", errorCode);
         }
         return response;
     }

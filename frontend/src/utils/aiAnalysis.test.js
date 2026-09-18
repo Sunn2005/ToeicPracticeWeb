@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   canRequestAIAnalysis,
+  getAIAnalysisErrorKey,
   selectAIAnalysisResult,
   shouldPollAIAnalysis,
 } from "./aiAnalysis.js";
@@ -11,6 +12,12 @@ test("polls only while an AI analysis is active", () => {
   assert.equal(shouldPollAIAnalysis("PROCESSING"), true);
   assert.equal(shouldPollAIAnalysis("COMPLETED"), false);
   assert.equal(shouldPollAIAnalysis("FAILED"), false);
+});
+
+test("maps backend AI error codes to specific user-facing messages", () => {
+  assert.equal(getAIAnalysisErrorKey("INVALID_GEMINI_OUTPUT"), "aiAnalysisInvalidOutput");
+  assert.equal(getAIAnalysisErrorKey("GEMINI_UNAVAILABLE"), "aiAnalysisUnavailable");
+  assert.equal(getAIAnalysisErrorKey("UNKNOWN_FAILURE"), "aiAnalysisServiceFailed");
 });
 
 test("offers analysis only for completed-result Full Test mode", () => {
