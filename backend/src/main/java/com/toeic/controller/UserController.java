@@ -21,7 +21,9 @@ import java.util.Map;
 @PreAuthorize("isAuthenticated()")
 @CrossOrigin(originPatterns = {
         "http://localhost:5173",
-        "https://*.vercel.app"
+        "https://*.vercel.app",
+        "https://capytoeic.id.vn",
+        "https://www.capytoeic.id.vn"
 })
 public class UserController {
 

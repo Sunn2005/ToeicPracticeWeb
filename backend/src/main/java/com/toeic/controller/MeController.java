@@ -13,7 +13,9 @@ import java.util.Map;
 @RestController
 @CrossOrigin(originPatterns = {
         "http://localhost:5173",
-        "https://*.vercel.app"
+        "https://*.vercel.app",
+        "https://capytoeic.id.vn",
+        "https://www.capytoeic.id.vn"
 })
 public class MeController {
 

@@ -60,7 +60,7 @@ function QuestionCard({
       ? "border-emerald-300 bg-emerald-50/50"
       : question.answerStatus === "INCORRECT"
         ? "border-red-300 bg-red-50/40"
-        : "border-amber-300 bg-amber-50/40"
+        : "border-slate-300 bg-slate-50/60"
     : isFocused
       ? "border-sky-400"
       : "border-slate-200";
@@ -95,7 +95,7 @@ function QuestionCard({
                 ? "bg-emerald-100 text-emerald-700"
                 : question.answerStatus === "INCORRECT"
                   ? "bg-red-100 text-red-700"
-                  : "bg-amber-100 text-amber-700"
+                  : "bg-slate-100 text-slate-600"
             }`}
           >
             {question.answerStatus === "CORRECT"

@@ -103,7 +103,7 @@ function AttemptHistoryCard({ attempt, test, onDelete, onReview, onReviewIncorre
           <p className="text-[11px] text-slate-500">{t("incorrect")}</p>
         </div>
         <div>
-          <p className="font-bold text-amber-500">{completed ? unanswered : attempt.totalQuestions || 0}</p>
+          <p className="font-bold text-slate-500">{completed ? unanswered : attempt.totalQuestions || 0}</p>
           <p className="text-[11px] text-slate-500">{t("unanswered")}</p>
         </div>
       </div>

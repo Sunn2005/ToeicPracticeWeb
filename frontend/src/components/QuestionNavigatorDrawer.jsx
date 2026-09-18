@@ -74,7 +74,7 @@ function QuestionNavigatorDrawer({
               <LegendItem className="border-sky-500 bg-sky-500" label={t("current")} />
               <LegendItem className="border-emerald-400 bg-emerald-50" label={t("correct")} />
               <LegendItem className="border-red-400 bg-red-50" label={t("incorrect")} />
-              <LegendItem className="border-amber-300 bg-amber-50" label={t("unanswered")} />
+              <LegendItem className="border-slate-300 bg-slate-100" label={t("unanswered")} />
             </div>
           ) : (
             <div className="flex flex-wrap gap-x-5 gap-y-3 border-b border-slate-200 pb-5">
@@ -108,7 +108,7 @@ function QuestionNavigatorDrawer({
                         ? "border-emerald-400 bg-emerald-50 text-emerald-700"
                         : reviewStatus === "INCORRECT"
                           ? "border-red-400 bg-red-50 text-red-700"
-                          : "border-amber-300 bg-amber-50 text-amber-700"
+                          : "border-slate-300 bg-slate-100 text-slate-600"
                       : isAnswered
                         ? "border-emerald-400 bg-emerald-50 text-emerald-700"
                         : "border-slate-300 bg-white text-slate-600";
