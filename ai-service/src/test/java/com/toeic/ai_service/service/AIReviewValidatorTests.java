@@ -7,8 +7,10 @@ import com.toeic.ai_service.model.ReviewStatistics;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -65,6 +67,124 @@ class AIReviewValidatorTests {
         GeminiAnalysis invalidConfidence = analysis(10, "HIGH");
         assertThrows(AIReviewValidator.InvalidAIAnalysisException.class,
                 () -> validator.validate(invalidConfidence, input, stats));
+    }
+
+    @Test
+    void acceptsOneWordLabelsButRejectsBlankLabels() {
+        AIReviewValidator validator = new AIReviewValidator();
+        ReviewInput input = validationInput();
+        ReviewStatistics statistics = validationStatistics();
+
+        assertDoesNotThrow(() -> validator.validate(
+                validShortLabelAnalysis(List.of("Prepositions")),
+                input,
+                statistics,
+                "en"
+        ));
+
+        assertThrows(AIReviewValidator.InvalidAIAnalysisException.class,
+                () -> validator.validate(
+                        validShortLabelAnalysis(List.of(" ")),
+                        input,
+                        statistics,
+                        "en"
+                ));
+    }
+
+    private ReviewInput validationInput() {
+        List<ReviewQuestion> questions = java.util.stream.IntStream.rangeClosed(1, 7)
+                .mapToObj(part -> new ReviewQuestion(
+                        part, part, "DETAIL", List.of("LISTENING"), List.of(), "EASY",
+                        "A", "A", true, false, null, "Question", Map.of("A", "Answer"),
+                        "Context", "Explanation"
+                ))
+                .toList();
+        return new ReviewInput("attempt", "user", "test", Map.of(), questions);
+    }
+
+    private ReviewStatistics validationStatistics() {
+        ReviewStatistics.Metric singleQuestionMetric = new ReviewStatistics.Metric(
+                1, 1, 0, 0, 100, List.of(), "LOW"
+        );
+        Map<String, ReviewStatistics.Metric> byPart = new LinkedHashMap<>();
+        java.util.stream.IntStream.rangeClosed(1, 7)
+                .forEach(part -> byPart.put(String.valueOf(part), singleQuestionMetric));
+        ReviewStatistics.Metric allQuestionsMetric = new ReviewStatistics.Metric(
+                7, 7, 0, 0, 100, List.of(), "HIGH"
+        );
+        return new ReviewStatistics(
+                50, 50, 100, 7, 0, 0,
+                byPart,
+                Map.of("DETAIL", allQuestionsMetric),
+                Map.of("LISTENING", allQuestionsMetric),
+                Map.of(),
+                Map.of("EASY", allQuestionsMetric),
+                new ReviewStatistics.TimeManagement(false, Map.of())
+        );
+    }
+
+    private GeminiAnalysis validShortLabelAnalysis(List<String> topicsToReview) {
+        List<GeminiAnalysis.PartAnalysis> parts = java.util.stream.IntStream.rangeClosed(1, 7)
+                .mapToObj(part -> new GeminiAnalysis.PartAnalysis(
+                        part,
+                        100,
+                        "STRONG",
+                        "You consistently answer this part accurately and should continue practicing varied questions to preserve reliable performance under realistic test conditions.",
+                        List.of("DETAIL"),
+                        List.of()
+                ))
+                .toList();
+        List<GeminiAnalysis.PriorityTopic> priorities = java.util.stream.IntStream.rangeClosed(1, 3)
+                .mapToObj(priority -> new GeminiAnalysis.PriorityTopic(
+                        priority,
+                        "Vocabulary",
+                        "DETAIL",
+                        priority,
+                        "You should review this area because consistent practice will improve accuracy across similar TOEIC questions.",
+                        "Fluency"
+                ))
+                .toList();
+        List<GeminiAnalysis.StudyDay> studyPlan = java.util.stream.IntStream.rangeClosed(1, 7)
+                .mapToObj(day -> new GeminiAnalysis.StudyDay(
+                        day,
+                        "Review",
+                        20,
+                        List.of(new GeminiAnalysis.StudyTask(
+                                "PRACTICE", "Drills", 20, day, "DETAIL", 10, 80
+                        ))
+                ))
+                .toList();
+
+        return new GeminiAnalysis(
+                new GeminiAnalysis.Summary(
+                        "Progress",
+                        "You demonstrate reliable accuracy across the test and should keep reviewing detailed questions while practicing varied formats to strengthen consistency, confidence, and overall TOEIC performance.",
+                        100,
+                        null,
+                        null
+                ),
+                List.of(),
+                List.of(),
+                parts,
+                List.of(new GeminiAnalysis.KnowledgeGap(
+                        "VOCABULARY",
+                        "Vocabulary",
+                        "DETAIL",
+                        1,
+                        100,
+                        90,
+                        "You should review focused vocabulary patterns to answer detailed questions more confidently and consistently.",
+                        topicsToReview
+                )),
+                new GeminiAnalysis.TimeManagement(false, "INSUFFICIENT_DATA", "Unavailable", List.of()),
+                priorities,
+                studyPlan,
+                List.of(new GeminiAnalysis.NextAction(
+                        "Practice", "PRACTICE", 1, "DETAIL", List.of(1)
+                )),
+                "HIGH",
+                List.of("Timing")
+        );
     }
 
     private GeminiAnalysis analysis(int score, String confidence) {

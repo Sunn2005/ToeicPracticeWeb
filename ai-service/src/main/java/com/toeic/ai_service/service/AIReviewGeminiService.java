@@ -7,6 +7,8 @@ import com.toeic.ai_service.model.ReviewStatistics;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.Objects;
@@ -14,6 +16,8 @@ import java.util.List;
 
 @Service
 public class AIReviewGeminiService {
+
+    private static final Logger log = LoggerFactory.getLogger(AIReviewGeminiService.class);
 
     private static final String SYSTEM_PROMPT = """
             Bạn là trợ lý phân tích kết quả TOEIC Listening và Reading.
@@ -38,9 +42,10 @@ public class AIReviewGeminiService {
               biểu hiện sai, tác động khi làm bài và một cách luyện cụ thể.
             - Mỗi partAnalysis.summary tối thiểu 18 từ và phải gồm: nhận định theo accuracy,
               kỹ năng/tag nổi bật hoặc còn yếu nếu dữ liệu có, cùng một bước luyện tiếp theo.
-            - Mỗi knowledgeGap.explanation và priorityTopic.reason tối thiểu 12 từ;
-              priorityTopic.goal tối thiểu 5 từ và nextAction.label tối thiểu 2 từ. Kế hoạch học
-              và hành động tiếp theo phải cụ thể, có thể thực hiện và dùng đúng ngôn ngữ của từng bản.
+            - Mỗi knowledgeGap.explanation và priorityTopic.reason tối thiểu 12 từ.
+              Các field dạng nhãn như title, name, goal, topicsToReview và label phải có nội dung,
+              nhưng có thể ngắn gọn hoặc chỉ gồm một từ khi tự nhiên. Kế hoạch học và hành động
+              tiếp theo phải cụ thể, có thể thực hiện và dùng đúng ngôn ngữ của từng bản.
 
             Chỉ nhận xét dựa trên dữ liệu được cung cấp.
             Không tự tạo điểm số, số câu đúng hoặc sai, question number, skill tag,
@@ -127,8 +132,9 @@ public class AIReviewGeminiService {
 
         for (int attempt = 1; attempt <= maxAttempts; attempt++) {
             attemptsMade = attempt;
+            GeminiAnalysis analysis = null;
             try {
-                GeminiAnalysis analysis = chatClient.prompt()
+                analysis = chatClient.prompt()
                         .system(SYSTEM_PROMPT)
                         .user(localeInstruction(locale)
                                 + "\n\nDữ liệu đã được hệ thống tính và kiểm chứng:\n"
@@ -142,6 +148,18 @@ public class AIReviewGeminiService {
                 );
                 validator.validate(analysis, input, statistics, locale);
                 return new LocalizedGeneration(analysis, attempt - 1);
+            } catch (AIReviewValidator.InvalidAIContentException exception) {
+                lastFailure = exception;
+                if (attempt == maxAttempts && analysis != null) {
+                    log.warn(
+                            "Using structurally valid {} AI review after {} content-quality attempts: {}",
+                            locale,
+                            attempt,
+                            exception.getMessage()
+                    );
+                    return new LocalizedGeneration(analysis, attempt - 1);
+                }
+                repairInstruction = repairInstruction(exception, locale);
             } catch (AIReviewValidator.InvalidAIAnalysisException exception) {
                 lastFailure = exception;
                 if (attempt == maxAttempts) {
@@ -241,8 +259,7 @@ public class AIReviewGeminiService {
         GeminiAnalysis.TimeManagement timeManagement = new GeminiAnalysis.TimeManagement(
                 false,
                 "INSUFFICIENT_DATA",
-                analysis.timeManagement() == null ? insufficientTimeSummary(locale)
-                        : analysis.timeManagement().summary(),
+                insufficientTimeSummary(locale),
                 List.of()
         );
 

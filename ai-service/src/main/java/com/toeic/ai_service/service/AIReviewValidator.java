@@ -86,8 +86,6 @@ public class AIReviewValidator {
         if (!Set.of("LOW", "MEDIUM", "HIGH").contains(analysis.overallConfidence())) {
             throw new InvalidAIAnalysisException("overallConfidence không hợp lệ");
         }
-        validateLocalizedContent(analysis, locale);
-
         Set<Integer> validQuestions = new HashSet<>();
         Set<String> validTags = new HashSet<>();
         for (ReviewQuestion question : input.questions()) {
@@ -142,18 +140,23 @@ public class AIReviewValidator {
                 validateTag(task.skillTag(), validTags);
             }
         }
+
+        // Chỉ kiểm tra chất lượng nội dung sau khi toàn bộ dữ liệu xác định đã hợp lệ.
+        // AIReviewGeminiService có thể dùng lỗi này để yêu cầu Gemini viết lại mà không
+        // vô tình bỏ qua các kiểm tra score, evidence, tag hoặc question number.
+        validateLocalizedContent(analysis, locale);
     }
 
     private void validateLocalizedContent(GeminiAnalysis analysis, String locale) {
-        requireLanguage(analysis.summary().headline(), "summary.headline", 3, locale);
+        requireText(analysis.summary().headline(), "summary.headline");
         requireLanguage(analysis.summary().overallComment(), "summary.overallComment", 25, locale);
 
         for (GeminiAnalysis.Strength item : analysis.strengths()) {
-            requireLanguage(item.title(), "strength.title", 2, locale);
+            requireText(item.title(), "strength.title");
             requireLanguage(item.message(), "strength.message", 15, locale);
         }
         for (GeminiAnalysis.Weakness item : analysis.weaknesses()) {
-            requireLanguage(item.title(), "weakness.title", 2, locale);
+            requireText(item.title(), "weakness.title");
             requireLanguage(item.message(), "weakness.message", 15, locale);
             requireLanguage(item.recommendation(), "weakness.recommendation", 12, locale);
         }
@@ -161,40 +164,49 @@ public class AIReviewValidator {
             requireLanguage(item.summary(), "partAnalysis[" + item.part() + "].summary", 18, locale);
         }
         for (GeminiAnalysis.KnowledgeGap item : analysis.knowledgeGaps()) {
-            requireLanguage(item.name(), "knowledgeGap.name", 2, locale);
+            requireText(item.name(), "knowledgeGap.name");
             requireLanguage(item.explanation(), "knowledgeGap.explanation", 12, locale);
             requireList(item.topicsToReview(), "knowledgeGap.topicsToReview");
             for (String topic : item.topicsToReview()) {
-                requireLanguage(topic, "knowledgeGap.topicsToReview", 2, locale);
+                requireText(topic, "knowledgeGap.topicsToReview");
             }
         }
-        requireLanguage(analysis.timeManagement().summary(), "timeManagement.summary", 5, locale);
+        requireText(analysis.timeManagement().summary(), "timeManagement.summary");
         for (GeminiAnalysis.PriorityTopic item : analysis.priorityTopics()) {
-            requireLanguage(item.title(), "priorityTopic.title", 2, locale);
+            requireText(item.title(), "priorityTopic.title");
             requireLanguage(item.reason(), "priorityTopic.reason", 12, locale);
-            requireLanguage(item.goal(), "priorityTopic.goal", 5, locale);
+            requireText(item.goal(), "priorityTopic.goal");
         }
         for (GeminiAnalysis.StudyDay day : analysis.studyPlan()) {
-            requireLanguage(day.title(), "studyPlan.title", 2, locale);
+            requireText(day.title(), "studyPlan.title");
             requireList(day.tasks(), "studyPlan.tasks");
             for (GeminiAnalysis.StudyTask task : day.tasks()) {
-                requireLanguage(task.title(), "studyPlan.task.title", 3, locale);
+                requireText(task.title(), "studyPlan.task.title");
             }
         }
         for (GeminiAnalysis.NextAction action : analysis.nextActions()) {
-            requireLanguage(action.label(), "nextAction.label", 2, locale);
+            requireText(action.label(), "nextAction.label");
         }
         for (String limitation : analysis.limitations()) {
-            requireLanguage(limitation, "limitations", 5, locale);
+            requireText(limitation, "limitations");
+        }
+    }
+
+    private void requireText(String value, String field) {
+        if (value == null || value.isBlank()) {
+            throw new InvalidAIAnalysisException(field + " không được để trống");
         }
     }
 
     private void requireLanguage(String value, String field, int minimumWords, String locale) {
+        if (value == null || value.isBlank()) {
+            throw new InvalidAIAnalysisException(field + " không được để trống");
+        }
         boolean valid = "en".equals(locale)
                 ? isAcceptableEnglishText(value, minimumWords)
                 : isAcceptableVietnameseText(value, minimumWords);
         if (!valid) {
-            throw new InvalidAIAnalysisException(
+            throw new InvalidAIContentException(
                     field + " phải dùng đúng ngôn ngữ " + locale
                             + " và đủ chi tiết (tối thiểu " + minimumWords + " từ)"
             );
@@ -349,6 +361,12 @@ public class AIReviewValidator {
 
     public static class InvalidAIAnalysisException extends RuntimeException {
         public InvalidAIAnalysisException(String message) {
+            super(message);
+        }
+    }
+
+    public static class InvalidAIContentException extends InvalidAIAnalysisException {
+        public InvalidAIContentException(String message) {
             super(message);
         }
     }
