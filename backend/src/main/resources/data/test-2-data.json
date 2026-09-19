@@ -11,7 +11,7 @@
         {
           "questionNumber": 1,
           "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/picture/T02-P1-1.png",
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-01.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-01.mp3",
           "question": null,
           "answers": [
             {
@@ -66,7 +66,7 @@
         {
           "questionNumber": 2,
           "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/picture/T02-P1-2.png",
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-02.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-02.mp3",
           "question": null,
           "answers": [
             {
@@ -121,7 +121,7 @@
         {
           "questionNumber": 3,
           "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/picture/T02-P1-3.png",
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-03.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-03.mp3",
           "question": null,
           "answers": [
             {
@@ -176,7 +176,7 @@
         {
           "questionNumber": 4,
           "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/picture/T02-P1-4.png",
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-04.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-04.mp3",
           "question": null,
           "answers": [
             {
@@ -231,7 +231,7 @@
         {
           "questionNumber": 5,
           "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/picture/T02-P1-5.png",
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-05.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-05.mp3",
           "question": null,
           "answers": [
             {
@@ -286,7 +286,7 @@
         {
           "questionNumber": 6,
           "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/picture/T02-P1-6.png",
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-06.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-06.mp3",
           "question": null,
           "answers": [
             {
@@ -346,7 +346,7 @@
       "questions": [
         {
           "questionNumber": 7,
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-07.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-07.mp3",
           "question": "Will you order the pasta or the chicken?",
           "answers": [
             {
@@ -392,7 +392,7 @@
         },
         {
           "questionNumber": 8,
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-08.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-08.mp3",
           "question": "Who should I talk to about getting a ticket to Bangkok?",
           "answers": [
             {
@@ -438,7 +438,7 @@
         },
         {
           "questionNumber": 9,
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-09.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-09.mp3",
           "question": "Would you like the report to be e-mailed or printed out?",
           "answers": [
             {
@@ -484,7 +484,7 @@
         },
         {
           "questionNumber": 10,
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-10.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-10.mp3",
           "question": "Have you decided how much to charge for your concert tickets?",
           "answers": [
             {
@@ -530,7 +530,7 @@
         },
         {
           "questionNumber": 11,
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-11.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-11.mp3",
           "question": "How often does the store offer a sales promotion?",
           "answers": [
             {
@@ -576,7 +576,7 @@
         },
         {
           "questionNumber": 12,
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-12.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-12.mp3",
           "question": "The tour starts at noon today, doesn't it?",
           "answers": [
             {
@@ -622,7 +622,7 @@
         },
         {
           "questionNumber": 13,
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-13.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-13.mp3",
           "question": "Let's begin our meeting about the Taylor project.",
           "answers": [
             {
@@ -668,7 +668,7 @@
         },
         {
           "questionNumber": 14,
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-14.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-14.mp3",
           "question": "There's a dental clinic on Main Street, isn't there?",
           "answers": [
             {
@@ -714,7 +714,7 @@
         },
         {
           "questionNumber": 15,
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-15.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-15.mp3",
           "question": "Where is the book reading going to take place?",
           "answers": [
             {
@@ -760,7 +760,7 @@
         },
         {
           "questionNumber": 16,
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-16.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-16.mp3",
           "question": "When's the bus going to be here?",
           "answers": [
             {
@@ -806,7 +806,7 @@
         },
         {
           "questionNumber": 17,
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-17.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-17.mp3",
           "question": "The estimated price for this car insurance is higher than we expected.",
           "answers": [
             {
@@ -852,7 +852,7 @@
         },
         {
           "questionNumber": 18,
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-18.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-18.mp3",
           "question": "Why haven't the renovations been completed yet?",
           "answers": [
             {
@@ -898,7 +898,7 @@
         },
         {
           "questionNumber": 19,
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-19.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-19.mp3",
           "question": "I'll give you my office number in case you have questions about the data.",
           "answers": [
             {
@@ -944,7 +944,7 @@
         },
         {
           "questionNumber": 20,
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-20.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-20.mp3",
           "question": "Which parking area should we use?",
           "answers": [
             {
@@ -990,7 +990,7 @@
         },
         {
           "questionNumber": 21,
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-21.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-21.mp3",
           "question": "Let's take a taxi to the airport.",
           "answers": [
             {
@@ -1036,7 +1036,7 @@
         },
         {
           "questionNumber": 22,
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-22.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-22.mp3",
           "question": "Our team training session was well attended, wasn't it?",
           "answers": [
             {
@@ -1082,7 +1082,7 @@
         },
         {
           "questionNumber": 23,
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-23.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-23.mp3",
           "question": "Why's the company discontinuing its newsletter?",
           "answers": [
             {
@@ -1128,7 +1128,7 @@
         },
         {
           "questionNumber": 24,
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-24.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-24.mp3",
           "question": "Weren't you planning to take the afternoon off?",
           "answers": [
             {
@@ -1174,7 +1174,7 @@
         },
         {
           "questionNumber": 25,
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-25.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-25.mp3",
           "question": "Dr. Molina sees patients in her Middleville office.",
           "answers": [
             {
@@ -1220,7 +1220,7 @@
         },
         {
           "questionNumber": 26,
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-26.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-26.mp3",
           "question": "Who's going out for lunch?",
           "answers": [
             {
@@ -1266,7 +1266,7 @@
         },
         {
           "questionNumber": 27,
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-27.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-27.mp3",
           "question": "Do the tickets go on sale this week or next?",
           "answers": [
             {
@@ -1312,7 +1312,7 @@
         },
         {
           "questionNumber": 28,
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-28.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-28.mp3",
           "question": "When will you finish updating the sales data?",
           "answers": [
             {
@@ -1358,7 +1358,7 @@
         },
         {
           "questionNumber": 29,
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-29.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-29.mp3",
           "question": "Who's leading the planning session tomorrow?",
           "answers": [
             {
@@ -1404,7 +1404,7 @@
         },
         {
           "questionNumber": 30,
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-30.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-30.mp3",
           "question": "Aren't we meeting with the clients this evening?",
           "answers": [
             {
@@ -1450,7 +1450,7 @@
         },
         {
           "questionNumber": 31,
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-31.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-31.mp3",
           "question": "They invited me to the opening, didn't they?",
           "answers": [
             {
@@ -1503,7 +1503,7 @@
         {
           "groupNumber": 1,
           "questionRange": "32-34",
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-32-34.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-32-34.mp3",
           "imageUrl": null,
           "transcript": "W: How were your deliveries?\nM: Not bad, except at that new residential building on South Street. I had to call them on my phone to come pick up their food. At first, I tried to call on the building intercom, but it's still broken.\nW: You're not the first to say that. Last week, a customer called to complain that their food was cold by the time they found it.\nM: Maybe we just can't make deliveries there until the landlord fixes the intercom system.\nW: I'm going to update the instructions on our mobile app telling customers to meet us at the building's front door. Let's see if that helps.",
           "questions": [
@@ -1666,7 +1666,7 @@
         {
           "groupNumber": 2,
           "questionRange": "35-37",
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-35-37.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-35-37.mp3",
           "imageUrl": null,
           "transcript": "W: We're getting close to the time of year when we need to begin planning our Theater in the Park series for the summer. We have lots of decisions to make about shows, dates, and performers.\nM: You're right. I'll set up a meeting for this month. You know, I had an idea. Why don't we invite community residents to volunteer to help with building sets, painting, and setting up the stage?\nW: We could, but I don't know if we'll be able to use volunteers this year. We'll need approval to start that kind of program. It'll take time. Let's check into that for next year.",
           "questions": [
@@ -1829,7 +1829,7 @@
         {
           "groupNumber": 3,
           "questionRange": "38-40",
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-38-40.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-38-40.mp3",
           "imageUrl": null,
           "transcript": "M: Back to our podcast with special guest Kimberly Stuart, who's currently advising our city on business development projects. Before the break, we promised to address the decline of shopping downtown.\nW: Yes—and it's been the worst at the kind of stores that sell unique items like antiques and jewelry. These items have always been purchased at brick-and-mortar stores but are now being purchased mostly online.\nM: So, do those stores have a future?\nW: I think they do, especially if we make a point of organizing live community activities downtown, such as concerts or festivals. When people walk around town, they are likely to browse at stores—and make purchases.",
           "questions": [
@@ -1992,7 +1992,7 @@
         {
           "groupNumber": 4,
           "questionRange": "41-43",
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-41-43.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-41-43.mp3",
           "imageUrl": null,
           "transcript": "M: Our company has seen a huge spike in sales ever since it launched the rebate program for customers. With the rebate, customers get money back. And they're telling their friends, increasing our sales.\nW: Yes. The rebate's been great for our company because now more homeowners have an incentive to install solar panels on their properties, since they're rewarded for the electricity their solar panels produce. But our technicians can't keep up with the high demand.\nM: You're right. I'm planning to hire more technicians. I've already received some résumés from potential candidates.",
           "questions": [
@@ -2155,7 +2155,7 @@
         {
           "groupNumber": 5,
           "questionRange": "44-46",
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-44-46.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-44-46.mp3",
           "imageUrl": null,
           "transcript": "M: Fernanda, I was just looking at the company calendar, and I noticed that the national electronics trade show is coming up soon.\nW: Oh, that's right! It'll be a great opportunity for us to showcase the product that we've been developing—our new robotic vacuum cleaner.\nM: We'll need to decide who we want to send to represent our company at the trade show.\nW: Well, I know just the right person—Kavi. Kavi does a good job of clearly explaining highly technical concepts in a way that everyone can understand.",
           "questions": [
@@ -2318,7 +2318,7 @@
         {
           "groupNumber": 6,
           "questionRange": "47-49",
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-47-49.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-47-49.mp3",
           "imageUrl": null,
           "transcript": "M: Dr. Fuentes, sorry to interrupt. Do you have a minute?\nW: Yes. My nine o'clock dental cleaning patient just canceled.\nM: I know you're looking for a new receptionist. I'd like to recommend someone for the position.\nW: Oh. Who do you have in mind?\nM: Well, a former colleague of mine has just moved back to town. Her name's Kelly Graham, and she has several years of experience.\nW: OK. Could you tell Kelly to send me her résumé? I'd be happy to look it over.",
           "questions": [
@@ -2481,7 +2481,7 @@
         {
           "groupNumber": 7,
           "questionRange": "50-52",
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-50-52.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-50-52.mp3",
           "imageUrl": null,
           "transcript": "M1: Ms. Gao? I'm Hector, and this is my colleague Sergey. Thanks for meeting with us.\nW: It's a pleasure to meet you both. How can I help?\nM2: We're making some training videos for our client, FiveStar Industries.\nM1: We found your advertisement in a trade publication. We need someone to choose appropriate filming sites at FiveStar's factories, and it said you have lots of experience scouting for industrial locations.\nW: Sure. I'd want to start by touring their factories. Can you schedule a time for me to do that next week?\nM2: Yes, I'll call them today to arrange it.",
           "questions": [
@@ -2644,7 +2644,7 @@
         {
           "groupNumber": 8,
           "questionRange": "53-55",
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-53-55.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-53-55.mp3",
           "imageUrl": null,
           "transcript": "M: Our engineering firm has been asked to cut the corporate travel budget by twenty percent, but it won't be easy. The engineering consultants have to travel to meet with clients.\nW: Right, and they often travel on short notice. Flight arrangements made at the last minute are expensive, especially for nonstop flights. It would be cheaper if they took connecting flights.\nM: Yes, but that can take a lot of time.\nW: True. Maybe we can make up for the cost of the flights by economizing on hotels. Let's look into that.",
           "questions": [
@@ -2807,7 +2807,7 @@
         {
           "groupNumber": 9,
           "questionRange": "56-58",
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-56-58.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-56-58.mp3",
           "imageUrl": null,
           "transcript": "M1: Thanks for meeting with us, Ms. Azuma. This is Scott Ajibade, one of our senior project managers.\nM2: I admire your work, Ms. Azuma.\nW: Thank you. I was surprised by your invitation. I typically design jewelry, but your company's known for making computers and mobile phones.\nM1: Scott's team is currently working on a smartwatch. But there's a lot of competition, as you know.\nM2: We're hoping you can create a fresh design that will help our product stand out.\nW: Do you already have an idea of what the watch should look like, or are we starting from scratch?\nM2: I have some preliminary sketches we can look at, but none of them seem quite right.",
           "questions": [
@@ -2970,7 +2970,7 @@
         {
           "groupNumber": 10,
           "questionRange": "59-61",
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-59-61.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-59-61.mp3",
           "imageUrl": null,
           "transcript": "W: Hi. I'd like to purchase some new carpeting. It's for the waiting room at my hair salon.\nM: We have many different styles. Are you looking for something different?\nW: Well, we get a lot of customers walking through, and our current carpeting is a light color.\nM: No matter what color you get, all our carpets are durable and can take high amounts of foot traffic. For businesses like yours, I recommend placing a protective mat near the door.\nW: That's a good idea.\nM: Also, I offer free cleaning services for a year for all purchases.",
           "questions": [
@@ -3133,7 +3133,7 @@
         {
           "groupNumber": 11,
           "questionRange": "62-64",
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-62-64.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-62-64.mp3",
           "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/picture/T02-P3-62-64.png",
           "transcript": "M: I really need this coffee break. My morning meeting with my client was really challenging.\nW: What were you discussing?\nM: The project schedule. They asked us to provide the prototype design to them three weeks earlier than originally planned.\nW: Well. Then today's cup is my treat. Which one would you like?\nM: That's so nice of you! I'll go with the White Cloud Coffee. I like a little milk in mine.\nW: Good choice. So, I have some news to share with you. Did you hear about David?\nM: No, what's going on?\nW: Apparently, he's planning to retire next month.",
           "questions": [
@@ -3296,7 +3296,7 @@
         {
           "groupNumber": 12,
           "questionRange": "65-67",
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-65-67.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-65-67.mp3",
           "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/picture/T02-P3-65-67.png",
           "transcript": "M: This is Bradley from Windows Galore. How can I help you?\nW: Hello! I'd like to have screens added to my windows at home. I was wondering if you would be available to stop by and take a look. I live at 42 West Third Street, by the way.\nM: OK—that's not far. Let me see. I could come by any morning this week.\nW: How about in the afternoon?\nM: Hmm. I could reschedule my Tuesday afternoon appointment. I'll check and get back to you—I have your number now. And your name is?\nW: Hoffman—Claudia Hoffman. Thank you. Talk to you soon.",
           "questions": [
@@ -3459,7 +3459,7 @@
         {
           "groupNumber": 13,
           "questionRange": "68-70",
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-68-70.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-68-70.mp3",
           "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/picture/T02-P3-68-70.png",
           "transcript": "M: Ms. Kwon, thank you for sending me to the upcoming robotics conference. I didn't expect an opportunity like this so soon after being hired here.\nW: It's important for you to be familiar with current robot designs. There are always new trends and technologies coming out, and I want you to stay ahead of developments in our industry.\nM: I agree. Plus, it'll give me the chance to introduce myself to potential clients.\nW: Oh, about that: here's a handout I provide to all new hires. It includes some helpful tips—especially this one. Do you have your business cards yet?\nM: Hmm. I haven't received them, but I'll call the printer today for an update.",
           "questions": [
@@ -3628,7 +3628,7 @@
         {
           "groupNumber": 1,
           "questionRange": "71-73",
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-71-73.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-71-73.mp3",
           "imageUrl": null,
           "transcript": "M: Crew, please stop working on that truck repair for a second. Many of you complained about how slow and hard it is to use the car lift, so I purchased a new one and it was delivered this morning. It can lift much heavier vehicles, and it's faster. The only problem is we're missing the bottles of hydraulic fluid that were supposed to be included in the shipment. So, we're stuck using the old car lift for a few more days. Oh, and one more thing—when talking to customers, please remember to mention that we're now offering a discount on oil changes if they schedule a vehicle inspection with us.",
           "questions": [
@@ -3791,7 +3791,7 @@
         {
           "groupNumber": 2,
           "questionRange": "74-76",
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-74-76.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-74-76.mp3",
           "imageUrl": null,
           "transcript": "W: As you know, we've had an extremely successful fourth quarter selling desks and chairs to our corporate clients on the West Coast. In fact, we've done so well that we're planning to give ten percent of this month's profits to a local charity in December. They have a great reputation for teaching computer skills to children for free. If you'd like to see a video clip of our CEO talking about this initiative, just visit our social media site.",
           "questions": [
@@ -3954,7 +3954,7 @@
         {
           "groupNumber": 3,
           "questionRange": "77-79",
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-77-79.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-77-79.mp3",
           "imageUrl": null,
           "transcript": "M: Welcome to our podcast with special guest Kimberly Stuart, who's currently advising our city on business development projects. Before the break, we promised to address the decline of shopping downtown. Yes—and it's been the worst at the kind of stores that sell unique items like antiques and jewelry. These items have always been purchased at brick-and-mortar stores but are now being purchased mostly online. So, do those stores have a future? I think they do, especially if we make a point of organizing live community activities downtown, such as concerts or festivals. When people walk around town, they are likely to browse at stores—and make purchases.",
           "questions": [
@@ -4118,7 +4118,7 @@
         {
           "groupNumber": 4,
           "questionRange": "80-82",
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-80-82.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-80-82.mp3",
           "imageUrl": null,
           "transcript": "W: As the company president, I'm excited to share that we've sold a record number of home appliances for two years in a row, and I'd like to reward your hard work. First, everyone will be eligible for a one-time monetary bonus. Your supervisor will speak with you about how it'll be calculated and when you'll receive it. Also, I'd like to offer more flexibility in your schedule, so all employees will be permitted to work remotely twice a week. You'll just need to note those days on your calendar, so everyone knows where you are.",
           "questions": [
@@ -4281,7 +4281,7 @@
         {
           "groupNumber": 5,
           "questionRange": "83-85",
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-83-85.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-83-85.mp3",
           "imageUrl": null,
           "transcript": "M: I called this meeting today because I wanted to talk about changes to how our company hires new employees. It came to my attention that some people were confused when reading about these new hiring policies in the latest company newsletter. I posted a link in the meeting invitation to this information, and I asked you to bring your laptops so that you can follow along on your own screen. After we review the policies, you can see Sumit in the back of the room if you'd like a printed copy. He has several.",
           "questions": [
@@ -4444,7 +4444,7 @@
         {
           "groupNumber": 6,
           "questionRange": "86-88",
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-86-88.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-86-88.mp3",
           "imageUrl": null,
           "transcript": "M: As head of the product design team, I have the sales results from the last quarter, and they're disappointing. It's clear that consumers are no longer interested in the types of toys and games we've been producing. My guess is that people are getting tired of noisy, blinking electronics. We have a lot of work to do. There's a new trend toward outdoor toys and games, where people can be physically active. I've already come up with some prototypes of new games. I brought a few of them, and now I'll show you how they work.",
           "questions": [
@@ -4608,7 +4608,7 @@
         {
           "groupNumber": 7,
           "questionRange": "89-91",
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-89-91.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-89-91.mp3",
           "imageUrl": null,
           "transcript": "M: Hello. You've reached Ji-Soo Yoon at the visitor center of the Pine Valley Nature Preserve. I am currently out of the office. Please be aware that visitor access to the park will be limited during the month of March while our facilities are undergoing renovations. If you are calling for information about helping to maintain our hiking trails, please refer to the volunteer page on our Web site. We welcome the assistance of motivated individuals. For all other inquiries, please leave a message after the tone.",
           "questions": [
@@ -4771,7 +4771,7 @@
         {
           "groupNumber": 8,
           "questionRange": "92-94",
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-92-94.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-92-94.mp3",
           "imageUrl": null,
           "transcript": "W: Today, I'll be interviewing the owners of Salazar Olive Oil, one of the best in California for the past two decades. Now—if you're hearing about this olive oil for the first time, you're not alone. The Salazar family has kept the operation small. I'm interested in discussing their business philosophy as well as their new project: an olive oil tasting class on their farm. You'll find out how to register during the interview so you can sign up!",
           "questions": [
@@ -4935,7 +4935,7 @@
         {
           "groupNumber": 9,
           "questionRange": "95-97",
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-95-97.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-95-97.mp3",
           "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/picture/T02-P4-95-97.png",
           "transcript": "W: Welcome to the Abingdon Transit Station. Please be advised that the Circle Route bus is not currently stopping at the station entrance because of some street resurfacing work. A temporary bus stop has been set up around the corner in front of the post office. Signs are posted directing you to the new stop. Bus timetables will be affected by the change in the route. Use the Abingdon Transit mobile phone app to view live updates for when the next bus is due.",
           "questions": [
@@ -5098,7 +5098,7 @@
         {
           "groupNumber": 10,
           "questionRange": "98-100",
-          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/Test_02-98-100.mp3",
+          "audioUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/audio/T02-98-100.mp3",
           "imageUrl": "https://fdyiixsxzhgwmicdfaos.supabase.co/storage/v1/object/public/toeic-media/T02-media/picture/T02-P4-98-100.png",
           "transcript": "M: Hello, everyone! We're happy to announce that the February continuing education workshops here at the community center were very successful. Thank you for working so hard to make sure they ran smoothly. Every workshop was completely full. In fact, we had to create a waiting list for the Monday night workshop. Beginning in March, we'll offer that same workshop on Fridays. Now, many participants complained about the lack of vending machines in the building. Bianca will be contacting vending services next week to ask about pricing.",
           "questions": [
