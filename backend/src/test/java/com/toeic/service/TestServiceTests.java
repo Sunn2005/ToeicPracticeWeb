@@ -95,6 +95,76 @@ class TestServiceTests {
     }
 
     @Test
+    void revealsSingleQuestionFeedbackOnlyAfterItIsAnswered() throws Exception {
+        Map<String, Object> pending = testService.getPracticeFeedback(testId, 101, Map.of());
+        assertEquals(false, pending.get("ready"));
+        assertEquals(List.of(101), pending.get("pendingQuestionNumbers"));
+        assertFalse(pending.containsKey("questions"));
+
+        Map<String, Object> ready = testService.getPracticeFeedback(
+                testId,
+                101,
+                Map.of(101, "B")
+        );
+        assertEquals(true, ready.get("ready"));
+        Map<?, ?> question = (Map<?, ?>) ((List<?>) ready.get("questions")).getFirst();
+        assertEquals(101, question.get("questionNumber"));
+        assertEquals("B", question.get("selectedAnswer"));
+        assertEquals("CORRECT", question.get("answerStatus"));
+        assertTrue(question.containsKey("correctAnswer"));
+        assertTrue(question.containsKey("detailedExplanation"));
+    }
+
+    @Test
+    void waitsForEveryQuestionBeforeRevealingGroupFeedback() throws Exception {
+        Map<String, Object> pending = testService.getPracticeFeedback(
+                testId,
+                32,
+                Map.of(32, "A", 33, "B")
+        );
+        assertEquals(false, pending.get("ready"));
+        assertEquals(List.of(34), pending.get("pendingQuestionNumbers"));
+
+        Map<String, Object> ready = testService.getPracticeFeedback(
+                testId,
+                32,
+                Map.of(32, "A", 33, "B", 34, "C")
+        );
+        assertEquals(true, ready.get("ready"));
+        assertEquals(List.of(32, 33, 34), ready.get("questionNumbers"));
+        assertEquals(3, ((List<?>) ready.get("questions")).size());
+        assertTrue(String.valueOf(ready.get("transcript")).contains("cheddar"));
+        assertTrue(String.valueOf(ready.get("transcriptTranslation")).contains("phô mai"));
+    }
+
+    @Test
+    void treatsPartSixAndSevenPassagesAsFeedbackGroups() throws Exception {
+        Map<String, Object> partSixPending = testService.getPracticeFeedback(
+                testId,
+                131,
+                Map.of(131, "A", 132, "B", 133, "C")
+        );
+        assertEquals(false, partSixPending.get("ready"));
+        assertEquals(List.of(134), partSixPending.get("pendingQuestionNumbers"));
+
+        Map<String, Object> partSixReady = testService.getPracticeFeedback(
+                testId,
+                131,
+                Map.of(131, "A", 132, "B", 133, "C", 134, "D")
+        );
+        assertEquals(true, partSixReady.get("ready"));
+        assertEquals(4, ((List<?>) partSixReady.get("questions")).size());
+
+        Map<String, Object> partSevenReady = testService.getPracticeFeedback(
+                testId,
+                147,
+                Map.of(147, "A", 148, "B")
+        );
+        assertEquals(true, partSevenReady.get("ready"));
+        assertEquals(List.of(147, 148), partSevenReady.get("questionNumbers"));
+    }
+
+    @Test
     void providesReadableTranscriptTranslationsForEveryPartThreeAndFourGroup() {
         List<TestPart> listeningParts = sourceTest.getParts().stream()
                 .filter(part -> part.getPartNumber() == 3 || part.getPartNumber() == 4)

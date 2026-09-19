@@ -52,6 +52,9 @@ function Welcome({ user }) {
   const [historyTest, setHistoryTest] = useState(null);
   const [historyLoading, setHistoryLoading] = useState(true);
   const [historyError, setHistoryError] = useState("");
+  const [resumePrompt, setResumePrompt] = useState(null);
+  const [restartingAttempt, setRestartingAttempt] = useState(false);
+  const [resumePromptError, setResumePromptError] = useState("");
   const displayName = user?.displayName || t("learner");
 
   useEffect(() => {
@@ -119,18 +122,51 @@ function Welcome({ user }) {
     durationMinutes,
     experience,
   }) => {
+    const requestBody = {
+      type: experience === "practice" ? "PRACTICE" : "FULL_TEST",
+      mode,
+      part,
+      parts,
+      durationMinutes,
+    };
     const attempt = await apiFetch(`/api/tests/${selectedTest.id}/attempts`, {
       method: "POST",
       forceRefresh: true,
-      body: JSON.stringify({
-        type: experience === "practice" ? "PRACTICE" : "FULL_TEST",
-        mode,
-        part,
-        parts,
-        durationMinutes,
-      }),
+      body: JSON.stringify(requestBody),
     });
+
+    if (attempt.resumed) {
+      setResumePrompt({ attempt, requestBody });
+      setResumePromptError("");
+      return;
+    }
+
     navigate(`/full-test/${attempt.id}/exam`);
+  };
+
+  const continueExistingAttempt = () => {
+    if (!resumePrompt) return;
+    navigate(`/full-test/${resumePrompt.attempt.id}/exam`);
+  };
+
+  const restartExistingAttempt = async () => {
+    if (!resumePrompt || !selectedTest) return;
+    setRestartingAttempt(true);
+    setResumePromptError("");
+    try {
+      const attempt = await apiFetch(`/api/tests/${selectedTest.id}/attempts`, {
+        method: "POST",
+        forceRefresh: true,
+        body: JSON.stringify({
+          ...resumePrompt.requestBody,
+          restartExisting: true,
+        }),
+      });
+      navigate(`/full-test/${attempt.id}/exam`);
+    } catch (requestError) {
+      setResumePromptError(requestError.message || t("unableStartTest"));
+      setRestartingAttempt(false);
+    }
   };
 
   const openTestMode = (test, tab) => {
@@ -336,6 +372,57 @@ function Welcome({ user }) {
           onClose={() => setSelectedTest(null)}
           onStart={handleStartExam}
         />
+      )}
+
+      {resumePrompt && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+          <section
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="resume-attempt-title"
+            className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl sm:p-8"
+          >
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-600">
+              {t("unfinishedAttempt")}
+            </p>
+            <h2 id="resume-attempt-title" className="mt-2 text-2xl font-black text-slate-950">
+              {t("resumeOrRestartTitle")}
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              {t("resumeOrRestartDescription")} {resumePrompt.attempt.currentSection === "LISTENING"
+                ? t("listening")
+                : t("reading")}.
+            </p>
+            <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">
+              {t("restartAttemptWarning")}
+            </p>
+
+            {resumePromptError && (
+              <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {resumePromptError}
+              </div>
+            )}
+
+            <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={restartExistingAttempt}
+                disabled={restartingAttempt}
+                className="rounded-xl border border-slate-200 px-5 py-3 font-bold text-slate-700 transition hover:bg-slate-50 disabled:cursor-wait disabled:opacity-50"
+              >
+                {restartingAttempt ? t("preparing") : t("restartAttempt")}
+              </button>
+              <button
+                type="button"
+                onClick={continueExistingAttempt}
+                disabled={restartingAttempt}
+                className="rounded-xl bg-sky-500 px-5 py-3 font-bold text-white shadow-lg shadow-sky-100 transition hover:bg-sky-600 disabled:opacity-50"
+              >
+                {t("continueAttempt")}
+              </button>
+            </div>
+          </section>
+        </div>
       )}
 
       <AttemptHistoryDrawer

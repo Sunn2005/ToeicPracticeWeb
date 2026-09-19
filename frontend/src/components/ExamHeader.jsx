@@ -20,15 +20,19 @@ function ExamHeader({
   const { t } = useLanguage();
   const isElapsed = timerType === TIMER_TYPES.ELAPSED;
   const isUrgent = !isElapsed && remainingSeconds <= 300;
+  const scopedParts = (selectedParts?.length ? selectedParts : [selectedPart])
+    .filter(Boolean)
+    .join(" + ");
+  const attemptModeLabel = mode === "FULL"
+    ? t("fullTest")
+    : mode === "PART"
+      ? `${t("part")} ${scopedParts}`
+      : mode === "LISTENING"
+        ? t("listeningTest")
+        : t("readingTest");
   const modeLabel = type === "PRACTICE"
-    ? `${t("practiceMode")} · ${t("part")} ${(selectedParts?.length ? selectedParts : [selectedPart]).filter(Boolean).join(" + ")}`
-    : mode === "FULL"
-      ? t("fullTest")
-      : mode === "PART"
-        ? `${t("part")} ${(selectedParts?.length ? selectedParts : [selectedPart]).filter(Boolean).join(" + ")}`
-        : mode === "LISTENING"
-          ? t("listeningTest")
-          : t("readingTest");
+    ? `${t("practiceMode")} · ${attemptModeLabel}`
+    : attemptModeLabel;
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">

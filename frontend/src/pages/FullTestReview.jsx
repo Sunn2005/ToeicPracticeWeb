@@ -34,12 +34,16 @@ function modeLabel(attempt, t) {
       ? [attempt.selectedPart]
       : [];
 
-  if (attempt.type === "PRACTICE") {
-    return `${t("practiceMode")} · ${t("part")} ${selectedParts.join(" + ")}`;
-  }
-  if (attempt.mode === "FULL") return t("fullTest");
-  if (attempt.mode === "PART") return `${t("part")} ${selectedParts.join(" + ")}`;
-  return attempt.mode === "LISTENING" ? t("listeningTest") : t("readingTest");
+  const attemptModeLabel = attempt.mode === "FULL"
+    ? t("fullTest")
+    : attempt.mode === "PART"
+      ? `${t("part")} ${selectedParts.join(" + ")}`
+      : attempt.mode === "LISTENING"
+        ? t("listeningTest")
+        : t("readingTest");
+  return attempt.type === "PRACTICE"
+    ? `${t("practiceMode")} · ${attemptModeLabel}`
+    : attemptModeLabel;
 }
 
 function TrashIcon() {

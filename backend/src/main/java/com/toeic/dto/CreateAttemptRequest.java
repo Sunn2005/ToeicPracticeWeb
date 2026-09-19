@@ -18,6 +18,7 @@ public class CreateAttemptRequest {
     private Integer part;
     private List<Integer> parts;
     private Integer durationMinutes;
+    private Boolean restartExisting;
 
     public CreateAttemptRequest(String testId) {
         this.testId = testId;

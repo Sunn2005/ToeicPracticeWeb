@@ -77,6 +77,7 @@ export function isLastListeningUnit(currentUnit, listeningUnits) {
 }
 
 export function shouldSubmitAfterListeningAudio(attempt, currentUnit, listeningUnits) {
+  if (String(attempt?.type || "").toUpperCase() === "PRACTICE") return false;
   if (!isLastListeningUnit(currentUnit, listeningUnits)) return false;
   const mode = normalizeMode(attempt?.mode);
   if (mode === "LISTENING") return true;
@@ -88,6 +89,7 @@ export function shouldSubmitAfterListeningAudio(attempt, currentUnit, listeningU
 
 export function shouldDisableSubmit(attempt, busy = false) {
   return Boolean(busy)
-    || (normalizeMode(attempt?.mode) === "FULL"
+    || (String(attempt?.type || "FULL_TEST").toUpperCase() === "FULL_TEST"
+      && normalizeMode(attempt?.mode) === "FULL"
       && attempt?.currentSection === "LISTENING");
 }

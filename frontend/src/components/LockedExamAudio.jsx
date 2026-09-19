@@ -1,7 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "../i18n/LanguageContext";
 
-function LockedExamAudio({ src, onEnded, advancing, paused = false, ready = true }) {
+function LockedExamAudio({
+  src,
+  onEnded,
+  advancing,
+  paused = false,
+  ready = true,
+  replayable = false,
+}) {
   const { t } = useLanguage();
   const audioRef = useRef(null);
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
@@ -27,13 +34,15 @@ function LockedExamAudio({ src, onEnded, advancing, paused = false, ready = true
       return;
     }
 
+    if (replayable) return;
+
     const playPromise = audio.play();
     if (playPromise) {
       playPromise
         .then(() => setAutoplayBlocked(false))
         .catch(() => setAutoplayBlocked(true));
     }
-  }, [paused, ready, src]);
+  }, [paused, ready, replayable, src]);
 
   const startAfterBrowserBlock = async () => {
     try {
@@ -49,6 +58,32 @@ function LockedExamAudio({ src, onEnded, advancing, paused = false, ready = true
       setAutoplayBlocked(true);
     }
   };
+
+  if (replayable) {
+    return (
+      <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3.5">
+        <div className="mb-3 flex items-center gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white">
+            ♫
+          </span>
+          <div>
+            <p className="text-sm font-bold text-emerald-900">{t("practiceAudio")}</p>
+            <p className="mt-0.5 text-xs leading-5 text-emerald-700">
+              {t("practiceAudioNote")}
+            </p>
+          </div>
+        </div>
+        <audio
+          ref={audioRef}
+          key={src}
+          src={src}
+          controls
+          preload="metadata"
+          className="w-full"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-xl border border-sky-100 bg-sky-50 px-4 py-3.5">

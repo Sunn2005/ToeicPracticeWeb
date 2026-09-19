@@ -94,6 +94,28 @@ public class AttemptService {
             Integer durationMinutes,
             String requestedType
     ) throws Exception {
+        return createOrResume(
+                userId,
+                testId,
+                requestedMode,
+                selectedPart,
+                requestedParts,
+                durationMinutes,
+                requestedType,
+                false
+        );
+    }
+
+    public Map<String, Object> createOrResume(
+            String userId,
+            String testId,
+            String requestedMode,
+            Integer selectedPart,
+            List<Integer> requestedParts,
+            Integer durationMinutes,
+            String requestedType,
+            Boolean restartExisting
+    ) throws Exception {
         testService.getMetadata(testId);
         AttemptScope scope = resolveScope(requestedMode, selectedPart, requestedParts, durationMinutes);
         String attemptType = normalizeAttemptType(requestedType);
@@ -108,7 +130,13 @@ public class AttemptService {
         if (active != null) {
             active = reconcileTimeout(active);
             if (IN_PROGRESS.equals(active.getStatus())) {
-                return toResponse(active, true);
+                if (Boolean.TRUE.equals(restartExisting)) {
+                    attemptDao.delete(active.getId());
+                } else {
+                    Map<String, Object> response = toResponse(active, true);
+                    response.put("resumed", true);
+                    return response;
+                }
             }
         }
 
@@ -153,7 +181,9 @@ public class AttemptService {
         attempt.setAnswers(null);
 
         attemptDao.save(attempt);
-        return toResponse(attempt, true);
+        Map<String, Object> response = toResponse(attempt, true);
+        response.put("resumed", false);
+        return response;
     }
 
     public Map<String, Object> getCurrent(String userId, String testId) throws Exception {
@@ -190,6 +220,37 @@ public class AttemptService {
         response.put("attempt", toResponse(attempt, true));
         response.put("test", testService.getExamTest(attempt.getTestId()));
         return response;
+    }
+
+    public Map<String, Object> getPracticeFeedback(
+            String userId,
+            String attemptId,
+            Integer questionNumber
+    ) throws Exception {
+        if (questionNumber == null || questionNumber < 1 || questionNumber > 200) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "questionNumber phải từ 1 đến 200");
+        }
+
+        Attempt attempt = reconcileTimeout(getOwnedAttempt(userId, attemptId));
+        requireInProgress(attempt);
+        if (!PRACTICE.equals(attemptType(attempt))) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Phản hồi tức thì chỉ áp dụng cho chế độ luyện tập"
+            );
+        }
+        if (!isQuestionSelected(attempt, questionNumber)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Câu hỏi không thuộc phạm vi luyện tập"
+            );
+        }
+
+        return testService.getPracticeFeedback(
+                attempt.getTestId(),
+                questionNumber,
+                loadAnswers(attempt.getId())
+        );
     }
 
     public Map<String, Object> saveAnswer(
@@ -292,6 +353,8 @@ public class AttemptService {
             if (hasSelectedReadingPart(attempt)) {
                 transitionToReading(attempt, System.currentTimeMillis());
                 saveAttempt(attempt);
+            } else if (PRACTICE.equals(attemptType(attempt))) {
+                return toResponse(attempt, true);
             } else {
                 attempt = submitInternal(attempt, false);
             }
@@ -328,7 +391,9 @@ public class AttemptService {
             return attempt.getResult();
         }
         requireInProgress(attempt);
-        if (MODE_FULL.equals(mode(attempt)) && !READING.equals(attempt.getCurrentSection())) {
+        if (FULL_TEST.equals(attemptType(attempt))
+                && MODE_FULL.equals(mode(attempt))
+                && !READING.equals(attempt.getCurrentSection())) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "Hãy hoàn thành Listening trước khi nộp Full Test"

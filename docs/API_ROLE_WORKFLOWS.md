@@ -331,7 +331,8 @@ Tất cả endpoint trong mục này yêu cầu đăng nhập. Ngoài endpoint t
   "mode": "PART",
   "part": 5,
   "parts": [5, 6],
-  "durationMinutes": 35
+  "durationMinutes": 35,
+  "restartExisting": false
 }
 ```
 
@@ -342,10 +343,11 @@ Tất cả endpoint trong mục này yêu cầu đăng nhập. Ngoài endpoint t
 | `part` | `integer` | Khi `mode=PART` nếu không có `parts` | Từ 1 đến 7. |
 | `parts` | `integer[]` | Khi `mode=PART` nếu không có `part` | Ít nhất một Part từ 1 đến 7; server loại trùng và sắp xếp. |
 | `durationMinutes` | `integer` | Không | Chỉ dùng cho `PART`, từ 1 đến 180 phút. |
+| `restartExisting` | `boolean` | Không | Mặc định `false`. Nếu `true`, xóa attempt `IN_PROGRESS` trùng scope cùng các đáp án đã lưu rồi tạo attempt mới từ đầu. Chỉ gửi sau khi người dùng xác nhận “Bắt đầu lại”. |
 
 Nếu `PART` không truyền `durationMinutes`, thời lượng gợi ý lần lượt cho Part 1–7 là `5, 10, 15, 15, 20, 10, 45` phút và được cộng theo các Part đã chọn.
 
-- **Response thành công:** `200 OK`, `AttemptResponse` có `answers` và `answeredCount`.
+- **Response thành công:** `200 OK`, `AttemptResponse` có `answers`, `answeredCount` và `resumed`. `resumed=true` nghĩa là server trả lại attempt đang làm dở; `false` nghĩa là attempt vừa được tạo mới.
 - **Lỗi chính:** `400 BAD_REQUEST` khi `type`, `mode`, Part hoặc thời lượng không hợp lệ; `404 NOT_FOUND` nếu đề không tồn tại/chưa duyệt.
 
 ### 6.2 Tạo hoặc tiếp tục attempt — endpoint tương thích
@@ -439,6 +441,16 @@ Trong Listening chỉ được lưu câu/nhóm câu đang hiển thị; câu cũ
 
 - **Lỗi chính:** `400 BAD_REQUEST` nếu số câu/đáp án sai; `409 CONFLICT` nếu câu ngoài scope, section không cho sửa hoặc bài đã khóa.
 
+### 6.6a Lấy phản hồi tức thì cho luyện tập
+
+- **Mục đích:** mở đáp án, trạng thái đúng/sai, bản dịch, transcript và lời giải của đúng một câu/nhóm câu trong lúc luyện tập.
+- **Method/type:** `GET`, response `application/json`.
+- **Path:** `/api/attempts/{attemptId}/practice-feedback?questionNumber={questionNumber}`.
+- **Quyền:** đã đăng nhập; chỉ owner; attempt phải có `type=PRACTICE` và đang làm.
+- **Quy tắc mở đáp án:** câu độc lập được mở sau khi đã chọn đáp án; nhóm gắn với cùng audio hoặc passage chỉ được mở sau khi tất cả câu trong nhóm đã có đáp án.
+- **Bảo mật:** response chỉ chứa dữ liệu của unit hiện tại, không trả đáp án của các câu/nhóm chưa hoàn thành.
+- **Response:** `ready=false` kèm `pendingQuestionNumbers` nếu nhóm chưa hoàn tất; khi `ready=true`, response có `questions`, `transcript` và `transcriptTranslation` tương ứng.
+
 ### 6.7 Cập nhật vị trí câu Reading
 
 - **Mục đích:** lưu câu Reading đang được user xem để có thể tiếp tục đúng vị trí.
@@ -486,7 +498,7 @@ Trong Listening chỉ được lưu câu/nhóm câu đang hiển thị; câu cũ
 - **Body:** không có.
 - **Response thành công:** `200 OK`, `ResultResponse`.
 - **Tính idempotent:** nếu bài đã hoàn thành, trả lại kết quả đã lưu.
-- **Lỗi chính:** với `mode=FULL`, trả `409 CONFLICT` nếu attempt vẫn đang ở Listening và chưa chuyển sang Reading; attempt đã khóa không nhận cập nhật khác.
+- **Lỗi chính:** với `type=FULL_TEST, mode=FULL`, trả `409 CONFLICT` nếu attempt vẫn đang ở Listening và chưa chuyển sang Reading; attempt đã khóa không nhận cập nhật khác. Attempt `PRACTICE` được phép nộp ở bất kỳ section nào.
 
 ### 6.11 Nộp bài — endpoint tương thích
 

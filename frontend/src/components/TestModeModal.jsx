@@ -65,13 +65,17 @@ function TestModeModal({ test, initialTab = "exam", onClose, onStart }) {
   }, [onClose, startingKey]);
 
   const startMode = async (selection) => {
-    const key = selection.mode === "PART"
-      ? `PART-${selection.parts.join("-")}`
-      : selection.mode;
+    const resolvedSelection = {
+      ...selection,
+      experience: selection.experience || activeTab,
+    };
+    const key = resolvedSelection.mode === "PART"
+      ? `PART-${resolvedSelection.parts.join("-")}`
+      : resolvedSelection.mode;
     setStartingKey(key);
     setError("");
     try {
-      await onStart(selection);
+      await onStart(resolvedSelection);
     } catch (requestError) {
       setError(requestError.message || t("unableStartTest"));
       setStartingKey("");
@@ -105,7 +109,7 @@ function TestModeModal({ test, initialTab = "exam", onClose, onStart }) {
     });
   };
 
-  const startSelectedParts = (experience = "exam") => startMode({
+  const startSelectedParts = (experience = activeTab) => startMode({
     mode: "PART",
     part: selectedParts.length === 1 ? selectedParts[0] : null,
     parts: selectedParts,
@@ -177,63 +181,7 @@ function TestModeModal({ test, initialTab = "exam", onClose, onStart }) {
             </div>
           )}
 
-          {activeTab === "practice" ? (
-            <section className="mt-6 rounded-3xl border border-emerald-100 bg-white p-5 sm:p-7">
-              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-600">{t("practiceMode")}</p>
-                  <h3 className="mt-2 text-xl font-bold text-slate-950">{t("practiceByPart")}</h3>
-                  <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">{t("practiceDescription")}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => startSelectedParts("practice")}
-                  disabled={!selectedParts.length || !validCustomTime || Boolean(startingKey)}
-                  className="shrink-0 rounded-xl bg-emerald-600 px-7 py-3 font-bold text-white shadow-lg shadow-emerald-100 transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
-                >
-                  {startingKey.startsWith("PART-") ? t("preparing") : t("start")}
-                </button>
-              </div>
-
-              <div className="mt-6 grid gap-5 md:grid-cols-2">
-                <PartGroup title={t("listening")} parts={listeningParts} selectedParts={selectedParts} onToggle={togglePart} />
-                <PartGroup title={t("reading")} parts={readingParts} selectedParts={selectedParts} onToggle={togglePart} />
-              </div>
-
-              <div className="mt-6 rounded-2xl bg-emerald-50/70 p-5">
-                <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-                  <div>
-                    <h4 className="font-bold text-slate-900">{t("testDuration")}</h4>
-                    {selectedParts.length > 0 && !customTimeEnabled && (
-                      <p className="mt-2 text-sm text-slate-600">{suggestedMinutes} {t("minuteShort")} · {t("suggestedTime")}</p>
-                    )}
-                  </div>
-                  <button type="button" role="switch" aria-checked={customTimeEnabled} onClick={toggleCustomTime} className="flex items-center gap-3 font-semibold text-slate-600">
-                    {t("customTime")}
-                    <span className={`relative h-7 w-12 rounded-full transition ${customTimeEnabled ? "bg-emerald-600" : "bg-slate-300"}`}>
-                      <span className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition ${customTimeEnabled ? "left-6" : "left-1"}`} />
-                    </span>
-                  </button>
-                </div>
-                {customTimeEnabled && (
-                  <label className="mt-4 block max-w-xs">
-                    <span className="text-sm font-semibold text-slate-700">{t("minuteRange")}</span>
-                    <div className="mt-2 flex items-center rounded-xl border border-slate-200 bg-white px-4 focus-within:border-emerald-400 focus-within:ring-4 focus-within:ring-emerald-100">
-                      <input type="number" min="1" max="180" step="1" value={customMinutes} onChange={(event) => setCustomMinutes(event.target.value)} className="min-w-0 flex-1 bg-transparent py-3 font-bold text-slate-900 outline-none" />
-                      <span className="text-sm text-slate-500">{t("minuteShort")}</span>
-                    </div>
-                    {!validCustomTime && <span className="mt-2 block text-sm text-red-600">{t("invalidMinutes")}</span>}
-                  </label>
-                )}
-              </div>
-
-              <div className="mt-5 flex flex-wrap gap-3 text-sm font-semibold text-slate-500">
-                <span className="rounded-full bg-emerald-50 px-3 py-2 text-emerald-700">{selectedQuestionCount} {t("questions")}</span>
-                <span className="py-2">{selectedParts.length} {t("partsSelected")}</span>
-              </div>
-            </section>
-          ) : (
-            <>
+          <>
               <div className="mt-6 grid gap-4 md:grid-cols-3">
                 {EXAM_MODES.map((mode) => (
                   <ExamModeCard
@@ -249,9 +197,11 @@ function TestModeModal({ test, initialTab = "exam", onClose, onStart }) {
               <section className="mt-8 border-t border-slate-200 pt-7">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <h3 className="text-xl font-bold text-slate-950">{t("testByPart")}</h3>
+                    <h3 className="text-xl font-bold text-slate-950">
+                      {activeTab === "practice" ? t("practiceByPart") : t("testByPart")}
+                    </h3>
                     <p className="mt-1 text-sm text-slate-500">
-                      {t("testByPartDescription")}
+                      {activeTab === "practice" ? t("practiceDescription") : t("testByPartDescription")}
                     </p>
                   </div>
                   <button
@@ -341,8 +291,7 @@ function TestModeModal({ test, initialTab = "exam", onClose, onStart }) {
                   <span>{selectedParts.length} {t("partsSelected")}</span>
                 </div>
               </section>
-            </>
-          )}
+          </>
         </div>
       </section>
     </div>

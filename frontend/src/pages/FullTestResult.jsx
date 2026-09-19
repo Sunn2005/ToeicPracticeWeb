@@ -303,16 +303,16 @@ function FullTestResult() {
       ? [result.selectedPart]
       : [];
   const testName = getTestName(result?.testId);
-  const modeTitle =
-    result?.type === "PRACTICE"
-      ? `${t("practiceMode")} · ${t("part")} ${selectedParts.join(" + ")}`
-      : resultMode === "FULL"
-        ? t("fullTest")
-        : resultMode === "LISTENING"
-          ? t("listeningTest")
-          : resultMode === "READING"
-            ? t("readingTest")
-            : `${t("part")} ${selectedParts.join(" + ")}`;
+  const resultModeTitle = resultMode === "FULL"
+    ? t("fullTest")
+    : resultMode === "LISTENING"
+      ? t("listeningTest")
+      : resultMode === "READING"
+        ? t("readingTest")
+        : `${t("part")} ${selectedParts.join(" + ")}`;
+  const modeTitle = result?.type === "PRACTICE"
+    ? `${t("practiceMode")} · ${resultModeTitle}`
+    : resultModeTitle;
   const maxScore = resultMode === "FULL" || (listeningTotal > 0 && readingTotal > 0) ? 990 : 495;
 
   return (

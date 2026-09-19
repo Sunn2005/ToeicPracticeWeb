@@ -58,7 +58,8 @@ public class AttemptController {
                 request.getPart(),
                 request.getParts(),
                 request.getDurationMinutes(),
-                request.getType()
+                request.getType(),
+                request.getRestartExisting()
         );
     }
 
@@ -84,6 +85,15 @@ public class AttemptController {
             @AuthenticationPrincipal ToeicUserPrincipal principal
     ) throws Exception {
         return attemptService.getExam(principal.uid(), attemptId);
+    }
+
+    @GetMapping("/{attemptId}/practice-feedback")
+    public Map<String, Object> getPracticeFeedback(
+            @PathVariable String attemptId,
+            @RequestParam Integer questionNumber,
+            @AuthenticationPrincipal ToeicUserPrincipal principal
+    ) throws Exception {
+        return attemptService.getPracticeFeedback(principal.uid(), attemptId, questionNumber);
     }
 
     @PutMapping("/{attemptId}/answers")

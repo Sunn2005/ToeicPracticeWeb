@@ -8,10 +8,12 @@ import PassagePanel from "../components/PassagePanel";
 import QuestionCard from "../components/QuestionCard";
 import QuestionNavigatorDrawer from "../components/QuestionNavigatorDrawer";
 import ResizableExamLayout from "../components/ResizableExamLayout";
+import ReviewTogglePanel from "../components/ReviewTogglePanel";
 import {
   TIMER_TYPES,
   getTimerSeconds,
   getTimerType,
+  isLastListeningUnit,
   shouldDisableSubmit,
   shouldSubmitAfterListeningAudio,
 } from "../config/examTiming";
@@ -21,7 +23,17 @@ import {
   findUnit,
   formatQuestionProgress,
 } from "../utils/testData";
+import {
+  formatListeningTranscript,
+  formatPartTwoTranscript,
+  formatTranslatedTranscript,
+} from "../utils/reviewContent";
 import { useLanguage } from "../i18n/LanguageContext";
+
+const PRACTICE_FEEDBACK_SOUNDS = {
+  correct: "/audio/correct.mp3",
+  incorrect: "/audio/incorrect.mp3",
+};
 
 function secondsUntil(endAt, serverNow) {
   return Math.max(0, Math.ceil((endAt - serverNow) / 1000));
@@ -103,9 +115,12 @@ function FullTestExam() {
   const readingContentRef = useRef(null);
   const readingQuestionsRef = useRef(null);
   const nextMediaPreloadRef = useRef(null);
+  const practiceFeedbackAudioRef = useRef(null);
+  const practiceSoundPendingUnitsRef = useRef(new Set());
   const [loadedListeningImageUrl, setLoadedListeningImageUrl] = useState(null);
   const [failedListeningImageUrl, setFailedListeningImageUrl] = useState(null);
   const [listeningImageRetryKey, setListeningImageRetryKey] = useState(0);
+  const [practiceFeedbackByUnit, setPracticeFeedbackByUnit] = useState({});
 
   useEffect(() => {
     let active = true;
@@ -164,6 +179,10 @@ function FullTestExam() {
   const currentQuestion = attempt?.currentQuestionNumber || 1;
   const currentUnits = attempt?.currentSection === "LISTENING" ? listeningUnits : readingUnits;
   const currentUnit = findUnit(currentUnits, currentQuestion);
+  const isPractice = attempt?.type === "PRACTICE";
+  const currentPracticeFeedback = currentUnit
+    ? practiceFeedbackByUnit[currentUnit.key]
+    : null;
   const currentListeningImageUrl = attempt?.currentSection === "LISTENING"
     ? currentUnit?.imageUrl
     : null;
@@ -250,6 +269,11 @@ function FullTestExam() {
     nextMediaPreloadRef.current = null;
   }, []);
 
+  useEffect(() => () => {
+    practiceFeedbackAudioRef.current?.pause();
+    practiceFeedbackAudioRef.current = null;
+  }, []);
+
   useEffect(() => {
     if (attempt?.currentSection !== "READING") return;
     readingQuestionsRef.current
@@ -319,6 +343,67 @@ function FullTestExam() {
     const saves = [...pendingSaves.current.values()];
     if (saves.length) await Promise.all(saves);
   }, []);
+
+  const playPracticeFeedbackSound = useCallback((feedback, unitKey) => {
+    if (!practiceSoundPendingUnitsRef.current.has(unitKey)) return;
+    practiceSoundPendingUnitsRef.current.delete(unitKey);
+
+    const allCorrect = feedback.questions?.length > 0
+      && feedback.questions.every((question) => question.answerStatus === "CORRECT");
+    practiceFeedbackAudioRef.current?.pause();
+    const audio = new Audio(
+      allCorrect
+        ? PRACTICE_FEEDBACK_SOUNDS.correct
+        : PRACTICE_FEEDBACK_SOUNDS.incorrect,
+    );
+    practiceFeedbackAudioRef.current = audio;
+    audio.play().catch(() => {
+      // Browsers can still reject delayed playback under strict autoplay
+      // policies. The visual correct/incorrect feedback remains available.
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!isPractice || !currentUnit || currentPracticeFeedback?.ready) return undefined;
+    const unitIsAnswered = currentUnit.questions.every(
+      (question) => answers[String(question.questionNumber)],
+    );
+    if (!unitIsAnswered) return undefined;
+
+    let active = true;
+    const loadFeedback = async () => {
+      try {
+        await waitForPendingSaves();
+        const questionNumber = currentUnit.questions[0]?.questionNumber;
+        if (!questionNumber) return;
+        const feedback = await apiFetch(
+          `/api/attempts/${attemptId}/practice-feedback?questionNumber=${questionNumber}`,
+        );
+        if (active && feedback.ready) {
+          setPracticeFeedbackByUnit((current) => ({
+            ...current,
+            [currentUnit.key]: feedback,
+          }));
+          playPracticeFeedbackSound(feedback, currentUnit.key);
+        }
+      } catch (requestError) {
+        if (active) setError(requestError.message);
+      }
+    };
+
+    loadFeedback();
+    return () => {
+      active = false;
+    };
+  }, [
+    answers,
+    attemptId,
+    currentPracticeFeedback?.ready,
+    currentUnit,
+    isPractice,
+    playPracticeFeedbackSound,
+    waitForPendingSaves,
+  ]);
 
   const closeNavigator = useCallback(() => setShowNavigator(false), []);
 
@@ -426,6 +511,9 @@ function FullTestExam() {
 
   const advanceListeningAfterAudio = async () => {
     if (!currentUnit || audioAdvanceInFlight.current) return;
+    if (isPractice
+        && isLastListeningUnit(currentUnit, listeningUnits)
+        && readingUnits.length === 0) return;
     audioAdvanceInFlight.current = true;
     setBusy(true);
     setError("");
@@ -553,6 +641,29 @@ function FullTestExam() {
     : null;
   const mediaImage = currentUnit.imageUrl;
   const mediaAudio = currentUnit.audioUrl;
+  const practiceFeedbackQuestions = new Map(
+    (currentPracticeFeedback?.questions || []).map((question) => [
+      question.questionNumber,
+      question,
+    ]),
+  );
+  const firstPracticeFeedbackQuestion = currentPracticeFeedback?.questions?.[0];
+  const practiceTranscript = currentUnit.partNumber === 2
+    ? firstPracticeFeedbackQuestion?.transcript
+    : [3, 4].includes(currentUnit.partNumber)
+      ? currentPracticeFeedback?.transcript
+      : null;
+  const formattedPracticeTranscript = currentUnit.partNumber === 2
+    ? formatPartTwoTranscript(practiceTranscript)
+    : formatListeningTranscript(practiceTranscript, currentUnit.partNumber);
+  const practiceTranscriptTranslation = currentUnit.partNumber === 2
+    ? formatTranslatedTranscript(
+      firstPracticeFeedbackQuestion?.questionTranslation,
+      firstPracticeFeedbackQuestion?.answerTranslation,
+    )
+    : [3, 4].includes(currentUnit.partNumber)
+      ? currentPracticeFeedback?.transcriptTranslation
+      : null;
   const readingPanelImageUrls = new Set([
     ...(currentUnit.imageUrls || []),
     ...(currentUnit.passages || []).map((passage) => passage.imageUrl),
@@ -643,11 +754,12 @@ function FullTestExam() {
                           advancing={busy}
                           paused={showSubmit}
                           ready={listeningImageReady}
+                          replayable={isPractice}
                           onEnded={advanceListeningAfterAudio}
                         />
                       ) : (
                         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-                          {t("missingAudio")}
+                          {isPractice ? t("practiceMissingAudio") : t("missingAudio")}
                         </div>
                       )}
 
@@ -692,6 +804,18 @@ function FullTestExam() {
                       )}
 
                       <PassagePanel compact passages={currentUnit.passages || []} />
+
+                      {currentPracticeFeedback?.ready && formattedPracticeTranscript && (
+                        <ReviewTogglePanel title={t("transcript")} icon="▤" tone="sky">
+                          <p className="whitespace-pre-wrap">{formattedPracticeTranscript}</p>
+                        </ReviewTogglePanel>
+                      )}
+
+                      {currentPracticeFeedback?.ready && practiceTranscriptTranslation && (
+                        <ReviewTogglePanel title={t("transcriptTranslation")} icon="文" tone="sky">
+                          <p className="whitespace-pre-wrap">{practiceTranscriptTranslation}</p>
+                        </ReviewTogglePanel>
+                      )}
                     </>
                   ) : (
                     <>
@@ -730,20 +854,40 @@ function FullTestExam() {
                     className="min-w-0 space-y-3 pb-2 xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:pr-1"
                   >
                     <div className="space-y-3 pb-4">
-                      {currentUnit.questions.map((question) => (
-                        <QuestionCard
-                          key={question.questionNumber}
-                          question={question}
-                          selectedAnswer={answers[String(question.questionNumber)] || null}
-                          onSelect={(answer) => {
-                            saveAnswer(question.questionNumber, answer).catch(() => undefined);
-                          }}
-                          disabled={isListening && busy}
-                          hideOptionContent={isListening && currentUnit.partNumber <= 2}
-                          isFocused={question.questionNumber === currentQuestion}
-                          compact
-                        />
-                      ))}
+                      {currentUnit.questions.map((question) => {
+                        const feedbackQuestion = practiceFeedbackQuestions.get(
+                          question.questionNumber,
+                        );
+                        const feedbackVisible = Boolean(feedbackQuestion);
+                        return (
+                          <QuestionCard
+                            key={question.questionNumber}
+                            question={feedbackQuestion || question}
+                            selectedAnswer={answers[String(question.questionNumber)] || null}
+                            onSelect={(answer) => {
+                              if (isPractice) {
+                                practiceSoundPendingUnitsRef.current.add(currentUnit.key);
+                              }
+                              saveAnswer(question.questionNumber, answer).catch(() => undefined);
+                            }}
+                            disabled={feedbackVisible || (isListening && busy)}
+                            hideOptionContent={isListening
+                              && currentUnit.partNumber <= 2
+                              && !feedbackVisible}
+                            isFocused={question.questionNumber === currentQuestion}
+                            compact
+                            review={feedbackVisible}
+                            hideReviewTranslations={[1, 2].includes(currentUnit.partNumber)}
+                            translatedTranscript={currentUnit.partNumber === 1 && feedbackVisible
+                              ? formatTranslatedTranscript(
+                                feedbackQuestion.questionTranslation,
+                                feedbackQuestion.answerTranslation,
+                              )
+                              : null}
+                            hideDetailedExplanation={[1, 2].includes(currentUnit.partNumber)}
+                          />
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -759,17 +903,27 @@ function FullTestExam() {
                     onSubmit={() => setShowSubmit(true)}
                     previousDisabled={isListening || previousReadingQuestion === null || busy}
                     nextDisabled={isListening
-                      ? busy || (Boolean(mediaAudio) && !audioAdvanceError)
+                      ? isPractice
+                        ? busy || (isLastListeningUnit(currentUnit, listeningUnits)
+                          && readingUnits.length === 0)
+                        : busy || (Boolean(mediaAudio) && !audioAdvanceError)
                       : nextReadingQuestion === null || busy}
                     submitDisabled={shouldDisableSubmit(attempt, busy)}
                     previousTitle={isListening
                       ? t("listeningLocked")
                       : undefined}
-                    nextTitle={isListening && mediaAudio && !audioAdvanceError
-                      ? t("nextGroupAuto")
+                    nextTitle={isListening && isPractice
+                      ? t("practiceNextGroup")
+                      : isListening && mediaAudio && !audioAdvanceError
+                        ? t("nextGroupAuto")
                       : undefined}
                     statusMessage={isListening
-                      ? audioAdvanceError
+                      ? isPractice
+                        ? isLastListeningUnit(currentUnit, listeningUnits)
+                          && readingUnits.length === 0
+                          ? t("practiceLastListening")
+                          : t("practiceListeningNavigation")
+                        : audioAdvanceError
                         ? t("nextGroupRetry")
                         : mediaAudio
                           ? t("nextListeningAuto")

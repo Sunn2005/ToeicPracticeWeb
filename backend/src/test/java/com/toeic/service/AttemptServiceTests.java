@@ -11,7 +11,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -42,6 +44,66 @@ class AttemptServiceTests {
         assertEquals("user-1", captor.getValue().getUserId());
         assertEquals("IN_PROGRESS", captor.getValue().getStatus());
         assertEquals("attempt-1", response.get("id"));
+        assertFalse((Boolean) response.get("resumed"));
+    }
+
+    @Test
+    void identifiesWhenAnExistingAttemptIsResumed() throws Exception {
+        AttemptDao attemptDao = mock(AttemptDao.class);
+        TestService testService = mock(TestService.class);
+        AttemptService attemptService = new AttemptService(attemptDao, testService);
+        Attempt existing = inProgressAttempt(
+                "existing-practice-full",
+                List.of(1, 2, 3, 4, 5, 6, 7),
+                "READING",
+                101
+        );
+        existing.setType("PRACTICE");
+        existing.setMode("FULL");
+
+        when(testService.getMetadata("test-1")).thenReturn(Map.of("testId", "test-1"));
+        when(attemptDao.findByUserId("user-1")).thenReturn(List.of(existing));
+        when(attemptDao.findAnswers("existing-practice-full")).thenReturn(Map.of());
+
+        Map<String, Object> response = attemptService.createOrResume(
+                "user-1", "test-1", "FULL", null,
+                List.of(1, 2, 3, 4, 5, 6, 7), null, "PRACTICE"
+        );
+
+        assertEquals("existing-practice-full", response.get("id"));
+        assertEquals("READING", response.get("currentSection"));
+        assertTrue((Boolean) response.get("resumed"));
+    }
+
+    @Test
+    void restartsAnExistingAttemptFromListeningWhenRequested() throws Exception {
+        AttemptDao attemptDao = mock(AttemptDao.class);
+        TestService testService = mock(TestService.class);
+        AttemptService attemptService = new AttemptService(attemptDao, testService);
+        Attempt existing = inProgressAttempt(
+                "old-practice-full",
+                List.of(1, 2, 3, 4, 5, 6, 7),
+                "READING",
+                101
+        );
+        existing.setType("PRACTICE");
+        existing.setMode("FULL");
+
+        when(testService.getMetadata("test-1")).thenReturn(Map.of("testId", "test-1"));
+        when(attemptDao.findByUserId("user-1")).thenReturn(List.of(existing));
+        when(attemptDao.nextId()).thenReturn("new-practice-full");
+        when(attemptDao.findAnswers("new-practice-full")).thenReturn(Map.of());
+
+        Map<String, Object> response = attemptService.createOrResume(
+                "user-1", "test-1", "FULL", null,
+                List.of(1, 2, 3, 4, 5, 6, 7), null, "PRACTICE", true
+        );
+
+        verify(attemptDao).delete("old-practice-full");
+        assertEquals("new-practice-full", response.get("id"));
+        assertEquals("LISTENING", response.get("currentSection"));
+        assertEquals(1, response.get("currentQuestionNumber"));
+        assertFalse((Boolean) response.get("resumed"));
     }
 
     @Test
@@ -182,6 +244,54 @@ class AttemptServiceTests {
         assertEquals("COMPLETED", attempt.getStatus());
         assertEquals("FINISHED", attempt.getCurrentSection());
         verify(attemptDao).save(attempt);
+    }
+
+    @Test
+    void allowsPracticeFullModeToSubmitDuringListening() throws Exception {
+        AttemptDao attemptDao = mock(AttemptDao.class);
+        TestService testService = mock(TestService.class);
+        AttemptService attemptService = new AttemptService(attemptDao, testService);
+        Attempt attempt = inProgressAttempt(
+                "practice-full-listening",
+                List.of(1, 2, 3, 4, 5, 6, 7),
+                "LISTENING",
+                1
+        );
+        attempt.setType("PRACTICE");
+        attempt.setMode("FULL");
+        attempt.setLastQuestionNumber(200);
+        attempt.setTotalQuestions(200);
+
+        Map<Integer, String> answerKey = new LinkedHashMap<>();
+        for (int number = 1; number <= 200; number++) {
+            answerKey.put(number, "A");
+        }
+        when(attemptDao.findById("practice-full-listening")).thenReturn(Optional.of(attempt));
+        when(attemptDao.findAnswers("practice-full-listening")).thenReturn(Map.of(1, "A"));
+        when(testService.getAnswerKey("test-1")).thenReturn(answerKey);
+
+        Map<String, Object> result = attemptService.submit("user-1", "practice-full-listening");
+
+        assertEquals(1, result.get("totalCorrect"));
+        assertEquals("PRACTICE", result.get("type"));
+        assertEquals("COMPLETED", attempt.getStatus());
+    }
+
+    @Test
+    void keepsPracticeListeningOpenAtLastUnitUntilUserSubmits() throws Exception {
+        AttemptDao attemptDao = mock(AttemptDao.class);
+        TestService testService = mock(TestService.class);
+        AttemptService attemptService = new AttemptService(attemptDao, testService);
+        Attempt attempt = inProgressAttempt("practice-part-1", List.of(1), "LISTENING", 6);
+        attempt.setType("PRACTICE");
+
+        when(attemptDao.findById("practice-part-1")).thenReturn(Optional.of(attempt));
+        when(attemptDao.findAnswers("practice-part-1")).thenReturn(Map.of(6, "A"));
+
+        Map<String, Object> response = attemptService.nextListening("user-1", "practice-part-1");
+
+        assertEquals("IN_PROGRESS", response.get("status"));
+        assertEquals(6, response.get("currentQuestionNumber"));
     }
 
     private Attempt inProgressAttempt(

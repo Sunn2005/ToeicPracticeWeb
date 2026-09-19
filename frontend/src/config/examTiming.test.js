@@ -76,4 +76,15 @@ test("full test locks submit during Listening and unlocks it in Reading", () => 
     shouldDisableSubmit({ mode: "FULL", currentSection: "READING" }, true),
     true,
   );
+  assert.equal(
+    shouldDisableSubmit({ type: "PRACTICE", mode: "FULL", currentSection: "LISTENING" }),
+    false,
+  );
+});
+
+test("practice Listening never auto-submits when replayable audio ends", () => {
+  const units = [{ key: "first" }, { key: "last" }];
+  const attempt = { type: "PRACTICE", mode: "LISTENING" };
+
+  assert.equal(shouldSubmitAfterListeningAudio(attempt, units[1], units), false);
 });

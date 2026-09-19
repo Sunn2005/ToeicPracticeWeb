@@ -1,6 +1,10 @@
 package com.toeic.service;
 
 import com.toeic.dao.TestDao;
+import com.toeic.model.Passage;
+import com.toeic.model.PassageGroup;
+import com.toeic.model.Question;
+import com.toeic.model.QuestionGroup;
 import com.toeic.model.Test;
 import com.toeic.model.TestPart;
 import org.springframework.http.HttpStatus;
@@ -92,6 +96,62 @@ public class TestService {
         return castMap(annotated);
     }
 
+    /**
+     * Returns answer feedback for exactly one practice unit. A unit is a
+     * standalone question or the complete group attached to one audio clip or
+     * passage. Secrets are released only after every question in that unit has
+     * an answer.
+     */
+    public Map<String, Object> getPracticeFeedback(
+            String testId,
+            int questionNumber,
+            Map<Integer, String> selectedAnswers
+    ) throws Exception {
+        requireMetadata(testId);
+        int partNumber = partNumberForQuestion(questionNumber);
+        TestPart part = testDao.findPart(testId, partNumber).orElseThrow(
+                () -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Không tìm thấy Part " + partNumber
+                )
+        );
+        PracticeUnit practiceUnit = findPracticeUnit(part, questionNumber);
+        if (practiceUnit == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy nhóm câu hỏi");
+        }
+
+        List<Integer> questionNumbers = practiceUnit.questions().stream()
+                .map(Question::getQuestionNumber)
+                .toList();
+        List<Integer> pendingQuestionNumbers = questionNumbers.stream()
+                .filter(number -> selectedAnswers.get(number) == null)
+                .toList();
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("ready", pendingQuestionNumbers.isEmpty());
+        response.put("partNumber", practiceUnit.partNumber());
+        response.put("questionNumbers", questionNumbers);
+        response.put("pendingQuestionNumbers", pendingQuestionNumbers);
+        if (!pendingQuestionNumbers.isEmpty()) {
+            return response;
+        }
+
+        List<Map<String, Object>> questions = practiceUnit.questions().stream()
+                .map(question -> objectMapper.convertValue(
+                        question,
+                        new TypeReference<Map<String, Object>>() {
+                        }
+                ))
+                .toList();
+        Map<String, Object> feedback = new LinkedHashMap<>();
+        feedback.put("questions", questions);
+        ReviewFieldNormalizer.normalize(feedback);
+        response.put("questions", addReviewAnswers(feedback, selectedAnswers).get("questions"));
+        response.put("transcript", practiceUnit.transcript());
+        response.put("transcriptTranslation", practiceUnit.transcriptTranslation());
+        return response;
+    }
+
     private Test loadTest(String testId) throws Exception {
         Test test = requireMetadata(testId);
         List<TestPart> parts = new ArrayList<>();
@@ -109,6 +169,99 @@ public class TestService {
 
         test.setParts(parts);
         return test;
+    }
+
+    private PracticeUnit findPracticeUnit(TestPart part, int questionNumber) {
+        if (part.getQuestions() != null) {
+            for (Question question : part.getQuestions()) {
+                if (questionNumber == question.getQuestionNumber()) {
+                    return new PracticeUnit(
+                            part.getPartNumber(),
+                            List.of(question),
+                            question.getTranscript(),
+                            null
+                    );
+                }
+            }
+        }
+
+        if (part.getGroups() != null) {
+            for (QuestionGroup group : part.getGroups()) {
+                if (containsQuestion(group.getQuestions(), questionNumber)) {
+                    return new PracticeUnit(
+                            part.getPartNumber(),
+                            group.getQuestions(),
+                            group.getTranscript(),
+                            group.getTranscriptTranslation()
+                    );
+                }
+            }
+        }
+
+        if (part.getPassages() != null) {
+            for (Passage passage : part.getPassages()) {
+                if (containsQuestion(passage.getQuestions(), questionNumber)) {
+                    return new PracticeUnit(
+                            part.getPartNumber(),
+                            passage.getQuestions(),
+                            null,
+                            null
+                    );
+                }
+            }
+        }
+
+        if (part.getPassageGroups() != null) {
+            for (PassageGroup group : part.getPassageGroups()) {
+                List<Question> questions = passageGroupQuestions(group);
+                if (containsQuestion(questions, questionNumber)) {
+                    return new PracticeUnit(
+                            part.getPartNumber(),
+                            questions,
+                            null,
+                            null
+                    );
+                }
+            }
+        }
+        return null;
+    }
+
+    private int partNumberForQuestion(int questionNumber) {
+        if (questionNumber <= 6) return 1;
+        if (questionNumber <= 31) return 2;
+        if (questionNumber <= 70) return 3;
+        if (questionNumber <= 100) return 4;
+        if (questionNumber <= 130) return 5;
+        if (questionNumber <= 146) return 6;
+        return 7;
+    }
+
+    private boolean containsQuestion(List<Question> questions, int questionNumber) {
+        return questions != null && questions.stream()
+                .anyMatch(question -> question.getQuestionNumber() == questionNumber);
+    }
+
+    private List<Question> passageGroupQuestions(PassageGroup group) {
+        Map<Integer, Question> questions = new LinkedHashMap<>();
+        addQuestionsByNumber(questions, group.getQuestions());
+        if (group.getPassages() != null) {
+            for (Passage passage : group.getPassages()) {
+                addQuestionsByNumber(questions, passage.getQuestions());
+            }
+        }
+        return new ArrayList<>(questions.values());
+    }
+
+    private void addQuestionsByNumber(Map<Integer, Question> target, List<Question> source) {
+        if (source == null) {
+            return;
+        }
+        for (Question question : source) {
+            if (question.getQuestionNumber() != null) {
+                target.putIfAbsent(question.getQuestionNumber(), question);
+            }
+        }
     }
 
     private Test requireMetadata(String testId) throws Exception {
@@ -234,5 +387,13 @@ public class TestService {
     @SuppressWarnings("unchecked")
     private Map<String, Object> castMap(Object value) {
         return (Map<String, Object>) value;
+    }
+
+    private record PracticeUnit(
+            Integer partNumber,
+            List<Question> questions,
+            String transcript,
+            String transcriptTranslation
+    ) {
     }
 }

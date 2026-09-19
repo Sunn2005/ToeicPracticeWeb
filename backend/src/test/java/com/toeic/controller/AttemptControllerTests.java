@@ -48,7 +48,7 @@ class AttemptControllerTests {
                 "status", "IN_PROGRESS"
         );
         when(attemptService.createOrResume(
-                "firebase-uid-123", "test-1", null, null, null, null, null
+                "firebase-uid-123", "test-1", null, null, null, null, null, null
         ))
                 .thenReturn(expected);
 
@@ -59,7 +59,7 @@ class AttemptControllerTests {
 
         assertEquals(expected, result);
         verify(attemptService).createOrResume(
-                "firebase-uid-123", "test-1", null, null, null, null, null
+                "firebase-uid-123", "test-1", null, null, null, null, null, null
         );
     }
 
@@ -76,7 +76,7 @@ class AttemptControllerTests {
                 "selectedPart", 6
         );
         when(attemptService.createOrResume(
-                "firebase-uid-123", "test-1", "PART", 6, null, null, null
+                "firebase-uid-123", "test-1", "PART", 6, null, null, null, null
         ))
                 .thenReturn(expected);
 
@@ -87,7 +87,7 @@ class AttemptControllerTests {
 
         assertEquals(expected, result);
         verify(attemptService).createOrResume(
-                "firebase-uid-123", "test-1", "PART", 6, null, null, null
+                "firebase-uid-123", "test-1", "PART", 6, null, null, null, null
         );
     }
 
@@ -98,6 +98,7 @@ class AttemptControllerTests {
         request.setMode("PART");
         request.setParts(List.of(5, 6));
         request.setDurationMinutes(25);
+        request.setRestartExisting(true);
         Map<String, Object> expected = Map.of(
                 "id", "attempt-parts-5-6",
                 "selectedParts", List.of(5, 6)
@@ -109,7 +110,8 @@ class AttemptControllerTests {
                 null,
                 List.of(5, 6),
                 25,
-                null
+                null,
+                true
         )).thenReturn(expected);
 
         Map<String, Object> result = controller.createAttempt(request, principal);
@@ -122,7 +124,8 @@ class AttemptControllerTests {
                 null,
                 List.of(5, 6),
                 25,
-                null
+                null,
+                true
         );
     }
 
