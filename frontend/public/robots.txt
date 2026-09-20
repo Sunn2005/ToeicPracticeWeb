@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# These routes contain private, user-specific, or in-progress test data.
+Disallow: /dashboard
+Disallow: /practice/
+Disallow: /full-test/
+Disallow: /admin/
+Disallow: /employee/
+
+Sitemap: https://capytoeic.id.vn/sitemap.xml
