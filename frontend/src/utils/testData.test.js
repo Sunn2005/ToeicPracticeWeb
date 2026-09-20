@@ -2,11 +2,41 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  buildNavigatorGroups,
   buildListeningUnits,
   buildReadingUnits,
   formatClock,
   formatQuestionProgress,
 } from "./testData.js";
+
+test("builds navigator groups from both Listening and Reading units", () => {
+  const groups = buildNavigatorGroups([
+    {
+      partNumber: 1,
+      partName: "Photographs",
+      questions: [{ questionNumber: 2 }, { questionNumber: 1 }],
+    },
+    {
+      partNumber: 5,
+      partName: "Incomplete Sentences",
+      questions: [{ questionNumber: 101 }],
+    },
+    {
+      partNumber: 7,
+      partName: "Reading Comprehension",
+      questions: [{ questionNumber: 148 }, { questionNumber: 147 }],
+    },
+  ]);
+
+  assert.deepEqual(
+    groups.map(({ partNumber, questions }) => ({ partNumber, questions })),
+    [
+      { partNumber: 1, questions: [1, 2] },
+      { partNumber: 5, questions: [101] },
+      { partNumber: 7, questions: [147, 148] },
+    ],
+  );
+});
 
 test("formats the countdown as hours, minutes, and seconds", () => {
   assert.equal(formatClock(6_004), "01:40:04");

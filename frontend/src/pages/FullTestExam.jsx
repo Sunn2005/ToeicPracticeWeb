@@ -18,6 +18,7 @@ import {
   shouldSubmitAfterListeningAudio,
 } from "../config/examTiming";
 import {
+  buildNavigatorGroups,
   buildListeningUnits,
   buildReadingUnits,
   findUnit,
@@ -116,6 +117,7 @@ function FullTestExam() {
   const readingQuestionsRef = useRef(null);
   const nextMediaPreloadRef = useRef(null);
   const practiceFeedbackAudioRef = useRef(null);
+  const practiceFeedbackAudioContextRef = useRef(null);
   const practiceSoundPendingUnitsRef = useRef(new Set());
   const [loadedListeningImageUrl, setLoadedListeningImageUrl] = useState(null);
   const [failedListeningImageUrl, setFailedListeningImageUrl] = useState(null);
@@ -193,19 +195,8 @@ function FullTestExam() {
     && failedListeningImageUrl === currentListeningImageUrl,
   );
   const navigatorGroups = useMemo(() => {
-    const grouped = new Map();
-    currentUnits.forEach((unit) => {
-      const questions = grouped.get(unit.partNumber) || [];
-      unit.questions.forEach((question) => {
-        if (!questions.includes(question.questionNumber)) questions.push(question.questionNumber);
-      });
-      grouped.set(unit.partNumber, questions);
-    });
-    return [...grouped.entries()].map(([partNumber, questions]) => ({
-      partNumber,
-      questions: questions.sort((left, right) => left - right),
-    }));
-  }, [currentUnits]);
+    return buildNavigatorGroups([...listeningUnits, ...readingUnits]);
+  }, [listeningUnits, readingUnits]);
   const scopeQuestionNumbers = useMemo(() => [...new Set(
     [...listeningUnits, ...readingUnits]
       .flatMap((unit) => unit.questions.map((question) => question.questionNumber)),
@@ -272,6 +263,16 @@ function FullTestExam() {
   useEffect(() => () => {
     practiceFeedbackAudioRef.current?.pause();
     practiceFeedbackAudioRef.current = null;
+    const player = practiceFeedbackAudioContextRef.current;
+    practiceFeedbackAudioContextRef.current = null;
+    if (player) {
+      try {
+        player.source?.stop();
+      } catch {
+        // The source may already have finished naturally.
+      }
+      player.context.close().catch(() => undefined);
+    }
   }, []);
 
   useEffect(() => {
@@ -344,24 +345,65 @@ function FullTestExam() {
     if (saves.length) await Promise.all(saves);
   }, []);
 
-  const playPracticeFeedbackSound = useCallback((feedback, unitKey) => {
+  const unlockPracticeFeedbackAudio = useCallback(() => {
+    let player = practiceFeedbackAudioContextRef.current;
+    if (!player) {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return null;
+
+      const context = new AudioContextClass();
+      player = {
+        context,
+        buffers: {},
+        source: null,
+        loadPromise: null,
+      };
+      player.loadPromise = Promise.all(
+        Object.entries(PRACTICE_FEEDBACK_SOUNDS).map(async ([name, url]) => {
+          const response = await fetch(url);
+          if (!response.ok) throw new Error(`Unable to load practice sound: ${url}`);
+          player.buffers[name] = await context.decodeAudioData(await response.arrayBuffer());
+        }),
+      ).then(() => true).catch(() => false);
+      practiceFeedbackAudioContextRef.current = player;
+    }
+
+    if (player.context.state === "suspended") {
+      player.context.resume().catch(() => undefined);
+    }
+    return player;
+  }, []);
+
+  const playPracticeFeedbackSound = useCallback(async (feedback, unitKey) => {
     if (!practiceSoundPendingUnitsRef.current.has(unitKey)) return;
     practiceSoundPendingUnitsRef.current.delete(unitKey);
 
     const allCorrect = feedback.questions?.length > 0
       && feedback.questions.every((question) => question.answerStatus === "CORRECT");
+    const soundName = allCorrect ? "correct" : "incorrect";
+    const player = unlockPracticeFeedbackAudio();
+
+    if (player && await player.loadPromise && player.context.state === "running") {
+      try {
+        player.source?.stop();
+      } catch {
+        // The source may already have finished naturally.
+      }
+      const source = player.context.createBufferSource();
+      source.buffer = player.buffers[soundName];
+      source.connect(player.context.destination);
+      source.start();
+      player.source = source;
+      return;
+    }
+
     practiceFeedbackAudioRef.current?.pause();
-    const audio = new Audio(
-      allCorrect
-        ? PRACTICE_FEEDBACK_SOUNDS.correct
-        : PRACTICE_FEEDBACK_SOUNDS.incorrect,
-    );
+    const audio = new Audio(PRACTICE_FEEDBACK_SOUNDS[soundName]);
     practiceFeedbackAudioRef.current = audio;
     audio.play().catch(() => {
-      // Browsers can still reject delayed playback under strict autoplay
-      // policies. The visual correct/incorrect feedback remains available.
+      // Keep visual feedback available if this older browser rejects audio.
     });
-  }, []);
+  }, [unlockPracticeFeedbackAudio]);
 
   useEffect(() => {
     if (!isPractice || !currentUnit || currentPracticeFeedback?.ready) return undefined;
@@ -866,6 +908,7 @@ function FullTestExam() {
                             selectedAnswer={answers[String(question.questionNumber)] || null}
                             onSelect={(answer) => {
                               if (isPractice) {
+                                unlockPracticeFeedbackAudio();
                                 practiceSoundPendingUnitsRef.current.add(currentUnit.key);
                               }
                               saveAnswer(question.questionNumber, answer).catch(() => undefined);
@@ -953,6 +996,7 @@ function FullTestExam() {
         currentQuestion={currentQuestion}
         answers={answers}
         navigationLocked={isListening}
+        isQuestionDisabled={(number) => number < 101}
         onSelect={isListening ? null : moveReading}
       />
     </div>

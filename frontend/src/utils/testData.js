@@ -72,6 +72,32 @@ export function buildAllUnits(test) {
   return [...buildListeningUnits(test), ...buildReadingUnits(test)];
 }
 
+export function buildNavigatorGroups(units) {
+  const grouped = new Map();
+
+  units.forEach((unit) => {
+    const group = grouped.get(unit.partNumber) || {
+      partNumber: unit.partNumber,
+      partName: unit.partName,
+      questions: [],
+    };
+
+    unit.questions.forEach((question) => {
+      if (!group.questions.includes(question.questionNumber)) {
+        group.questions.push(question.questionNumber);
+      }
+    });
+    grouped.set(unit.partNumber, group);
+  });
+
+  return [...grouped.values()]
+    .map((group) => ({
+      ...group,
+      questions: group.questions.sort((left, right) => left - right),
+    }))
+    .sort((left, right) => left.partNumber - right.partNumber);
+}
+
 export function findUnit(units, questionNumber) {
   return units.find(
     (unit) => questionNumber >= unit.start && questionNumber <= unit.end,

@@ -17,6 +17,7 @@ function QuestionNavigatorDrawer({
   currentQuestion,
   answers,
   onSelect,
+  isQuestionDisabled,
   navigationLocked = false,
   questionStatuses,
   reviewMode = false,
@@ -102,6 +103,9 @@ function QuestionNavigatorDrawer({
                   {group.questions.map((number) => {
                     const isCurrent = number === currentQuestion;
                     const isAnswered = Boolean(answers[String(number)]);
+                    const selectionDisabled = navigationLocked
+                      || !onSelect
+                      || Boolean(isQuestionDisabled?.(number));
                     const reviewStatus = questionStatuses?.[String(number)];
                     const statusClass = reviewMode
                       ? reviewStatus === "CORRECT"
@@ -116,7 +120,7 @@ function QuestionNavigatorDrawer({
                       <button
                         key={number}
                         type="button"
-                        disabled={navigationLocked || !onSelect}
+                        disabled={selectionDisabled}
                         onClick={() => {
                           onSelect?.(number);
                           onClose();
@@ -127,7 +131,7 @@ function QuestionNavigatorDrawer({
                           isCurrent
                             ? "border-sky-500 bg-sky-500 text-white ring-2 ring-sky-200"
                             : statusClass
-                        } ${navigationLocked ? "cursor-default" : "hover:border-sky-400 hover:bg-sky-50"}`}
+                        } ${selectionDisabled ? "cursor-default" : "hover:border-sky-400 hover:bg-sky-50"}`}
                       >
                         {number}
                       </button>
