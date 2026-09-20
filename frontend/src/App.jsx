@@ -19,6 +19,31 @@ import { LanguageProvider } from "./i18n/LanguageContext";
 import LoadingScreen from "./components/LoadingScreen";
 import FloatingPet from "./components/FloatingPet";
 
+const ROLE_STORAGE_PREFIX = "capytoeic:user-role:";
+const KNOWN_ROLES = new Set(["USER", "EMPLOYEE", "ADMIN"]);
+
+function readCachedRole(uid) {
+  if (!uid) return null;
+
+  try {
+    const role = String(window.localStorage.getItem(`${ROLE_STORAGE_PREFIX}${uid}`) || "")
+      .toUpperCase();
+    return KNOWN_ROLES.has(role) ? role : null;
+  } catch {
+    return null;
+  }
+}
+
+function cacheRole(uid, role) {
+  if (!uid || !KNOWN_ROLES.has(role)) return;
+
+  try {
+    window.localStorage.setItem(`${ROLE_STORAGE_PREFIX}${uid}`, role);
+  } catch {
+    // Storage can be unavailable in private browsing. The in-memory role still works.
+  }
+}
+
 function AppRoutes() {
   const [user, setUser] = useState(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
@@ -26,6 +51,14 @@ function AppRoutes() {
 
   useEffect(() => {
     return onAuthStateChanged(auth, (currentUser) => {
+      setRoleInfo(currentUser
+        ? {
+            uid: currentUser.uid,
+            // The backend creates every new account as USER. Use that harmless
+            // display fallback so the pet is not blocked by a cold API server.
+            role: readCachedRole(currentUser.uid) || "USER",
+          }
+        : { uid: null, role: null });
       setUser(currentUser);
       setCheckingAuth(false);
     });
@@ -44,15 +77,16 @@ function AppRoutes() {
       try {
         const profile = await apiFetch("/api/me");
         if (active) {
+          const role = String(profile?.role || "").toUpperCase() || "UNKNOWN";
+          cacheRole(user.uid, role);
           setRoleInfo({
             uid: user.uid,
-            role: String(profile?.role || "").toUpperCase() || "UNKNOWN",
+            role,
           });
         }
       } catch {
-        // Keep the pet hidden when the role cannot be verified. This prevents
-        // management accounts from briefly seeing it during a failed request.
-        if (active) setRoleInfo({ uid: user.uid, role: "UNKNOWN" });
+        // Role only controls non-sensitive UI. Keep the cached/default value if
+        // Render is waking up or offline; protected APIs still enforce the role.
       }
     };
 
