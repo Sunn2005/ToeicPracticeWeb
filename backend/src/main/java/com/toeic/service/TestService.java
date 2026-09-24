@@ -18,13 +18,19 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Comparator;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import com.toeic.model.enums.TestStatus;
 
 @Service
 public class TestService {
 
+    private static final List<Integer> ALL_PARTS = List.of(1, 2, 3, 4, 5, 6, 7);
+
     private final TestDao testDao;
     private final ObjectMapper objectMapper;
+    private final Map<String, Map<String, Object>> responseCache = new ConcurrentHashMap<>();
 
     public TestService(TestDao testDao, ObjectMapper objectMapper) {
         this.testDao = testDao;
@@ -57,7 +63,11 @@ public class TestService {
     }
 
     public Map<String, Object> getExamTest(String testId) throws Exception {
-        return toResponse(loadTest(testId), true);
+        return getExamTest(testId, null);
+    }
+
+    public Map<String, Object> getExamTest(String testId, List<Integer> partNumbers) throws Exception {
+        return cachedResponse("exam", loadTest(testId, partNumbers), true);
     }
 
     public Map<String, Object> getExamPart(String testId, int partNumber) throws Exception {
@@ -81,7 +91,11 @@ public class TestService {
     }
 
     public Map<String, Object> getReviewTest(String testId) throws Exception {
-        return toResponse(loadTest(testId), false);
+        return getReviewTest(testId, null);
+    }
+
+    public Map<String, Object> getReviewTest(String testId, List<Integer> partNumbers) throws Exception {
+        return cachedResponse("review", loadTest(testId, partNumbers), false);
     }
 
     public Map<Integer, String> getAnswerKey(String testId) throws Exception {
@@ -153,22 +167,49 @@ public class TestService {
     }
 
     private Test loadTest(String testId) throws Exception {
+        return loadTest(testId, null);
+    }
+
+    private Test loadTest(String testId, List<Integer> partNumbers) throws Exception {
         Test test = requireMetadata(testId);
-        List<TestPart> parts = new ArrayList<>();
-
-        for (int partNumber = 1; partNumber <= 7; partNumber++) {
-            int currentPart = partNumber;
-            TestPart part = testDao.findPart(testId, partNumber).orElseThrow(
-                    () -> new ResponseStatusException(
-                            HttpStatus.NOT_FOUND,
-                            "Đề thi thiếu dữ liệu Part " + currentPart
-                    )
-            );
-            parts.add(part);
+        List<Integer> requestedParts = normalizePartNumbers(partNumbers);
+        List<TestPart> parts = testDao.findParts(testId, requestedParts);
+        Set<Integer> found = parts.stream()
+                .map(TestPart::getPartNumber)
+                .collect(Collectors.toSet());
+        for (int partNumber : requestedParts) {
+            if (!found.contains(partNumber)) {
+                throw new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Đề thi thiếu dữ liệu Part " + partNumber
+                );
+            }
         }
-
         test.setParts(parts);
         return test;
+    }
+
+    private List<Integer> normalizePartNumbers(List<Integer> partNumbers) {
+        if (partNumbers == null || partNumbers.isEmpty()) {
+            return ALL_PARTS;
+        }
+        return partNumbers.stream().distinct().sorted().toList();
+    }
+
+    private Map<String, Object> cachedResponse(String kind, Test test, boolean examSafe) {
+        String partsKey = test.getParts() == null
+                ? ""
+                : test.getParts().stream()
+                .map(part -> String.valueOf(part.getPartNumber()))
+                .collect(Collectors.joining(","));
+        String key = kind + ":" + test.getTestId() + ":" + test.getUpdatedAt() + ":" + partsKey;
+        Map<String, Object> cached = responseCache.get(key);
+        if (cached != null) {
+            return cached;
+        }
+        Map<String, Object> built = toResponse(test, examSafe);
+        responseCache.put(key, built);
+        return built;
     }
 
     private PracticeUnit findPracticeUnit(TestPart part, int questionNumber) {

@@ -18,4 +18,4 @@ COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 8080
 
-CMD ["java", "-jar", "app.jar"]
+CMD ["java", "-XX:MaxRAMPercentage=75.0", "-XX:+UseSerialGC", "-XX:TieredStopAtLevel=1", "-jar", "app.jar"]

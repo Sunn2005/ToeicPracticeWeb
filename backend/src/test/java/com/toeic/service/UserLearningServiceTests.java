@@ -61,7 +61,7 @@ class UserLearningServiceTests {
         attempt.setType("PRACTICE");
         attempt.setStatus("COMPLETED");
         attempt.setStartedAt(100L);
-        when(attemptDao.findByUserId("user-1")).thenReturn(List.of(attempt));
+        when(attemptDao.findHistoryByUserId("user-1")).thenReturn(List.of(attempt));
 
         List<Map<String, Object>> history = service.getAttempts("user-1");
 
@@ -83,7 +83,7 @@ class UserLearningServiceTests {
         unfinished.setStatus("IN_PROGRESS");
         unfinished.setStartedAt(200L);
 
-        when(attemptDao.findByUserId("user-1")).thenReturn(List.of(unfinished, submitted));
+        when(attemptDao.findHistoryByUserId("user-1")).thenReturn(List.of(unfinished, submitted));
 
         List<Map<String, Object>> history = service.getAttempts("user-1");
 

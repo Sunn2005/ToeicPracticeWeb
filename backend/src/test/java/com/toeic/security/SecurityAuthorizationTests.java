@@ -77,6 +77,13 @@ class SecurityAuthorizationTests {
     }
 
     @Test
+    void guestCanPingHealthWithoutTouchingFirestore() throws Exception {
+        mockMvc.perform(get("/api/health"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("ok"));
+    }
+
+    @Test
     void guestCannotUseAuthenticatedApis() throws Exception {
         mockMvc.perform(get("/api/users/me/statistics"))
                 .andExpect(status().isUnauthorized())
@@ -186,6 +193,11 @@ class SecurityAuthorizationTests {
         @GetMapping("/api/tests")
         Map<String, Object> tests() {
             return Map.of("ok", true);
+        }
+
+        @GetMapping("/api/health")
+        Map<String, String> health() {
+            return Map.of("status", "ok");
         }
 
         @GetMapping("/api/users/me/statistics")

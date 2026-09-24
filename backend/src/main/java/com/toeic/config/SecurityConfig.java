@@ -49,6 +49,9 @@ public class SecurityConfig {
                         .requestMatchers("/error")
                         .permitAll()
 
+                        .requestMatchers(HttpMethod.GET, "/api/health")
+                        .permitAll()
+
                         // Chỉ các API đọc catalog đề thi là public.
                         .requestMatchers(
                                 HttpMethod.GET,

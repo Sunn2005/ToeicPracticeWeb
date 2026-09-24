@@ -14,6 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import java.util.List;
@@ -37,6 +39,12 @@ class TestServiceTests {
         testId = sourceTest.getTestId();
 
         when(testDao.findMetadataById(sourceTest.getTestId())).thenReturn(Optional.of(sourceTest));
+        when(testDao.findParts(eq(sourceTest.getTestId()), any())).thenAnswer(invocation -> {
+            List<Integer> requested = invocation.getArgument(1);
+            return sourceTest.getParts().stream()
+                    .filter(part -> requested.contains(part.getPartNumber()))
+                    .toList();
+        });
         for (TestPart part : sourceTest.getParts()) {
             when(testDao.findPart(sourceTest.getTestId(), part.getPartNumber()))
                     .thenReturn(Optional.of(part));
@@ -51,6 +59,15 @@ class TestServiceTests {
         assertEquals(200, answerKey.size());
         assertEquals("B", answerKey.get(1));
         assertTrue(answerKey.containsKey(200));
+    }
+
+    @Test
+    void loadsOnlyTheRequestedPartsForAPracticeExam() throws Exception {
+        Map<String, Object> exam = testService.getExamTest(testId, List.of(5));
+        List<?> parts = (List<?>) exam.get("parts");
+
+        assertEquals(1, parts.size());
+        assertEquals(5, ((Map<?, ?>) parts.getFirst()).get("partNumber"));
     }
 
     @Test

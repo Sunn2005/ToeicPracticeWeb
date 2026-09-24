@@ -80,13 +80,10 @@ function FullTestIntro() {
     setStarting(true);
     setError("");
     try {
-      // forceRefresh=true bảo đảm đây là Firebase ID token mới, không phải
-      // Google OAuth access token.
       const attempt = await apiFetch(`/api/tests/${testId}/attempts`, {
         method: "POST",
-        forceRefresh: true,
       });
-      navigate(`/full-test/${attempt.id}/exam`);
+      navigate(`/full-test/${attempt.id}/exam`, { state: { attempt } });
     } catch (requestError) {
       setError(requestError.message);
       setStarting(false);

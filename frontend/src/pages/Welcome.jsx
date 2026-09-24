@@ -9,7 +9,12 @@ import { TOEIC_TESTS } from "../data/testCatalog";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import { useLanguage } from "../i18n/LanguageContext";
 import AttemptHistoryDrawer from "../components/AttemptHistoryDrawer";
-import { deleteAttempt, getAttemptHistory } from "../api/userLearning";
+import {
+  deleteAttempt,
+  getAttemptHistory,
+  readAttemptHistoryCache,
+  writeAttemptHistoryCache,
+} from "../api/userLearning";
 import { getHistoryStats, getSubmittedAttempts } from "../utils/attemptHistory";
 import BrandLogo from "../components/BrandLogo";
 
@@ -59,24 +64,24 @@ function Welcome({ user }) {
 
   useEffect(() => {
     let active = true;
-    Promise.all(
-      TOEIC_TESTS.map(async (test) => {
-        if (!test.available) return test;
-        try {
-          const metadata = await publicApiFetch(`/api/tests/${test.id}`);
+    publicApiFetch("/api/tests")
+      .then((catalog) => {
+        if (!active || !Array.isArray(catalog)) return;
+        const byId = new Map(catalog.map((item) => [item.testId, item]));
+        setTests(TOEIC_TESTS.map((test) => {
+          const metadata = byId.get(test.id);
+          if (!test.available || !metadata) return test;
           return {
             ...test,
             title: metadata.title || test.title,
             totalQuestions: metadata.totalQuestions || test.totalQuestions,
             duration: metadata.totalMinutes || test.duration,
           };
-        } catch {
-          return test;
-        }
-      }),
-    ).then((catalog) => {
-      if (active) setTests(catalog);
-    });
+        }));
+      })
+      .catch(() => {
+        // The local catalog is already on screen. Fresh metadata is optional.
+      });
 
     return () => {
       active = false;
@@ -85,13 +90,23 @@ function Welcome({ user }) {
 
   useEffect(() => {
     let active = true;
+    const cached = readAttemptHistoryCache(user?.uid);
+    if (cached) {
+      setAttempts(getSubmittedAttempts(cached));
+      setHistoryLoading(false);
+    }
+
     getAttemptHistory()
       .then((history) => {
-        if (active) setAttempts(getSubmittedAttempts(history));
+        if (!active) return;
+        writeAttemptHistoryCache(user?.uid, history);
+        setAttempts(getSubmittedAttempts(history));
+        setHistoryError("");
       })
       .catch((requestError) => {
-        if (active)
+        if (active && !cached) {
           setHistoryError(requestError.message || t("historyLoadError"));
+        }
       })
       .finally(() => {
         if (active) setHistoryLoading(false);
@@ -99,7 +114,7 @@ function Welcome({ user }) {
     return () => {
       active = false;
     };
-  }, [t]);
+  }, [t, user?.uid]);
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
@@ -131,7 +146,6 @@ function Welcome({ user }) {
     };
     const attempt = await apiFetch(`/api/tests/${selectedTest.id}/attempts`, {
       method: "POST",
-      forceRefresh: true,
       body: JSON.stringify(requestBody),
     });
 
@@ -141,12 +155,14 @@ function Welcome({ user }) {
       return;
     }
 
-    navigate(`/full-test/${attempt.id}/exam`);
+    navigate(`/full-test/${attempt.id}/exam`, { state: { attempt } });
   };
 
   const continueExistingAttempt = () => {
     if (!resumePrompt) return;
-    navigate(`/full-test/${resumePrompt.attempt.id}/exam`);
+    navigate(`/full-test/${resumePrompt.attempt.id}/exam`, {
+      state: { attempt: resumePrompt.attempt },
+    });
   };
 
   const restartExistingAttempt = async () => {
@@ -156,13 +172,12 @@ function Welcome({ user }) {
     try {
       const attempt = await apiFetch(`/api/tests/${selectedTest.id}/attempts`, {
         method: "POST",
-        forceRefresh: true,
         body: JSON.stringify({
           ...resumePrompt.requestBody,
           restartExisting: true,
         }),
       });
-      navigate(`/full-test/${attempt.id}/exam`);
+      navigate(`/full-test/${attempt.id}/exam`, { state: { attempt } });
     } catch (requestError) {
       setResumePromptError(requestError.message || t("unableStartTest"));
       setRestartingAttempt(false);
@@ -176,9 +191,11 @@ function Welcome({ user }) {
 
   const handleDeleteAttempt = async (attemptId) => {
     await deleteAttempt(attemptId);
-    setAttempts((current) =>
-      current.filter((attempt) => attempt.id !== attemptId),
-    );
+    setAttempts((current) => {
+      const next = current.filter((attempt) => attempt.id !== attemptId);
+      writeAttemptHistoryCache(user?.uid, next);
+      return next;
+    });
   };
 
   const openAttemptReview = async (attempt, filter = "") => {

@@ -75,6 +75,40 @@ public class FirestoreAttemptDao implements AttemptDao {
     }
 
     @Override
+    public List<Attempt> findHistoryByUserId(String userId) throws Exception {
+        List<Attempt> attempts = new ArrayList<>();
+        for (QueryDocumentSnapshot snapshot : firestore.collection("attempts")
+                .whereEqualTo("userId", userId)
+                .select(
+                        "id",
+                        "userId",
+                        "testId",
+                        "type",
+                        "mode",
+                        "selectedPart",
+                        "selectedParts",
+                        "status",
+                        "currentSection",
+                        "currentQuestionNumber",
+                        "totalQuestions",
+                        "score",
+                        "startedAt",
+                        "updatedAt",
+                        "submittedAt",
+                        "result"
+                )
+                .get()
+                .get()
+                .getDocuments()) {
+            Map<String, Object> data = snapshot.getData();
+            if (data != null) {
+                attempts.add(attemptFrom(snapshot.getId(), data));
+            }
+        }
+        return attempts;
+    }
+
+    @Override
     public void delete(String attemptId) throws Exception {
         var attemptReference = firestore.collection("attempts").document(attemptId);
         WriteBatch batch = firestore.batch();

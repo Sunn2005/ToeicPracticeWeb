@@ -19,6 +19,8 @@ public interface AttemptDao {
 
     List<Attempt> findByUserId(String userId) throws Exception;
 
+    List<Attempt> findHistoryByUserId(String userId) throws Exception;
+
     void delete(String attemptId) throws Exception;
 
     void saveAnswer(String attemptId, AttemptAnswer answer) throws Exception;

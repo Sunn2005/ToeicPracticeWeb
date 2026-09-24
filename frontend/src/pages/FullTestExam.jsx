@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { ApiError, apiFetch } from "../api/client";
 import ExamHeader from "../components/ExamHeader";
 import ExamNavigationBar from "../components/ExamNavigationBar";
@@ -24,6 +24,7 @@ import {
   findUnit,
   formatQuestionProgress,
 } from "../utils/testData";
+import { recallExamTest, rememberExamTest } from "../utils/examTestCache";
 import {
   formatListeningTranscript,
   formatPartTwoTranscript,
@@ -95,6 +96,8 @@ function FullTestExam() {
   const { t } = useLanguage();
   const { attemptId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const seededAttempt = useRef(location.state?.attempt);
   const [payload, setPayload] = useState(null);
   const [answers, setAnswers] = useState({});
   const [remainingSeconds, setRemainingSeconds] = useState(null);
@@ -126,16 +129,29 @@ function FullTestExam() {
 
   useEffect(() => {
     let active = true;
+    const applyExam = (data) => {
+      const serverNow = data.attempt.serverTime || Date.now();
+      setPayload(data);
+      setAnswers(data.attempt.answers || {});
+      answersRef.current = data.attempt.answers || {};
+      setClockSkew(serverNow - Date.now());
+      setRemainingSeconds(getTimerSeconds(data.attempt, serverNow));
+      setSectionRemainingSeconds(secondsUntil(data.attempt.sectionEndAt, serverNow));
+    };
+
+    const seeded = seededAttempt.current;
+    const cachedTest = seeded?.id === attemptId
+      ? recallExamTest(seeded.testId, seeded.selectedParts)
+      : null;
+    if (cachedTest && seeded) {
+      applyExam({ attempt: seeded, test: cachedTest });
+    }
+
     apiFetch(`/api/attempts/${attemptId}/exam`)
       .then((data) => {
         if (!active) return;
-        const serverNow = data.attempt.serverTime || Date.now();
-        setPayload(data);
-        setAnswers(data.attempt.answers || {});
-        answersRef.current = data.attempt.answers || {};
-        setClockSkew(serverNow - Date.now());
-        setRemainingSeconds(getTimerSeconds(data.attempt, serverNow));
-        setSectionRemainingSeconds(secondsUntil(data.attempt.sectionEndAt, serverNow));
+        rememberExamTest(data.test);
+        applyExam(data);
       })
       .catch((requestError) => {
         if (!active) return;

@@ -12,6 +12,8 @@ public interface TestDao {
 
     Optional<TestPart> findPart(String testId, int partNumber) throws Exception;
 
+    List<TestPart> findParts(String testId, List<Integer> partNumbers) throws Exception;
+
     List<Test> findAllMetadata() throws Exception;
 
     String nextId();

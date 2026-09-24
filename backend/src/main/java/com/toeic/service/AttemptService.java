@@ -218,7 +218,7 @@ public class AttemptService {
 
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("attempt", toResponse(attempt, true));
-        response.put("test", testService.getExamTest(attempt.getTestId()));
+        response.put("test", testService.getExamTest(attempt.getTestId(), selectedParts(attempt)));
         return response;
     }
 
@@ -427,7 +427,7 @@ public class AttemptService {
 
         Map<Integer, String> answers = loadAnswers(attempt.getId());
         Map<String, Object> reviewTest = testService.addReviewAnswers(
-                testService.getReviewTest(attempt.getTestId()),
+                testService.getReviewTest(attempt.getTestId(), selectedParts(attempt)),
                 answers
         );
 
