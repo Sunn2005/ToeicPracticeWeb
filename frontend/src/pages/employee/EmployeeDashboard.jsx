@@ -1,1 +1,1 @@
-// TODO(Member 3): Implement employee draft/review status summaries.
+export { default } from "../admin/AdminDashboard";

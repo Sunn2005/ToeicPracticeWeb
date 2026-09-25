@@ -1,13 +1,10 @@
-import { useEffect, useState } from "react";
 import {
   BrowserRouter,
   Navigate,
   Route,
   Routes,
+  useLocation,
 } from "react-router-dom";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "./firebase";
-import { apiFetch } from "./api/client";
 import Login from "./pages/Login";
 import PracticePart from "./pages/PracticePart";
 import Welcome from "./pages/Welcome";
@@ -18,85 +15,24 @@ import FullTestReview from "./pages/FullTestReview";
 import { LanguageProvider } from "./i18n/LanguageContext";
 import LoadingScreen from "./components/LoadingScreen";
 import FloatingPet from "./components/FloatingPet";
-
-const ROLE_STORAGE_PREFIX = "capytoeic:user-role:";
-const KNOWN_ROLES = new Set(["USER", "EMPLOYEE", "ADMIN"]);
-
-function readCachedRole(uid) {
-  if (!uid) return null;
-
-  try {
-    const role = String(window.localStorage.getItem(`${ROLE_STORAGE_PREFIX}${uid}`) || "")
-      .toUpperCase();
-    return KNOWN_ROLES.has(role) ? role : null;
-  } catch {
-    return null;
-  }
-}
-
-function cacheRole(uid, role) {
-  if (!uid || !KNOWN_ROLES.has(role)) return;
-
-  try {
-    window.localStorage.setItem(`${ROLE_STORAGE_PREFIX}${uid}`, role);
-  } catch {
-    // Storage can be unavailable in private browsing. The in-memory role still works.
-  }
-}
+import { AuthProvider } from "./auth/AuthContext";
+import { useAuth } from "./auth/useAuth";
+import ProtectedRoute from "./auth/ProtectedRoute";
+import LoginPage from "./pages/auth/LoginPage";
+import ManagementLayout from "./layouts/ManagementLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import MyTestsPage from "./pages/employee/MyTestsPage";
+import CreateTestPage from "./pages/employee/CreateTestPage";
+import ReviewQueuePage from "./pages/admin/ReviewQueuePage";
+import ReviewHistoryPage from "./pages/admin/ReviewHistoryPage";
+import TestReviewPage from "./pages/admin/TestReviewPage";
+import ForbiddenPage from "./pages/errors/ForbiddenPage";
 
 function AppRoutes() {
-  const [user, setUser] = useState(null);
-  const [checkingAuth, setCheckingAuth] = useState(true);
-  const [roleInfo, setRoleInfo] = useState({ uid: null, role: null });
+  const { user, role, authLoading } = useAuth();
+  const location = useLocation();
 
-  useEffect(() => {
-    return onAuthStateChanged(auth, (currentUser) => {
-      setRoleInfo(currentUser
-        ? {
-            uid: currentUser.uid,
-            // The backend creates every new account as USER. Use that harmless
-            // display fallback so the pet is not blocked by a cold API server.
-            role: readCachedRole(currentUser.uid) || "USER",
-          }
-        : { uid: null, role: null });
-      setUser(currentUser);
-      setCheckingAuth(false);
-    });
-  }, []);
-
-  useEffect(() => {
-    let active = true;
-
-    if (!user) {
-      return () => {
-        active = false;
-      };
-    }
-
-    const resolveRole = async () => {
-      try {
-        const profile = await apiFetch("/api/me");
-        if (active) {
-          const role = String(profile?.role || "").toUpperCase() || "UNKNOWN";
-          cacheRole(user.uid, role);
-          setRoleInfo({
-            uid: user.uid,
-            role,
-          });
-        }
-      } catch {
-        // Role only controls non-sensitive UI. Keep the cached/default value if
-        // Render is waking up or offline; protected APIs still enforce the role.
-      }
-    };
-
-    resolveRole();
-    return () => {
-      active = false;
-    };
-  }, [user]);
-
-  if (checkingAuth) {
+  if (authLoading) {
     return <LoadingScreen />;
   }
 
@@ -139,11 +75,23 @@ function AppRoutes() {
         path="*"
         element={<Navigate to={user ? "/dashboard" : "/login"} replace />}
       />
+
+      <Route path="/console" element={<LoginPage />} />
+      <Route path="/console/forbidden" element={<ForbiddenPage />} />
+      <Route element={<ProtectedRoute allowedRoles={["ADMIN", "EMPLOYEE"]} />}>
+        <Route element={<ManagementLayout />}>
+          <Route path="/console/dashboard" element={<AdminDashboard />} />
+          <Route path="/console/tests" element={<MyTestsPage />} />
+          <Route path="/console/tests/new" element={<CreateTestPage />} />
+          <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
+            <Route path="/console/reviews" element={<ReviewQueuePage />} />
+            <Route path="/console/reviews/:testId" element={<TestReviewPage />} />
+            <Route path="/console/review-history" element={<ReviewHistoryPage />} />
+          </Route>
+        </Route>
+      </Route>
       </Routes>
-      <FloatingPet
-        user={user}
-        role={roleInfo.uid === user?.uid ? roleInfo.role : null}
-      />
+      {!location.pathname.startsWith("/console") && <FloatingPet user={user} role={role} />}
     </>
   );
 }
@@ -151,9 +99,11 @@ function AppRoutes() {
 function App() {
   return (
     <LanguageProvider>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </AuthProvider>
     </LanguageProvider>
   );
 }
