@@ -37,7 +37,7 @@ function ManagementLayout() {
   const isAdmin = role === "ADMIN";
 
   const navigation = [
-    { label: "Dashboard", icon: "dashboard", to: "/console/dashboard" },
+    { label: "Trang tổng quan", icon: "dashboard", to: "/console/dashboard" },
     { label: "Quản lý đề thi", icon: "tests", to: "/console/tests", badge: "EMP" },
     { label: "Tạo đề mới", icon: "create", to: "/console/tests/new", badge: "EMP" },
     { label: "Xét duyệt", icon: "review", to: "/console/reviews", locked: !isAdmin },
