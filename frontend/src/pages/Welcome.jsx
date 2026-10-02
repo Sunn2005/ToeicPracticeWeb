@@ -15,7 +15,7 @@ import {
   readAttemptHistoryCache,
   writeAttemptHistoryCache,
 } from "../api/userLearning";
-import { getHistoryStats, getSubmittedAttempts } from "../utils/attemptHistory";
+import { getHistoryStats } from "../utils/attemptHistory";
 import BrandLogo from "../components/BrandLogo";
 
 function UserAvatar({ user, displayName, size = "large" }) {
@@ -53,9 +53,10 @@ function Welcome({ user }) {
   const [selectedTest, setSelectedTest] = useState(null);
   const [modalTab, setModalTab] = useState("exam");
   const [tests, setTests] = useState(TOEIC_TESTS);
-  const [attempts, setAttempts] = useState([]);
+  const initialHistory = readAttemptHistoryCache(user?.uid);
+  const [attempts, setAttempts] = useState(() => initialHistory || []);
   const [historyTest, setHistoryTest] = useState(null);
-  const [historyLoading, setHistoryLoading] = useState(true);
+  const [historyLoading, setHistoryLoading] = useState(() => !initialHistory);
   const [historyError, setHistoryError] = useState("");
   const [resumePrompt, setResumePrompt] = useState(null);
   const [restartingAttempt, setRestartingAttempt] = useState(false);
@@ -91,16 +92,12 @@ function Welcome({ user }) {
   useEffect(() => {
     let active = true;
     const cached = readAttemptHistoryCache(user?.uid);
-    if (cached) {
-      setAttempts(getSubmittedAttempts(cached));
-      setHistoryLoading(false);
-    }
 
     getAttemptHistory()
       .then((history) => {
         if (!active) return;
         writeAttemptHistoryCache(user?.uid, history);
-        setAttempts(getSubmittedAttempts(history));
+        setAttempts(history);
         setHistoryError("");
       })
       .catch((requestError) => {
@@ -209,6 +206,10 @@ function Welcome({ user }) {
     } catch (requestError) {
       setHistoryError(requestError.message || t("historyReviewError"));
     }
+  };
+
+  const resumeAttempt = (attempt) => {
+    navigate(`/full-test/${attempt.id}/exam`, { state: { attempt } });
   };
 
   const learningStats = useMemo(() => getHistoryStats(attempts), [attempts]);
@@ -453,6 +454,7 @@ function Welcome({ user }) {
         error={historyError}
         onClose={() => setHistoryTest(null)}
         onDelete={handleDeleteAttempt}
+        onResume={resumeAttempt}
         onReview={(attempt) => openAttemptReview(attempt)}
         onReviewIncorrect={(attempt) => openAttemptReview(attempt, "INCORRECT")}
       />

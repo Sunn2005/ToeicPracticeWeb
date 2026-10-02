@@ -32,6 +32,7 @@ public record ToeicUserPrincipal(
                 email,
                 displayName,
                 photoUrl,
+                null,
                 role,
                 createdAt,
                 lastLoginAt

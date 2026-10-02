@@ -19,6 +19,7 @@ public class AttemptResultDto {
     private Integer selectedPart;
     private List<Integer> selectedParts;
     private Integer timeLimitSeconds;
+    private Boolean timed;
     private Integer firstQuestionNumber;
     private Integer lastQuestionNumber;
     private Integer listeningTotalQuestions;
@@ -56,6 +57,7 @@ public class AttemptResultDto {
                 .selectedPart(result.getSelectedPart())
                 .selectedParts(result.getSelectedParts())
                 .timeLimitSeconds(result.getTimeLimitSeconds())
+                .timed(result.getTimed())
                 .firstQuestionNumber(result.getFirstQuestionNumber())
                 .lastQuestionNumber(result.getLastQuestionNumber())
                 .listeningTotalQuestions(result.getListeningTotalQuestions())

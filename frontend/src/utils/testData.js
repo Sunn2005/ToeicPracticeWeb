@@ -135,11 +135,17 @@ export function formatClock(totalSeconds) {
   return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(remainder).padStart(2, "0")}`;
 }
 
-export function formatDuration(totalSeconds) {
+export function formatDuration(totalSeconds, language = "en") {
   const seconds = Math.max(0, Number(totalSeconds) || 0);
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const remainder = Math.floor(seconds % 60);
+  if (language === "vi") {
+    if (hours > 0) {
+      return `${hours} giờ ${minutes} phút ${remainder} giây`;
+    }
+    return `${minutes} phút ${remainder} giây`;
+  }
   if (hours > 0) {
     return `${hours} hr ${minutes} min ${remainder} sec`;
   }

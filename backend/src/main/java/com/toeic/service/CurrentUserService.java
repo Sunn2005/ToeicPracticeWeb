@@ -5,6 +5,8 @@ import com.toeic.model.FirebaseIdentity;
 import com.toeic.model.User;
 import com.toeic.model.enums.UserRole;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -55,10 +57,36 @@ public class CurrentUserService {
         response.put("email", user.getEmail());
         response.put("displayName", user.getDisplayName());
         response.put("photoUrl", user.getPhotoUrl());
+        response.put("targetScore", user.getTargetScore());
         response.put("role", user.getRole() == null ? UserRole.USER.name() : user.getRole().name());
         response.put("createdAt", user.getCreatedAt());
         response.put("lastLoginAt", user.getLastLoginAt());
         return response;
+    }
+
+    public Map<String, Object> getProfile(String uid) throws Exception {
+        User user = userDao.findByUid(uid).orElseThrow();
+        return toResponse(user);
+    }
+
+    public Map<String, Object> updateProfile(
+            String uid,
+            String displayName,
+            String photoUrl,
+            Integer targetScore
+    ) throws Exception {
+        User user = userDao.findByUid(uid).orElseThrow();
+        if (displayName == null || displayName.isBlank() || displayName.trim().length() > 80) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Họ và tên phải có từ 1 đến 80 ký tự");
+        }
+        if (targetScore != null && (targetScore < 10 || targetScore > 990 || targetScore % 5 != 0)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mục tiêu TOEIC phải từ 10 đến 990 và chia hết cho 5");
+        }
+        user.setDisplayName(displayName.trim());
+        user.setPhotoUrl(photoUrl == null || photoUrl.isBlank() ? null : photoUrl.trim());
+        user.setTargetScore(targetScore);
+        userDao.save(user);
+        return toResponse(user);
     }
 
 }

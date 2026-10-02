@@ -18,18 +18,19 @@ export function getSubmittedAttempts(attempts) {
 }
 
 export function getHistoryStats(attempts) {
-  const completed = attempts.filter((attempt) => attempt.status === "COMPLETED");
-  const totalCorrect = completed.reduce(
+  const allCompleted = attempts.filter((attempt) => attempt.status === "COMPLETED");
+  const completedExams = allCompleted.filter((attempt) => attempt.type !== "PRACTICE");
+  const totalCorrect = completedExams.reduce(
     (sum, attempt) => sum + (Number(attempt.result?.totalCorrect) || 0),
     0,
   );
-  const totalQuestions = completed.reduce(
+  const totalQuestions = completedExams.reduce(
     (sum, attempt) => sum + (Number(attempt.result?.totalQuestions) || 0),
     0,
   );
   const accuracy = totalQuestions ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
 
-  const activeDays = new Set(completed.map((attempt) => {
+  const activeDays = new Set(allCompleted.map((attempt) => {
     const timestamp = Number(attempt.submittedAt || attempt.updatedAt || attempt.startedAt);
     const date = new Date(timestamp);
     return Number.isNaN(date.getTime())
@@ -45,5 +46,11 @@ export function getHistoryStats(attempts) {
     cursor.setDate(cursor.getDate() - 1);
   }
 
-  return { completed: completed.length, accuracy, streak };
+  return {
+    completed: completedExams.length,
+    practiceCompleted: allCompleted.length - completedExams.length,
+    inProgress: attempts.filter((attempt) => attempt.status === "IN_PROGRESS").length,
+    accuracy,
+    streak,
+  };
 }

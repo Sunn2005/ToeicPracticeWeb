@@ -6,6 +6,7 @@ import {
   buildListeningUnits,
   buildReadingUnits,
   formatClock,
+  formatDuration,
   formatQuestionProgress,
 } from "./testData.js";
 
@@ -41,6 +42,11 @@ test("builds navigator groups from both Listening and Reading units", () => {
 test("formats the countdown as hours, minutes, and seconds", () => {
   assert.equal(formatClock(6_004), "01:40:04");
   assert.equal(formatClock(9), "00:00:09");
+});
+
+test("formats result duration using the selected UI language", () => {
+  assert.equal(formatDuration(4_635, "en"), "1 hr 17 min 15 sec");
+  assert.equal(formatDuration(4_635, "vi"), "1 giờ 17 phút 15 giây");
 });
 
 test("formats question progress for a single question and a Listening group", () => {

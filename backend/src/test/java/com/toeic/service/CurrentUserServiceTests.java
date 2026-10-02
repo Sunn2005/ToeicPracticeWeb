@@ -50,4 +50,22 @@ class CurrentUserServiceTests {
         verify(userDao).save(legacyUser);
     }
 
+    @Test
+    void updatesTheLearnerProfileAndTargetScore() throws Exception {
+        FirebaseAuthenticationService authenticationService = mock(FirebaseAuthenticationService.class);
+        UserDao userDao = mock(UserDao.class);
+        CurrentUserService service = new CurrentUserService(authenticationService, userDao);
+        User user = new User();
+        user.setUid("uid-1");
+        user.setEmail("user@example.com");
+        user.setRole(UserRole.USER);
+        when(userDao.findByUid("uid-1")).thenReturn(Optional.of(user));
+
+        var response = service.updateProfile("uid-1", "Minh Anh", null, 800);
+
+        assertEquals("Minh Anh", response.get("displayName"));
+        assertEquals(800, response.get("targetScore"));
+        verify(userDao).save(user);
+    }
+
 }

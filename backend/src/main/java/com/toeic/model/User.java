@@ -13,6 +13,7 @@ public class User {
     private String email;
     private String displayName;
     private String photoUrl;
+    private Integer targetScore;
     private UserRole role;
     private Long createdAt;
     private Long lastLoginAt;

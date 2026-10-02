@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { apiFetch } from "../api/client";
 import { formatDuration } from "../utils/testData";
-import LanguageSwitcher from "../components/LanguageSwitcher";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getTestName } from "../data/testCatalog";
+import { getAllQuestions } from "../utils/testData";
+import { useAuth } from "../auth/useAuth";
 import {
   getAttemptAIAnalysis,
   requestAttemptAIAnalysis,
@@ -16,7 +17,17 @@ import {
   shouldPollAIAnalysis,
 } from "../utils/aiAnalysis";
 
-function Metric({ label, value, tone = "slate" }) {
+const PART_NAMES = {
+  1: "Photographs",
+  2: "Question – Response",
+  3: "Conversations",
+  4: "Talks",
+  5: "Incomplete Sentences",
+  6: "Text Completion",
+  7: "Reading Comprehension",
+};
+
+function Metric({ label, value, tone = "slate", compact = false }) {
   const tones = {
     sky: "bg-sky-50 text-sky-700 border-sky-100",
     violet: "bg-violet-50 text-violet-700 border-violet-100",
@@ -25,9 +36,73 @@ function Metric({ label, value, tone = "slate" }) {
   };
   return (
     <div className={`rounded-2xl border p-5 ${tones[tone]}`}>
-      <p className="text-3xl font-bold">{value}</p>
+      <p className={`${compact ? "text-lg leading-7" : "text-3xl"} font-bold`}>{value}</p>
       <p className="mt-2 text-sm font-medium opacity-80">{label}</p>
     </div>
+  );
+}
+
+function ScoreRing({ label, value, max, tone = "sky", large = false }) {
+  const colors = {
+    sky: ["#0ea5e9", "#e0f2fe"],
+    emerald: ["#10b981", "#d1fae5"],
+    violet: ["#8b5cf6", "#ede9fe"],
+  };
+  const [activeColor, trackColor] = colors[tone];
+  const percentage = Math.min(100, Math.max(0, (Number(value) / Math.max(1, Number(max))) * 100));
+  return (
+    <div
+      className={`relative grid shrink-0 place-items-center rounded-full ${large ? "h-36 w-36" : "h-28 w-28"}`}
+      style={{ background: `conic-gradient(${activeColor} ${percentage}%, ${trackColor} 0)` }}
+    >
+      <div className={`grid place-items-center rounded-full bg-white text-center ${large ? "h-28 w-28" : "h-[88px] w-[88px]"}`}>
+        <span>
+          <span className="block text-[11px] font-bold uppercase tracking-wide text-slate-500">{label}</span>
+          <strong className={`block text-slate-950 ${large ? "text-3xl" : "text-2xl"}`}>{value}</strong>
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function PartPerformancePanel({ parts, loading, t }) {
+  const listening = parts.filter((part) => part.partNumber <= 4);
+  const reading = parts.filter((part) => part.partNumber >= 5);
+  const renderSection = (title, items, tone) => (
+    <section>
+      <h3 className={`border-b border-slate-200 pb-2 text-xs font-bold uppercase tracking-wide ${tone === "emerald" ? "text-emerald-600" : "text-sky-600"}`}>{title}</h3>
+      <div className="mt-3 space-y-4">
+        {items.map((part) => {
+          const color = part.accuracy >= 80 ? "bg-emerald-500" : part.accuracy >= 70 ? "bg-sky-500" : "bg-amber-500";
+          return (
+            <div key={part.partNumber}>
+              <div className="mb-1.5 flex items-center justify-between gap-3 text-sm">
+                <span className="min-w-0 truncate font-semibold text-slate-800">Part {part.partNumber}: {part.name}</span>
+                <strong className={part.accuracy >= 80 ? "text-emerald-600" : part.accuracy >= 70 ? "text-sky-600" : "text-amber-600"}>{part.accuracy}%</strong>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-slate-100"><div className={`h-full rounded-full ${color}`} style={{ width: `${part.accuracy}%` }} /></div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+
+  return (
+    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+      <h2 className="text-lg font-bold text-slate-950">{t("partPerformance")}</h2>
+      <p className="mt-1 text-sm text-slate-400">{t("partPerformanceDescription")}</p>
+      {loading ? (
+        <p className="mt-6 rounded-xl bg-slate-50 p-4 text-sm text-slate-500">{t("loadingPartPerformance")}</p>
+      ) : parts.length ? (
+        <div className="mt-5 space-y-6">
+          {listening.length > 0 && renderSection(t("listeningSection"), listening, "sky")}
+          {reading.length > 0 && renderSection(t("readingSection"), reading, "emerald")}
+        </div>
+      ) : (
+        <p className="mt-6 rounded-xl bg-slate-50 p-4 text-sm text-slate-500">{t("partPerformanceUnavailable")}</p>
+      )}
+    </section>
   );
 }
 
@@ -80,7 +155,7 @@ function AIAnalysisPanel({ analysis, status, busy, error, onRequest, language, t
   const statistics = result?.statistics;
 
   return (
-    <section className="mt-8 rounded-3xl border border-violet-200 bg-violet-50/60 p-5 sm:p-7">
+    <section className="rounded-2xl border border-violet-200 bg-violet-50/60 p-5 shadow-sm sm:p-7">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-violet-600">AI TOEIC Coach</p>
@@ -216,13 +291,18 @@ function AIAnalysisPanel({ analysis, status, busy, error, onRequest, language, t
 
 function FullTestResult() {
   const { language, t } = useLanguage();
+  const { user, profile } = useAuth();
   const { attemptId } = useParams();
   const navigate = useNavigate();
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
+  const [reviewData, setReviewData] = useState(null);
+  const [reviewLoading, setReviewLoading] = useState(true);
   const [aiAnalysis, setAIAnalysis] = useState(null);
   const [aiError, setAIError] = useState("");
   const [aiRequesting, setAIRequesting] = useState(false);
+  const [retaking, setRetaking] = useState(false);
+  const [retakeError, setRetakeError] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -232,6 +312,21 @@ function FullTestResult() {
       })
       .catch((requestError) => {
         if (active) setError(requestError.message);
+      });
+    return () => {
+      active = false;
+    };
+  }, [attemptId]);
+
+  useEffect(() => {
+    let active = true;
+    apiFetch(`/api/attempts/${attemptId}/review`)
+      .then((data) => {
+        if (active) setReviewData(data);
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        if (active) setReviewLoading(false);
       });
     return () => {
       active = false;
@@ -287,6 +382,53 @@ function FullTestResult() {
     }
   };
 
+  const partPerformance = useMemo(() => {
+    if (!reviewData?.test) return [];
+    const grouped = new Map();
+    getAllQuestions(reviewData.test).forEach(({ partNumber, unit, question }) => {
+      const current = grouped.get(partNumber) || {
+        partNumber,
+        name: PART_NAMES[partNumber] || unit.partName || `Part ${partNumber}`,
+        total: 0,
+        correct: 0,
+      };
+      current.total += 1;
+      if (question.answerStatus === "CORRECT") current.correct += 1;
+      grouped.set(partNumber, current);
+    });
+    return [...grouped.values()]
+      .map((part) => ({
+        ...part,
+        accuracy: part.total ? Math.round((part.correct / part.total) * 100) : 0,
+      }))
+      .sort((left, right) => left.partNumber - right.partNumber);
+  }, [reviewData]);
+
+  const retakeTest = async () => {
+    setRetaking(true);
+    setRetakeError("");
+    try {
+      const durationMinutes = result?.timed && result?.mode === "PART" && result?.timeLimitSeconds
+        ? Math.max(1, Math.round(result.timeLimitSeconds / 60))
+        : undefined;
+      const attempt = await apiFetch(`/api/tests/${result.testId}/attempts`, {
+        method: "POST",
+        body: JSON.stringify({
+          type: result.type,
+          mode: result.mode,
+          part: result.selectedPart,
+          parts: result.selectedParts,
+          durationMinutes,
+          restartExisting: true,
+        }),
+      });
+      navigate(`/full-test/${attempt.id}/exam`, { state: { attempt } });
+    } catch (requestError) {
+      setRetakeError(requestError.message || t("unableStartTest"));
+      setRetaking(false);
+    }
+  };
+
   if (!result && !error) {
     return <div className="flex min-h-screen items-center justify-center bg-slate-50">{t("scoringTest")}</div>;
   }
@@ -313,70 +455,93 @@ function FullTestResult() {
   const modeTitle = result?.type === "PRACTICE"
     ? `${t("practiceMode")} · ${resultModeTitle}`
     : resultModeTitle;
+  const isPractice = result?.type === "PRACTICE";
+  const accuracy = totalQuestions
+    ? Math.round(((Number(result?.totalCorrect) || 0) / totalQuestions) * 100)
+    : 0;
   const maxScore = resultMode === "FULL" || (listeningTotal > 0 && readingTotal > 0) ? 990 : 495;
+  const learnerName = profile?.displayName || user?.displayName || t("learner");
+  const targetScore = Number(profile?.targetScore) || 800;
+  const pointsToTarget = Math.max(0, targetScore - (Number(result?.totalScore) || 0));
+  const completedAt = result?.submittedAt
+    ? new Intl.DateTimeFormat(language === "vi" ? "vi-VN" : "en-US", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(result.submittedAt))
+    : "—";
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 via-sky-50 to-cyan-100 px-5 py-8 text-slate-900 sm:px-8 sm:py-12">
-      <main className="mx-auto max-w-5xl">
-        <div className="mb-4 flex justify-end">
-          <LanguageSwitcher />
-        </div>
+    <div className="text-slate-900">
+      <main className="mx-auto max-w-[1380px] space-y-6">
         {error ? (
           <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700">
             {error}
           </div>
         ) : (
           <>
-            <section className="overflow-hidden rounded-4xl bg-white shadow-2xl shadow-sky-100">
-              <div className="bg-slate-950 px-6 py-8 text-white sm:px-10">
-                <p className="text-sm font-bold uppercase tracking-[0.2em] text-sky-300">{testName} · {modeTitle} · {t("testResults")}</p>
-                <div className="mt-4 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
-                  <div>
-                    <h1 className="text-3xl font-bold sm:text-4xl">{t("completedTest")}</h1>
-                    <p className="mt-3 text-slate-300">
-                      {t("testDurationLabel")} {formatDuration(result.durationSeconds)}
-                      {result.autoSubmitted ? ` · ${t("autoSubmitted")}` : ""}
-                    </p>
-                  </div>
-                  <div className="rounded-3xl bg-white/10 px-8 py-5 text-center ring-1 ring-white/20">
-                    <p className="text-xs font-bold uppercase tracking-widest text-sky-300">{t("estimatedScore")}</p>
-                    <p className="mt-1 text-5xl font-black">{result.totalScore}</p>
-                    <p className="text-sm text-slate-300">/ {maxScore}</p>
-                  </div>
+            <section className="flex flex-col justify-between gap-6 rounded-2xl border border-slate-200 bg-white px-6 py-7 shadow-sm sm:px-8 lg:flex-row lg:items-center">
+              <div>
+                <div className="flex flex-wrap items-center gap-3 text-sm text-slate-400">
+                  <span className="rounded-full bg-emerald-100 px-3 py-1 font-semibold text-emerald-700">{t("completed")}</span>
+                  <span>{t("completedAt")}: {completedAt}</span>
                 </div>
+                <h1 className="mt-3 text-2xl font-bold text-slate-950 sm:text-3xl">{t("congratulations")} {learnerName}! 🎉</h1>
+                <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{t("resultIntroPrefix")} <strong>{testName} · {modeTitle}</strong> {t("resultIntroSuffix")}</p>
               </div>
+              <button type="button" onClick={() => navigate("/tests")} className="shrink-0 rounded-xl border border-sky-500 px-6 py-3 font-semibold text-sky-600 transition hover:bg-sky-50">{t("backToTestList")}</button>
+            </section>
 
-              <div className="p-6 sm:p-10">
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                  {listeningTotal > 0 && (
-                    <Metric label={t("listening")} value={`${result.listeningScore}/495`} tone="sky" />
-                  )}
-                  {readingTotal > 0 && (
-                    <Metric label={t("reading")} value={`${result.readingScore}/495`} tone="violet" />
-                  )}
-                  <Metric label={t("correct")} value={`${result.totalCorrect}/${totalQuestions}`} tone="emerald" />
-                  <Metric label={t("incorrect")} value={result.totalWrong} />
-                  <Metric label={t("unanswered")} value={result.totalUnanswered} />
-                </div>
+            <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(340px,0.95fr)]">
+              <div className="space-y-6">
+                <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
+                  <h2 className="text-xl font-bold text-slate-950">{t("overallScore")}</h2>
+                  <div className="mt-6 flex flex-col gap-7 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="flex flex-col items-center gap-5 rounded-2xl bg-sky-50/70 p-5 sm:flex-row sm:px-7">
+                      <ScoreRing
+                        label={isPractice ? t("accuracy") : t("totalScore")}
+                        value={isPractice ? accuracy : Number(result.totalScore) || 0}
+                        max={isPractice ? 100 : maxScore}
+                        large
+                      />
+                      <div className="text-center sm:text-left">
+                        <p className="text-sm text-slate-500">{t("yourTarget")}:</p>
+                        <strong className="mt-1 block text-2xl text-sky-600">{isPractice ? "100%" : `${targetScore} / 990`}</strong>
+                        {!isPractice && <p className="mt-1 text-sm text-slate-400">{pointsToTarget} {t("pointsToTarget")}</p>}
+                      </div>
+                    </div>
 
-                <div className="mt-8 grid gap-5 sm:grid-cols-2">
-                  {listeningTotal > 0 && <section className="rounded-2xl border border-slate-200 p-5">
-                    <h2 className="font-bold">{t("listening")}</h2>
-                    <p className="mt-3 text-sm leading-7 text-slate-600">
-                      {t("correct")} {result.listeningCorrect}/{listeningTotal} · {t("incorrect")} {result.listeningWrong} · {t("unanswered")} {result.listeningUnanswered}
-                    </p>
-                  </section>}
-                  {readingTotal > 0 && <section className="rounded-2xl border border-slate-200 p-5">
-                    <h2 className="font-bold">{t("reading")}</h2>
-                    <p className="mt-3 text-sm leading-7 text-slate-600">
-                      {t("correct")} {result.readingCorrect}/{readingTotal} · {t("incorrect")} {result.readingWrong} · {t("unanswered")} {result.readingUnanswered}
-                    </p>
-                  </section>}
-                </div>
+                    <div className="flex flex-wrap justify-center gap-7 lg:justify-end">
+                      {listeningTotal > 0 && (
+                        <ScoreRing
+                          label={t("listening")}
+                          value={isPractice ? Math.round(((Number(result.listeningCorrect) || 0) / listeningTotal) * 100) : Number(result.listeningScore) || 0}
+                          max={isPractice ? 100 : 495}
+                          tone="sky"
+                        />
+                      )}
+                      {readingTotal > 0 && (
+                        <ScoreRing
+                          label={t("reading")}
+                          value={isPractice ? Math.round(((Number(result.readingCorrect) || 0) / readingTotal) * 100) : Number(result.readingScore) || 0}
+                          max={isPractice ? 100 : 495}
+                          tone="emerald"
+                        />
+                      )}
+                    </div>
+                  </div>
 
-                <p className="mt-7 rounded-xl bg-amber-50 p-4 text-sm leading-6 text-amber-800">
-                  {t("estimatedScoreNote")}
-                </p>
+                  <div className="my-6 h-px bg-slate-100" />
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    <Metric label={t("correctCountLabel")} value={`${result.totalCorrect}/${totalQuestions}`} tone="emerald" />
+                    <Metric label={t("wrongCountLabel")} value={`${result.totalWrong}/${totalQuestions}`} />
+                    <Metric label={t("blankCountLabel")} value={`${result.totalUnanswered}/${totalQuestions}`} tone="violet" />
+                    <Metric label={t("timeTaken")} value={formatDuration(result.durationSeconds, language)} tone="sky" compact />
+                  </div>
+                  {!isPractice && <p className="mt-5 text-xs leading-5 text-slate-400">{t("estimatedScoreNote")}</p>}
+                </section>
 
                 {aiEligible && (
                   <AIAnalysisPanel
@@ -389,25 +554,22 @@ function FullTestResult() {
                     t={t}
                   />
                 )}
-
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-end">
-                  <button
-                    type="button"
-                    onClick={() => navigate("/dashboard")}
-                    className="rounded-xl border border-slate-200 px-5 py-3 font-semibold text-slate-700 hover:bg-slate-50"
-                  >
-                    {t("backToTestList")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => navigate(`/full-test/${attemptId}/review`)}
-                    className="rounded-xl bg-sky-500 px-5 py-3 font-semibold text-white shadow-lg shadow-sky-200 hover:bg-sky-600"
-                  >
-                    {t("reviewAnswers")}
-                  </button>
-                </div>
               </div>
-            </section>
+
+              <aside className="space-y-6">
+                <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+                  <h2 className="text-xl font-bold text-slate-950">{t("nextActionsTitle")}</h2>
+                  <div className="mt-5 space-y-3">
+                    <button type="button" onClick={() => navigate(`/full-test/${attemptId}/review`)} className="w-full rounded-xl bg-sky-500 px-5 py-3 font-semibold text-white transition hover:bg-sky-600">{t("viewDetailedAnswers")}</button>
+                    <button type="button" onClick={retakeTest} disabled={retaking} className="w-full rounded-xl border border-sky-500 px-5 py-3 font-semibold text-sky-600 transition hover:bg-sky-50 disabled:opacity-60">{retaking ? t("retaking") : t("retakeThisTest")}</button>
+                    <button type="button" onClick={() => navigate("/tests")} className="w-full px-5 py-3 text-sm font-semibold text-slate-600 transition hover:text-sky-600">{t("backToTestList")}</button>
+                  </div>
+                  {retakeError && <p className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{retakeError}</p>}
+                </section>
+
+                <PartPerformancePanel parts={partPerformance} loading={reviewLoading} t={t} />
+              </aside>
+            </div>
           </>
         )}
       </main>

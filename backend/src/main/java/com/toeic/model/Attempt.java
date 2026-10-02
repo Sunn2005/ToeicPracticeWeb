@@ -19,6 +19,7 @@ public class Attempt {
     private Integer selectedPart;
     private List<Integer> selectedParts;
     private Integer timeLimitSeconds;
+    private Boolean timed;
     private String status;
     private String currentSection;
     private Integer currentQuestionNumber;

@@ -70,7 +70,7 @@ class UserLearningServiceTests {
     }
 
     @Test
-    void includesOnlySubmittedAttemptsInHistory() throws Exception {
+    void includesSubmittedAndInProgressAttemptsInHistory() throws Exception {
         AttemptDao attemptDao = mock(AttemptDao.class);
         UserLearningService service = new UserLearningService(attemptDao);
 
@@ -88,7 +88,35 @@ class UserLearningServiceTests {
 
         List<Map<String, Object>> history = service.getAttempts("user-1");
 
-        assertEquals(1, history.size());
-        assertEquals("submitted-1", history.getFirst().get("id"));
+        assertEquals(2, history.size());
+        assertEquals("unfinished-1", history.getFirst().get("id"));
+        assertEquals("submitted-1", history.get(1).get("id"));
+    }
+
+    @Test
+    void excludesPracticeScoresFromExamStatistics() throws Exception {
+        AttemptDao attemptDao = mock(AttemptDao.class);
+        UserLearningService service = new UserLearningService(attemptDao);
+
+        Attempt exam = new Attempt();
+        exam.setType("FULL_TEST");
+        exam.setStatus("COMPLETED");
+        exam.setScore(700);
+        exam.setResult(AttemptResult.builder().listeningTotalQuestions(100).listeningScore(350).build());
+
+        Attempt practice = new Attempt();
+        practice.setType("PRACTICE");
+        practice.setStatus("COMPLETED");
+        practice.setScore(990);
+        practice.setResult(AttemptResult.builder().listeningTotalQuestions(100).listeningScore(495).build());
+
+        when(attemptDao.findByUserId("user-1")).thenReturn(List.of(exam, practice));
+
+        Map<String, Object> result = service.getStatistics("user-1");
+
+        assertEquals(700, result.get("averageScore"));
+        assertEquals(350, result.get("averageListeningScore"));
+        assertEquals(1, result.get("completedExamAttempts"));
+        assertEquals(1, result.get("completedPracticeAttempts"));
     }
 }

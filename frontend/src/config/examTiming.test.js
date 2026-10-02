@@ -11,7 +11,7 @@ import {
   shouldSubmitAfterListeningAudio,
 } from "./examTiming.js";
 
-test("Part 1 uses its suggested countdown and submits after its last audio", () => {
+test("Part 1 uses its suggested countdown and waits for confirmation after its last audio", () => {
   const units = [{ key: "part1-1" }, { key: "part1-6" }];
   const attempt = { mode: "PART", selectedPart: 1, startedAt: 1_000 };
 
@@ -19,16 +19,16 @@ test("Part 1 uses its suggested countdown and submits after its last audio", () 
   assert.equal(getTimerType("PART", 1), TIMER_TYPES.COUNTDOWN);
   assert.equal(getTimerSeconds(attempt, 6_000), 4 * 60 + 55);
   assert.equal(shouldSubmitAfterListeningAudio(attempt, units[0], units), false);
-  assert.equal(shouldSubmitAfterListeningAudio(attempt, units[1], units), true);
+  assert.equal(shouldSubmitAfterListeningAudio(attempt, units[1], units), false);
 });
 
-test("Part 3 submits only after the last question group audio", () => {
+test("Part 3 waits for confirmation after the last question group audio", () => {
   const units = [{ key: "32-34" }, { key: "68-70" }];
   const attempt = { mode: "PART", selectedPart: 3, startedAt: 1_000 };
 
   assert.equal(getTimerType("PART", 3), TIMER_TYPES.COUNTDOWN);
   assert.equal(shouldSubmitAfterListeningAudio(attempt, units[0], units), false);
-  assert.equal(shouldSubmitAfterListeningAudio(attempt, units[1], units), true);
+  assert.equal(shouldSubmitAfterListeningAudio(attempt, units[1], units), false);
 });
 
 test("Part 5 uses a 20-minute countdown", () => {
@@ -87,4 +87,11 @@ test("practice Listening never auto-submits when replayable audio ends", () => {
   const attempt = { type: "PRACTICE", mode: "LISTENING" };
 
   assert.equal(shouldSubmitAfterListeningAudio(attempt, units[1], units), false);
+});
+
+test("untimed practice has no countdown", () => {
+  const attempt = { type: "PRACTICE", timed: false, mode: "PART", startedAt: 1_000 };
+
+  assert.equal(getTimerType(attempt), TIMER_TYPES.UNTIMED);
+  assert.equal(getTimerSeconds(attempt, 61_000), 0);
 });

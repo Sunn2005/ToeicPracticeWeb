@@ -27,9 +27,7 @@ public class UserLearningService {
     }
 
     public List<Map<String, Object>> getAttempts(String userId) throws Exception {
-        List<Attempt> attempts = new ArrayList<>(attemptDao.findHistoryByUserId(userId).stream()
-                .filter(attempt -> "COMPLETED".equals(attempt.getStatus()))
-                .toList());
+        List<Attempt> attempts = new ArrayList<>(attemptDao.findHistoryByUserId(userId));
         attempts.sort(Comparator.comparing(
                 Attempt::getStartedAt,
                 Comparator.nullsLast(Comparator.reverseOrder())
@@ -39,8 +37,13 @@ public class UserLearningService {
 
     public Map<String, Object> getStatistics(String userId) throws Exception {
         List<Attempt> attempts = attemptDao.findByUserId(userId);
-        List<Attempt> completed = attempts.stream()
+        List<Attempt> completedExams = attempts.stream()
                 .filter(attempt -> "COMPLETED".equals(attempt.getStatus()))
+                .filter(attempt -> !"PRACTICE".equals(attempt.getType()))
+                .toList();
+        List<Attempt> completedPractice = attempts.stream()
+                .filter(attempt -> "COMPLETED".equals(attempt.getStatus()))
+                .filter(attempt -> "PRACTICE".equals(attempt.getType()))
                 .toList();
 
         int totalScore = 0;
@@ -51,13 +54,17 @@ public class UserLearningService {
         int readingSamples = 0;
         Set<Long> activeDays = new LinkedHashSet<>();
 
-        for (Attempt attempt : completed) {
+        attempts.stream()
+                .filter(attempt -> "COMPLETED".equals(attempt.getStatus()))
+                .map(Attempt::getSubmittedAt)
+                .filter(java.util.Objects::nonNull)
+                .map(timestamp -> timestamp / DAY_MS)
+                .forEach(activeDays::add);
+
+        for (Attempt attempt : completedExams) {
             int score = number(attempt.getScore());
             totalScore += score;
             bestScore = Math.max(bestScore, score);
-            if (attempt.getSubmittedAt() != null) {
-                activeDays.add(attempt.getSubmittedAt() / DAY_MS);
-            }
             AttemptResult result = attempt.getResult();
             if (result != null && number(result.getListeningTotalQuestions()) > 0) {
                 listeningScore += number(result.getListeningScore());
@@ -71,9 +78,13 @@ public class UserLearningService {
 
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("totalAttempts", attempts.size());
-        response.put("completedAttempts", completed.size());
-        response.put("inProgressAttempts", attempts.size() - completed.size());
-        response.put("averageScore", average(totalScore, completed.size()));
+        response.put("completedAttempts", completedExams.size());
+        response.put("completedExamAttempts", completedExams.size());
+        response.put("completedPracticeAttempts", completedPractice.size());
+        response.put("inProgressAttempts", attempts.stream()
+                .filter(attempt -> "IN_PROGRESS".equals(attempt.getStatus()))
+                .count());
+        response.put("averageScore", average(totalScore, completedExams.size()));
         response.put("bestScore", bestScore);
         response.put("averageListeningScore", average(listeningScore, listeningSamples));
         response.put("averageReadingScore", average(readingScore, readingSamples));
@@ -99,6 +110,10 @@ public class UserLearningService {
         response.put("mode", attempt.getMode());
         response.put("selectedPart", attempt.getSelectedPart());
         response.put("selectedParts", attempt.getSelectedParts());
+        response.put("timeLimitSeconds", attempt.getTimeLimitSeconds());
+        response.put("timed", attempt.getTimed() == null
+                ? !"PRACTICE".equals(attempt.getType())
+                : attempt.getTimed());
         response.put("status", attempt.getStatus());
         response.put("currentSection", attempt.getCurrentSection());
         response.put("currentQuestionNumber", attempt.getCurrentQuestionNumber());
