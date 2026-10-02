@@ -1,5 +1,6 @@
 package com.toeic.controller;
 
+import com.toeic.dto.AttemptResultDto;
 import com.toeic.dto.CreateAttemptRequest;
 import com.toeic.dto.SaveAnswerRequest;
 import com.toeic.dto.UpdatePositionRequest;
@@ -136,7 +137,7 @@ public class AttemptController {
     }
 
     @PostMapping("/{attemptId}/submit")
-    public Map<String, Object> submit(
+    public AttemptResultDto submit(
             @PathVariable String attemptId,
             @AuthenticationPrincipal ToeicUserPrincipal principal
     ) throws Exception {
@@ -144,7 +145,7 @@ public class AttemptController {
     }
 
     @PostMapping("/{attemptId}/submit-for-review")
-    public Map<String, Object> submitForReview(
+    public AttemptResultDto submitForReview(
             @PathVariable String attemptId,
             @AuthenticationPrincipal ToeicUserPrincipal principal
     ) throws Exception {
@@ -152,7 +153,7 @@ public class AttemptController {
     }
 
     @GetMapping("/{attemptId}/result")
-    public Map<String, Object> getResult(
+    public AttemptResultDto getResult(
             @PathVariable String attemptId,
             @AuthenticationPrincipal ToeicUserPrincipal principal
     ) throws Exception {

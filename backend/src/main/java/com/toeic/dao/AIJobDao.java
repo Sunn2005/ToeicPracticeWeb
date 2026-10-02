@@ -1,8 +1,8 @@
 package com.toeic.dao;
 
 import com.toeic.model.AIJob;
+import com.toeic.model.AIExplanationResult;
 
-import java.util.Map;
 import java.util.Optional;
 
 public interface AIJobDao {
@@ -13,7 +13,7 @@ public interface AIJobDao {
 
     boolean markSucceeded(
             String jobId,
-            Map<String, Object> result,
+            AIExplanationResult result,
             long completedAt
     ) throws Exception;
 

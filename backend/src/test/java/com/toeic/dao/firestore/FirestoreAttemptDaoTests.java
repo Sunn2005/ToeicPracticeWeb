@@ -57,7 +57,7 @@ class FirestoreAttemptDaoTests {
         Attempt result = FirestoreAttemptDao.attemptFrom("document-id", data);
 
         assertEquals("stored-attempt", result.getId());
-        assertEquals(750L, result.getResult().get("totalScore"));
+        assertEquals(750, result.getResult().getTotalScore());
         assertEquals("A", result.getAnswers().get("101"));
     }
 }

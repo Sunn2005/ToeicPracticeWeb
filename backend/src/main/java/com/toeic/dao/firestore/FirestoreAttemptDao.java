@@ -8,6 +8,7 @@ import com.google.cloud.firestore.WriteBatch;
 import com.toeic.dao.AttemptDao;
 import com.toeic.model.Attempt;
 import com.toeic.model.AttemptAnswer;
+import com.toeic.model.AttemptResult;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -196,7 +197,7 @@ public class FirestoreAttemptDao implements AttemptDao {
         attempt.setReadingStartedAt(epochMillis(data.get("readingStartedAt"), "readingStartedAt"));
         attempt.setReadingEndAt(epochMillis(data.get("readingEndAt"), "readingEndAt"));
         attempt.setScore(integerValue(data.get("score"), "score"));
-        attempt.setResult(objectMapValue(data.get("result"), "result"));
+        attempt.setResult(attemptResultValue(data.get("result"), "result"));
         attempt.setAiAnalysisStatus(stringValue(data.get("aiAnalysisStatus")));
         attempt.setAiAnalysisId(stringValue(data.get("aiAnalysisId")));
         attempt.setAiAnalysisRequestedAt(epochMillis(
@@ -251,14 +252,64 @@ public class FirestoreAttemptDao implements AttemptDao {
         throw unsupportedFieldType(fieldName, value);
     }
 
-    private static Map<String, Object> objectMapValue(Object value, String fieldName) {
+    private static AttemptResult attemptResultValue(Object value, String fieldName) {
         if (value == null) {
             return null;
         }
         if (value instanceof Map<?, ?> source) {
-            Map<String, Object> result = new LinkedHashMap<>();
-            source.forEach((key, item) -> result.put(String.valueOf(key), item));
-            return result;
+            return AttemptResult.builder()
+                    .attemptId(stringValue(source.get("attemptId")))
+                    .testId(stringValue(source.get("testId")))
+                    .type(stringValue(source.get("type")))
+                    .mode(stringValue(source.get("mode")))
+                    .selectedPart(integerValue(source.get("selectedPart"), "result.selectedPart"))
+                    .selectedParts(integerListValue(source.get("selectedParts"), "result.selectedParts"))
+                    .timeLimitSeconds(integerValue(source.get("timeLimitSeconds"), "result.timeLimitSeconds"))
+                    .firstQuestionNumber(integerValue(source.get("firstQuestionNumber"), "result.firstQuestionNumber"))
+                    .lastQuestionNumber(integerValue(source.get("lastQuestionNumber"), "result.lastQuestionNumber"))
+                    .listeningTotalQuestions(integerValue(source.get("listeningTotalQuestions"), "result.listeningTotalQuestions"))
+                    .readingTotalQuestions(integerValue(source.get("readingTotalQuestions"), "result.readingTotalQuestions"))
+                    .listeningCorrect(integerValue(source.get("listeningCorrect"), "result.listeningCorrect"))
+                    .listeningWrong(integerValue(source.get("listeningWrong"), "result.listeningWrong"))
+                    .listeningUnanswered(integerValue(source.get("listeningUnanswered"), "result.listeningUnanswered"))
+                    .readingCorrect(integerValue(source.get("readingCorrect"), "result.readingCorrect"))
+                    .readingWrong(integerValue(source.get("readingWrong"), "result.readingWrong"))
+                    .readingUnanswered(integerValue(source.get("readingUnanswered"), "result.readingUnanswered"))
+                    .totalCorrect(integerValue(source.get("totalCorrect"), "result.totalCorrect"))
+                    .totalWrong(integerValue(source.get("totalWrong"), "result.totalWrong"))
+                    .totalUnanswered(integerValue(source.get("totalUnanswered"), "result.totalUnanswered"))
+                    .totalQuestions(integerValue(source.get("totalQuestions"), "result.totalQuestions"))
+                    .correctCount(integerValue(source.get("correctCount"), "result.correctCount"))
+                    .incorrectCount(integerValue(source.get("incorrectCount"), "result.incorrectCount"))
+                    .unansweredCount(integerValue(source.get("unansweredCount"), "result.unansweredCount"))
+                    .listeningScore(integerValue(source.get("listeningScore"), "result.listeningScore"))
+                    .readingScore(integerValue(source.get("readingScore"), "result.readingScore"))
+                    .totalScore(integerValue(source.get("totalScore"), "result.totalScore"))
+                    .estimatedTotalScore(integerValue(source.get("estimatedTotalScore"), "result.estimatedTotalScore"))
+                    .durationSeconds(longValue(source.get("durationSeconds"), "result.durationSeconds"))
+                    .submittedAt(epochMillis(source.get("submittedAt"), "result.submittedAt"))
+                    .autoSubmitted(booleanValue(source.get("autoSubmitted"), "result.autoSubmitted"))
+                    .build();
+        }
+        throw unsupportedFieldType(fieldName, value);
+    }
+
+    private static Long longValue(Object value, String fieldName) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Number number) {
+            return number.longValue();
+        }
+        throw unsupportedFieldType(fieldName, value);
+    }
+
+    private static Boolean booleanValue(Object value, String fieldName) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Boolean booleanValue) {
+            return booleanValue;
         }
         throw unsupportedFieldType(fieldName, value);
     }

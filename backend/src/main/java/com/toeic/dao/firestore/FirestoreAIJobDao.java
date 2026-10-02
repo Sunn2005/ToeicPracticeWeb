@@ -5,6 +5,7 @@ import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.toeic.dao.AIJobDao;
 import com.toeic.model.AIJob;
+import com.toeic.model.AIExplanationResult;
 import org.springframework.stereotype.Repository;
 
 import java.util.LinkedHashMap;
@@ -50,7 +51,7 @@ public class FirestoreAIJobDao implements AIJobDao {
     @Override
     public boolean markSucceeded(
             String jobId,
-            Map<String, Object> result,
+            AIExplanationResult result,
             long completedAt
     ) throws Exception {
         DocumentReference reference = firestore.collection("aiJobs")
@@ -60,13 +61,13 @@ public class FirestoreAIJobDao implements AIJobDao {
             return false;
         }
 
-        reference.update(Map.of(
-                "status", "SUCCEEDED",
-                "result", result,
-                "completedAt", completedAt,
-                "updatedAt", completedAt,
-                "error", ""
-        )).get();
+        Map<String, Object> updates = new LinkedHashMap<>();
+        updates.put("status", "SUCCEEDED");
+        updates.put("result", result);
+        updates.put("completedAt", completedAt);
+        updates.put("updatedAt", completedAt);
+        updates.put("error", "");
+        reference.update(updates).get();
 
         return true;
     }

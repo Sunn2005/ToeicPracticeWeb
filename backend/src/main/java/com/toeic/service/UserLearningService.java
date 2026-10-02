@@ -1,6 +1,7 @@
 package com.toeic.service;
 
 import com.toeic.dao.AttemptDao;
+import com.toeic.model.AttemptResult;
 import com.toeic.model.Attempt;
 import org.springframework.stereotype.Service;
 import org.springframework.http.HttpStatus;
@@ -57,13 +58,13 @@ public class UserLearningService {
             if (attempt.getSubmittedAt() != null) {
                 activeDays.add(attempt.getSubmittedAt() / DAY_MS);
             }
-            Map<String, Object> result = attempt.getResult();
-            if (result != null && number(result.get("listeningTotalQuestions")) > 0) {
-                listeningScore += number(result.get("listeningScore"));
+            AttemptResult result = attempt.getResult();
+            if (result != null && number(result.getListeningTotalQuestions()) > 0) {
+                listeningScore += number(result.getListeningScore());
                 listeningSamples++;
             }
-            if (result != null && number(result.get("readingTotalQuestions")) > 0) {
-                readingScore += number(result.get("readingScore"));
+            if (result != null && number(result.getReadingTotalQuestions()) > 0) {
+                readingScore += number(result.getReadingScore());
                 readingSamples++;
             }
         }

@@ -38,7 +38,7 @@ public class Attempt {
     private Long readingEndAt;
 
     private Integer score;
-    private Map<String, Object> result;
+    private AttemptResult result;
     private String aiAnalysisStatus;
     private String aiAnalysisId;
     private Long aiAnalysisRequestedAt;

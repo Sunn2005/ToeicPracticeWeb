@@ -1,6 +1,7 @@
 package com.toeic.controller;
 
 import com.toeic.dto.CreateAttemptRequest;
+import com.toeic.dto.AttemptResultDto;
 import com.toeic.model.enums.UserRole;
 import com.toeic.security.ToeicUserPrincipal;
 import com.toeic.service.AttemptService;
@@ -131,14 +132,14 @@ class AttemptControllerTests {
 
     @Test
     void submitsAttemptForReviewWithAuthenticatedUser() throws Exception {
-        Map<String, Object> expected = Map.of(
-                "attemptId", "attempt-123",
-                "totalCorrect", 4
-        );
+        AttemptResultDto expected = AttemptResultDto.builder()
+                .attemptId("attempt-123")
+                .totalCorrect(4)
+                .build();
         when(attemptService.submitForReview("firebase-uid-123", "attempt-123"))
                 .thenReturn(expected);
 
-        Map<String, Object> result = controller.submitForReview(
+        AttemptResultDto result = controller.submitForReview(
                 "attempt-123",
                 principal
         );

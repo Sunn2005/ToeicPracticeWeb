@@ -1,6 +1,8 @@
 package com.toeic.service;
 
 import com.toeic.dao.AttemptDao;
+import com.toeic.dto.AttemptResultDto;
+import com.toeic.model.AttemptResult;
 import com.toeic.model.Attempt;
 import com.toeic.model.AttemptAnswer;
 import com.toeic.model.enums.AttemptSection;
@@ -385,10 +387,10 @@ public class AttemptService {
         return toResponse(attempt, true);
     }
 
-    public Map<String, Object> submit(String userId, String attemptId) throws Exception {
+    public AttemptResultDto submit(String userId, String attemptId) throws Exception {
         Attempt attempt = reconcileTimeout(getOwnedAttempt(userId, attemptId));
         if (COMPLETED.equals(attempt.getStatus())) {
-            return attempt.getResult();
+            return AttemptResultDto.from(attempt.getResult());
         }
         requireInProgress(attempt);
         if (FULL_TEST.equals(attemptType(attempt))
@@ -399,24 +401,24 @@ public class AttemptService {
                     "Hãy hoàn thành Listening trước khi nộp Full Test"
             );
         }
-        return submitInternal(attempt, false).getResult();
+        return AttemptResultDto.from(submitInternal(attempt, false).getResult());
     }
 
-    public Map<String, Object> submitForReview(String userId, String attemptId) throws Exception {
+    public AttemptResultDto submitForReview(String userId, String attemptId) throws Exception {
         Attempt attempt = reconcileTimeout(getOwnedAttempt(userId, attemptId));
         if (COMPLETED.equals(attempt.getStatus())) {
-            return attempt.getResult();
+            return AttemptResultDto.from(attempt.getResult());
         }
         requireInProgress(attempt);
-        return submitInternal(attempt, false).getResult();
+        return AttemptResultDto.from(submitInternal(attempt, false).getResult());
     }
 
-    public Map<String, Object> getResult(String userId, String attemptId) throws Exception {
+    public AttemptResultDto getResult(String userId, String attemptId) throws Exception {
         Attempt attempt = reconcileTimeout(getOwnedAttempt(userId, attemptId));
         if (!COMPLETED.equals(attempt.getStatus()) || attempt.getResult() == null) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Bài thi chưa được nộp");
         }
-        return attempt.getResult();
+        return AttemptResultDto.from(attempt.getResult());
     }
 
     public Map<String, Object> getReview(String userId, String attemptId) throws Exception {
@@ -572,38 +574,39 @@ public class AttemptService {
         int readingScore = ToeicScoreConverter.readingScore(readingCorrect, readingTotal);
         int totalQuestions = questionNumbers.size();
 
-        Map<String, Object> result = new LinkedHashMap<>();
-        result.put("attemptId", attempt.getId());
-        result.put("testId", attempt.getTestId());
-        result.put("type", attemptType(attempt));
-        result.put("mode", mode(attempt));
-        result.put("selectedPart", attempt.getSelectedPart());
-        result.put("selectedParts", selectedParts(attempt));
-        result.put("timeLimitSeconds", attempt.getTimeLimitSeconds());
-        result.put("firstQuestionNumber", firstQuestion);
-        result.put("lastQuestionNumber", lastQuestion);
-        result.put("listeningTotalQuestions", listeningTotal);
-        result.put("readingTotalQuestions", readingTotal);
-        result.put("listeningCorrect", listeningCorrect);
-        result.put("listeningWrong", listeningAnswered - listeningCorrect);
-        result.put("listeningUnanswered", listeningTotal - listeningAnswered);
-        result.put("readingCorrect", readingCorrect);
-        result.put("readingWrong", readingAnswered - readingCorrect);
-        result.put("readingUnanswered", readingTotal - readingAnswered);
-        result.put("totalCorrect", listeningCorrect + readingCorrect);
-        result.put("totalWrong", listeningAnswered + readingAnswered - listeningCorrect - readingCorrect);
-        result.put("totalUnanswered", totalQuestions - listeningAnswered - readingAnswered);
-        result.put("totalQuestions", totalQuestions);
-        result.put("correctCount", listeningCorrect + readingCorrect);
-        result.put("incorrectCount", listeningAnswered + readingAnswered - listeningCorrect - readingCorrect);
-        result.put("unansweredCount", totalQuestions - listeningAnswered - readingAnswered);
-        result.put("listeningScore", listeningScore);
-        result.put("readingScore", readingScore);
-        result.put("totalScore", listeningScore + readingScore);
-        result.put("estimatedTotalScore", listeningScore + readingScore);
-        result.put("durationSeconds", Math.max(0, (submittedAt - attempt.getStartedAt()) / 1000));
-        result.put("submittedAt", submittedAt);
-        result.put("autoSubmitted", autoSubmitted);
+        AttemptResult result = AttemptResult.builder()
+                .attemptId(attempt.getId())
+                .testId(attempt.getTestId())
+                .type(attemptType(attempt))
+                .mode(mode(attempt))
+                .selectedPart(attempt.getSelectedPart())
+                .selectedParts(selectedParts(attempt))
+                .timeLimitSeconds(attempt.getTimeLimitSeconds())
+                .firstQuestionNumber(firstQuestion)
+                .lastQuestionNumber(lastQuestion)
+                .listeningTotalQuestions(listeningTotal)
+                .readingTotalQuestions(readingTotal)
+                .listeningCorrect(listeningCorrect)
+                .listeningWrong(listeningAnswered - listeningCorrect)
+                .listeningUnanswered(listeningTotal - listeningAnswered)
+                .readingCorrect(readingCorrect)
+                .readingWrong(readingAnswered - readingCorrect)
+                .readingUnanswered(readingTotal - readingAnswered)
+                .totalCorrect(listeningCorrect + readingCorrect)
+                .totalWrong(listeningAnswered + readingAnswered - listeningCorrect - readingCorrect)
+                .totalUnanswered(totalQuestions - listeningAnswered - readingAnswered)
+                .totalQuestions(totalQuestions)
+                .correctCount(listeningCorrect + readingCorrect)
+                .incorrectCount(listeningAnswered + readingAnswered - listeningCorrect - readingCorrect)
+                .unansweredCount(totalQuestions - listeningAnswered - readingAnswered)
+                .listeningScore(listeningScore)
+                .readingScore(readingScore)
+                .totalScore(listeningScore + readingScore)
+                .estimatedTotalScore(listeningScore + readingScore)
+                .durationSeconds(Math.max(0, (submittedAt - attempt.getStartedAt()) / 1000))
+                .submittedAt(submittedAt)
+                .autoSubmitted(autoSubmitted)
+                .build();
 
         attempt.setStatus(COMPLETED);
         attempt.setCurrentSection(FINISHED);

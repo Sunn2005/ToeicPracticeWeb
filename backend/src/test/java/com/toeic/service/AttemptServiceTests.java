@@ -1,6 +1,7 @@
 package com.toeic.service;
 
 import com.toeic.dao.AttemptDao;
+import com.toeic.dto.AttemptResultDto;
 import com.toeic.model.Attempt;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -202,12 +203,12 @@ class AttemptServiceTests {
         when(attemptDao.findAnswers("attempt-5-7")).thenReturn(Map.of(101, "A", 147, "A"));
         when(testService.getAnswerKey("test-1")).thenReturn(answerKey);
 
-        Map<String, Object> result = attemptService.submit("user-1", "attempt-5-7");
+        AttemptResultDto result = attemptService.submit("user-1", "attempt-5-7");
 
-        assertEquals(84, result.get("totalQuestions"));
-        assertEquals(84, result.get("readingTotalQuestions"));
-        assertEquals(2, result.get("totalCorrect"));
-        assertEquals(List.of(5, 7), result.get("selectedParts"));
+        assertEquals(84, result.getTotalQuestions());
+        assertEquals(84, result.getReadingTotalQuestions());
+        assertEquals(2, result.getTotalCorrect());
+        assertEquals(List.of(5, 7), result.getSelectedParts());
     }
 
     @Test
@@ -233,14 +234,14 @@ class AttemptServiceTests {
         when(attemptDao.findAnswers("attempt-full-listening")).thenReturn(Map.of(1, "A", 32, "B"));
         when(testService.getAnswerKey("test-1")).thenReturn(answerKey);
 
-        Map<String, Object> result = attemptService.submitForReview(
+        AttemptResultDto result = attemptService.submitForReview(
                 "user-1",
                 "attempt-full-listening"
         );
 
-        assertEquals(1, result.get("totalCorrect"));
-        assertEquals(1, result.get("totalWrong"));
-        assertEquals(198, result.get("totalUnanswered"));
+        assertEquals(1, result.getTotalCorrect());
+        assertEquals(1, result.getTotalWrong());
+        assertEquals(198, result.getTotalUnanswered());
         assertEquals("COMPLETED", attempt.getStatus());
         assertEquals("FINISHED", attempt.getCurrentSection());
         verify(attemptDao).save(attempt);
@@ -270,10 +271,10 @@ class AttemptServiceTests {
         when(attemptDao.findAnswers("practice-full-listening")).thenReturn(Map.of(1, "A"));
         when(testService.getAnswerKey("test-1")).thenReturn(answerKey);
 
-        Map<String, Object> result = attemptService.submit("user-1", "practice-full-listening");
+        AttemptResultDto result = attemptService.submit("user-1", "practice-full-listening");
 
-        assertEquals(1, result.get("totalCorrect"));
-        assertEquals("PRACTICE", result.get("type"));
+        assertEquals(1, result.getTotalCorrect());
+        assertEquals("PRACTICE", result.getType());
         assertEquals("COMPLETED", attempt.getStatus());
     }
 

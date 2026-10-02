@@ -1,6 +1,7 @@
 package com.toeic.service;
 
 import com.toeic.dao.AttemptDao;
+import com.toeic.model.AttemptResult;
 import com.toeic.model.Attempt;
 import org.junit.jupiter.api.Test;
 
@@ -22,12 +23,12 @@ class UserLearningServiceTests {
         attempt.setStatus("COMPLETED");
         attempt.setScore(750);
         attempt.setSubmittedAt(1_700_000_000_000L);
-        attempt.setResult(Map.of(
-                "listeningTotalQuestions", 100,
-                "listeningScore", 390,
-                "readingTotalQuestions", 100,
-                "readingScore", 360
-        ));
+        attempt.setResult(AttemptResult.builder()
+                .listeningTotalQuestions(100)
+                .listeningScore(390)
+                .readingTotalQuestions(100)
+                .readingScore(360)
+                .build());
         when(attemptDao.findByUserId("user-1")).thenReturn(List.of(attempt));
 
         Map<String, Object> result = service.getStatistics("user-1");

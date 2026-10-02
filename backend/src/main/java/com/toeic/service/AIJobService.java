@@ -1,9 +1,11 @@
 package com.toeic.service;
 
 import com.toeic.dao.AIJobDao;
+import com.toeic.dto.ai.AIExplanationResultDto;
 import com.toeic.dto.ai.AIJobRequest;
 import com.toeic.dto.ai.AIJobResult;
 import com.toeic.model.AIJob;
+import com.toeic.model.AIExplanationResult;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -100,10 +102,11 @@ public class AIJobService {
 
         if ("SUCCEEDED".equals(message.status())
                 && message.result() != null) {
-            Map<String, Object> result = new LinkedHashMap<>();
-            result.put("explanation", message.result().explanation());
-            result.put("grammarPoint", message.result().grammarPoint());
-            result.put("correctAnswer", message.result().correctAnswer());
+            AIExplanationResult result = new AIExplanationResult(
+                    message.result().explanation(),
+                    message.result().grammarPoint(),
+                    message.result().correctAnswer()
+            );
 
             updated = aiJobDao.markSucceeded(
                     message.jobId(),
@@ -149,7 +152,7 @@ public class AIJobService {
         response.put("createdAt", job.getCreatedAt());
         response.put("updatedAt", job.getUpdatedAt());
         response.put("completedAt", job.getCompletedAt());
-        response.put("result", job.getResult());
+        response.put("result", AIExplanationResultDto.from(job.getResult()));
         response.put("error", job.getError());
         return response;
     }
