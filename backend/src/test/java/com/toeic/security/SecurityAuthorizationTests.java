@@ -2,9 +2,13 @@ package com.toeic.security;
 
 import com.toeic.config.SecurityConfig;
 import com.toeic.controller.ApiExceptionHandler;
+import com.toeic.config.AuthProperties;
+import com.toeic.model.FirebaseIdentity;
 import com.toeic.model.User;
 import com.toeic.model.enums.UserRole;
 import com.toeic.service.CurrentUserService;
+import com.toeic.service.FirebaseSessionService;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -27,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -45,6 +50,7 @@ import static org.mockito.Mockito.when;
         SecurityAuthorizationTests.SecurityProbeController.class,
         ApiExceptionHandler.class,
         SecurityConfig.class,
+        AuthProperties.class,
         FirebaseAuthenticationFilter.class,
         RestAuthenticationEntryPoint.class,
         RestAccessDeniedHandler.class
@@ -57,16 +63,23 @@ class SecurityAuthorizationTests {
     @MockitoBean
     private CurrentUserService currentUserService;
 
+    @MockitoBean
+    private FirebaseSessionService firebaseSessionService;
+
     @Test
     void productionDomainCanCompleteCorsPreflight() throws Exception {
         mockMvc.perform(options("/api/users/me/statistics")
                         .header(HttpHeaders.ORIGIN, "https://capytoeic.id.vn")
-                        .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET")
-                        .header(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "Authorization"))
+                        .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "POST")
+                        .header(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "X-XSRF-TOKEN"))
                 .andExpect(status().isOk())
                 .andExpect(header().string(
                         HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,
                         "https://capytoeic.id.vn"
+                ))
+                .andExpect(header().string(
+                        HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS,
+                        "true"
                 ));
     }
 
@@ -93,46 +106,58 @@ class SecurityAuthorizationTests {
     @Test
     void creatingAnAttemptRequiresAuthenticationEvenThoughTestReadsArePublic() throws Exception {
         mockMvc.perform(post("/api/tests/test-1/attempts"))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(post("/api/tests/test-1/attempts").with(csrf()))
                 .andExpect(status().isUnauthorized());
 
         mockMvc.perform(post("/api/tests/test-1/attempts")
+                        .with(csrf())
                         .with(authentication(authenticationFor(UserRole.USER))))
                 .andExpect(status().isOk());
     }
 
     @Test
-    void validFirebaseBearerTokenAuthenticatesTheRequest() throws Exception {
+    void validFirebaseSessionCookieAuthenticatesTheRequest() throws Exception {
+        FirebaseIdentity identity = new FirebaseIdentity(
+                "user-1", "user@example.com", "User", null, null
+        );
         User user = new User();
         user.setUid("user-1");
         user.setRole(UserRole.USER);
-        when(currentUserService.requireUser("Bearer valid-token")).thenReturn(user);
+        when(firebaseSessionService.verifySession("valid-session")).thenReturn(identity);
+        when(currentUserService.requireUser(identity)).thenReturn(user);
 
         mockMvc.perform(get("/api/users/me/statistics")
-                        .header("Authorization", "Bearer valid-token"))
+                        .cookie(new Cookie("session", "valid-session")))
                 .andExpect(status().isOk());
     }
 
     @Test
-    void invalidFirebaseBearerTokenReturnsUnauthorized() throws Exception {
-        when(currentUserService.requireUser("Bearer invalid-token")).thenThrow(
+    void invalidFirebaseSessionCookieReturnsUnauthorized() throws Exception {
+        when(firebaseSessionService.verifySession("invalid-session")).thenThrow(
                 new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token không hợp lệ")
         );
 
         mockMvc.perform(get("/api/tests")
-                        .header("Authorization", "Bearer invalid-token"))
+                        .cookie(new Cookie("session", "invalid-session")))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("AUTHENTICATION_REQUIRED"));
     }
 
     @Test
     void authenticatedBusinessErrorsAreNotConvertedToUnauthorized() throws Exception {
+        FirebaseIdentity identity = new FirebaseIdentity(
+                "user-1", "user@example.com", "User", null, null
+        );
         User user = new User();
         user.setUid("user-1");
         user.setRole(UserRole.USER);
-        when(currentUserService.requireUser("Bearer valid-token")).thenReturn(user);
+        when(firebaseSessionService.verifySession("valid-session")).thenReturn(identity);
+        when(currentUserService.requireUser(identity)).thenReturn(user);
 
         mockMvc.perform(get("/api/attempts/conflict")
-                        .header("Authorization", "Bearer valid-token"))
+                        .cookie(new Cookie("session", "valid-session")))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("CONFLICT"));
     }

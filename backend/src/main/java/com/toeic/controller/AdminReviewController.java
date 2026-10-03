@@ -6,7 +6,6 @@ import com.toeic.service.AdminReviewService;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,13 +19,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/admin")
 @PreAuthorize("hasRole('ADMIN')")
-@CrossOrigin(originPatterns = {
-        "http://localhost:5173",
-        "https://*.vercel.app",
-        "https://capytoeic.id.vn",
-        "https://www.capytoeic.id.vn"
-})
-
 public class AdminReviewController {
 
     private final AdminReviewService adminReviewService;
