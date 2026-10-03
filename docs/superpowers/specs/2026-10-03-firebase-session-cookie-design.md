@@ -133,7 +133,7 @@ When a session expires during an exam, the frontend must distinguish the `401` f
 
 Backend properties:
 
-- `app.auth.session-cookie-name=session`
+- `app.auth.cookie-name=session`
 - `app.auth.session-duration=7d`
 - `app.auth.cookie-secure=${AUTH_COOKIE_SECURE:true}`
 - `app.auth.cookie-same-site=Lax`

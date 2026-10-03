@@ -146,6 +146,22 @@ class SecurityAuthorizationTests {
     }
 
     @Test
+    void firebaseInfrastructureFailureReturnsServiceUnavailableInsteadOfLoggingTheUserOut()
+            throws Exception {
+        when(firebaseSessionService.verifySession("valid-session")).thenThrow(
+                new ResponseStatusException(
+                        HttpStatus.SERVICE_UNAVAILABLE,
+                        "FIREBASE_AUTH_UNAVAILABLE"
+                )
+        );
+
+        mockMvc.perform(get("/api/users/me/statistics")
+                        .cookie(new Cookie("session", "valid-session")))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.code").value("FIREBASE_AUTH_UNAVAILABLE"));
+    }
+
+    @Test
     void authenticatedBusinessErrorsAreNotConvertedToUnauthorized() throws Exception {
         FirebaseIdentity identity = new FirebaseIdentity(
                 "user-1", "user@example.com", "User", null, null

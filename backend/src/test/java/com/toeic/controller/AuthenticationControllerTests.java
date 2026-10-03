@@ -10,6 +10,7 @@ import com.toeic.security.RestAccessDeniedHandler;
 import com.toeic.security.RestAuthenticationEntryPoint;
 import com.toeic.service.CurrentUserService;
 import com.toeic.service.FirebaseSessionService;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
@@ -21,16 +22,22 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Duration;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -68,7 +75,25 @@ class AuthenticationControllerTests {
         mockMvc.perform(get("/api/v1/auth/csrf"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").isNotEmpty())
-                .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("XSRF-TOKEN=")));
+                .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("XSRF-TOKEN=")))
+                .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("Secure")))
+                .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("Path=/")))
+                .andExpect(result -> assertEquals(
+                        "Lax",
+                        result.getResponse().getCookie("XSRF-TOKEN").getAttribute("SameSite")
+                ));
+    }
+
+    @Test
+    void csrfEndpointCanRecoverWhenTheExistingSessionCookieIsInvalid() throws Exception {
+        when(firebaseSessionService.verifySession("stale-session")).thenThrow(
+                new ResponseStatusException(HttpStatus.UNAUTHORIZED, "FIREBASE_SESSION_INVALID")
+        );
+
+        mockMvc.perform(get("/api/v1/auth/csrf")
+                        .cookie(new Cookie("session", "stale-session")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").isNotEmpty());
     }
 
     @Test
@@ -97,6 +122,7 @@ class AuthenticationControllerTests {
 
         mockMvc.perform(post("/api/v1/auth/session")
                         .with(csrf())
+                        .cookie(new Cookie("session", "stale-session"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"idToken":"fresh-id-token"}
@@ -128,7 +154,9 @@ class AuthenticationControllerTests {
 
     @Test
     void logoutExpiresTheSameSessionCookie() throws Exception {
-        mockMvc.perform(post("/api/v1/auth/logout").with(csrf()))
+        mockMvc.perform(post("/api/v1/auth/logout")
+                        .with(csrf())
+                        .cookie(new Cookie("session", "stale-session")))
                 .andExpect(status().isNoContent())
                 .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("session=")))
                 .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("Max-Age=0")))
@@ -136,6 +164,20 @@ class AuthenticationControllerTests {
                 .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("Secure")))
                 .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("SameSite=Lax")))
                 .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("Path=/")));
+    }
+
+    @Test
+    void localHttpConfigurationOmitsTheSecureCookieAttribute() {
+        AuthenticationController controller = new AuthenticationController(
+                mock(FirebaseSessionService.class),
+                mock(CurrentUserService.class),
+                new AuthProperties("session", Duration.ofDays(7), false, "Lax")
+        );
+
+        String cookie = controller.logout().getHeaders().getFirst(HttpHeaders.SET_COOKIE);
+
+        assertNotNull(cookie);
+        assertFalse(cookie.contains("Secure"));
     }
 
     @TestConfiguration

@@ -14,19 +14,10 @@ import java.util.Map;
 @Service
 public class CurrentUserService {
 
-    private final FirebaseAuthenticationService authenticationService;
     private final UserDao userDao;
 
-    public CurrentUserService(
-            FirebaseAuthenticationService authenticationService,
-            UserDao userDao
-    ) {
-        this.authenticationService = authenticationService;
+    public CurrentUserService(UserDao userDao) {
         this.userDao = userDao;
-    }
-
-    public User requireUser(String authorization) throws Exception {
-        return requireUser(authenticationService.requireIdentity(authorization));
     }
 
     public User requireUser(FirebaseIdentity identity) throws Exception {

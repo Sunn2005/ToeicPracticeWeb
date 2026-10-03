@@ -1,9 +1,13 @@
 package com.toeic.service;
 
 import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.AuthErrorCode;
 import com.toeic.config.AuthProperties;
 import com.toeic.model.FirebaseIdentity;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -11,6 +15,7 @@ import java.time.Duration;
 import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
@@ -18,6 +23,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(OutputCaptureExtension.class)
 class FirebaseSessionServiceTests {
 
     @Test
@@ -79,9 +85,13 @@ class FirebaseSessionServiceTests {
     }
 
     @Test
-    void convertsInvalidSessionCookiesToUnauthorizedWithoutLeakingTheCookie() throws Exception {
+    void convertsInvalidSessionCookiesToUnauthorizedWithoutLeakingTheCookie(
+            CapturedOutput output
+    ) throws Exception {
         FirebaseAuthGateway firebaseAuth = mock(FirebaseAuthGateway.class);
         FirebaseAuthException firebaseError = mock(FirebaseAuthException.class);
+        when(firebaseError.getAuthErrorCode()).thenReturn(AuthErrorCode.INVALID_SESSION_COOKIE);
+        when(firebaseError.getMessage()).thenReturn("secret-cookie leaked by provider");
         when(firebaseAuth.verifySessionCookie("secret-cookie", true)).thenThrow(firebaseError);
 
         FirebaseSessionService service = new FirebaseSessionService(firebaseAuth, properties());
@@ -93,6 +103,24 @@ class FirebaseSessionServiceTests {
         assertEquals(HttpStatus.UNAUTHORIZED, error.getStatusCode());
         assertEquals("FIREBASE_SESSION_INVALID", error.getReason());
         assertTrue(error.getMessage() == null || !error.getMessage().contains("secret-cookie"));
+        assertFalse(output.getOut().contains("secret-cookie"));
+    }
+
+    @Test
+    void reportsFirebaseInfrastructureFailuresAsServiceUnavailable() throws Exception {
+        FirebaseAuthGateway firebaseAuth = mock(FirebaseAuthGateway.class);
+        FirebaseAuthException firebaseError = mock(FirebaseAuthException.class);
+        when(firebaseError.getAuthErrorCode()).thenReturn(AuthErrorCode.CERTIFICATE_FETCH_FAILED);
+        when(firebaseAuth.verifySessionCookie("session-cookie", true)).thenThrow(firebaseError);
+
+        FirebaseSessionService service = new FirebaseSessionService(firebaseAuth, properties());
+        ResponseStatusException error = assertThrows(
+                ResponseStatusException.class,
+                () -> service.verifySession("session-cookie")
+        );
+
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, error.getStatusCode());
+        assertEquals("FIREBASE_AUTH_UNAVAILABLE", error.getReason());
     }
 
     private FirebaseAuthGateway.VerifiedIdToken tokenWithAuthTime(long authTime) {

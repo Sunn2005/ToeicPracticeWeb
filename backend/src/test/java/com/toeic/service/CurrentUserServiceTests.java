@@ -18,15 +18,14 @@ class CurrentUserServiceTests {
 
     @Test
     void createsAUserProfileWithTheDefaultUserRole() throws Exception {
-        FirebaseAuthenticationService authenticationService = mock(FirebaseAuthenticationService.class);
         UserDao userDao = mock(UserDao.class);
-        CurrentUserService service = new CurrentUserService(authenticationService, userDao);
-        when(authenticationService.requireIdentity("Bearer token")).thenReturn(
-                new FirebaseIdentity("uid-1", "user@example.com", "User", null, "ADMIN")
+        CurrentUserService service = new CurrentUserService(userDao);
+        FirebaseIdentity identity = new FirebaseIdentity(
+                "uid-1", "user@example.com", "User", null, "ADMIN"
         );
         when(userDao.findByUid("uid-1")).thenReturn(Optional.empty());
 
-        User result = service.requireUser("Bearer token");
+        User result = service.requireUser(identity);
 
         assertEquals(UserRole.USER, result.getRole());
         verify(userDao).save(any(User.class));
@@ -34,9 +33,8 @@ class CurrentUserServiceTests {
 
     @Test
     void createsAUserFromVerifiedIdentityWithoutTrustingItsRoleClaim() throws Exception {
-        FirebaseAuthenticationService authenticationService = mock(FirebaseAuthenticationService.class);
         UserDao userDao = mock(UserDao.class);
-        CurrentUserService service = new CurrentUserService(authenticationService, userDao);
+        CurrentUserService service = new CurrentUserService(userDao);
         FirebaseIdentity identity = new FirebaseIdentity(
                 "uid-1",
                 "user@example.com",
@@ -54,17 +52,16 @@ class CurrentUserServiceTests {
 
     @Test
     void repairsLegacyProfileWithoutRoleAsUser() throws Exception {
-        FirebaseAuthenticationService authenticationService = mock(FirebaseAuthenticationService.class);
         UserDao userDao = mock(UserDao.class);
-        CurrentUserService service = new CurrentUserService(authenticationService, userDao);
+        CurrentUserService service = new CurrentUserService(userDao);
         User legacyUser = new User();
         legacyUser.setUid("uid-legacy");
-        when(authenticationService.requireIdentity("Bearer token")).thenReturn(
-                new FirebaseIdentity("uid-legacy", null, null, null, "ADMIN")
+        FirebaseIdentity identity = new FirebaseIdentity(
+                "uid-legacy", null, null, null, "ADMIN"
         );
         when(userDao.findByUid("uid-legacy")).thenReturn(Optional.of(legacyUser));
 
-        User result = service.requireUser("Bearer token");
+        User result = service.requireUser(identity);
 
         assertEquals(UserRole.USER, result.getRole());
         verify(userDao).save(legacyUser);
@@ -72,9 +69,8 @@ class CurrentUserServiceTests {
 
     @Test
     void updatesTheLearnerProfileAndTargetScore() throws Exception {
-        FirebaseAuthenticationService authenticationService = mock(FirebaseAuthenticationService.class);
         UserDao userDao = mock(UserDao.class);
-        CurrentUserService service = new CurrentUserService(authenticationService, userDao);
+        CurrentUserService service = new CurrentUserService(userDao);
         User user = new User();
         user.setUid("uid-1");
         user.setEmail("user@example.com");

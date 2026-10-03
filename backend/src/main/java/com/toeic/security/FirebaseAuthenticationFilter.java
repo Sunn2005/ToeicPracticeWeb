@@ -8,10 +8,10 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.server.ResponseStatusException;
@@ -23,21 +23,31 @@ import java.util.List;
 @Component
 public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
 
+    private static final String AUTH_PATH_PREFIX = "/api/v1/auth/";
+
     private final CurrentUserService currentUserService;
     private final FirebaseSessionService firebaseSessionService;
     private final AuthProperties authProperties;
-    private final AuthenticationEntryPoint authenticationEntryPoint;
+    private final RestAuthenticationEntryPoint authenticationEntryPoint;
 
     public FirebaseAuthenticationFilter(
             CurrentUserService currentUserService,
             FirebaseSessionService firebaseSessionService,
             AuthProperties authProperties,
-            AuthenticationEntryPoint authenticationEntryPoint
+            RestAuthenticationEntryPoint authenticationEntryPoint
     ) {
         this.currentUserService = currentUserService;
         this.firebaseSessionService = firebaseSessionService;
         this.authProperties = authProperties;
         this.authenticationEntryPoint = authenticationEntryPoint;
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        // Authentication recovery endpoints must remain reachable when an old
+        // session cookie is expired or revoked. CSRF protection still runs in
+        // Spring Security and protects the unsafe session/logout requests.
+        return request.getRequestURI().startsWith(AUTH_PATH_PREFIX);
     }
 
     @Override
@@ -68,6 +78,16 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (ResponseStatusException exception) {
             SecurityContextHolder.clearContext();
+            if (exception.getStatusCode().value() == HttpServletResponse.SC_SERVICE_UNAVAILABLE) {
+                authenticationEntryPoint.writeError(
+                        request,
+                        response,
+                        HttpStatus.SERVICE_UNAVAILABLE,
+                        "FIREBASE_AUTH_UNAVAILABLE",
+                        "Dịch vụ xác thực tạm thời không khả dụng"
+                );
+                return;
+            }
             authenticationEntryPoint.commence(
                     request,
                     response,
