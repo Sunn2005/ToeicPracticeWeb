@@ -77,12 +77,12 @@ Nếu dùng Windows PowerShell:
 Copy-Item .env.example .env.local
 ```
 
-### Cách A — dùng backend production trên Render
+### Cách A — dùng backend production qua custom domain
 
 Đây là lựa chọn đơn giản nhất cho thành viên chỉ làm frontend:
 
 ```env
-VITE_API_BASE_URL=https://toeicpracticeweb.onrender.com
+VITE_API_BASE_URL=https://api.capytoeic.id.vn
 ```
 
 Lưu ý: Render Free có thể sleep khi không có người dùng. Request đầu tiên đôi khi mất khoảng 30–60 giây.
@@ -96,6 +96,7 @@ VITE_API_BASE_URL=http://localhost:8080
 ```
 
 Frontend phải chạy tại `http://localhost:5173` vì backend hiện cho phép CORS đối với origin này.
+Backend local qua HTTP phải có `AUTH_COOKIE_SECURE=false`; production giữ mặc định `true`.
 
 ### Quy tắc bảo mật `.env`
 
@@ -275,7 +276,7 @@ const metadata = await publicApiFetch("/api/tests/test-1");
 
 ### API cần đăng nhập
 
-Dùng `apiFetch` cho endpoint cần Firebase ID token:
+Dùng `apiFetch` cho endpoint cần phiên đăng nhập:
 
 ```jsx
 import { apiFetch } from "../api/client";
@@ -289,7 +290,6 @@ Ví dụ gửi JSON:
 ```jsx
 const attempt = await apiFetch("/api/tests/test-1/attempts", {
   method: "POST",
-  forceRefresh: true,
   body: JSON.stringify({
     mode: "PART",
     part: 3,
@@ -299,7 +299,9 @@ const attempt = await apiFetch("/api/tests/test-1/attempts", {
 });
 ```
 
-`apiFetch` tự lấy Firebase ID token, thêm `Authorization: Bearer <token>` và thử refresh token một lần khi nhận `401`.
+`apiFetch` luôn gửi cookie phiên bằng `credentials: "include"`. Với `POST`, `PUT`, `PATCH` và `DELETE`, client tự lấy CSRF token và gửi header `X-XSRF-TOKEN`.
+
+Firebase ID token chỉ tồn tại tạm thời trong memory trong lúc đăng nhập. Frontend gửi token này một lần tới `/api/v1/auth/session`; backend đổi nó thành Firebase session cookie `HttpOnly`. Frontend không lưu ID token, refresh token hoặc session cookie trong localStorage.
 
 Không tự sao chép logic lấy token vào từng page. Nếu cần thêm endpoint, hãy tạo wrapper trong file tương ứng của thư mục `src/api/`.
 
@@ -406,9 +408,15 @@ Render Free có thể đang cold start. Chờ khoảng 30–60 giây rồi thử
 ### `401 Unauthorized`
 
 - Đăng nhập lại bằng Google.
-- Đăng xuất rồi đăng nhập lại để refresh token.
-- Không gửi Google OAuth access token; backend cần Firebase ID token.
+- Phiên cookie có thể đã hết hạn hoặc bị thu hồi.
+- Không gửi Google OAuth access token trực tiếp tới API nghiệp vụ.
 - Với code mới, ưu tiên dùng `apiFetch` thay vì tự viết `fetch`.
+
+### `403 CSRF_TOKEN_INVALID`
+
+- Không tự viết `fetch` cho request thay đổi dữ liệu; dùng `apiFetch` để gửi CSRF token đúng cách.
+- Kiểm tra `VITE_API_BASE_URL` và bảo đảm request dùng `credentials: "include"`.
+- Nếu vừa đổi domain hoặc xóa cookie, tải lại trang để lấy CSRF token mới.
 
 ### `403 Forbidden`
 

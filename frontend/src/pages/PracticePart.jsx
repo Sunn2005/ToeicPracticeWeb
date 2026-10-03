@@ -1,17 +1,13 @@
 import { useEffect, useState } from "react";
-import { auth } from "../firebase";
+import { loadPracticePart, startPracticeAttempt } from "../api/practice";
+import { useAuth } from "../auth/useAuth";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import LoadingScreen from "../components/LoadingScreen";
 import { useLanguage } from "../i18n/LanguageContext";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ||
-  (import.meta.env.DEV
-    ? "http://localhost:8080"
-    : "https://toeicpracticeweb.onrender.com");
-
 function PracticePart() {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [part, setPart] = useState(null);
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(true);
@@ -20,14 +16,7 @@ function PracticePart() {
   const [startingAttempt, setStartingAttempt] = useState(false);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/tests/test_001/parts/part5`)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Unable to load data");
-        }
-
-        return response.json();
-      })
+    loadPracticePart("test_001", "part5")
       .then((data) => {
         setPart(data);
         setLoading(false);
@@ -40,8 +29,6 @@ function PracticePart() {
 
   const startAttempt = async () => {
     try {
-      const user = auth.currentUser;
-
       if (!user) {
         alert(t("signInBeforeTest"));
         return;
@@ -49,34 +36,7 @@ function PracticePart() {
 
       setStartingAttempt(true);
 
-      // getIdToken() trả về Firebase ID token. Tham số true buộc Firebase
-      // refresh token để backend không nhận lại token cũ trong cache.
-      const idToken = await auth.currentUser.getIdToken(true);
-
-      const response = await fetch(`${API_BASE_URL}/api/attempts`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`,
-        },
-        body: JSON.stringify({
-          testId: "test_001",
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-
-        console.error("Backend error:", errorText);
-
-        throw new Error(
-          `Unable to create attempt - Status ${response.status}: ${errorText}`,
-        );
-      }
-
-      const data = await response.json();
-
-      console.log("Attempt:", data);
+      const data = await startPracticeAttempt("test_001");
 
       setAttemptId(data.id);
     } catch (error) {

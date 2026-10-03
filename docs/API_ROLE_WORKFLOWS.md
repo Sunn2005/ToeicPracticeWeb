@@ -11,21 +11,44 @@ Tài liệu này mô tả contract hiện tại của REST API trong `backend`: 
 - Upload media dùng `multipart/form-data`.
 - Các thời điểm như `createdAt`, `updatedAt`, `startedAt`, `submittedAt` là Unix timestamp theo millisecond (`Long`).
 - Những field chưa có dữ liệu có thể trả về `null`.
-- API không dùng session phía server; token phải được gửi lại trong mỗi request được bảo vệ.
+- API không lưu session trong bộ nhớ server. Trình duyệt gửi Firebase session cookie đã ký trong mỗi request được bảo vệ.
 
 ### Xác thực
 
-Mọi endpoint được bảo vệ yêu cầu header:
+Sau khi đăng nhập bằng Firebase Web SDK, frontend gửi ID token mới phát hành một lần tới `POST /api/v1/auth/session`. Backend xác minh token và trả Firebase session cookie có các thuộc tính `HttpOnly`, `Secure` trên production, `SameSite=Lax`, `Path=/` và thời hạn cố định 7 ngày.
 
-```http
-Authorization: Bearer <Firebase-ID-token>
-```
+Mọi endpoint được bảo vệ đọc cookie `session`; frontend phải gọi API với `credentials: "include"`. ID token, refresh token và session cookie không được lưu thủ công trong localStorage. Localhost qua HTTP phải chạy backend với `AUTH_COOKIE_SECURE=false`; production giữ `AUTH_COOKIE_SECURE=true`.
+
+Các request `POST`, `PUT`, `PATCH` và `DELETE` phải gửi CSRF token. Frontend lấy token từ `GET /api/v1/auth/csrf` và gửi lại qua header `X-XSRF-TOKEN`; cookie CSRF tương ứng được trình duyệt gửi tự động.
 
 `GUEST` là phiên trình duyệt chưa đăng nhập và không được lưu trong Firestore. Profile đã đăng nhập nằm tại `users/{uid}`; tài khoản mới mặc định có role `USER`.
 
 Firestore `users/{uid}.role` là nguồn dữ liệu duy nhất dùng để phân quyền. Role `EMPLOYEE` hoặc `ADMIN` phải được gán bằng quy trình quản trị tin cậy. Không nhận role từ request body, local storage hoặc state của frontend.
 
 Spring Security ánh xạ role thành `ROLE_USER`, `ROLE_EMPLOYEE`, `ROLE_ADMIN`.
+
+### Endpoint phiên đăng nhập
+
+#### Lấy CSRF token
+
+- **Method/path:** `GET /api/v1/auth/csrf`.
+- **Quyền:** public.
+- **Response:** `200 OK`, `{ "token": "..." }`, đồng thời khởi tạo cookie CSRF.
+
+#### Tạo session
+
+- **Method/path:** `POST /api/v1/auth/session`.
+- **Quyền:** public nhưng bắt buộc CSRF.
+- **Body:** `{ "idToken": "<fresh Firebase ID token>" }`.
+- **Response:** `200 OK`, profile hiện tại trong JSON và session cookie trong `Set-Cookie`.
+- Backend chỉ chấp nhận lần xác thực Firebase diễn ra trong 5 phút gần nhất và không trả credential trong JSON.
+
+#### Đăng xuất
+
+- **Method/path:** `POST /api/v1/auth/logout`.
+- **Quyền:** public nhưng bắt buộc CSRF.
+- **Response:** `204 No Content` và cookie `session` hết hạn.
+- Logout trình duyệt hiện tại không thu hồi phiên trên các thiết bị khác.
 
 ### Ma trận phân quyền
 

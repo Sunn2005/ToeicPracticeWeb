@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { afterEach, test } from "node:test";
 import {
   ApiError,
+  API_BASE_URL,
   apiFetch,
   clearCsrfToken,
   getCsrfToken,
@@ -10,6 +11,10 @@ import {
 import { createSession, destroySession } from "./auth.js";
 
 const originalFetch = globalThis.fetch;
+
+test("production fallback uses the same-site custom API domain", () => {
+  assert.equal(API_BASE_URL, "https://api.capytoeic.id.vn");
+});
 
 afterEach(() => {
   globalThis.fetch = originalFetch;
