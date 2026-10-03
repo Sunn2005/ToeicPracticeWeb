@@ -35,9 +35,6 @@ import ProfilePage from "./pages/user/ProfilePage";
 function AppRoutes() {
   const { user, role, authLoading } = useAuth();
   const location = useLocation();
-  const userShellPaths = new Set(["/dashboard", "/tests", "/history", "/profile"]);
-  const usesUserShell = userShellPaths.has(location.pathname)
-    || /^\/full-test\/[^/]+\/result$/.test(location.pathname);
 
   if (authLoading) {
     return <LoadingScreen />;
@@ -97,7 +94,7 @@ function AppRoutes() {
         </Route>
       </Route>
       </Routes>
-      {!location.pathname.startsWith("/console") && !usesUserShell && <FloatingPet user={user} role={role} />}
+      {!location.pathname.startsWith("/console") && <FloatingPet user={user} role={role} />}
     </>
   );
 }
