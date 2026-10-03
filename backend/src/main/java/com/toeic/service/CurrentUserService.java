@@ -26,7 +26,10 @@ public class CurrentUserService {
     }
 
     public User requireUser(String authorization) throws Exception {
-        FirebaseIdentity identity = authenticationService.requireIdentity(authorization);
+        return requireUser(authenticationService.requireIdentity(authorization));
+    }
+
+    public User requireUser(FirebaseIdentity identity) throws Exception {
         User existing = userDao.findByUid(identity.uid()).orElse(null);
         if (existing != null) {
             if (existing.getRole() == null) {

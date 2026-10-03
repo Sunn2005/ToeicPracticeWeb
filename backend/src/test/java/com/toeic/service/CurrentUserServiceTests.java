@@ -33,6 +33,26 @@ class CurrentUserServiceTests {
     }
 
     @Test
+    void createsAUserFromVerifiedIdentityWithoutTrustingItsRoleClaim() throws Exception {
+        FirebaseAuthenticationService authenticationService = mock(FirebaseAuthenticationService.class);
+        UserDao userDao = mock(UserDao.class);
+        CurrentUserService service = new CurrentUserService(authenticationService, userDao);
+        FirebaseIdentity identity = new FirebaseIdentity(
+                "uid-1",
+                "user@example.com",
+                "User",
+                null,
+                "ADMIN"
+        );
+        when(userDao.findByUid("uid-1")).thenReturn(Optional.empty());
+
+        User result = service.requireUser(identity);
+
+        assertEquals(UserRole.USER, result.getRole());
+        verify(userDao).save(any(User.class));
+    }
+
+    @Test
     void repairsLegacyProfileWithoutRoleAsUser() throws Exception {
         FirebaseAuthenticationService authenticationService = mock(FirebaseAuthenticationService.class);
         UserDao userDao = mock(UserDao.class);
