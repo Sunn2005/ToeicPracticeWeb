@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { signOut } from "firebase/auth";
-import { auth } from "../firebase";
 import { useAuth } from "../auth/useAuth";
 import BrandLogo from "../components/BrandLogo";
 import LanguageSwitcher from "../components/LanguageSwitcher";
@@ -44,7 +42,7 @@ function UserAvatar({ photoUrl, name }) {
 
 export default function UserLayout() {
   const { t } = useLanguage();
-  const { user, profile } = useAuth();
+  const { user, profile, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -57,7 +55,7 @@ export default function UserLayout() {
 
   const handleSignOut = async () => {
     setSigningOut(true);
-    await signOut(auth);
+    await logout();
     navigate("/login", { replace: true });
   };
 

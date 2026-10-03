@@ -2,6 +2,7 @@ import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
+import { useAuth } from "../auth/useAuth";
 import BrandLogo from "../components/BrandLogo";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import { useLanguage } from "../i18n/LanguageContext";
@@ -17,6 +18,7 @@ const GOOGLE_SIGN_IN_ERROR_KEYS = {
 function Login() {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const { establishSession, profileError } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -30,7 +32,8 @@ function Login() {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: "select_account" });
 
-      await signInWithPopup(auth, provider);
+      const credential = await signInWithPopup(auth, provider);
+      await establishSession(credential.user);
       navigate("/dashboard", { replace: true });
     } catch (error) {
       const errorCode = typeof error?.code === "string" ? error.code : "unknown";
@@ -112,12 +115,12 @@ function Login() {
                 {t("googleSignInSupport")}
               </p>
 
-              {errorMessage && (
+              {(errorMessage || profileError) && (
                 <p
                   role="alert"
                   className="mt-4 [overflow-wrap:anywhere] rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700"
                 >
-                  {errorMessage}
+                  {errorMessage || profileError}
                 </p>
               )}
 

@@ -1,12 +1,12 @@
-import { signOut } from "firebase/auth";
 import { Link, useNavigate } from "react-router-dom";
-import { auth } from "../../firebase";
+import { useAuth } from "../../auth/useAuth";
 
 function ForbiddenPage() {
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const useAnotherAccount = async () => {
-    await signOut(auth);
+    await logout();
     navigate("/console", { replace: true });
   };
 

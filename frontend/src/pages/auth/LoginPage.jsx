@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
-import { apiFetch } from "../../api/client";
 import { useAuth } from "../../auth/useAuth";
 import BrandLogo from "../../components/BrandLogo";
 import { auth } from "../../firebase";
@@ -35,7 +34,7 @@ function authErrorMessage(error) {
 function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, role, profileLoading } = useAuth();
+  const { user, role, profileLoading, establishSession, logout } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -56,12 +55,16 @@ function LoginPage() {
     setErrorMessage("");
 
     try {
-      await signInWithEmailAndPassword(auth, toStaffEmail(username), password);
-      const profile = await apiFetch("/api/me", { forceRefresh: true });
+      const credential = await signInWithEmailAndPassword(
+        auth,
+        toStaffEmail(username),
+        password,
+      );
+      const profile = await establishSession(credential.user);
       const nextRole = String(profile?.role || "").toUpperCase();
 
       if (!STAFF_ROLES.has(nextRole)) {
-        await signOut(auth);
+        await logout();
         setErrorMessage("Tài khoản này không có quyền truy cập trang quản trị.");
         return;
       }

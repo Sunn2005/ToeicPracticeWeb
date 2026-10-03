@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { signOut } from "firebase/auth";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/useAuth";
-import { auth } from "../firebase";
 
 const iconPaths = {
   dashboard: ["M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"],
@@ -32,7 +30,7 @@ function initials(profile) {
 
 function ManagementLayout() {
   const navigate = useNavigate();
-  const { profile, role } = useAuth();
+  const { profile, role, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isAdmin = role === "ADMIN";
 
@@ -45,7 +43,7 @@ function ManagementLayout() {
   ];
 
   const handleLogout = async () => {
-    await signOut(auth);
+    await logout();
     navigate("/console", { replace: true });
   };
 

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-import { auth } from "../firebase";
+import { useAuth } from "../auth/useAuth";
 import { apiFetch, publicApiFetch } from "../api/client";
 import TestList from "../components/TestList";
 import TestModeModal from "../components/TestModeModal";
@@ -48,6 +47,7 @@ function UserAvatar({ user, displayName, size = "large" }) {
 function Welcome({ user }) {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState("");
   const [selectedTest, setSelectedTest] = useState(null);
@@ -118,7 +118,7 @@ function Welcome({ user }) {
     setSignOutError("");
 
     try {
-      await signOut(auth);
+      await logout();
       navigate("/login", { replace: true });
     } catch (error) {
       console.error("Unable to sign out:", error);
