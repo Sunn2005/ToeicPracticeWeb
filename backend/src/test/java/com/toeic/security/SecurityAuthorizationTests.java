@@ -2,12 +2,14 @@ package com.toeic.security;
 
 import com.toeic.config.SecurityConfig;
 import com.toeic.controller.ApiExceptionHandler;
+import com.toeic.controller.AdminSubscriptionController;
 import com.toeic.config.AuthProperties;
 import com.toeic.model.FirebaseIdentity;
 import com.toeic.model.User;
 import com.toeic.model.enums.UserRole;
 import com.toeic.service.CurrentUserService;
 import com.toeic.service.FirebaseSessionService;
+import com.toeic.service.SubscriptionService;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,7 @@ import org.springframework.boot.security.autoconfigure.web.servlet.ServletWebSec
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -35,12 +38,14 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.mockito.Mockito.when;
 
-@WebMvcTest(SecurityAuthorizationTests.SecurityProbeController.class)
+@WebMvcTest({SecurityAuthorizationTests.SecurityProbeController.class, AdminSubscriptionController.class})
 @ImportAutoConfiguration({
         SecurityAutoConfiguration.class,
         SecurityFilterAutoConfiguration.class,
@@ -48,6 +53,7 @@ import static org.mockito.Mockito.when;
 })
 @Import({
         SecurityAuthorizationTests.SecurityProbeController.class,
+        AdminSubscriptionController.class,
         ApiExceptionHandler.class,
         SecurityConfig.class,
         AuthProperties.class,
@@ -65,6 +71,9 @@ class SecurityAuthorizationTests {
 
     @MockitoBean
     private FirebaseSessionService firebaseSessionService;
+
+    @MockitoBean
+    private SubscriptionService subscriptionService;
 
     @Test
     void productionDomainCanCompleteCorsPreflight() throws Exception {
@@ -210,6 +219,53 @@ class SecurityAuthorizationTests {
         mockMvc.perform(get("/api/admin/test-submissions")
                         .with(authentication(authenticationFor(UserRole.ADMIN))))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void adminCanReadActivateAndRevokeSubscriptions() throws Exception {
+        SubscriptionService.SubscriptionSummary summary = new SubscriptionService.SubscriptionSummary(
+                "PRO", com.toeic.model.enums.SubscriptionStatus.ACTIVE, 1L, 1_800_000_050_000L,
+                List.of(com.toeic.model.enums.Entitlement.AI_CHAT, com.toeic.model.enums.Entitlement.AI_ANALYSIS), true);
+        when(subscriptionService.getSummary("target-user")).thenReturn(summary);
+        when(subscriptionService.activateOrExtend("target-user", 1_800_000_050_000L, "admin-1"))
+                .thenReturn(summary);
+        when(subscriptionService.revoke("target-user", "admin-1")).thenReturn(summary);
+        for (var request : List.of(get("/api/admin/subscriptions/target-user"),
+                put("/api/admin/subscriptions/target-user").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"expiresAt\":1800000050000}"),
+                delete("/api/admin/subscriptions/target-user"))) {
+            mockMvc.perform(request.with(csrf()).with(authentication(authenticationFor(UserRole.ADMIN))))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.planCode").value("PRO"));
+        }
+    }
+
+    @Test
+    void userAndEmployeeCannotReadActivateOrRevokeSubscriptions() throws Exception {
+        for (UserRole role : List.of(UserRole.USER, UserRole.EMPLOYEE)) {
+            for (var request : List.of(get("/api/admin/subscriptions/target-user"),
+                    put("/api/admin/subscriptions/target-user").contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"expiresAt\":1800000050000}"),
+                    delete("/api/admin/subscriptions/target-user"))) {
+                mockMvc.perform(request.with(csrf()).with(authentication(authenticationFor(role))))
+                        .andExpect(status().isForbidden())
+                        .andExpect(jsonPath("$.code").value("ACCESS_DENIED"));
+            }
+        }
+        org.mockito.Mockito.verifyNoInteractions(subscriptionService);
+    }
+
+    @Test
+    void guestCannotReadOrMutateSubscriptions() throws Exception {
+        for (var request : List.of(get("/api/admin/subscriptions/target-user"),
+                put("/api/admin/subscriptions/target-user").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"expiresAt\":1800000050000}"),
+                delete("/api/admin/subscriptions/target-user"))) {
+            mockMvc.perform(request.with(csrf()))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.code").value("AUTHENTICATION_REQUIRED"));
+        }
+        org.mockito.Mockito.verifyNoInteractions(subscriptionService);
     }
 
     private ToeicAuthenticationToken authenticationFor(UserRole role) {
