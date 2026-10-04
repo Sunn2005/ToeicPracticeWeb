@@ -251,9 +251,27 @@ Response trong lúc thi luôn loại bỏ đệ quy các field bí mật: `corre
   "photoUrl": "https://example.com/avatar.png",
   "role": "USER",
   "createdAt": 1789020000000,
-  "lastLoginAt": 1789020000000
+  "lastLoginAt": 1789020000000,
+  "subscription": {
+    "planCode": "PRO",
+    "status": "ACTIVE",
+    "startsAt": 1789020000000,
+    "expiresAt": 1791612000000,
+    "entitlements": ["AI_CHAT", "AI_ANALYSIS"],
+    "effective": true
+  }
 }
 ```
+
+`subscription` luôn có đúng sáu field: `planCode`, `status`, `startsAt`, `expiresAt`, `entitlements`, `effective`. Không trả UID hay metadata audit. Khi chưa có subscription, bốn field đầu là `null`, `entitlements=[]`, `effective=false`.
+
+### 3.2 Schema subscription và quyền Pro
+
+Firestore lưu tại `subscriptions/{uid}`: `userId`, `planCode`, `status`, `entitlements`, `startsAt`, `expiresAt`, `activatedBy`, `revokedBy`, `revokedAt`, `createdAt`, `updatedAt`. Các thời điểm là Unix millisecond; audit actor là UID admin. `planCode=PRO`, `status` là `ACTIVE` hoặc `REVOKED`; quyền hiện tại gồm `AI_CHAT`, `AI_ANALYSIS`.
+
+Server tính `effective` bằng `status=ACTIVE && startsAt <= serverNow && serverNow < expiresAt`; thiếu thời điểm làm subscription không có hiệu lực. Quyền chỉ được cấp khi subscription có hiệu lực và danh sách `entitlements` chứa quyền cần thiết. Hết hạn không tự đổi status đã lưu thành `REVOKED`. Role vẫn lấy từ `users/{uid}.role`, độc lập với Pro.
+
+`AI_CHAT` hiện chỉ là giá trị entitlement; tài liệu này không xác nhận có API/chat UI hoặc thanh toán đã triển khai.
 
 ## 4. API catalog đề thi công khai
 
@@ -586,7 +604,9 @@ Frontend mới nên dùng `POST /api/attempts/{attemptId}/submit`.
 - **Path:** `/api/attempts/{attemptId}/ai-analysis`.
 - **Quyền:** đã đăng nhập; chỉ owner.
 - **Body:** không có.
+- **Query:** `refresh: boolean`, mặc định `false`; `true` yêu cầu phân tích lại kết quả đã hoàn thành.
 - **Điều kiện:** attempt phải có `type=FULL_TEST`, `mode=FULL`, `status=COMPLETED`.
+- **Quyền Pro:** tạo mới, thử lại job thất bại và refresh cần entitlement `AI_ANALYSIS` đang có hiệu lực. Thiếu quyền trả `403 PRO_REQUIRED` trước khi lưu hoặc publish job.
 - **Response thành công:** `200 OK`.
 
 ```json
@@ -598,7 +618,9 @@ Frontend mới nên dùng `POST /api/attempts/{attemptId}/submit`.
 }
 ```
 
-Trạng thái có thể là `NOT_REQUESTED`, `PENDING`, `PROCESSING`, `COMPLETED`, `FAILED`. Gọi lại khi đang xử lý hoặc đã hoàn thành không tạo job trùng; server trả trạng thái hiện tại.
+Trạng thái có thể là `NOT_REQUESTED`, `PENDING`, `PROCESSING`, `COMPLETED`, `FAILED`. Gọi lại khi đang xử lý hoặc đã hoàn thành với `refresh=false` không tạo job trùng; server trả trạng thái hiện tại.
+
+Job `PENDING`/`PROCESSING` luôn trả trạng thái hiện tại kể cả `refresh=true`. Kết quả `COMPLETED` với `refresh=false` cũng trả trạng thái hiện tại; các trường hợp idempotent này không yêu cầu Pro còn hiệu lực.
 
 - **Lỗi chính:** `409 CONFLICT` nếu không phải Full Test đầy đủ hoặc chưa hoàn thành; `503 SERVICE_UNAVAILABLE` nếu không publish được yêu cầu sang AI Service.
 
@@ -633,6 +655,8 @@ Trạng thái có thể là `NOT_REQUESTED`, `PENDING`, `PROCESSING`, `COMPLETED
 ```
 
 Khi chưa hoàn thành, `result` là `null`. Nếu trạng thái là `COMPLETED` nhưng document kết quả chưa tồn tại, server trả `409 CONFLICT`.
+
+GET không yêu cầu entitlement Pro; owner vẫn đọc được kết quả đã hoàn thành sau khi subscription hết hạn hoặc bị thu hồi. Ownership check vẫn áp dụng cho cả attempt và kết quả.
 
 ## 7. API AI giải thích một câu hỏi
 
@@ -853,6 +877,22 @@ Tất cả endpoint trong mục này yêu cầu role `ADMIN`.
 - **Params/body:** không có.
 - **Response thành công:** `200 OK`, mảng `TestMetadata` có status `APPROVED`/`REJECTED` và `reviewedAt` khác `null`, sắp xếp lần review mới nhất trước.
 
+### 9.6 Quản lý subscription Pro
+
+Tất cả endpoint dưới đây yêu cầu role `ADMIN`, session hợp lệ; PUT/DELETE còn cần CSRF như quy ước chung. `uid` là UID người nhận subscription, không phải UID người thực hiện. Actor `activatedBy`/`revokedBy` lấy từ principal đã xác thực, không từ body.
+
+| Method/path | Body | Response |
+| --- | --- | --- |
+| `GET /api/admin/subscriptions/{uid}` | Không có | `200 OK`, summary sáu field tại mục 3.1. |
+| `PUT /api/admin/subscriptions/{uid}` | Chỉ `{ "expiresAt": 1791612000000 }` | `200 OK`, summary sau kích hoạt/gia hạn. |
+| `DELETE /api/admin/subscriptions/{uid}` | Không có | `200 OK`, summary sau thu hồi (không phải `204`). |
+
+GET với subscription chưa tồn tại trả summary rỗng, không trả `404`. PUT yêu cầu `expiresAt` bắt buộc, là Unix millisecond sau thời gian server; thiếu/null trả `400 VALIDATION_ERROR`, body không deserialize được trả `400 INVALID_REQUEST_BODY`, thời hạn không ở tương lai trả `400 SUBSCRIPTION_EXPIRY_INVALID`. Không gửi `planCode`, `status`, quyền, ngày bắt đầu hoặc audit fields.
+
+PUT tạo subscription mới hoặc kích hoạt lại subscription hết hạn/bị thu hồi với `startsAt=serverNow`. Khi status `ACTIVE` và expiry hiện tại còn ở tương lai, PUT giữ ngày bắt đầu (nếu có), chỉ kéo dài expiry; expiry yêu cầu bằng hoặc sớm hơn expiry hiện tại là no-op sau khi đã validate thời điểm tương lai. Khi ghi, server đặt `PRO`, `ACTIVE`, `[AI_CHAT, AI_ANALYSIS]`, cập nhật `activatedBy`/`updatedAt`, xóa metadata thu hồi và giữ `createdAt` cũ.
+
+DELETE đánh dấu `REVOKED`, cập nhật `revokedBy`, `revokedAt`, `updatedAt`; không xóa document. Subscription chưa tồn tại hoặc đã `REVOKED` là no-op và vẫn trả `200 OK`. Thiếu session trả `401 AUTHENTICATION_REQUIRED`; sai role trả `403 ACCESS_DENIED`.
+
 ## 10. API nội bộ kiểm thử AI
 
 ### 10.1 Publish trực tiếp một yêu cầu giải thích
@@ -926,6 +966,8 @@ Security và application errors đều trả JSON. Frontend nên xử lý theo H
 | `401` | `AUTHENTICATION_REQUIRED` | Thiếu, sai hoặc hết hạn Firebase ID token. |
 | `403` | `ACCESS_DENIED` | User đã đăng nhập nhưng thiếu role cần thiết. |
 | `403` | `FORBIDDEN` | Lỗi quyền sở hữu/nghiệp vụ do service trả về. |
+| `403` | `PRO_REQUIRED` | Tạo/thử lại/refresh AI analysis khi thiếu entitlement Pro có hiệu lực. |
+| `400` | `SUBSCRIPTION_EXPIRY_INVALID` | Expiry subscription không sau thời gian server. |
 | `404` | `NOT_FOUND` | Resource không tồn tại hoặc bị che bởi rule ownership/publication. |
 | `409` | `CONFLICT` | Trạng thái workflow/section không cho phép thao tác. |
 | `503` | `SERVICE_UNAVAILABLE` | Storage, RabbitMQ hoặc AI service chưa sẵn sàng. |

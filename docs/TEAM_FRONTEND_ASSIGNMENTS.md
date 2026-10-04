@@ -120,13 +120,15 @@ Không được sửa:
 - Logic làm bài để phù hợp với cấu trúc đề đang tạo.
 - File của Member 1, 2 hoặc 4.
 
-### Member 4 — Admin review workflow
+### Member 4 — Admin review workflow và subscription Pro
 
 Được sửa:
 
 - `src/pages/admin/**`
 - `src/components/admin/**`
 - `src/api/adminReviews.js`
+- `src/api/adminSubscriptions.js` và `src/api/adminSubscriptions.test.js`
+- Trang Pro: `src/pages/admin/SubscriptionManagementPage.jsx`, helper `subscriptionManagement.js` và `subscriptionManagement.test.js`.
 
 Nhiệm vụ chính:
 
@@ -134,6 +136,8 @@ Nhiệm vụ chính:
 - Trang xem chi tiết nội dung cần duyệt.
 - Approve, reject và nhập lý do reject.
 - Lịch sử duyệt.
+- Quản lý Pro tại `/console/subscriptions`: tra UID, kích hoạt/gia hạn với body chỉ `expiresAt`, xác nhận thu hồi; dùng summary server để hiển thị hiệu lực. Route chỉ cho `ADMIN`, điều hướng subscription chỉ xuất hiện cho admin.
+- Wrapper subscription dùng `apiFetch`, encode UID và xử lý status/code; không tự lấy token, suy luận quyền từ expiry trên trình duyệt hoặc gửi audit actor.
 - Xử lý đúng `401`, `403`, `404` và `409` từ backend.
 
 Không được sửa:
@@ -186,6 +190,12 @@ Các file sau thuộc trưởng nhóm/người phụ trách backend và exam flo
 Nếu phát hiện lỗi trong các file này, tạo issue hoặc mô tả trong PR gồm: cách tái hiện, kết quả mong đợi, kết quả thực tế, ảnh chụp và log lỗi đã loại bỏ token/dữ liệu nhạy cảm. Không tự sửa ngoài phạm vi.
 
 ## 5. File dùng chung có nguy cơ conflict
+
+### Tích hợp Pro: route, điều hướng và profile
+
+Member 4 sở hữu page/helper/API/test subscription nêu trên. Member 1 tích hợp route `/console/subscriptions` trong `src/App.jsx` và liên kết admin trong `src/layouts/ManagementLayout.jsx`; giữ guard role và mọi route `/full-test/**`. Thay đổi `src/auth/**` để dùng summary `GET /api/me.subscription` thuộc Member 1. Thành viên khác cần phối hợp owner trước khi sửa các file này.
+
+Các file review/AI trong mục 4 vẫn bị khóa, gồm `src/pages/FullTestReview.jsx`; việc hiển thị `PRO_REQUIRED` và giữ khả năng đọc kết quả sau expiry thuộc trưởng nhóm/người phụ trách AI. API client, auth infrastructure, backend và AI service không thuộc quyền sửa của Member 4. Entitlement `AI_CHAT` không có nghĩa là chat hoặc thanh toán đã triển khai.
 
 ### `src/i18n/translations.js`
 
