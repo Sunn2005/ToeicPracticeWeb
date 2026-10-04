@@ -24,6 +24,7 @@ import MyTestsPage from "./pages/employee/MyTestsPage";
 import CreateTestPage from "./pages/employee/CreateTestPage";
 import ReviewQueuePage from "./pages/admin/ReviewQueuePage";
 import ReviewHistoryPage from "./pages/admin/ReviewHistoryPage";
+import SubscriptionManagementPage from "./pages/admin/SubscriptionManagementPage";
 import TestReviewPage from "./pages/admin/TestReviewPage";
 import ForbiddenPage from "./pages/errors/ForbiddenPage";
 import UserLayout from "./layouts/UserLayout";
@@ -87,6 +88,7 @@ function AppRoutes() {
           <Route path="/console/tests" element={<MyTestsPage />} />
           <Route path="/console/tests/new" element={<CreateTestPage />} />
           <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
+            <Route path="/console/subscriptions" element={<SubscriptionManagementPage />} />
             <Route path="/console/reviews" element={<ReviewQueuePage />} />
             <Route path="/console/reviews/:testId" element={<TestReviewPage />} />
             <Route path="/console/review-history" element={<ReviewHistoryPage />} />
