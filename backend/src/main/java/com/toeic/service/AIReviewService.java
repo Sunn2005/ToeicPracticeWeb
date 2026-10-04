@@ -7,6 +7,7 @@ import com.toeic.dto.ai.AIReviewFailed;
 import com.toeic.dto.ai.AIReviewRequest;
 import com.toeic.model.Attempt;
 import com.toeic.model.enums.AIAnalysisStatus;
+import com.toeic.model.enums.Entitlement;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -28,15 +29,18 @@ public class AIReviewService {
     private final AttemptDao attemptDao;
     private final AIAnalysisDao analysisDao;
     private final AIReviewRequestPublisher publisher;
+    private final SubscriptionService subscriptionService;
 
     public AIReviewService(
             AttemptDao attemptDao,
             AIAnalysisDao analysisDao,
-            AIReviewRequestPublisher publisher
+            AIReviewRequestPublisher publisher,
+            SubscriptionService subscriptionService
     ) {
         this.attemptDao = attemptDao;
         this.analysisDao = analysisDao;
         this.publisher = publisher;
+        this.subscriptionService = subscriptionService;
     }
 
     public Map<String, Object> requestAnalysis(String userId, String attemptId) throws Exception {
@@ -57,6 +61,8 @@ public class AIReviewService {
                     ? "Bài làm đã được phân tích."
                     : "Yêu cầu phân tích đang được xử lý.");
         }
+
+        subscriptionService.requireEntitlement(userId, Entitlement.AI_ANALYSIS);
 
         long now = System.currentTimeMillis();
         attempt.setAiAnalysisStatus(PENDING);
