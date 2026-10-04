@@ -5,6 +5,7 @@ import com.toeic.dto.CreateChatConversationRequest;
 import com.toeic.dto.SendChatMessageRequest;
 import com.toeic.model.AIChatConversation;
 import com.toeic.model.AIChatJob;
+import com.toeic.model.AIChatMessage;
 import com.toeic.security.ToeicUserPrincipal;
 import com.toeic.service.AIChatService;
 import org.springframework.http.HttpStatus;
@@ -32,36 +33,40 @@ public class AIChatController {
     }
 
     @PostMapping("/conversations")
-    public ResponseEntity<AIChatConversation> createConversation(
+    public ResponseEntity<ConversationResponse> createConversation(
             @RequestBody CreateChatConversationRequest request,
             @AuthenticationPrincipal ToeicUserPrincipal principal
     ) throws Exception {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(chatService.createConversation(principal.uid(), request));
+                .body(ConversationResponse.from(chatService.createConversation(principal.uid(), request)));
     }
 
     @GetMapping("/conversations")
-    public List<AIChatConversation> listConversations(
+    public List<ConversationResponse> listConversations(
             @AuthenticationPrincipal ToeicUserPrincipal principal
     ) throws Exception {
-        return chatService.listConversations(principal.uid());
+        return chatService.listConversations(principal.uid()).stream().map(ConversationResponse::from).toList();
     }
 
     @GetMapping("/conversations/{conversationId}")
-    public AIChatService.ConversationDetail getConversation(
+    public ConversationDetailResponse getConversation(
             @PathVariable String conversationId,
             @AuthenticationPrincipal ToeicUserPrincipal principal
     ) throws Exception {
-        return chatService.getConversation(principal.uid(), conversationId);
+        AIChatService.ConversationDetail detail = chatService.getConversation(principal.uid(), conversationId);
+        return new ConversationDetailResponse(
+                ConversationResponse.from(detail.conversation()),
+                detail.messages().stream().map(MessageResponse::from).toList());
     }
 
     @PostMapping("/conversations/{conversationId}/messages")
-    public ResponseEntity<AIChatDao.AcceptedChatMessage> sendMessage(
+    public ResponseEntity<AcceptedMessageResponse> sendMessage(
             @PathVariable String conversationId,
             @RequestBody SendChatMessageRequest request,
             @AuthenticationPrincipal ToeicUserPrincipal principal
     ) throws Exception {
-        return ResponseEntity.accepted().body(chatService.sendMessage(principal.uid(), conversationId, request));
+        return ResponseEntity.accepted().body(AcceptedMessageResponse.from(
+                chatService.sendMessage(principal.uid(), conversationId, request)));
     }
 
     @DeleteMapping("/conversations/{conversationId}")
@@ -74,10 +79,64 @@ public class AIChatController {
     }
 
     @GetMapping("/jobs/{jobId}")
-    public AIChatJob getJob(
+    public JobResponse getJob(
             @PathVariable String jobId,
             @AuthenticationPrincipal ToeicUserPrincipal principal
     ) throws Exception {
-        return chatService.getJob(principal.uid(), jobId);
+        return JobResponse.from(chatService.getJob(principal.uid(), jobId));
+    }
+
+    public record ConversationResponse(
+            String id, String title, String locale, String contextAttemptId, Integer contextQuestionNumber,
+            AIChatConversation.Status status, Long createdAt, Long updatedAt, Long lastMessageAt
+    ) {
+        static ConversationResponse from(AIChatConversation value) {
+            return new ConversationResponse(value.getId(), value.getTitle(), value.getLocale(),
+                    value.getContextAttemptId(), value.getContextQuestionNumber(), value.getStatus(),
+                    value.getCreatedAt(), value.getUpdatedAt(), value.getLastMessageAt());
+        }
+    }
+
+    public record MessageResponse(
+            String id, AIChatMessage.Role role, String content, AIChatMessage.Status status,
+            String jobId, String errorCode, Long createdAt, Long completedAt
+    ) {
+        static MessageResponse from(AIChatMessage value) {
+            return new MessageResponse(value.getId(), value.getRole(), value.getContent(), value.getStatus(),
+                    value.getJobId(), value.getErrorCode(), value.getCreatedAt(), value.getCompletedAt());
+        }
+    }
+
+    public record JobResponse(
+            String id, String conversationId, String userMessageId, String assistantMessageId,
+            AIChatJob.Status status, String errorCode, Long createdAt, Long updatedAt, Long completedAt
+    ) {
+        static JobResponse from(AIChatJob value) {
+            return new JobResponse(value.getId(), value.getConversationId(), value.getUserMessageId(),
+                    value.getAssistantMessageId(), value.getStatus(), value.getErrorCode(),
+                    value.getCreatedAt(), value.getUpdatedAt(), value.getCompletedAt());
+        }
+    }
+
+    public record ConversationDetailResponse(
+            ConversationResponse conversation, List<MessageResponse> messages
+    ) {
+        public ConversationDetailResponse {
+            messages = List.copyOf(messages);
+        }
+    }
+
+    public record AcceptedMessageResponse(
+            MessageResponse userMessage,
+            MessageResponse assistantMessage,
+            JobResponse job,
+            AIChatDao.QuotaSummary quotaSummary,
+            boolean newlyAccepted
+    ) {
+        static AcceptedMessageResponse from(AIChatDao.AcceptedChatMessage value) {
+            return new AcceptedMessageResponse(MessageResponse.from(value.userMessage()),
+                    MessageResponse.from(value.assistantMessage()), JobResponse.from(value.job()),
+                    value.quotaSummary(), value.newlyAccepted());
+        }
     }
 }

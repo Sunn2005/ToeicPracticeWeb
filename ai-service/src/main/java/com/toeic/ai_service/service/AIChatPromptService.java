@@ -4,6 +4,7 @@ import com.toeic.ai_service.model.AIChatRequest;
 import com.toeic.ai_service.model.ToeicChatAnswer;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -13,8 +14,6 @@ import java.util.Set;
 
 @Service
 public class AIChatPromptService {
-    private static final int MAX_HISTORY_MESSAGES = 12;
-    private static final int MAX_HISTORY_CHARACTERS = 12_000;
     private static final Set<String> ROLES = Set.of("USER", "ASSISTANT");
 
     private static final String BASE_SYSTEM_PROMPT = """
@@ -30,14 +29,26 @@ public class AIChatPromptService {
             """;
 
     private final ChatClient chatClient;
+    private final int historyMessageLimit;
+    private final int historyCharacterLimit;
 
     @Autowired
-    public AIChatPromptService(ChatClient.Builder builder) {
-        this(builder.build());
+    public AIChatPromptService(
+            ChatClient.Builder builder,
+            @Value("${app.ai.chat.history-message-limit:12}") int historyMessageLimit,
+            @Value("${app.ai.chat.history-character-limit:12000}") int historyCharacterLimit
+    ) {
+        this(builder.build(), historyMessageLimit, historyCharacterLimit);
     }
 
     AIChatPromptService(ChatClient chatClient) {
+        this(chatClient, 12, 12_000);
+    }
+
+    AIChatPromptService(ChatClient chatClient, int historyMessageLimit, int historyCharacterLimit) {
         this.chatClient = chatClient;
+        this.historyMessageLimit = positive(historyMessageLimit, "historyMessageLimit");
+        this.historyCharacterLimit = positive(historyCharacterLimit, "historyCharacterLimit");
     }
 
     public ToeicChatAnswer answer(AIChatRequest request) {
@@ -124,11 +135,11 @@ public class AIChatPromptService {
             }
             valid.add(message);
         }
-        if (valid.size() > MAX_HISTORY_MESSAGES) {
-            valid = new ArrayList<>(valid.subList(valid.size() - MAX_HISTORY_MESSAGES, valid.size()));
+        if (valid.size() > historyMessageLimit) {
+            valid = new ArrayList<>(valid.subList(valid.size() - historyMessageLimit, valid.size()));
         }
         int characters = valid.stream().mapToInt(this::characters).sum();
-        while (!valid.isEmpty() && characters > MAX_HISTORY_CHARACTERS) {
+        while (!valid.isEmpty() && characters > historyCharacterLimit) {
             characters -= characters(valid.removeFirst());
         }
         return List.copyOf(valid);
@@ -153,6 +164,11 @@ public class AIChatPromptService {
 
     private String nullSafe(String value) {
         return value == null ? "" : value;
+    }
+
+    private int positive(int value, String name) {
+        if (value < 1) throw new IllegalArgumentException(name + " must be positive");
+        return value;
     }
 
     record PreparedPrompt(String system, String user, List<AIChatRequest.HistoryMessage> history) {

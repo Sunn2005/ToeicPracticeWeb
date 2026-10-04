@@ -101,6 +101,22 @@ class AIChatPromptServiceTests {
     }
 
     @Test
+    void historyMessageAndCharacterLimitsAreConfigurationBacked() {
+        AIChatPromptService service = new AIChatPromptService(mock(ChatClient.class), 2, 10);
+        List<AIChatRequest.HistoryMessage> history = List.of(
+                new AIChatRequest.HistoryMessage("USER", "12345"),
+                new AIChatRequest.HistoryMessage("ASSISTANT", "67890"),
+                new AIChatRequest.HistoryMessage("USER", "abcde")
+        );
+
+        var prepared = service.prepare(request("en", history, null));
+
+        assertEquals(2, prepared.history().size());
+        assertEquals("67890", prepared.history().getFirst().content());
+        assertEquals("abcde", prepared.history().getLast().content());
+    }
+
+    @Test
     void rejectsUnsupportedLocaleAndMalformedHistory() {
         AIChatPromptService service = serviceWithMockClient(null);
 

@@ -58,6 +58,7 @@ Spring Security ánh xạ role thành `ROLE_USER`, `ROLE_EMPLOYEE`, `ROLE_ADMIN`
 | `POST /api/tests/{testId}/attempts` | Không | Có | Có | Có |
 | `/api/me`, `/api/users/me/**`, `/api/attempts/**` | Không | Có | Có | Có |
 | `/api/ai/jobs/**` | Không | Có | Có | Có |
+| `/api/ai/chat/**` | Không | Có; mutation cần `AI_CHAT` | Có; mutation cần `AI_CHAT` | Có; mutation cần `AI_CHAT` |
 | `/api/employee/**` | Không | Không | Có | Có |
 | `/api/admin/**` | Không | Không | Không | Có |
 | `/api/internal/**` | Không | Không | Không | Có; endpoint còn phải được bật bằng cấu hình |
@@ -271,7 +272,7 @@ Firestore lưu tại `subscriptions/{uid}`: `userId`, `planCode`, `status`, `ent
 
 Server tính `effective` bằng `status=ACTIVE && startsAt <= serverNow && serverNow < expiresAt`; thiếu thời điểm làm subscription không có hiệu lực. Quyền chỉ được cấp khi subscription có hiệu lực và danh sách `entitlements` chứa quyền cần thiết. Thời gian hết hạn tự nó không chuẩn hóa status đã lưu; subscription có thể vẫn lưu `ACTIVE` nhưng `effective=false`, còn `EXPIRED` và `REVOKED` luôn không có hiệu lực. Role vẫn lấy từ `users/{uid}.role`, độc lập với Pro.
 
-`AI_CHAT` hiện chỉ là giá trị entitlement; tài liệu này không xác nhận có API/chat UI hoặc thanh toán đã triển khai.
+`AI_CHAT` cấp quyền tạo/xóa hội thoại và gửi tin nhắn qua API Capy Chat ở mục 7A. Lịch sử đã tạo vẫn đọc được sau khi Pro hết hạn hoặc bị thu hồi. Thanh toán chưa được triển khai; admin đang quản lý subscription thủ công.
 
 ## 4. API catalog đề thi công khai
 
@@ -729,6 +730,164 @@ Khi thành công:
 
 Khi thất bại, `status=FAILED`, `result=null` và `error` chứa thông báo lỗi. Job không tồn tại hoặc thuộc user khác đều trả `404 NOT_FOUND`.
 
+## 7A. API Capy AI Chat
+
+Tất cả endpoint dùng Firebase UID từ session đã xác thực; không nhận `userId`, ownership, entitlement, đáp án hoặc lịch sử từ client. Conversation/job không tồn tại và resource của user khác đều trả cùng `404 NOT_FOUND`. Response công khai không trả `userId` hoặc `idempotencyKey` nội bộ.
+
+Mutation `POST`/`DELETE` yêu cầu entitlement `AI_CHAT` đang có hiệu lực và bị chặn bằng `409 CHAT_BLOCKED_DURING_ATTEMPT` nếu user còn attempt `IN_PROGRESS` sau khi server đối chiếu deadline. `GET` chỉ yêu cầu đăng nhập, nên user hết hạn/thu hồi Pro vẫn đọc được lịch sử cũ.
+
+### 7A.1 Tạo conversation
+
+- **Method/path:** `POST /api/ai/chat/conversations`.
+- **Body:** `locale` chỉ nhận `vi|en`; `attemptId` và `questionNumber` phải cùng có hoặc cùng vắng mặt.
+
+```json
+{
+  "locale": "vi",
+  "attemptId": "attempt-123",
+  "questionNumber": 101
+}
+```
+
+Context chỉ hợp lệ với đúng một câu thuộc attempt của user, đã `COMPLETED` và nằm trong scope. Frontend chỉ gửi identifiers; BE-Core tự lấy các review field được phép. Với chat TOEIC chung, gửi `{ "locale": "vi" }`.
+
+- **Response:** `201 Created`.
+
+```json
+{
+  "id": "conversation-uuid",
+  "title": "Hội thoại TOEIC mới",
+  "locale": "vi",
+  "contextAttemptId": "attempt-123",
+  "contextQuestionNumber": 101,
+  "status": "ACTIVE",
+  "createdAt": 1791093600000,
+  "updatedAt": 1791093600000,
+  "lastMessageAt": 1791093600000
+}
+```
+
+Tối đa 10 conversation `ACTIVE`; conversation đã soft-delete không tính vào giới hạn.
+
+### 7A.2 Liệt kê và mở conversation
+
+- `GET /api/ai/chat/conversations` trả `200 OK`, mảng conversation active sắp xếp theo `lastMessageAt` mới nhất trước.
+- `GET /api/ai/chat/conversations/{conversationId}` trả `200 OK`:
+
+```json
+{
+  "conversation": {
+    "id": "conversation-uuid",
+    "title": "Hội thoại TOEIC mới",
+    "locale": "vi",
+    "contextAttemptId": null,
+    "contextQuestionNumber": null,
+    "status": "ACTIVE",
+    "createdAt": 1791093600000,
+    "updatedAt": 1791093601000,
+    "lastMessageAt": 1791093601000
+  },
+  "messages": [
+    {
+      "id": "message-id",
+      "role": "USER",
+      "content": "Giải thích giúp mình cách dùng despite.",
+      "status": "SUCCEEDED",
+      "jobId": "job-id",
+      "errorCode": null,
+      "createdAt": 1791093601000,
+      "completedAt": 1791093601000
+    }
+  ]
+}
+```
+
+Message có `role=USER|ASSISTANT`, `status=PENDING|SUCCEEDED|FAILED`. Assistant `PENDING` có `content=null`; assistant `FAILED` có `errorCode` và giữ `content=null`.
+
+### 7A.3 Gửi tin nhắn
+
+- **Method/path:** `POST /api/ai/chat/conversations/{conversationId}/messages`.
+- **Body:** `content` được trim, tối đa 1.000 Unicode characters; `idempotencyKey` không rỗng, tối đa 128 ký tự và phải duy nhất theo user.
+
+```json
+{
+  "content": "Vì sao câu này dùng despite?",
+  "idempotencyKey": "95cbcb8e-f88a-4ae2-b510-575047a7d590"
+}
+```
+
+- **Response:** `202 Accepted`. Một key lặp với cùng conversation/content trả lại đúng aggregate cũ với `newlyAccepted=false`, không charge quota và không publish lại.
+
+```json
+{
+  "userMessage": {
+    "id": "user-message-id",
+    "role": "USER",
+    "content": "Vì sao câu này dùng despite?",
+    "status": "SUCCEEDED",
+    "jobId": "job-id",
+    "errorCode": null,
+    "createdAt": 1791093601000,
+    "completedAt": 1791093601000
+  },
+  "assistantMessage": {
+    "id": "assistant-message-id",
+    "role": "ASSISTANT",
+    "content": null,
+    "status": "PENDING",
+    "jobId": "job-id",
+    "errorCode": null,
+    "createdAt": 1791093601000,
+    "completedAt": null
+  },
+  "job": {
+    "id": "job-id",
+    "conversationId": "conversation-uuid",
+    "userMessageId": "user-message-id",
+    "assistantMessageId": "assistant-message-id",
+    "status": "PENDING",
+    "errorCode": null,
+    "createdAt": 1791093601000,
+    "updatedAt": 1791093601000,
+    "completedAt": null
+  },
+  "quotaSummary": {
+    "dailyLimit": 30,
+    "remainingDaily": 29,
+    "nextResetAt": 1791133200000
+  },
+  "newlyAccepted": true
+}
+```
+
+Quota được charge atomically một lần khi message hợp lệ được chấp nhận: 30/ngày lịch `Asia/Ho_Chi_Minh`, reset lúc 00:00 kế tiếp, và tối đa 5 lượt trong rolling 60 giây. Server dùng admission time không giảm để request commit đảo thứ tự quanh nửa đêm không vượt giới hạn.
+
+### 7A.4 Poll job
+
+- **Method/path:** `GET /api/ai/chat/jobs/{jobId}`.
+- **Response:** `200 OK`, cùng schema `job` ở response `202`; `status=PENDING|SUCCEEDED|FAILED`. Khi terminal, `completedAt` có giá trị; khi failed, `errorCode` có mã ổn định. Frontend poll đến terminal với timeout/abort riêng, rồi đọc lại conversation để lấy assistant message cuối cùng.
+
+### 7A.5 Xóa conversation
+
+- **Method/path:** `DELETE /api/ai/chat/conversations/{conversationId}`.
+- **Response:** `204 No Content`.
+- Đây là soft delete: conversation biến mất khỏi list/read và không được gửi cho Gemini; message/job vẫn được giữ. Thao tác lặp trên conversation owned đã xóa là no-op ở tầng lưu trữ, nhưng normal lookup vẫn không công khai resource đã xóa.
+
+### 7A.6 Lỗi ổn định
+
+| HTTP | Code | Điều kiện |
+| --- | --- | --- |
+| `400` | `CHAT_CONTEXT_INVALID` | Locale hoặc cặp context identifiers không hợp lệ. |
+| `400` | `CHAT_MESSAGE_INVALID` | Content/key rỗng, quá dài, malformed hoặc key được reuse cho payload khác. |
+| `403` | `PRO_REQUIRED` | Mutation khi thiếu `AI_CHAT` có hiệu lực. |
+| `404` | `NOT_FOUND` | Conversation/job/context không tồn tại, bị xóa, ngoài scope hoặc thuộc user khác. |
+| `409` | `ATTEMPT_NOT_COMPLETED` | Attempt context chưa cho phép review. |
+| `409` | `CHAT_BLOCKED_DURING_ATTEMPT` | User còn attempt đang làm. |
+| `409` | `CONVERSATION_LIMIT_REACHED` | Đã có 10 conversation active. |
+| `429` | `CHAT_RATE_LIMITED` | Vượt 5 lượt trong rolling minute. |
+| `429` | `CHAT_DAILY_LIMIT_REACHED` | Hết 30 lượt trong ngày Việt Nam. |
+| `503` | `AI_UNAVAILABLE` | Không publish được hoặc provider tạm thời lỗi. |
+
 ## 8. API Employee quản lý đề
 
 Yêu cầu role `EMPLOYEE` hoặc `ADMIN`. API danh sách/chi tiết chỉ thao tác trên đề có `createdBy` bằng UID hiện tại; `ADMIN` không tự động thấy hoặc sửa đề của employee khác qua nhóm API này.
@@ -945,6 +1104,16 @@ NOT_REQUESTED -> PENDING -> PROCESSING -> COMPLETED
                     \----------\-------> FAILED
 ```
 
+### Capy AI Chat
+
+```text
+accepted: USER/SUCCEEDED + ASSISTANT/PENDING + JOB/PENDING
+                                      -> ASSISTANT/SUCCEEDED + JOB/SUCCEEDED
+                                      -> ASSISTANT/FAILED    + JOB/FAILED
+```
+
+Terminal delivery đầu tiên thắng; result lặp hoặc identifiers không khớp không ghi đè. Transport duplicate không charge hoặc publish lại.
+
 ## 12. Error response
 
 Security và application errors đều trả JSON. Frontend nên xử lý theo HTTP status và `code`, không so khớp nội dung tiếng Việt của `message`.
@@ -969,6 +1138,10 @@ Security và application errors đều trả JSON. Frontend nên xử lý theo H
 | `403` | `ACCESS_DENIED` | User đã đăng nhập nhưng thiếu role cần thiết. |
 | `403` | `FORBIDDEN` | Lỗi quyền sở hữu/nghiệp vụ do service trả về. |
 | `403` | `PRO_REQUIRED` | Tạo/thử lại/refresh AI analysis khi thiếu entitlement Pro có hiệu lực. |
+| `400` | `CHAT_CONTEXT_INVALID`, `CHAT_MESSAGE_INVALID` | Context hoặc nội dung chat không hợp lệ. |
+| `409` | `CHAT_BLOCKED_DURING_ATTEMPT`, `ATTEMPT_NOT_COMPLETED`, `CONVERSATION_LIMIT_REACHED` | Chat không hợp lệ theo trạng thái attempt/conversation. |
+| `429` | `CHAT_RATE_LIMITED`, `CHAT_DAILY_LIMIT_REACHED` | Vượt quota chat burst/ngày. |
+| `503` | `AI_UNAVAILABLE` | RabbitMQ/Gemini chat tạm thời không sẵn sàng. |
 | `400` | `SUBSCRIPTION_EXPIRY_INVALID` | Expiry subscription không sau thời gian server. |
 | `404` | `NOT_FOUND` | Resource không tồn tại hoặc bị che bởi rule ownership/publication. |
 | `409` | `CONFLICT` | Trạng thái workflow/section không cho phép thao tác. |

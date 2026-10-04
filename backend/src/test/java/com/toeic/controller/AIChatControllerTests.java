@@ -66,7 +66,8 @@ class AIChatControllerTests {
                         .content("{\"locale\":\"vi\",\"attemptId\":\"attempt\",\"questionNumber\":101}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value("conversation"))
-                .andExpect(jsonPath("$.locale").value("vi"));
+                .andExpect(jsonPath("$.locale").value("vi"))
+                .andExpect(jsonPath("$.userId").doesNotExist());
     }
 
     @Test
@@ -82,7 +83,8 @@ class AIChatControllerTests {
         mockMvc.perform(get("/api/ai/chat/conversations/{conversationId}", "conversation"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.conversation.id").value("conversation"))
-                .andExpect(jsonPath("$.messages[0].id").value("message"));
+                .andExpect(jsonPath("$.messages[0].id").value("message"))
+                .andExpect(jsonPath("$.conversation.userId").doesNotExist());
     }
 
     @Test
@@ -96,6 +98,8 @@ class AIChatControllerTests {
                 .andExpect(jsonPath("$.userMessage.id").value("user-message"))
                 .andExpect(jsonPath("$.assistantMessage.status").value("PENDING"))
                 .andExpect(jsonPath("$.job.id").value("job"))
+                .andExpect(jsonPath("$.job.idempotencyKey").doesNotExist())
+                .andExpect(jsonPath("$.job.userId").doesNotExist())
                 .andExpect(jsonPath("$.quotaSummary.remainingDaily").value(29))
                 .andExpect(jsonPath("$.newlyAccepted").value(true));
     }
@@ -115,7 +119,9 @@ class AIChatControllerTests {
         mockMvc.perform(get("/api/ai/chat/jobs/{jobId}", "job"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value("job"))
-                .andExpect(jsonPath("$.status").value("PENDING"));
+                .andExpect(jsonPath("$.status").value("PENDING"))
+                .andExpect(jsonPath("$.idempotencyKey").doesNotExist())
+                .andExpect(jsonPath("$.userId").doesNotExist());
     }
 
     @Test
