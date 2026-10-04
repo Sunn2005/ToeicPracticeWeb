@@ -64,7 +64,7 @@ export default function ChatMessageList({ messages, onRetry, canRetry }) {
                   {message.errorCode && <p className="mt-1 text-xs font-semibold">{message.errorCode}</p>}
                   <button
                     type="button"
-                    onClick={() => onRetry(message.id)}
+                    onClick={() => void onRetry(message.id).catch(() => undefined)}
                     disabled={!canRetry}
                     className="mt-3 rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-bold text-red-700 transition hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 disabled:cursor-not-allowed disabled:opacity-50"
                   >

@@ -147,9 +147,13 @@ export default function AIChatBox({
     : chat.errorMessage;
 
   const create = async (context) => {
-    await chat.startConversation(context);
-    setCreating(false);
-    setShowHistory(false);
+    try {
+      await chat.startConversation(context);
+      setCreating(false);
+      setShowHistory(false);
+    } catch {
+      // The hook exposes the stable backend error in the panel.
+    }
   };
 
   const confirmDelete = async () => {
@@ -157,6 +161,8 @@ export default function AIChatBox({
     try {
       await chat.removeConversation(deleteTarget.id);
       setDeleteTarget(null);
+    } catch {
+      // The hook exposes the stable backend error in the panel.
     } finally {
       setDeleting(false);
     }
@@ -217,7 +223,7 @@ export default function AIChatBox({
                 onSelect={(id) => {
                   setCreating(false);
                   setShowHistory(false);
-                  void chat.openConversation(id);
+                  void chat.openConversation(id).catch(() => undefined);
                 }}
                 onDelete={setDeleteTarget}
               />
@@ -240,6 +246,7 @@ export default function AIChatBox({
                 getQuestionChoices={getQuestionChoices}
                 onCreate={create}
                 creating={chat.sending}
+                disabled={!chat.canSend}
               />
             ) : (
               <>

@@ -6,6 +6,7 @@ export default function AttemptQuestionContextPicker({
   getQuestionChoices,
   onCreate,
   creating,
+  disabled = false,
 }) {
   const { t } = useLanguage();
   const [attemptId, setAttemptId] = useState("");
@@ -40,7 +41,7 @@ export default function AttemptQuestionContextPicker({
         <button
           type="button"
           onClick={() => onCreate()}
-          disabled={creating}
+          disabled={creating || disabled}
           className="mt-5 w-full rounded-xl bg-sky-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-sky-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 disabled:cursor-wait disabled:bg-sky-300"
         >
           {t("chatStartGeneral")}
@@ -59,6 +60,7 @@ export default function AttemptQuestionContextPicker({
             <select
               id="capy-chat-attempt"
               value={attemptId}
+              disabled={disabled}
               onChange={(event) => {
                 const nextAttemptId = event.target.value;
                 setAttemptId(nextAttemptId);
@@ -81,7 +83,7 @@ export default function AttemptQuestionContextPicker({
               id="capy-chat-question"
               value={questionNumber}
               onChange={(event) => setQuestionNumber(event.target.value)}
-              disabled={!attemptId || loadingQuestions}
+              disabled={disabled || !attemptId || loadingQuestions}
               className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-800 outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-100 disabled:cursor-not-allowed disabled:bg-slate-100"
             >
               <option value="">{loadingQuestions ? t("loading") : t("chatSelectQuestion")}</option>
@@ -93,7 +95,7 @@ export default function AttemptQuestionContextPicker({
           <button
             type="button"
             onClick={() => onCreate({ attemptId, questionNumber: Number(questionNumber) })}
-            disabled={creating || !attemptId || !questionNumber}
+            disabled={creating || disabled || !attemptId || !questionNumber}
             className="w-full rounded-xl border border-sky-300 px-4 py-3 text-sm font-bold text-sky-700 transition hover:bg-sky-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-400"
           >
             {t("chatStartWithQuestion")}

@@ -156,7 +156,7 @@ export function useAIChat({ enabled, locale }) {
 
   useEffect(() => {
     dispatch({ type: AI_CHAT_ACTIONS.ENABLED_CHANGED, enabled });
-    if (enabled) void refreshConversations();
+    if (enabled) void refreshConversations().catch(() => undefined);
     else abortAll();
   }, [abortAll, enabled, refreshConversations]);
 
