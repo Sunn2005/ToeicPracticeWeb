@@ -220,6 +220,22 @@ class AIChatServiceTests {
     }
 
     @Test
+    void historyFailureAfterAdmissionMarksPendingMessageFailedWithoutPublishing() throws Exception {
+        when(dao.findConversation("user", "conversation")).thenReturn(Optional.of(conversation()));
+        when(dao.acceptMessage("user", "conversation", "hello", "key", NOW, 30, 5))
+                .thenReturn(accepted(true));
+        when(dao.listMessages("user", "conversation", 100))
+                .thenThrow(new IllegalStateException("Firestore read failed"));
+
+        assertCode("AI_UNAVAILABLE", () -> service.sendMessage(
+                "user", "conversation", new SendChatMessageRequest("hello", "key")));
+
+        verify(dao).finalizeMessage("user", "conversation", "job", "assistant-message",
+                AIChatJob.Status.FAILED, null, "AI_UNAVAILABLE", NOW);
+        verifyNoInteractions(publisher);
+    }
+
+    @Test
     void readsRemainAvailableWithoutEntitlementButMutationsDoNot() throws Exception {
         when(dao.listConversations("user", 100)).thenReturn(List.of(conversation()));
         when(dao.findConversation("user", "conversation")).thenReturn(Optional.of(conversation()));

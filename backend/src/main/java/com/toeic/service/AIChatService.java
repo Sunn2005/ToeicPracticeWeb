@@ -134,24 +134,26 @@ public class AIChatService {
                 clock.millis(), dailyLimit, burstLimit);
         if (!accepted.newlyAccepted()) return accepted;
 
-        List<AIChatRequest.HistoryMessage> history = historyForRequest(
-                chatDao.listMessages(userId, conversationId, readLimit), accepted.userMessage().getId());
-        AIChatRequest generationRequest = new AIChatRequest(
-                userId, conversationId, accepted.job().getId(), accepted.userMessage().getId(),
-                accepted.assistantMessage().getId(), conversation.getLocale(), history,
-                validated.content(), questionContext);
         try {
+            List<AIChatRequest.HistoryMessage> history = historyForRequest(
+                    chatDao.listMessages(userId, conversationId, readLimit), accepted.userMessage().getId());
+            AIChatRequest generationRequest = new AIChatRequest(
+                    userId, conversationId, accepted.job().getId(), accepted.userMessage().getId(),
+                    accepted.assistantMessage().getId(), conversation.getLocale(), history,
+                    validated.content(), questionContext);
             requestPublisher.publish(generationRequest);
-        } catch (RuntimeException publishFailure) {
+        } catch (Exception postAdmissionFailure) {
             try {
                 chatDao.finalizeMessage(userId, conversationId, accepted.job().getId(),
                         accepted.assistantMessage().getId(), AIChatJob.Status.FAILED,
                         null, "AI_UNAVAILABLE", clock.millis());
             } catch (Exception finalizeFailure) {
-                publishFailure.addSuppressed(finalizeFailure);
+                postAdmissionFailure.addSuppressed(finalizeFailure);
             }
-            throw new ApiCodeException(HttpStatus.SERVICE_UNAVAILABLE, "AI_UNAVAILABLE",
-                    "AI chat is temporarily unavailable");
+            ApiCodeException unavailable = new ApiCodeException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "AI_UNAVAILABLE", "AI chat is temporarily unavailable");
+            unavailable.initCause(postAdmissionFailure);
+            throw unavailable;
         }
         return accepted;
     }
