@@ -1,6 +1,7 @@
 package com.toeic.service;
 
 import com.toeic.dao.AttemptDao;
+import com.toeic.controller.ApiCodeException;
 import com.toeic.dto.AttemptResultDto;
 import com.toeic.model.AttemptResult;
 import com.toeic.model.Attempt;
@@ -215,6 +216,22 @@ public class AttemptService {
     public Map<String, Object> getAttempt(String userId, String attemptId) throws Exception {
         Attempt attempt = reconcileTimeout(getOwnedAttempt(userId, attemptId));
         return toResponse(attempt, true);
+    }
+
+    public void requireNoInProgressAttempt(String userId) throws Exception {
+        for (Attempt attempt : attemptDao.findByUserId(userId)) {
+            if (!IN_PROGRESS.equals(attempt.getStatus())) {
+                continue;
+            }
+            applyLegacyScope(attempt);
+            if (IN_PROGRESS.equals(reconcileTimeout(attempt).getStatus())) {
+                throw new ApiCodeException(
+                        HttpStatus.CONFLICT,
+                        "CHAT_BLOCKED_DURING_ATTEMPT",
+                        "Không thể trò chuyện trong khi đang làm bài"
+                );
+            }
+        }
     }
 
     public Map<String, Object> getExam(String userId, String attemptId) throws Exception {
