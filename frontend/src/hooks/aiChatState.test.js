@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   AI_CHAT_ACTIONS,
   aiChatReducer,
+  conversationIdToResume,
   createInitialAIChatState,
   pendingJobIdsFromMessages,
 } from "./aiChatState.js";
@@ -64,6 +65,24 @@ test("accepted messages update quota and add one pending job", () => {
 
   assert.deepEqual(next.messages.map((message) => message.id), ["user-1", "assistant-1"]);
   assert.deepEqual(next.pendingJobIds, ["job-1"]);
+  assert.equal(next.quota.remainingDaily, 29);
+  assert.equal(next.sending, false);
+});
+
+test("an accepted response never appends messages to a different active conversation", () => {
+  const secondConversation = { ...conversation, id: "conversation-2" };
+  const opened = reduce(createInitialAIChatState(), AI_CHAT_ACTIONS.CONVERSATION_OPENED, {
+    detail: { conversation: secondConversation, messages: [] },
+  });
+
+  const next = reduce(opened, AI_CHAT_ACTIONS.MESSAGE_ACCEPTED, {
+    accepted,
+    conversationId: conversation.id,
+  });
+
+  assert.equal(next.activeConversationId, secondConversation.id);
+  assert.deepEqual(next.messages, []);
+  assert.deepEqual(next.pendingJobIds, []);
   assert.equal(next.quota.remainingDaily, 29);
   assert.equal(next.sending, false);
 });
@@ -170,4 +189,12 @@ test("pending job recovery keeps only unique pending assistant jobs", () => {
     detail: { conversation, messages: [accepted.userMessage, accepted.assistantMessage] },
   });
   assert.deepEqual(resumed.pendingJobIds, ["job-1"]);
+});
+
+test("reopening selects the retained active conversation only when it still exists", () => {
+  const second = { ...conversation, id: "conversation-2" };
+
+  assert.equal(conversationIdToResume([conversation, second], second.id), second.id);
+  assert.equal(conversationIdToResume([conversation], second.id), null);
+  assert.equal(conversationIdToResume([conversation], null), null);
 });

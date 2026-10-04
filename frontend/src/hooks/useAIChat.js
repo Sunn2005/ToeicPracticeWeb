@@ -10,9 +10,14 @@ import {
 import {
   AI_CHAT_ACTIONS,
   aiChatReducer,
+  conversationIdToResume,
   createInitialAIChatState,
   pendingJobIdsFromMessages,
 } from "./aiChatState.js";
+import {
+  createChatSendAttemptRegistry,
+  isConfirmedHttpFailure,
+} from "./aiChatSendAttempts.js";
 
 function requestError(error, fallbackCode) {
   return {
@@ -24,6 +29,14 @@ function requestError(error, fallbackCode) {
 export function useAIChat({ enabled, locale }) {
   const [state, dispatch] = useReducer(aiChatReducer, enabled, createInitialAIChatState);
   const controllersRef = useRef(new Map());
+  const sendAttemptsRef = useRef(
+    createChatSendAttemptRegistry(() => globalThis.crypto.randomUUID()),
+  );
+  const stateRef = useRef(state);
+
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
 
   const abortAll = useCallback(() => {
     controllersRef.current.forEach((controller) => controller.abort());
@@ -65,12 +78,15 @@ export function useAIChat({ enabled, locale }) {
     }
   }, []);
 
-  const resumePendingJobs = useCallback((messages = state.messages, conversationId = state.activeConversationId) => {
+  const resumePendingJobs = useCallback((
+    messages = stateRef.current.messages,
+    conversationId = stateRef.current.activeConversationId,
+  ) => {
     if (!conversationId) return [];
     const jobIds = pendingJobIdsFromMessages(messages);
     jobIds.forEach((jobId) => void pollJob(jobId, conversationId));
     return jobIds;
-  }, [pollJob, state.activeConversationId, state.messages]);
+  }, [pollJob]);
 
   const openConversation = useCallback(async (conversationId) => {
     try {
@@ -109,16 +125,20 @@ export function useAIChat({ enabled, locale }) {
 
   const sendMessage = useCallback(async (content) => {
     if (!state.activeConversationId || !state.canSend || state.sending) return null;
+    const conversationId = state.activeConversationId;
+    const attempt = sendAttemptsRef.current.prepare(conversationId, content);
     dispatch({ type: AI_CHAT_ACTIONS.SEND_STARTED });
     try {
-      const accepted = await sendChatMessage(state.activeConversationId, {
+      const accepted = await sendChatMessage(conversationId, {
         content,
-        idempotencyKey: globalThis.crypto.randomUUID(),
+        idempotencyKey: attempt.idempotencyKey,
       });
-      dispatch({ type: AI_CHAT_ACTIONS.MESSAGE_ACCEPTED, accepted });
-      void pollJob(accepted.job.id, state.activeConversationId);
+      sendAttemptsRef.current.clear(attempt);
+      dispatch({ type: AI_CHAT_ACTIONS.MESSAGE_ACCEPTED, accepted, conversationId });
+      void pollJob(accepted.job.id, conversationId);
       return accepted;
     } catch (error) {
+      if (isConfirmedHttpFailure(error)) sendAttemptsRef.current.clear(attempt);
       dispatch({
         type: AI_CHAT_ACTIONS.REQUEST_FAILED,
         ...requestError(error, "CHAT_SEND_FAILED"),
@@ -156,9 +176,25 @@ export function useAIChat({ enabled, locale }) {
 
   useEffect(() => {
     dispatch({ type: AI_CHAT_ACTIONS.ENABLED_CHANGED, enabled });
-    if (enabled) void refreshConversations().catch(() => undefined);
-    else abortAll();
-  }, [abortAll, enabled, refreshConversations]);
+    let cancelled = false;
+    if (enabled) {
+      void refreshConversations()
+        .then((conversations) => {
+          if (cancelled) return undefined;
+          const conversationId = conversationIdToResume(
+            conversations,
+            stateRef.current.activeConversationId,
+          );
+          return conversationId ? openConversation(conversationId) : undefined;
+        })
+        .catch(() => undefined);
+    } else {
+      abortAll();
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [abortAll, enabled, openConversation, refreshConversations]);
 
   useEffect(() => abortAll, [abortAll]);
 

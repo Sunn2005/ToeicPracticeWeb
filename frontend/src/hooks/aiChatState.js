@@ -78,6 +78,13 @@ export function pendingJobIdsFromMessages(messages) {
   return [...jobIds];
 }
 
+export function conversationIdToResume(conversations, activeConversationId) {
+  if (!activeConversationId) return null;
+  return (conversations || []).some(({ id }) => id === activeConversationId)
+    ? activeConversationId
+    : null;
+}
+
 function detailState(state, detail) {
   const conversation = detail?.conversation;
   if (!conversation?.id) return state;
@@ -163,6 +170,16 @@ export function aiChatReducer(state, action) {
     case AI_CHAT_ACTIONS.SEND_STARTED:
       return { ...state, sending: true, errorCode: null, errorMessage: "" };
     case AI_CHAT_ACTIONS.MESSAGE_ACCEPTED: {
+      const conversationId = action.conversationId || action.accepted?.job?.conversationId;
+      if (conversationId && conversationId !== state.activeConversationId) {
+        return {
+          ...state,
+          quota: action.accepted.quotaSummary || state.quota,
+          sending: false,
+          errorCode: null,
+          errorMessage: "",
+        };
+      }
       const messages = collapseFailedRetries(mergeById(state.messages, [
         action.accepted.userMessage,
         action.accepted.assistantMessage,
