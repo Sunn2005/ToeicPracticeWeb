@@ -4,6 +4,7 @@ import AttemptQuestionContextPicker from "./AttemptQuestionContextPicker";
 import ChatComposer from "./ChatComposer";
 import ChatMessageList from "./ChatMessageList";
 import ConversationList from "./ConversationList";
+import { keepFocusInsideDialog } from "./focusTrap.js";
 
 const ERROR_TRANSLATION_KEYS = {
   PRO_REQUIRED: "chatErrorProRequired",
@@ -51,17 +52,7 @@ function DeleteConfirmation({ conversation, busy, onCancel, onConfirm }) {
         onCancelRef.current();
         return;
       }
-      if (event.key !== "Tab" || !dialogRef.current) return;
-      const controls = [...dialogRef.current.querySelectorAll("button:not([disabled])")];
-      const first = controls[0];
-      const last = controls.at(-1);
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
+      keepFocusInsideDialog(event, dialogRef.current, document.activeElement);
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
@@ -115,20 +106,9 @@ export default function AIChatBox({
         onClose();
         return;
       }
-      if (event.key !== "Tab" || !dialogRef.current) return;
-      const focusable = [...dialogRef.current.querySelectorAll(
-        'button:not([disabled]), textarea:not([disabled]), select:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
-      )];
-      if (!focusable.length) return;
-      const first = focusable[0];
-      const last = focusable.at(-1);
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
+      keepFocusInsideDialog(event, dialogRef.current, document.activeElement, {
+        suspended: Boolean(deleteTargetRef.current),
+      });
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => {
