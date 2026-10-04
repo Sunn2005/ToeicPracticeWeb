@@ -131,6 +131,7 @@ export function aiChatReducer(state, action) {
         messages: [],
         pendingJobIds: [],
         loadingConversation: false,
+        sending: false,
         errorCode: null,
         errorMessage: "",
       };

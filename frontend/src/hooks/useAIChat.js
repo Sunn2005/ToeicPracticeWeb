@@ -93,6 +93,7 @@ export function useAIChat({ enabled, locale }) {
       payload.attemptId = attemptId;
       payload.questionNumber = questionNumber;
     }
+    dispatch({ type: AI_CHAT_ACTIONS.SEND_STARTED });
     try {
       const conversation = await createConversation(payload);
       dispatch({ type: AI_CHAT_ACTIONS.CONVERSATION_CREATED, conversation });
@@ -139,8 +140,11 @@ export function useAIChat({ enabled, locale }) {
   const removeConversation = useCallback(async (conversationId) => {
     try {
       await deleteConversation(conversationId);
-      if (state.activeConversationId === conversationId) abortAll();
+      const removingActive = state.activeConversationId === conversationId;
+      const nextConversation = state.conversations.find(({ id }) => id !== conversationId);
+      if (removingActive) abortAll();
       dispatch({ type: AI_CHAT_ACTIONS.CONVERSATION_DELETED, conversationId });
+      if (removingActive && nextConversation) await openConversation(nextConversation.id);
     } catch (error) {
       dispatch({
         type: AI_CHAT_ACTIONS.REQUEST_FAILED,
@@ -148,7 +152,7 @@ export function useAIChat({ enabled, locale }) {
       });
       throw error;
     }
-  }, [abortAll, state.activeConversationId]);
+  }, [abortAll, openConversation, state.activeConversationId, state.conversations]);
 
   useEffect(() => {
     dispatch({ type: AI_CHAT_ACTIONS.ENABLED_CHANGED, enabled });

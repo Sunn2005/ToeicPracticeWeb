@@ -68,6 +68,15 @@ test("accepted messages update quota and add one pending job", () => {
   assert.equal(next.sending, false);
 });
 
+test("creating a conversation clears the mutation lock and opens an empty thread", () => {
+  const sending = reduce(createInitialAIChatState(), AI_CHAT_ACTIONS.SEND_STARTED);
+  const created = reduce(sending, AI_CHAT_ACTIONS.CONVERSATION_CREATED, { conversation });
+
+  assert.equal(created.sending, false);
+  assert.equal(created.activeConversationId, conversation.id);
+  assert.deepEqual(created.messages, []);
+});
+
 test("idempotent accepted or terminal updates never duplicate displayed messages", () => {
   const opened = reduce(createInitialAIChatState(), AI_CHAT_ACTIONS.CONVERSATION_OPENED, {
     detail: { conversation, messages: [] },
