@@ -130,6 +130,46 @@ body {
   animation: floating-pet-sprite 1.25s linear infinite;
 }
 
+.floating-pet__hint,
+.floating-pet__hover-label {
+  position: absolute;
+  right: 78%;
+  bottom: 72%;
+  width: max-content;
+  max-width: min(220px, calc(100vw - 130px));
+  border: 1px solid #bae6fd;
+  border-radius: 14px 14px 4px;
+  background: rgb(255 255 255 / 0.97);
+  box-shadow: 0 12px 28px rgb(15 23 42 / 0.14);
+  color: #075985;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.35;
+  padding: 0.65rem 0.8rem;
+  pointer-events: none;
+  text-align: left;
+}
+
+.floating-pet__hint {
+  animation: brand-loader-float 2.2s ease-in-out infinite;
+}
+
+.floating-pet__hover-label {
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+
+.floating-pet:hover .floating-pet__hover-label,
+.floating-pet:focus-visible .floating-pet__hover-label {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.floating-pet:has(.floating-pet__hint) .floating-pet__hover-label {
+  display: none;
+}
+
 .brand-loader-frame {
   position: relative;
   display: grid;
@@ -167,8 +207,13 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .brand-loader-frame,
   .brand-loader-dot,
-  .floating-pet__sprite {
+  .floating-pet__sprite,
+  .floating-pet__hint {
     animation: none;
+  }
+
+  .floating-pet__hover-label {
+    transition: none;
   }
 }
 
