@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -230,6 +231,15 @@ class SubscriptionServiceTests {
         public void save(Subscription subscription) {
             records.put(subscription.getUserId(), subscription);
             writes++;
+        }
+
+        @Override
+        public synchronized Subscription updateAtomically(String userId, Function<Subscription, Mutation> mutation) {
+            Mutation result = mutation.apply(records.get(userId));
+            if (result.changed()) {
+                save(result.subscription());
+            }
+            return result.subscription();
         }
     }
 }

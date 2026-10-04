@@ -5,12 +5,15 @@ import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.Transaction;
+import com.toeic.controller.ApiCodeException;
 import com.toeic.model.Subscription;
 import com.toeic.model.enums.Entitlement;
 import com.toeic.model.enums.SubscriptionStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
@@ -82,6 +85,26 @@ class FirestoreSubscriptionDaoTests {
         assertNull(stored.getRevokedAt());
         assertEquals(900L, stored.getCreatedAt());
         assertEquals(1000L, stored.getUpdatedAt());
+    }
+
+    @Test
+    void transactionPreservesStableBusinessErrorsFromTheMutation() throws Exception {
+        var transaction = mock(Transaction.class);
+        when(transaction.get(document)).thenReturn(ApiFutures.immediateFuture(snapshot));
+        when(firestore.runTransaction(any())).thenAnswer(invocation -> {
+            Transaction.Function<Subscription> callback = invocation.getArgument(0);
+            try {
+                return ApiFutures.immediateFuture(callback.updateCallback(transaction));
+            } catch (Exception exception) {
+                return ApiFutures.immediateFailedFuture(exception);
+            }
+        });
+        var expected = new ApiCodeException(HttpStatus.BAD_REQUEST, "SUBSCRIPTION_EXPIRY_INVALID",
+                "Expiry elapsed during retry");
+        var actual = assertThrows(ApiCodeException.class,
+                () -> dao.updateAtomically("learner", current -> { throw expected; }));
+        assertSame(expected, actual);
+        verify(transaction, never()).set(eq(document), any(Subscription.class));
     }
 
     private static Subscription subscription(String userId) {

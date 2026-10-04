@@ -20,10 +20,11 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.Optional;
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -43,10 +44,14 @@ class AdminSubscriptionControllerTests {
     void setUp() throws Exception {
         subscriptionDao = mock(SubscriptionDao.class);
         when(subscriptionDao.findByUserId("target-user")).thenAnswer(ignored -> Optional.ofNullable(stored));
-        doAnswer(invocation -> {
-            stored = invocation.getArgument(0);
-            return null;
-        }).when(subscriptionDao).save(any(Subscription.class));
+        when(subscriptionDao.updateAtomically(eq("target-user"), any())).thenAnswer(invocation -> {
+            Function<Subscription, SubscriptionDao.Mutation> mutation = invocation.getArgument(1);
+            var result = mutation.apply(stored);
+            if (result.changed()) {
+                stored = result.subscription();
+            }
+            return result.subscription();
+        });
         SubscriptionService service = new SubscriptionService(subscriptionDao,
                 Clock.fixed(Instant.ofEpochMilli(NOW), ZoneOffset.UTC));
         ToeicUserPrincipal principal = new ToeicUserPrincipal(

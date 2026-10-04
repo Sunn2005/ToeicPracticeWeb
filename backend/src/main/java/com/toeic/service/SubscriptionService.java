@@ -46,16 +46,27 @@ public class SubscriptionService {
     }
 
     public SubscriptionSummary activateOrExtend(String userId, long expiresAt, String adminUid) throws Exception {
-        long now = clock.millis();
+        validateExpiry(expiresAt, clock.millis());
+        Subscription updated = subscriptionDao.updateAtomically(userId,
+                current -> activateOrExtend(current, userId, expiresAt, adminUid));
+        return summary(updated, clock.millis());
+    }
+
+    private void validateExpiry(long expiresAt, long now) {
         if (expiresAt <= now) {
             throw new ApiCodeException(HttpStatus.BAD_REQUEST, "SUBSCRIPTION_EXPIRY_INVALID",
                     "Subscription expiry must be after server time");
         }
-        Subscription subscription = subscriptionDao.findByUserId(userId).orElse(null);
+    }
+
+    private SubscriptionDao.Mutation activateOrExtend(
+            Subscription subscription, String userId, long expiresAt, String adminUid) {
+        long now = clock.millis();
+        validateExpiry(expiresAt, now);
         boolean continuing = subscription != null && subscription.getStatus() == SubscriptionStatus.ACTIVE
                 && subscription.getExpiresAt() != null && subscription.getExpiresAt() > now;
         if (continuing && expiresAt <= subscription.getExpiresAt()) {
-            return summary(subscription, now);
+            return new SubscriptionDao.Mutation(subscription, false);
         }
         if (subscription == null) {
             subscription = new Subscription();
@@ -73,22 +84,24 @@ public class SubscriptionService {
         subscription.setRevokedBy(null);
         subscription.setRevokedAt(null);
         subscription.setUpdatedAt(now);
-        subscriptionDao.save(subscription);
-        return summary(subscription, now);
+        return new SubscriptionDao.Mutation(subscription, true);
     }
 
     public SubscriptionSummary revoke(String userId, String adminUid) throws Exception {
+        Subscription updated = subscriptionDao.updateAtomically(userId, current -> revoke(current, adminUid));
+        return summary(updated, clock.millis());
+    }
+
+    private SubscriptionDao.Mutation revoke(Subscription subscription, String adminUid) {
         long now = clock.millis();
-        Subscription subscription = subscriptionDao.findByUserId(userId).orElse(null);
         if (subscription == null || subscription.getStatus() == SubscriptionStatus.REVOKED) {
-            return summary(subscription, now);
+            return new SubscriptionDao.Mutation(subscription, false);
         }
         subscription.setStatus(SubscriptionStatus.REVOKED);
         subscription.setRevokedBy(adminUid);
         subscription.setRevokedAt(now);
         subscription.setUpdatedAt(now);
-        subscriptionDao.save(subscription);
-        return summary(subscription, now);
+        return new SubscriptionDao.Mutation(subscription, true);
     }
 
     private SubscriptionSummary summary(Subscription subscription, long now) {

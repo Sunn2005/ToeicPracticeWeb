@@ -267,9 +267,9 @@ Response trong lúc thi luôn loại bỏ đệ quy các field bí mật: `corre
 
 ### 3.2 Schema subscription và quyền Pro
 
-Firestore lưu tại `subscriptions/{uid}`: `userId`, `planCode`, `status`, `entitlements`, `startsAt`, `expiresAt`, `activatedBy`, `revokedBy`, `revokedAt`, `createdAt`, `updatedAt`. Các thời điểm là Unix millisecond; audit actor là UID admin. `planCode=PRO`, `status` là `ACTIVE` hoặc `REVOKED`; quyền hiện tại gồm `AI_CHAT`, `AI_ANALYSIS`.
+Firestore lưu tại `subscriptions/{uid}`: `userId`, `planCode`, `status`, `entitlements`, `startsAt`, `expiresAt`, `activatedBy`, `revokedBy`, `revokedAt`, `createdAt`, `updatedAt`. Các thời điểm là Unix millisecond; audit actor là UID admin. `planCode=PRO`, `status` là `ACTIVE`, `EXPIRED` hoặc `REVOKED`; quyền hiện tại gồm `AI_CHAT`, `AI_ANALYSIS`. Các thao tác quản trị thủ công hiện chỉ ghi `ACTIVE` (kích hoạt/gia hạn) hoặc `REVOKED` (thu hồi).
 
-Server tính `effective` bằng `status=ACTIVE && startsAt <= serverNow && serverNow < expiresAt`; thiếu thời điểm làm subscription không có hiệu lực. Quyền chỉ được cấp khi subscription có hiệu lực và danh sách `entitlements` chứa quyền cần thiết. Hết hạn không tự đổi status đã lưu thành `REVOKED`. Role vẫn lấy từ `users/{uid}.role`, độc lập với Pro.
+Server tính `effective` bằng `status=ACTIVE && startsAt <= serverNow && serverNow < expiresAt`; thiếu thời điểm làm subscription không có hiệu lực. Quyền chỉ được cấp khi subscription có hiệu lực và danh sách `entitlements` chứa quyền cần thiết. Thời gian hết hạn tự nó không chuẩn hóa status đã lưu; subscription có thể vẫn lưu `ACTIVE` nhưng `effective=false`, còn `EXPIRED` và `REVOKED` luôn không có hiệu lực. Role vẫn lấy từ `users/{uid}.role`, độc lập với Pro.
 
 `AI_CHAT` hiện chỉ là giá trị entitlement; tài liệu này không xác nhận có API/chat UI hoặc thanh toán đã triển khai.
 
@@ -892,6 +892,8 @@ GET với subscription chưa tồn tại trả summary rỗng, không trả `404
 PUT tạo subscription mới hoặc kích hoạt lại subscription hết hạn/bị thu hồi với `startsAt=serverNow`. Khi status `ACTIVE` và expiry hiện tại còn ở tương lai, PUT giữ ngày bắt đầu (nếu có), chỉ kéo dài expiry; expiry yêu cầu bằng hoặc sớm hơn expiry hiện tại là no-op sau khi đã validate thời điểm tương lai. Khi ghi, server đặt `PRO`, `ACTIVE`, `[AI_CHAT, AI_ANALYSIS]`, cập nhật `activatedBy`/`updatedAt`, xóa metadata thu hồi và giữ `createdAt` cũ.
 
 DELETE đánh dấu `REVOKED`, cập nhật `revokedBy`, `revokedAt`, `updatedAt`; không xóa document. Subscription chưa tồn tại hoặc đã `REVOKED` là no-op và vẫn trả `200 OK`. Thiếu session trả `401 AUTHENTICATION_REQUIRED`; sai role trả `403 ACCESS_DENIED`.
+
+PUT và DELETE đọc, quyết định và ghi subscription trong cùng một Firestore transaction. Khi có cập nhật đồng thời, server tính lại trên document mới nhất để giữ quy tắc không rút ngắn expiry, tính idempotent và metadata audit.
 
 ## 10. API nội bộ kiểm thử AI
 
