@@ -25,6 +25,8 @@ public interface AIChatDao {
      * All reads, quota checks, and message/job/usage writes occur in one transaction.
      * Keys are unique per user. Reuse with different content or conversation is CHAT_MESSAGE_INVALID.
      * now and configurable limits are supplied by the trusted application service, never the client.
+     * Admission time is max(now, the user's last persisted admission time); daily quota/reset and
+     * message timestamps use that monotonic time. Burst state is shared across conversations and days.
      */
     AcceptedChatMessage acceptMessage(String userId, String conversationId, String content,
             String idempotencyKey, long now, int dailyLimit, int burstLimit) throws Exception;

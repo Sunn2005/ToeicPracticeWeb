@@ -118,14 +118,18 @@ public class FirestoreAIChatDao implements AIChatDao {
         // Deterministic identifiers are computed outside the retriable callback; no random or transport side effects.
         String jobId = idempotencyId(userId, idempotencyKey);
         var jobReference = jobRef(jobId);
-        LocalDate date = Instant.ofEpochMilli(now).atZone(QUOTA_ZONE).toLocalDate();
-        var usageReference = usageRef(userId, date);
-        var previousUsageReference = usageRef(userId, date.minusDays(1));
-        long resetAt = date.plusDays(1).atStartOfDay(QUOTA_ZONE).toInstant().toEpochMilli();
+        var burstReference = firestore.collection("aiChatUsage").document(userId + "_burst");
         return transact(transaction -> {
             var conversation = conversationFrom(transaction.get(conversationReference).get());
             if (!activeOwned(conversation, userId)) throw notFound();
             var existingJob = jobFrom(transaction.get(jobReference).get());
+            var burst = transaction.get(burstReference).get();
+            Long lastAdmissionAt = burst.getLong("lastAdmissionAt");
+            // Shared state serializes every conversation and day. Older sampled times cannot move admission backward.
+            long admissionAt = lastAdmissionAt == null ? now : Math.max(now, lastAdmissionAt);
+            LocalDate date = Instant.ofEpochMilli(admissionAt).atZone(QUOTA_ZONE).toLocalDate();
+            var usageReference = usageRef(userId, date);
+            long resetAt = date.plusDays(1).atStartOfDay(QUOTA_ZONE).toInstant().toEpochMilli();
             var quota = quotaFrom(transaction.get(usageReference).get(), userId, date, resetAt);
             if (existingJob != null) {
                 if (!Objects.equals(userId, existingJob.getUserId())
@@ -137,22 +141,22 @@ public class FirestoreAIChatDao implements AIChatDao {
                 return new AcceptedChatMessage(conversation, userMessage, assistantMessage, existingJob,
                         summary(quota, dailyLimit), false);
             }
-            var previous = quotaFrom(transaction.get(previousUsageReference).get(), userId, date.minusDays(1), 0);
             if (quota.getAcceptedCount() >= dailyLimit) {
                 throw new ApiCodeException(HttpStatus.TOO_MANY_REQUESTS, "CHAT_DAILY_LIMIT_REACHED", "Daily chat quota exhausted");
             }
-            List<Long> recent = new ArrayList<>();
-            quota.getAcceptedTimestamps().stream().filter(time -> time > now - 60_000).forEach(recent::add);
-            long previousRecent = previous.getAcceptedTimestamps().stream().filter(time -> time > now - 60_000).count();
-            if (recent.size() + previousRecent >= burstLimit) {
+            List<Long> recent = recentAdmissions(burst, admissionAt);
+            if (recent.size() >= burstLimit) {
                 throw new ApiCodeException(HttpStatus.TOO_MANY_REQUESTS, "CHAT_RATE_LIMITED", "Rolling minute chat limit reached");
             }
-            recent.add(now);
+            recent.add(admissionAt);
             quota.setAcceptedCount(quota.getAcceptedCount() + 1);
-            quota.setAcceptedTimestamps(recent);
-            var userMessage = newMessage(jobId + "_0", AIChatMessage.Role.USER, content, AIChatMessage.Status.SUCCEEDED, jobId, now);
-            userMessage.setCompletedAt(now);
-            var assistantMessage = newMessage(jobId + "_1", AIChatMessage.Role.ASSISTANT, null, AIChatMessage.Status.PENDING, jobId, now);
+            List<Long> dailyRecent = new ArrayList<>(quota.getAcceptedTimestamps().stream()
+                    .filter(time -> time > admissionAt - 60_000).toList());
+            dailyRecent.add(admissionAt);
+            quota.setAcceptedTimestamps(dailyRecent);
+            var userMessage = newMessage(jobId + "_0", AIChatMessage.Role.USER, content, AIChatMessage.Status.SUCCEEDED, jobId, admissionAt);
+            userMessage.setCompletedAt(admissionAt);
+            var assistantMessage = newMessage(jobId + "_1", AIChatMessage.Role.ASSISTANT, null, AIChatMessage.Status.PENDING, jobId, admissionAt);
             var job = new AIChatJob();
             job.setId(jobId);
             job.setUserId(userId);
@@ -161,14 +165,15 @@ public class FirestoreAIChatDao implements AIChatDao {
             job.setAssistantMessageId(assistantMessage.getId());
             job.setIdempotencyKey(idempotencyKey);
             job.setStatus(AIChatJob.Status.PENDING);
-            job.setCreatedAt(now);
-            job.setUpdatedAt(now);
-            conversation.setUpdatedAt(Math.max(conversation.getUpdatedAt(), now));
-            conversation.setLastMessageAt(Math.max(conversation.getLastMessageAt(), now));
+            job.setCreatedAt(admissionAt);
+            job.setUpdatedAt(admissionAt);
+            conversation.setUpdatedAt(Math.max(conversation.getUpdatedAt(), admissionAt));
+            conversation.setLastMessageAt(Math.max(conversation.getLastMessageAt(), admissionAt));
             transaction.set(messageRef(conversationId, userMessage.getId()), userMessage);
             transaction.set(messageRef(conversationId, assistantMessage.getId()), assistantMessage);
             transaction.set(jobReference, job);
             transaction.set(usageReference, quota);
+            transaction.set(burstReference, Map.of("userId", userId, "lastAdmissionAt", admissionAt, "acceptedTimestamps", recent));
             transaction.set(conversationReference, conversation);
             return new AcceptedChatMessage(conversation, userMessage, assistantMessage, job, summary(quota, dailyLimit), true);
         });
@@ -297,6 +302,21 @@ public class FirestoreAIChatDao implements AIChatDao {
 
     private static QuotaSummary summary(AIChatQuota quota, int dailyLimit) {
         return new QuotaSummary(dailyLimit, Math.max(0, dailyLimit - quota.getAcceptedCount()), quota.getNextResetAt());
+    }
+
+    private static List<Long> recentAdmissions(DocumentSnapshot snapshot, long admissionAt) {
+        List<Long> recent = new ArrayList<>();
+        if (!snapshot.exists()) return recent;
+        var data = snapshot.getData();
+        if (data == null || !(data.get("acceptedTimestamps") instanceof List<?> timestamps)) {
+            throw new IllegalStateException("Invalid chat burst state");
+        }
+        for (Object timestamp : timestamps) {
+            if (!(timestamp instanceof Number number)) throw new IllegalStateException("Invalid chat burst timestamp");
+            long time = number.longValue();
+            if (time > admissionAt - 60_000) recent.add(time);
+        }
+        return recent;
     }
 
     private static boolean activeOwned(AIChatConversation conversation, String userId) {

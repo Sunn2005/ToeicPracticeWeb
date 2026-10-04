@@ -157,6 +157,40 @@ class FirestoreAIChatDaoTests {
     }
 
     @Test
+    void delayedPreMidnightSampleCannotBypassBurstAfterFiveNewDayAdmissions() throws Exception {
+        long midnight = Instant.parse("2026-10-03T17:00:00Z").toEpochMilli();
+        create("chat", "learner", midnight - 1);
+        for (int i = 0; i < 5; i++) send("chat", "new-day-" + i, midnight + i);
+        var before = store.copyDocuments();
+        assertCode("CHAT_RATE_LIMITED", HttpStatus.TOO_MANY_REQUESTS,
+                () -> send("chat", "delayed-old-day", midnight - 1));
+        assertEquals(before, store.documents);
+        assertEquals(10, dao.listMessages("learner", "chat", 20).size());
+    }
+
+    @Test
+    void twoConversationsShareBurstAndAdmissionDayDespiteReversedMidnightSamples() throws Exception {
+        long midnight = Instant.parse("2026-10-03T17:00:00Z").toEpochMilli();
+        create("first", "learner", midnight - 1);
+        create("second", "learner", midnight - 1);
+        send("first", "new-day", midnight + 10);
+        var delayed = send("second", "delayed-old-day", midnight - 1);
+        assertEquals(28, delayed.quotaSummary().remainingDaily());
+        assertEquals(Instant.parse("2026-10-04T17:00:00Z").toEpochMilli(), delayed.quotaSummary().nextResetAt());
+        assertEquals(midnight + 10, delayed.userMessage().getCreatedAt());
+        assertEquals(2, store.documents.get("aiChatUsage/learner_2026-10-04").get("acceptedCount"));
+        assertFalse(store.documents.containsKey("aiChatUsage/learner_2026-10-03"));
+        for (int i = 0; i < 3; i++) send(i % 2 == 0 ? "first" : "second", "more-" + i, midnight + 11 + i);
+        var before = store.copyDocuments();
+        assertCode("CHAT_RATE_LIMITED", HttpStatus.TOO_MANY_REQUESTS,
+                () -> send("second", "sixth", midnight - 2));
+        assertFalse(send("second", "delayed-old-day", midnight - 1).newlyAccepted());
+        assertEquals(before, store.documents);
+        assertEquals(6, dao.listMessages("learner", "first", 20).size());
+        assertEquals(4, dao.listMessages("learner", "second", 20).size());
+    }
+
+    @Test
     void capIsTenAndSoftDeletionFreesOneSlotWithoutRemovingHistory() throws Exception {
         for (int i = 0; i < 10; i++) create("chat-" + i, "learner", NOW);
         var first = send("chat-0", "key", NOW);
@@ -245,6 +279,37 @@ class FirestoreAIChatDaoTests {
     }
 
     @Test
+    void conflictReplayObservesFifthAdmissionCommittedByAnotherConversation() throws Exception {
+        long midnight = Instant.parse("2026-10-03T17:00:00Z").toEpochMilli();
+        create("first", "learner", midnight - 1);
+        create("second", "learner", midnight - 1);
+        for (int i = 0; i < 4; i++) send("first", "initial-" + i, midnight + i);
+        store.retryNext = true;
+        store.afterDiscardedAttempt = () -> send("first", "competing-fifth", midnight + 4);
+        assertCode("CHAT_RATE_LIMITED", HttpStatus.TOO_MANY_REQUESTS,
+                () -> send("second", "delayed-old-day", midnight - 1));
+        assertEquals(5, store.documents.get("aiChatUsage/learner_2026-10-04").get("acceptedCount"));
+        assertEquals(10, dao.listMessages("learner", "first", 20).size());
+        assertTrue(dao.listMessages("learner", "second", 20).isEmpty());
+        assertEquals(5, ((List<?>) store.documents.get("aiChatUsage/learner_burst").get("acceptedTimestamps")).size());
+        assertEquals(midnight + 4, store.documents.get("aiChatUsage/learner_burst").get("lastAdmissionAt"));
+    }
+
+    @Test
+    void conflictReplayReturnsDuplicateCommittedByCompetingSendWithoutChargingAgain() throws Exception {
+        create("chat", "learner", NOW);
+        store.retryNext = true;
+        store.afterDiscardedAttempt = () -> send("chat", "same-key", NOW + 1);
+        var accepted = send("chat", "same-key", NOW);
+        assertFalse(accepted.newlyAccepted());
+        assertEquals(NOW + 1, accepted.userMessage().getCreatedAt());
+        assertEquals(29, accepted.quotaSummary().remainingDaily());
+        assertEquals(2, dao.listMessages("learner", "chat", 20).size());
+        assertEquals(1, store.documents.get("aiChatUsage/learner_2026-10-03").get("acceptedCount"));
+        assertEquals(List.of(NOW + 1), store.documents.get("aiChatUsage/learner_burst").get("acceptedTimestamps"));
+    }
+
+    @Test
     void concurrentDuplicateAcceptanceProducesOnePairAndOneCharge() throws Exception {
         create("chat", "learner", NOW);
         try (var pool = Executors.newFixedThreadPool(2)) {
@@ -317,6 +382,7 @@ class FirestoreAIChatDaoTests {
         final Map<Query, QueryState> queries = new IdentityHashMap<>();
         final Map<String, DocumentReference> references = new HashMap<>();
         boolean retryNext;
+        Throwing afterDiscardedAttempt;
 
         MemoryFirestore() {
             when(firestore.collection(anyString())).thenAnswer(call -> collection(call.getArgument(0)));
@@ -324,7 +390,13 @@ class FirestoreAIChatDaoTests {
                 synchronized (documents) {
                     Transaction.Function<Object> callback = call.getArgument(0);
                     try {
-                        if (retryNext) { retryNext = false; execute(callback, false); }
+                        if (retryNext) {
+                            retryNext = false;
+                            execute(callback, false);
+                            var competitor = afterDiscardedAttempt;
+                            afterDiscardedAttempt = null;
+                            if (competitor != null) competitor.run();
+                        }
                         return ApiFutures.immediateFuture(execute(callback, true));
                     } catch (Exception exception) {
                         return ApiFutures.immediateFailedFuture(exception);
