@@ -52,6 +52,23 @@ public class RabbitMessagingConfig {
     }
 
     @Bean
+    Queue aiChatRequestQueue(
+            @Value("${app.ai.chat-request-queue}") String name,
+            @Value("${app.ai.dead-letter-exchange}") String deadLetterExchange,
+            @Value("${app.ai.dead-letter-routing-key}") String deadLetterRoutingKey
+    ) {
+        return QueueBuilder.durable(name)
+                .deadLetterExchange(deadLetterExchange)
+                .deadLetterRoutingKey(deadLetterRoutingKey)
+                .build();
+    }
+
+    @Bean
+    Queue aiChatResultQueue(@Value("${app.ai.chat-result-queue}") String name) {
+        return QueueBuilder.durable(name).build();
+    }
+
+    @Bean
     Binding aiReviewRequestBinding(
             Queue aiReviewRequestQueue,
             DirectExchange aiExchange,
@@ -76,6 +93,24 @@ public class RabbitMessagingConfig {
             @Value("${app.ai.review-failed-routing-key}") String routingKey
     ) {
         return BindingBuilder.bind(aiReviewFailedQueue).to(aiExchange).with(routingKey);
+    }
+
+    @Bean
+    Binding aiChatRequestBinding(
+            Queue aiChatRequestQueue,
+            DirectExchange aiExchange,
+            @Value("${app.ai.chat-request-routing-key}") String routingKey
+    ) {
+        return BindingBuilder.bind(aiChatRequestQueue).to(aiExchange).with(routingKey);
+    }
+
+    @Bean
+    Binding aiChatResultBinding(
+            Queue aiChatResultQueue,
+            DirectExchange aiExchange,
+            @Value("${app.ai.chat-result-routing-key}") String routingKey
+    ) {
+        return BindingBuilder.bind(aiChatResultQueue).to(aiExchange).with(routingKey);
     }
 
     @Bean

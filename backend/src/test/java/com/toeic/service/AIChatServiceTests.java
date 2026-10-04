@@ -4,6 +4,7 @@ import com.toeic.controller.ApiCodeException;
 import com.toeic.dao.AIChatDao;
 import com.toeic.dto.CreateChatConversationRequest;
 import com.toeic.dto.SendChatMessageRequest;
+import com.toeic.dto.ai.AIChatRequest;
 import com.toeic.dto.ai.AIChatQuestionContext;
 import com.toeic.model.AIChatConversation;
 import com.toeic.model.AIChatJob;
@@ -37,6 +38,7 @@ class AIChatServiceTests {
     private SubscriptionService subscriptions;
     private AttemptService attempts;
     private ChatAttemptContextService contexts;
+    private AIChatRequestPublisher publisher;
     private AIChatService service;
 
     @BeforeEach
@@ -45,8 +47,9 @@ class AIChatServiceTests {
         subscriptions = mock(SubscriptionService.class);
         attempts = mock(AttemptService.class);
         contexts = mock(ChatAttemptContextService.class);
-        service = new AIChatService(dao, subscriptions, attempts, contexts,
-                Clock.fixed(Instant.ofEpochMilli(NOW), ZoneOffset.UTC), 30, 5, 10, 100, 1_000);
+        publisher = mock(AIChatRequestPublisher.class);
+        service = new AIChatService(dao, subscriptions, attempts, contexts, publisher,
+                Clock.fixed(Instant.ofEpochMilli(NOW), ZoneOffset.UTC), 30, 5, 10, 100, 1_000, 12);
     }
 
     @Test
@@ -168,6 +171,52 @@ class AIChatServiceTests {
 
         assertFalse(response.newlyAccepted());
         verify(dao).acceptMessage("user", "conversation", "hello", "key", NOW, 30, 5);
+        verifyNoInteractions(publisher);
+    }
+
+    @Test
+    void newlyAcceptedMessagePublishesIdentifiersBoundedHistoryAndSanitizedContext() throws Exception {
+        AIChatConversation conversation = conversation();
+        conversation.setLocale("en");
+        conversation.setContextAttemptId("attempt");
+        conversation.setContextQuestionNumber(101);
+        AIChatQuestionContext context = context();
+        when(dao.findConversation("user", "conversation")).thenReturn(Optional.of(conversation));
+        when(contexts.resolve("user", "attempt", 101)).thenReturn(context);
+        when(dao.acceptMessage("user", "conversation", "hello", "key", NOW, 30, 5))
+                .thenReturn(accepted(true));
+        when(dao.listMessages("user", "conversation", 100)).thenReturn(history(15));
+
+        service.sendMessage("user", "conversation", new SendChatMessageRequest("hello", "key"));
+
+        var captor = org.mockito.ArgumentCaptor.forClass(AIChatRequest.class);
+        verify(publisher).publish(captor.capture());
+        AIChatRequest request = captor.getValue();
+        assertEquals("user", request.userId());
+        assertEquals("conversation", request.conversationId());
+        assertEquals("job", request.jobId());
+        assertEquals("user-message", request.userMessageId());
+        assertEquals("assistant-message", request.assistantMessageId());
+        assertEquals("en", request.locale());
+        assertEquals("hello", request.currentMessage());
+        assertEquals(context, request.questionContext());
+        assertEquals(12, request.history().size());
+        assertEquals("history-3", request.history().getFirst().content());
+        assertEquals("history-14", request.history().getLast().content());
+    }
+
+    @Test
+    void publishFailureMarksPendingMessageFailedAndReturnsStableUnavailableCode() throws Exception {
+        when(dao.findConversation("user", "conversation")).thenReturn(Optional.of(conversation()));
+        when(dao.acceptMessage("user", "conversation", "hello", "key", NOW, 30, 5))
+                .thenReturn(accepted(true));
+        doThrow(new IllegalStateException("broker down")).when(publisher).publish(any());
+
+        assertCode("AI_UNAVAILABLE", () -> service.sendMessage(
+                "user", "conversation", new SendChatMessageRequest("hello", "key")));
+
+        verify(dao).finalizeMessage("user", "conversation", "job", "assistant-message",
+                AIChatJob.Status.FAILED, null, "AI_UNAVAILABLE", NOW);
     }
 
     @Test
@@ -245,6 +294,19 @@ class AIChatServiceTests {
     private AIChatQuestionContext context() {
         return new AIChatQuestionContext(5, 101, "Question", List.of(), "A", "B",
                 "Because", null, null, null, null);
+    }
+
+    private List<AIChatMessage> history(int count) {
+        java.util.ArrayList<AIChatMessage> values = new java.util.ArrayList<>();
+        for (int index = 0; index < count; index++) {
+            AIChatMessage value = message();
+            value.setId("history-id-" + index);
+            value.setContent("history-" + index);
+            value.setRole(index % 2 == 0 ? AIChatMessage.Role.USER : AIChatMessage.Role.ASSISTANT);
+            value.setCreatedAt(NOW - count + index);
+            values.add(value);
+        }
+        return values;
     }
 
     private ApiCodeException code(String code) {

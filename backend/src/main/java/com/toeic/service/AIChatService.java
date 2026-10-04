@@ -4,6 +4,8 @@ import com.toeic.controller.ApiCodeException;
 import com.toeic.dao.AIChatDao;
 import com.toeic.dto.CreateChatConversationRequest;
 import com.toeic.dto.SendChatMessageRequest;
+import com.toeic.dto.ai.AIChatQuestionContext;
+import com.toeic.dto.ai.AIChatRequest;
 import com.toeic.model.AIChatConversation;
 import com.toeic.model.AIChatJob;
 import com.toeic.model.AIChatMessage;
@@ -28,12 +30,14 @@ public class AIChatService {
     private final SubscriptionService subscriptionService;
     private final AttemptService attemptService;
     private final ChatAttemptContextService contextService;
+    private final AIChatRequestPublisher requestPublisher;
     private final Clock clock;
     private final int dailyLimit;
     private final int burstLimit;
     private final int conversationLimit;
     private final int readLimit;
     private final int messageCharacterLimit;
+    private final int historyMessageLimit;
 
     @Autowired
     public AIChatService(
@@ -41,14 +45,16 @@ public class AIChatService {
             SubscriptionService subscriptionService,
             AttemptService attemptService,
             ChatAttemptContextService contextService,
+            AIChatRequestPublisher requestPublisher,
             @Value("${app.ai.chat.daily-limit:30}") int dailyLimit,
             @Value("${app.ai.chat.burst-limit:5}") int burstLimit,
             @Value("${app.ai.chat.conversation-limit:10}") int conversationLimit,
             @Value("${app.ai.chat.read-limit:100}") int readLimit,
-            @Value("${app.ai.chat.message-character-limit:1000}") int messageCharacterLimit
+            @Value("${app.ai.chat.message-character-limit:1000}") int messageCharacterLimit,
+            @Value("${app.ai.chat.history-message-limit:12}") int historyMessageLimit
     ) {
-        this(chatDao, subscriptionService, attemptService, contextService, Clock.systemUTC(),
-                dailyLimit, burstLimit, conversationLimit, readLimit, messageCharacterLimit);
+        this(chatDao, subscriptionService, attemptService, contextService, requestPublisher, Clock.systemUTC(),
+                dailyLimit, burstLimit, conversationLimit, readLimit, messageCharacterLimit, historyMessageLimit);
     }
 
     public AIChatService(
@@ -56,23 +62,27 @@ public class AIChatService {
             SubscriptionService subscriptionService,
             AttemptService attemptService,
             ChatAttemptContextService contextService,
+            AIChatRequestPublisher requestPublisher,
             Clock clock,
             int dailyLimit,
             int burstLimit,
             int conversationLimit,
             int readLimit,
-            int messageCharacterLimit
+            int messageCharacterLimit,
+            int historyMessageLimit
     ) {
         this.chatDao = chatDao;
         this.subscriptionService = subscriptionService;
         this.attemptService = attemptService;
         this.contextService = contextService;
+        this.requestPublisher = requestPublisher;
         this.clock = clock;
         this.dailyLimit = positive(dailyLimit, "dailyLimit");
         this.burstLimit = positive(burstLimit, "burstLimit");
         this.conversationLimit = positive(conversationLimit, "conversationLimit");
         this.readLimit = positive(readLimit, "readLimit");
         this.messageCharacterLimit = positive(messageCharacterLimit, "messageCharacterLimit");
+        this.historyMessageLimit = positive(historyMessageLimit, "historyMessageLimit");
     }
 
     public AIChatConversation createConversation(String userId, CreateChatConversationRequest request) throws Exception {
@@ -114,11 +124,36 @@ public class AIChatService {
         subscriptionService.requireEntitlement(userId, Entitlement.AI_CHAT);
         attemptService.requireNoInProgressAttempt(userId);
         AIChatConversation conversation = ownedConversation(userId, conversationId);
+        AIChatQuestionContext questionContext = null;
         if (conversation.getContextAttemptId() != null) {
-            contextService.resolve(userId, conversation.getContextAttemptId(), conversation.getContextQuestionNumber());
+            questionContext = contextService.resolve(
+                    userId, conversation.getContextAttemptId(), conversation.getContextQuestionNumber());
         }
-        return chatDao.acceptMessage(userId, conversationId, validated.content(), validated.idempotencyKey(),
+        AIChatDao.AcceptedChatMessage accepted = chatDao.acceptMessage(
+                userId, conversationId, validated.content(), validated.idempotencyKey(),
                 clock.millis(), dailyLimit, burstLimit);
+        if (!accepted.newlyAccepted()) return accepted;
+
+        List<AIChatRequest.HistoryMessage> history = historyForRequest(
+                chatDao.listMessages(userId, conversationId, readLimit), accepted.userMessage().getId());
+        AIChatRequest generationRequest = new AIChatRequest(
+                userId, conversationId, accepted.job().getId(), accepted.userMessage().getId(),
+                accepted.assistantMessage().getId(), conversation.getLocale(), history,
+                validated.content(), questionContext);
+        try {
+            requestPublisher.publish(generationRequest);
+        } catch (RuntimeException publishFailure) {
+            try {
+                chatDao.finalizeMessage(userId, conversationId, accepted.job().getId(),
+                        accepted.assistantMessage().getId(), AIChatJob.Status.FAILED,
+                        null, "AI_UNAVAILABLE", clock.millis());
+            } catch (Exception finalizeFailure) {
+                publishFailure.addSuppressed(finalizeFailure);
+            }
+            throw new ApiCodeException(HttpStatus.SERVICE_UNAVAILABLE, "AI_UNAVAILABLE",
+                    "AI chat is temporarily unavailable");
+        }
+        return accepted;
     }
 
     public void deleteConversation(String userId, String conversationId) throws Exception {
@@ -136,6 +171,19 @@ public class AIChatService {
     private AIChatConversation ownedConversation(String userId, String conversationId) throws Exception {
         requireIdentifier(conversationId);
         return chatDao.findConversation(userId, conversationId).orElseThrow(AIChatService::notFound);
+    }
+
+    private List<AIChatRequest.HistoryMessage> historyForRequest(
+            List<AIChatMessage> messages, String currentUserMessageId
+    ) {
+        List<AIChatRequest.HistoryMessage> successful = messages.stream()
+                .filter(message -> message.getStatus() == AIChatMessage.Status.SUCCEEDED)
+                .filter(message -> message.getContent() != null && !message.getContent().isBlank())
+                .filter(message -> !message.getId().equals(currentUserMessageId))
+                .map(message -> new AIChatRequest.HistoryMessage(message.getRole().name(), message.getContent()))
+                .toList();
+        int from = Math.max(0, successful.size() - historyMessageLimit);
+        return List.copyOf(successful.subList(from, successful.size()));
     }
 
     private ValidatedContext validateConversationRequest(CreateChatConversationRequest request) {
