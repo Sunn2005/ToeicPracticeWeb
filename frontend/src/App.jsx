@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/react";
 import {
   BrowserRouter,
   Navigate,
@@ -43,58 +44,73 @@ function AppRoutes() {
   return (
     <>
       <Routes>
-      <Route
-        path="/"
-        element={<Navigate to={user ? "/dashboard" : "/login"} replace />}
-      />
-      <Route
-        path="/login"
-        element={user ? <Navigate to="/dashboard" replace /> : <Login />}
-      />
-      <Route element={user ? <UserLayout /> : <Navigate to="/login" replace />}>
-        <Route path="/dashboard" element={<UserDashboard />} />
-        <Route path="/tests" element={<TestCatalogPage />} />
-        <Route path="/history" element={<AttemptHistoryPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/full-test/:attemptId/result" element={<FullTestResult />} />
-      </Route>
-      <Route
-        path="/practice/part5"
-        element={user ? <PracticePart /> : <Navigate to="/login" replace />}
-      />
-      <Route
-        path="/full-test/:testId"
-        element={user ? <FullTestIntro /> : <Navigate to="/login" replace />}
-      />
-      <Route
-        path="/full-test/:attemptId/exam"
-        element={user ? <FullTestExam /> : <Navigate to="/login" replace />}
-      />
-      <Route
-        path="/full-test/:attemptId/review"
-        element={user ? <FullTestReview /> : <Navigate to="/login" replace />}
-      />
-      <Route
-        path="*"
-        element={<Navigate to={user ? "/dashboard" : "/login"} replace />}
-      />
+        <Route
+          path="/"
+          element={<Navigate to={user ? "/dashboard" : "/login"} replace />}
+        />
+        <Route
+          path="/login"
+          element={user ? <Navigate to="/dashboard" replace /> : <Login />}
+        />
+        <Route
+          element={user ? <UserLayout /> : <Navigate to="/login" replace />}
+        >
+          <Route path="/dashboard" element={<UserDashboard />} />
+          <Route path="/tests" element={<TestCatalogPage />} />
+          <Route path="/history" element={<AttemptHistoryPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route
+            path="/full-test/:attemptId/result"
+            element={<FullTestResult />}
+          />
+        </Route>
+        <Route
+          path="/practice/part5"
+          element={user ? <PracticePart /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/full-test/:testId"
+          element={user ? <FullTestIntro /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/full-test/:attemptId/exam"
+          element={user ? <FullTestExam /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/full-test/:attemptId/review"
+          element={user ? <FullTestReview /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="*"
+          element={<Navigate to={user ? "/dashboard" : "/login"} replace />}
+        />
 
-      <Route path="/console" element={<LoginPage />} />
-      <Route path="/console/forbidden" element={<ForbiddenPage />} />
-      <Route element={<ProtectedRoute allowedRoles={["ADMIN", "EMPLOYEE"]} />}>
-        <Route element={<ManagementLayout />}>
-          <Route path="/console/dashboard" element={<AdminDashboard />} />
-          <Route path="/console/tests" element={<MyTestsPage />} />
-          <Route path="/console/tests/new" element={<CreateTestPage />} />
-          <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
-            <Route path="/console/reviews" element={<ReviewQueuePage />} />
-            <Route path="/console/reviews/:testId" element={<TestReviewPage />} />
-            <Route path="/console/review-history" element={<ReviewHistoryPage />} />
+        <Route path="/console" element={<LoginPage />} />
+        <Route path="/console/forbidden" element={<ForbiddenPage />} />
+        <Route
+          element={<ProtectedRoute allowedRoles={["ADMIN", "EMPLOYEE"]} />}
+        >
+          <Route element={<ManagementLayout />}>
+            <Route path="/console/dashboard" element={<AdminDashboard />} />
+            <Route path="/console/tests" element={<MyTestsPage />} />
+            <Route path="/console/tests/new" element={<CreateTestPage />} />
+            <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
+              <Route path="/console/reviews" element={<ReviewQueuePage />} />
+              <Route
+                path="/console/reviews/:testId"
+                element={<TestReviewPage />}
+              />
+              <Route
+                path="/console/review-history"
+                element={<ReviewHistoryPage />}
+              />
+            </Route>
           </Route>
         </Route>
-      </Route>
       </Routes>
-      {!location.pathname.startsWith("/console") && <FloatingPet user={user} role={role} />}
+      {!location.pathname.startsWith("/console") && (
+        <FloatingPet user={user} role={role} />
+      )}
     </>
   );
 }
@@ -105,6 +121,7 @@ function App() {
       <AuthProvider>
         <BrowserRouter>
           <AppRoutes />
+          <Analytics />
         </BrowserRouter>
       </AuthProvider>
     </LanguageProvider>
