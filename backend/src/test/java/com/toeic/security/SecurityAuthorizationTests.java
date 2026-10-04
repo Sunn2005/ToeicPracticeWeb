@@ -113,6 +113,17 @@ class SecurityAuthorizationTests {
     }
 
     @Test
+    void chatApisRequireAuthenticationAndAllowAuthenticatedUsers() throws Exception {
+        mockMvc.perform(get("/api/ai/chat/conversations"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("AUTHENTICATION_REQUIRED"));
+
+        mockMvc.perform(get("/api/ai/chat/conversations")
+                        .with(authentication(authenticationFor(UserRole.USER))))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void creatingAnAttemptRequiresAuthenticationEvenThoughTestReadsArePublic() throws Exception {
         mockMvc.perform(post("/api/tests/test-1/attempts"))
                 .andExpect(status().isForbidden());
@@ -299,6 +310,11 @@ class SecurityAuthorizationTests {
 
         @GetMapping("/api/users/me/statistics")
         Map<String, Object> statistics() {
+            return Map.of("ok", true);
+        }
+
+        @GetMapping("/api/ai/chat/conversations")
+        Map<String, Object> chatConversations() {
             return Map.of("ok", true);
         }
 
