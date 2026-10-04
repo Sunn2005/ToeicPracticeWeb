@@ -207,6 +207,7 @@ frontend/
 │   ├── auth/                # Firebase session và route guard
 │   ├── components/          # Component dùng chung
 │   │   ├── admin/           # Component dành cho Admin
+│   │   ├── ai-chat/         # Khung chat Capy AI dành cho người dùng Pro
 │   │   ├── test-editor/     # Component tạo/sửa đề TOEIC
 │   │   ├── tests/           # Component danh sách và bộ lọc đề
 │   │   ├── ui/              # Button, Input, Modal, Badge...
@@ -259,7 +260,58 @@ Luồng thi hiện tại sử dụng:
 /full-test/:attemptId/review
 ```
 
-## 9. Quy ước gọi API
+## 9. Capy AI Chat dành cho người dùng Pro
+
+Capy AI Chat hỗ trợ giải đáp thắc mắc liên quan đến luyện thi TOEIC trước và sau khi làm bài. Đây không phải trợ lý trong phòng thi và không thay thế luồng nhận xét AI của bài Full Test.
+
+### Điều kiện hiển thị
+
+- Chỉ tài khoản có `role: USER`, `subscription.effective: true` và entitlement `AI_CHAT` từ `GET /api/me` mới thấy pet Capy.
+- Người dùng thường, `EMPLOYEE`, `ADMIN` và các route quản trị không hiển thị Capy.
+- Capy và khung chat không xuất hiện tại route làm bài `/full-test/:attemptId/exam`.
+- Frontend chỉ dùng subscription summary để quyết định cách hiển thị. Backend vẫn kiểm tra entitlement trên mọi API chat; không được tin role hoặc trạng thái Pro từ local storage/request body.
+- Dashboard người dùng thường chỉ giới thiệu lợi ích Pro. Dự án chưa triển khai checkout hoặc thanh toán nên không được tạo nút mua giả.
+
+### Tương tác và khả năng truy cập
+
+- Lần đầu Capy xuất hiện trên một trình duyệt, tooltip “Nhấn để trò chuyện” tự ẩn sau khoảng 6 giây. Trạng thái đã xem dùng key `capy-ai-chat-hint-seen-v1` trong local storage và không dùng để phân quyền.
+- Click hoặc kích hoạt bằng bàn phím mở dialog chat. Kéo quá ngưỡng 8 CSS px chỉ đổi vị trí pet và không mở chat.
+- Dialog giữ focus bên trong khi mở, hỗ trợ `Escape` để đóng và trả focus về launcher. Dialog xác nhận xóa hội thoại cũng có focus trap riêng.
+- Mobile dùng chiều cao viewport động và safe-area cho vùng nhập; desktop hiển thị panel neo gần Capy.
+- Hiệu ứng chuyển động được giảm khi trình duyệt bật `prefers-reduced-motion`.
+
+### Cách chat hoạt động
+
+- API wrapper nằm tại `src/api/aiChat.js`; component không tự lấy Firebase token hoặc gọi `fetch` trực tiếp.
+- Phiên bản đầu dùng job bất đồng bộ và polling, không dùng token streaming. Tin nhắn người dùng xuất hiện ngay; câu trả lời Capy được cập nhật khi job hoàn thành.
+- Đóng khung chat chỉ hủy polling phía trình duyệt, không hủy job backend. Khi mở lại hội thoại có job đang chờ, frontend tiếp tục polling.
+- Người dùng có thể gắn context bằng attempt đã hoàn thành và số câu hỏi. Frontend chỉ gửi ID/số câu; backend tự tải và kiểm tra ownership cùng trạng thái attempt.
+- Khi backend trả `PRO_REQUIRED`, lịch sử đang có vẫn được giữ để đọc nhưng composer chuyển sang read-only. Khi profile đã biết entitlement không còn hiệu lực, launcher và dialog được đóng.
+- Timeout polling mặc định là 60 giây. Không thay đổi timeout, trạng thái job hoặc mã lỗi ổn định nếu chưa thống nhất contract với backend/AI service.
+
+### Checklist kiểm thử thủ công
+
+Chuẩn bị một tài khoản `USER` Pro có entitlement `AI_CHAT`, một tài khoản `USER` thường và backend/AI service/RabbitMQ hoạt động. Không dùng hoặc commit tài khoản/secret dùng chung.
+
+1. Trên desktop và mobile, đăng nhập tài khoản Pro; kiểm tra Capy, tooltip lần đầu, click mở chat và layout không tràn viewport.
+2. Dùng `Tab`/`Shift+Tab`, `Enter`/`Space` và `Escape`; kiểm tra focus không thoát dialog và quay lại launcher sau khi đóng.
+3. Click Capy không kéo phải mở chat; kéo dưới 8 px vẫn được xem là click; kéo vượt 8 px chỉ di chuyển pet.
+4. Bật reduced motion ở hệ điều hành/trình duyệt và kiểm tra launcher không dùng chuyển động không cần thiết.
+5. Gửi tin nhắn rồi đóng chat khi đang chờ; mở lại và kiểm tra job tiếp tục đến khi có câu trả lời.
+6. Chọn attempt đã hoàn thành, chọn câu hỏi, gửi chat và kiểm tra UI không hiển thị/đẩy đáp án hoặc nội dung review chưa được phép.
+7. Đăng nhập tài khoản thường, `EMPLOYEE` và `ADMIN`; xác nhận Capy hoàn toàn không xuất hiện.
+8. Với tài khoản Pro, đi vào `/full-test/:attemptId/exam`; xác nhận Capy và dialog không xuất hiện.
+9. Thu hồi/hết hạn Pro; xác nhận lần tải profile tiếp theo đóng chat. Nếu API gửi trả `PRO_REQUIRED` trước khi profile cập nhật, xác nhận lịch sử còn đọc được nhưng không thể gửi thêm.
+
+Sau khi thay đổi frontend, luôn chạy:
+
+```bash
+npm run lint
+npm test
+npm run build
+```
+
+## 10. Quy ước gọi API
 
 API client dùng chung nằm tại `src/api/client.js`.
 
@@ -315,10 +367,11 @@ Client đã hỗ trợ cả JSON và `FormData`. Khi Member 3 triển khai uploa
 | Current user | `GET /api/me`                                                   | Đã đăng nhập            |
 | Learning     | `GET /api/users/me/attempts`, `GET /api/users/me/statistics`    | `USER` trở lên          |
 | Exam         | `/api/tests/{testId}/attempts`, `/api/attempts/{attemptId}/...` | Đã đăng nhập            |
+| Capy AI Chat | `/api/ai-chat/conversations`, `/api/ai-chat/jobs/{jobId}`       | `USER` Pro + `AI_CHAT`  |
 | Employee     | `/api/employee/tests`, `/api/employee/media`                    | `EMPLOYEE` hoặc `ADMIN` |
 | Admin review | `/api/admin/test-submissions`, `/api/admin/review-history`      | `ADMIN`                 |
 
-## 10. Phân chia công việc frontend
+## 11. Phân chia công việc frontend
 
 Quy định ownership, file bị khóa, cách đặt branch, commit và pull request được mô tả đầy đủ tại:
 
@@ -355,7 +408,7 @@ Mọi thành viên phải đọc tài liệu này trước khi tạo branch đ�
 
 Để giảm conflict, chỉ Member 1 nên thực hiện đợt tích hợp route lớn trong `App.jsx`. Các thành viên khác tập trung vào page, component và API wrapper thuộc phạm vi của mình.
 
-## 11. Quy trình Git dành cho thành viên
+## 12. Quy trình Git dành cho thành viên
 
 Từ thư mục gốc repository:
 
@@ -392,7 +445,7 @@ Không đưa các file sau vào commit:
 
 Không dùng `git add .` một cách máy móc. Luôn chạy `git status` và kiểm tra từng file trước khi commit.
 
-## 12. Lỗi thường gặp
+## 13. Lỗi thường gặp
 
 ### `Failed to fetch` hoặc CORS
 
@@ -445,7 +498,7 @@ npm run dev
 
 Vite chỉ đọc biến môi trường khi khởi động process.
 
-## 13. Checklist trước khi giao code
+## 14. Checklist trước khi giao code
 
 - [ ] Chức năng chạy được trên màn hình desktop và mobile.
 - [ ] Có loading, empty và error state phù hợp.
@@ -458,6 +511,6 @@ Vite chỉ đọc biến môi trường khi khởi động process.
 - [ ] Không có `.env`, key JSON, `.DS_Store`, `dist/` hoặc `node_modules/` trong commit.
 - [ ] Pull request mô tả màn hình đã làm, endpoint đã dùng và cách kiểm thử.
 
-## 14. Thông tin liên hệ trong nhóm
+## 15. Thông tin liên hệ trong nhóm
 
 Khi cần quyền Firebase/Render, tài khoản `EMPLOYEE`/`ADMIN`, hoặc thay đổi API contract, liên hệ trưởng nhóm qua kênh nội bộ. Không gửi private key hoặc mật khẩu qua GitHub issue, pull request hay group chat công khai.
