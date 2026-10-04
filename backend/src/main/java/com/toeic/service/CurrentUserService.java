@@ -15,9 +15,11 @@ import java.util.Map;
 public class CurrentUserService {
 
     private final UserDao userDao;
+    private final SubscriptionService subscriptionService;
 
-    public CurrentUserService(UserDao userDao) {
+    public CurrentUserService(UserDao userDao, SubscriptionService subscriptionService) {
         this.userDao = userDao;
+        this.subscriptionService = subscriptionService;
     }
 
     public User requireUser(FirebaseIdentity identity) throws Exception {
@@ -45,7 +47,7 @@ public class CurrentUserService {
         return user;
     }
 
-    public Map<String, Object> toResponse(User user) {
+    public Map<String, Object> toResponse(User user) throws Exception {
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("uid", user.getUid());
         response.put("email", user.getEmail());
@@ -55,6 +57,7 @@ public class CurrentUserService {
         response.put("role", user.getRole() == null ? UserRole.USER.name() : user.getRole().name());
         response.put("createdAt", user.getCreatedAt());
         response.put("lastLoginAt", user.getLastLoginAt());
+        response.put("subscription", subscriptionService.getSummary(user.getUid()));
         return response;
     }
 

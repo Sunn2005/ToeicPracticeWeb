@@ -24,6 +24,44 @@ test("session bootstrap treats only 401 as an anonymous browser", async () => {
   assert.deepEqual(result, { status: "anonymous", profile: null, error: "" });
 });
 
+test("session bootstrap preserves the backend subscription summary unchanged", async () => {
+  const subscription = {
+    planCode: "PRO",
+    status: "ACTIVE",
+    startsAt: 1000,
+    expiresAt: 3000,
+    entitlements: ["AI_CHAT", "AI_ANALYSIS"],
+    effective: true,
+  };
+  const result = await loadBackendSession(async () => ({
+    uid: "uid-1", role: "USER", subscription,
+  }));
+
+  assert.equal(result.status, "authenticated");
+  assert.deepEqual(result.profile.subscription, {
+    planCode: "PRO", status: "ACTIVE", startsAt: 1000, expiresAt: 3000,
+    entitlements: ["AI_CHAT", "AI_ANALYSIS"], effective: true,
+  });
+  assert.equal(result.profile.role, "USER");
+});
+
+test("an unauthorized reload clears a previously loaded Pro subscription", async () => {
+  const loaded = await loadBackendSession(async () => ({
+    uid: "uid-1", role: "USER",
+    subscription: {
+      planCode: "PRO", status: "ACTIVE", startsAt: 1000, expiresAt: 3000,
+      entitlements: ["AI_CHAT", "AI_ANALYSIS"], effective: true,
+    },
+  }));
+  assert.equal(loaded.profile.subscription.effective, true);
+
+  const result = await loadBackendSession(async () => {
+    throw Object.assign(new Error("Expired"), { status: 401 });
+  });
+
+  assert.deepEqual(result, { status: "anonymous", profile: null, error: "" });
+});
+
 test("session bootstrap preserves network failures as retryable errors", async () => {
   const result = await loadBackendSession(async () => {
     throw new Error("Backend unavailable");
