@@ -102,7 +102,7 @@
 - [x] Implement a transactionally create-once result repository, processor, and thin listener delegation; do not store request history/current chat content in the outbox.
 - [x] Update docs with the outbox collection, ownership, replay, and retention expectations.
 - [x] Run focused and complete AI-service suites.
-- [ ] Commit as `fix: persist chat results before Rabbit delivery`.
+- [x] Commit as `fix: persist chat results before Rabbit delivery`.
 
 ### Task 5: Contract Correction and Final Verification
 
@@ -114,4 +114,4 @@
 
 - [x] Correct the documented paths and readable-after-expiry note.
 - [x] Run frontend lint/test/build, backend credential-free tests, AI-service tests, `git diff --check`, and secret/file-scope checks.
-- [ ] Review the complete remediation diff and commit as `docs: correct AI chat frontend contract`.
+- [x] Review the complete remediation diff and commit as `docs: correct AI chat frontend contract`.

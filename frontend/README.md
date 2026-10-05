@@ -367,9 +367,11 @@ Client đã hỗ trợ cả JSON và `FormData`. Khi Member 3 triển khai uploa
 | Current user | `GET /api/me`                                                   | Đã đăng nhập            |
 | Learning     | `GET /api/users/me/attempts`, `GET /api/users/me/statistics`    | `USER` trở lên          |
 | Exam         | `/api/tests/{testId}/attempts`, `/api/attempts/{attemptId}/...` | Đã đăng nhập            |
-| Capy AI Chat | `/api/ai-chat/conversations`, `/api/ai-chat/jobs/{jobId}`       | `USER` Pro + `AI_CHAT`  |
+| Capy AI Chat | `/api/ai/chat/conversations`, `/api/ai/chat/jobs/{jobId}`       | `USER` Pro + `AI_CHAT`  |
 | Employee     | `/api/employee/tests`, `/api/employee/media`                    | `EMPLOYEE` hoặc `ADMIN` |
 | Admin review | `/api/admin/test-submissions`, `/api/admin/review-history`      | `ADMIN`                 |
+
+Các mutation Capy AI Chat yêu cầu entitlement Pro hiệu lực. Các endpoint `GET` lịch sử hội thoại/job vẫn cho owner đã đăng nhập đọc sau khi Pro hết hạn hoặc bị thu hồi; backend không cho gửi, tạo, xóa hoặc retry mới khi thiếu `AI_CHAT`.
 
 ## 11. Phân chia công việc frontend
 
