@@ -1114,6 +1114,8 @@ accepted: USER/SUCCEEDED + ASSISTANT/PENDING + JOB/PENDING
 
 Terminal delivery đầu tiên thắng; result lặp hoặc identifiers không khớp không ghi đè. Transport duplicate không charge hoặc publish lại.
 
+AI Service dùng `aiChatGenerationResults/{jobId}` làm outbox terminal trước khi publish `ai.chat.result`. Document chỉ chứa job/user/conversation/assistant-message identifiers, trạng thái, answer hoặc stable error code và timestamps; không chứa history, current message hay question context. Khi listener retry hoặc Rabbit redelivery, AI Service replay terminal result đã lưu thay vì gọi Gemini lại. Outbox `PROCESSING` không được cleanup; terminal outbox chỉ cleanup sau khi BE-Core job đã terminal và qua retention window vận hành.
+
 ## 12. Error response
 
 Security và application errors đều trả JSON. Frontend nên xử lý theo HTTP status và `code`, không so khớp nội dung tiếng Việt của `message`.

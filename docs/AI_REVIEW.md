@@ -194,8 +194,9 @@ Capy Chat là workflow riêng với AI Analysis toàn bài. BE-Core giữ author
 2. Khi gửi, BE-Core kiểm tra `AI_CHAT`, đối chiếu mọi attempt đang làm, validate tối đa 1.000 characters và atomically tạo user message, pending assistant, job, quota.
 3. Key lặp cùng payload trả aggregate cũ; key lặp khác payload bị từ chối. Chỉ aggregate có `newlyAccepted=true` mới được publish.
 4. Request chứa identifiers, locale, current message, tối đa 12 prior successful messages và optional context allowlist của một câu. Không chứa profile, audio URL, sibling question hoặc raw attempt.
-5. AI Service áp lại cap 12 messages/12.000 Unicode content characters, đặt prompt TOEIC-only/chống injection, gọi Gemini structured output và publish success/failure.
-6. BE-Core atomically finalize assistant/job; delivery terminal lặp không ghi đè kết quả đầu tiên. Frontend chỉ poll BE-Core.
+5. AI Service transactionally claim `jobId`, áp lại cap 12 messages/12.000 Unicode content characters, đặt prompt TOEIC-only/chống injection và gọi Gemini structured output.
+6. AI Service lưu terminal result vào Firestore trước khi publish. Listener retry hoặc Rabbit redelivery đọc lại đúng result đã lưu thay vì gọi Gemini lần nữa.
+7. BE-Core atomically finalize assistant/job; delivery terminal lặp không ghi đè kết quả đầu tiên. Frontend chỉ poll BE-Core.
 
 ### RabbitMQ contract
 
@@ -236,6 +237,8 @@ Result schema:
 
 Provider failure dùng `status=FAILED`, `answer=null`, `errorCode=AI_UNAVAILABLE`. Logs chỉ ghi identifiers, status và kết quả finalize.
 
+Nếu publish result thất bại sau khi Gemini đã trả lời, Spring listener retry hoặc broker redelivery phải đặt request vào recovery mode. Recovery claim đọc terminal result từ outbox và publish lại nguyên giá trị đã lưu; không tạo câu trả lời Gemini mới. Retry nội bộ của listener được nhận diện bằng Rabbit `retryCount`, không chỉ cờ broker `redelivered`.
+
 ### Firestore contract
 
 - `aiChatConversations/{conversationId}`: owner, title, locale, optional context identifiers, `ACTIVE|DELETED`, timestamps.
@@ -244,8 +247,11 @@ Provider failure dùng `status=FAILED`, `answer=null`, `errorCode=AI_UNAVAILABLE
 - `aiChatUsage/{uid_yyyy-MM-dd}`: daily accepted count, audit timestamps, reset time theo `Asia/Ho_Chi_Minh`.
 - `aiChatUsage/{uid}_burst`: authoritative rolling-minute timestamps và monotonic last admission.
 - `aiChatUsage/{uid}_conversations`: shared active-conversation count guard.
+- `aiChatGenerationResults/{jobId}`: outbox do AI Service sở hữu, gồm identifiers, `PROCESSING|SUCCEEDED|FAILED`, answer/error terminal và processing/completed timestamps. Collection này không lưu history, current message hoặc question context.
 
 Query list conversation cần composite index cho `userId`, `status`, `lastMessageAt DESC`. Guard documents không được xóa bởi daily cleanup. Nếu có manual Firestore writes ngoài DAO tin cậy, phải repair guard count trước khi tiếp tục mutation.
+
+Không xóa document outbox đang `PROCESSING`. Terminal outbox chỉ được cleanup sau khi job tương ứng ở BE-Core đã terminal và đã qua retention window vận hành; phiên bản hiện tại chưa tự động cleanup collection này.
 
 ### Cấu hình giới hạn
 

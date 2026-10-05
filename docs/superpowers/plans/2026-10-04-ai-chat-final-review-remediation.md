@@ -42,13 +42,13 @@
 - Produces: conversation-scoped `MESSAGE_ACCEPTED` actions and a send-attempt registry keyed by conversation/content.
 - Produces: reopening reloads the previously active conversation and restarts pending polling.
 
-- [ ] Write failing reducer tests proving an acceptance for A cannot alter B and a helper test proving reopen selects the retained active conversation.
-- [ ] Run focused Node tests and confirm failures are caused by the missing scope/recovery behavior.
-- [ ] Add conversation IDs to async actions, reload the retained active conversation after the enabled list refresh, and poll its pending jobs.
-- [ ] Write failing send-attempt tests proving unknown transport failure retains the UUID while HTTP failure/success clears it.
-- [ ] Implement the minimal registry and use it in `sendMessage`; confirmed terminal retry continues to allocate a fresh key.
-- [ ] Run focused tests, then the complete frontend test suite and lint.
-- [ ] Commit as `fix: harden AI chat frontend lifecycle`.
+- [x] Write failing reducer tests proving an acceptance for A cannot alter B and a helper test proving reopen selects the retained active conversation.
+- [x] Run focused Node tests and confirm failures are caused by the missing scope/recovery behavior.
+- [x] Add conversation IDs to async actions, reload the retained active conversation after the enabled list refresh, and poll its pending jobs.
+- [x] Write failing send-attempt tests proving unknown transport failure retains the UUID while HTTP failure/success clears it.
+- [x] Implement the minimal registry and use it in `sendMessage`; confirmed terminal retry continues to allocate a fresh key.
+- [x] Run focused tests, then the complete frontend test suite and lint.
+- [x] Commit as `fix: harden AI chat frontend lifecycle`.
 
 ### Task 2: Accessible Dialog Focus Ownership
 
@@ -61,11 +61,11 @@
 **Interfaces:**
 - Produces: `visibleFocusableElements(container)` that excludes controls without client rectangles.
 
-- [ ] Write failing helper tests for visible/hidden/disabled controls and top-dialog ownership.
-- [ ] Run the focused test and confirm failure from the missing helper.
-- [ ] Use the helper in both traps and suspend the outer Tab trap while delete confirmation is active.
-- [ ] Run focused tests plus complete frontend lint/test/build.
-- [ ] Commit as `fix: keep Capy dialog focus on visible controls`.
+- [x] Write failing helper tests for visible/hidden/disabled controls and top-dialog ownership.
+- [x] Run the focused test and confirm failure from the missing helper.
+- [x] Use the helper in both traps and suspend the outer Tab trap while delete confirmation is active.
+- [x] Run focused tests plus complete frontend lint/test/build.
+- [x] Commit as `fix: keep Capy dialog focus on visible controls`.
 
 ### Task 3: BE-Core Post-Admission Failure Terminalization
 
@@ -76,11 +76,11 @@
 **Interfaces:**
 - Produces: any history-build or publish exception after a newly accepted job attempts to finalize that job as `FAILED/AI_UNAVAILABLE` and returns stable `AI_UNAVAILABLE`.
 
-- [ ] Write a failing service regression where admission succeeds and `listMessages` throws; assert terminalization and no publish.
-- [ ] Run the focused Maven test and confirm the pending-job defect.
-- [ ] Move all fallible post-admission request preparation into one failure boundary while preserving the duplicate-key fast path.
-- [ ] Run focused and complete credential-free backend suites.
-- [ ] Commit as `fix: terminalize chat jobs after admission failures`.
+- [x] Write a failing service regression where admission succeeds and `listMessages` throws; assert terminalization and no publish.
+- [x] Run the focused Maven test and confirm the pending-job defect.
+- [x] Move all fallible post-admission request preparation into one failure boundary while preserving the duplicate-key fast path.
+- [x] Run focused and complete credential-free backend suites.
+- [x] Commit as `fix: terminalize chat jobs after admission failures`.
 
 ### Task 4: AI-Service Durable Chat Result Outbox
 
@@ -97,11 +97,11 @@
 - Produces: Firestore `aiChatGenerationResults/{jobId}` documents containing identifiers and one terminal sanitized result.
 - Produces: `AIChatProcessor.process(AIChatRequest)` loads a saved terminal result or generates and saves once, then publishes that exact result.
 
-- [ ] Write failing processor tests proving save-before-publish and replay-after-publish-failure without a second Gemini call.
-- [ ] Run focused tests and confirm missing processor/repository behavior.
-- [ ] Implement a transactionally create-once result repository, processor, and thin listener delegation; do not store request history/current chat content in the outbox.
-- [ ] Update docs with the outbox collection, ownership, replay, and retention expectations.
-- [ ] Run focused and complete AI-service suites.
+- [x] Write failing processor tests proving save-before-publish and replay-after-publish-failure without a second Gemini call.
+- [x] Run focused tests and confirm missing processor/repository behavior.
+- [x] Implement a transactionally create-once result repository, processor, and thin listener delegation; do not store request history/current chat content in the outbox.
+- [x] Update docs with the outbox collection, ownership, replay, and retention expectations.
+- [x] Run focused and complete AI-service suites.
 - [ ] Commit as `fix: persist chat results before Rabbit delivery`.
 
 ### Task 5: Contract Correction and Final Verification
@@ -112,6 +112,6 @@
 **Interfaces:**
 - Documents: actual `/api/ai/chat/**` paths and historical-read behavior after Pro expiry.
 
-- [ ] Correct the documented paths and readable-after-expiry note.
-- [ ] Run frontend lint/test/build, backend credential-free tests, AI-service tests, `git diff --check`, and secret/file-scope checks.
+- [x] Correct the documented paths and readable-after-expiry note.
+- [x] Run frontend lint/test/build, backend credential-free tests, AI-service tests, `git diff --check`, and secret/file-scope checks.
 - [ ] Review the complete remediation diff and commit as `docs: correct AI chat frontend contract`.

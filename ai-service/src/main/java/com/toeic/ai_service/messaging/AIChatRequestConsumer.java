@@ -2,10 +2,10 @@ package com.toeic.ai_service.messaging;
 
 import com.toeic.ai_service.model.AIChatRequest;
 import com.toeic.ai_service.model.AIChatResult;
-import com.toeic.ai_service.model.ToeicChatAnswer;
-import com.toeic.ai_service.service.AIChatPromptService;
+import com.toeic.ai_service.service.AIChatProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageDeliveryMode;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -16,37 +16,36 @@ import org.springframework.stereotype.Component;
 public class AIChatRequestConsumer {
     private static final Logger log = LoggerFactory.getLogger(AIChatRequestConsumer.class);
 
-    private final AIChatPromptService promptService;
+    private final AIChatProcessor processor;
     private final RabbitTemplate rabbitTemplate;
     private final String exchange;
     private final String resultRoutingKey;
 
     public AIChatRequestConsumer(
-            AIChatPromptService promptService,
+            AIChatProcessor processor,
             RabbitTemplate rabbitTemplate,
             @Value("${app.rabbitmq.exchange}") String exchange,
             @Value("${app.rabbitmq.chat-result-routing-key}") String resultRoutingKey
     ) {
-        this.promptService = promptService;
+        this.processor = processor;
         this.rabbitTemplate = rabbitTemplate;
         this.exchange = exchange;
         this.resultRoutingKey = resultRoutingKey;
     }
 
     @RabbitListener(queues = "${app.rabbitmq.chat-request-queue}")
-    public void consume(AIChatRequest request) {
-        validateEnvelope(request);
+    public void consume(AIChatRequest request, Message message) throws Exception {
         log.info("Received AI chat request: jobId={}, conversationId={}",
-                request.jobId(), request.conversationId());
+                request == null ? null : request.jobId(),
+                request == null ? null : request.conversationId());
 
-        AIChatResult result;
-        try {
-            ToeicChatAnswer answer = promptService.answer(request);
-            result = AIChatResult.succeeded(request, answer.content());
-        } catch (AIChatPromptService.InvalidChatRequestException invalidRequest) {
-            throw invalidRequest;
-        } catch (RuntimeException providerFailure) {
-            result = AIChatResult.failed(request, "AI_UNAVAILABLE");
+        boolean recovery = Boolean.TRUE.equals(message.getMessageProperties().isRedelivered())
+                || message.getMessageProperties().getRetryCount() > 0;
+        AIChatResult result = processor.process(request, recovery).orElse(null);
+        if (result == null) {
+            log.info("AI chat request already processing: jobId={}",
+                    request == null ? null : request.jobId());
+            return;
         }
 
         publish(result);
@@ -62,16 +61,4 @@ public class AIChatRequestConsumer {
         });
     }
 
-    private void validateEnvelope(AIChatRequest request) {
-        if (request == null || blank(request.userId()) || blank(request.conversationId())
-                || blank(request.jobId()) || blank(request.userMessageId())
-                || blank(request.assistantMessageId()) || blank(request.currentMessage())
-                || !("vi".equals(request.locale()) || "en".equals(request.locale()))) {
-            throw new IllegalArgumentException("Invalid AI chat request");
-        }
-    }
-
-    private boolean blank(String value) {
-        return value == null || value.isBlank();
-    }
 }
