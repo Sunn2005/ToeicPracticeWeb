@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { useLanguage } from "../../i18n/LanguageContext";
 import AttemptQuestionContextPicker from "./AttemptQuestionContextPicker";
 import ChatComposer from "./ChatComposer";
@@ -125,6 +126,7 @@ export default function AIChatBox({
   const errorText = chat.errorCode
     ? t(ERROR_TRANSLATION_KEYS[chat.errorCode] || "chatErrorGeneric")
     : chat.errorMessage;
+  const blockedDuringAttempt = chat.errorCode === "CHAT_BLOCKED_DURING_ATTEMPT";
 
   const create = async (context) => {
     try {
@@ -213,8 +215,15 @@ export default function AIChatBox({
           <main className="flex min-w-0 flex-1 flex-col bg-slate-50">
             {errorText && (
               <div role="alert" className="flex items-start justify-between gap-3 border-b border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-                <span>{errorText}{chat.errorCode ? ` (${chat.errorCode})` : ""}</span>
-                <button type="button" onClick={chat.clearError} className="shrink-0 font-bold underline">{t("dismiss")}</button>
+                <span className="min-w-0 flex-1">{errorText}{chat.errorCode ? ` (${chat.errorCode})` : ""}</span>
+                <span className="flex shrink-0 flex-col items-end gap-2 sm:flex-row">
+                  {blockedDuringAttempt && (
+                    <Link to="/history" onClick={onClose} className="font-bold underline">
+                      {t("chatViewAttemptHistory")}
+                    </Link>
+                  )}
+                  <button type="button" onClick={chat.clearError} className="font-bold underline">{t("dismiss")}</button>
+                </span>
               </div>
             )}
             {!chat.canSend && (
