@@ -64,23 +64,33 @@ export async function getCsrfToken() {
 async function request(path, options = {}) {
   const method = String(options.method || "GET").toUpperCase();
   const headers = new Headers(options.headers || {});
+  const unsafe = !SAFE_METHODS.has(method);
   const isFormData =
     typeof FormData !== "undefined" && options.body instanceof FormData;
 
   if (options.body != null && !isFormData && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
-  if (!SAFE_METHODS.has(method)) {
+  if (unsafe) {
     headers.set("X-XSRF-TOKEN", await getCsrfToken());
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    method,
-    headers,
-    credentials: "include",
-  });
-  const body = await parseResponse(response);
+  const execute = async () => {
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      method,
+      headers: new Headers(headers),
+      credentials: "include",
+    });
+    return { response, body: await parseResponse(response) };
+  };
+
+  let { response, body } = await execute();
+  if (unsafe && response.status === 403 && body?.code === "CSRF_TOKEN_INVALID") {
+    clearCsrfToken();
+    headers.set("X-XSRF-TOKEN", await getCsrfToken());
+    ({ response, body } = await execute());
+  }
   if (!response.ok) {
     throw errorFromResponse(response, body);
   }
