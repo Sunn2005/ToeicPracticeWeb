@@ -120,13 +120,15 @@ Không được sửa:
 - Logic làm bài để phù hợp với cấu trúc đề đang tạo.
 - File của Member 1, 2 hoặc 4.
 
-### Member 4 — Admin review workflow
+### Member 4 — Admin review workflow và subscription Pro
 
 Được sửa:
 
 - `src/pages/admin/**`
 - `src/components/admin/**`
 - `src/api/adminReviews.js`
+- `src/api/adminSubscriptions.js` và `src/api/adminSubscriptions.test.js`
+- Trang Pro: `src/pages/admin/SubscriptionManagementPage.jsx`, helper `subscriptionManagement.js` và `subscriptionManagement.test.js`.
 
 Nhiệm vụ chính:
 
@@ -134,6 +136,8 @@ Nhiệm vụ chính:
 - Trang xem chi tiết nội dung cần duyệt.
 - Approve, reject và nhập lý do reject.
 - Lịch sử duyệt.
+- Quản lý Pro tại `/console/subscriptions`: tra UID, kích hoạt/gia hạn với body chỉ `expiresAt`, xác nhận thu hồi; dùng summary server để hiển thị hiệu lực. Route chỉ cho `ADMIN`, điều hướng subscription chỉ xuất hiện cho admin.
+- Wrapper subscription dùng `apiFetch`, encode UID và xử lý status/code; không tự lấy token, suy luận quyền từ expiry trên trình duyệt hoặc gửi audit actor.
 - Xử lý đúng `401`, `403`, `404` và `409` từ backend.
 
 Không được sửa:
@@ -172,6 +176,18 @@ Các file sau thuộc trưởng nhóm/người phụ trách backend và exam flo
 - `src/hooks/useAIExplanationJobs.js`
 - `src/components/AIExplanationPanel.jsx`
 
+### Capy AI Chat dành cho Pro
+
+Các file sau thuộc owner tính năng AI/Pro và được xem là một cụm contract. Thành viên khác chỉ sửa khi đã phối hợp với owner:
+
+- `src/api/aiChat.js` và `src/api/aiChat.test.js`
+- `src/hooks/aiChatState.js`, `src/hooks/aiChatState.test.js` và `src/hooks/useAIChat.js`
+- `src/components/ai-chat/**`
+- `src/components/FloatingPet.jsx`
+- `src/components/floatingPetInteraction.js` và `src/components/floatingPetInteraction.test.js`
+
+Owner tính năng chịu trách nhiệm giữ nguyên quy tắc Pro-only, job polling, trạng thái pending/failed, retry idempotent, stable error code, read-only khi mất quyền và giới hạn context an toàn. Không đổi response shape, timeout hoặc semantics đóng/mở chat chỉ để xử lý UI cục bộ.
+
 ### Hạ tầng dùng chung
 
 - `src/api/client.js`
@@ -186,6 +202,21 @@ Các file sau thuộc trưởng nhóm/người phụ trách backend và exam flo
 Nếu phát hiện lỗi trong các file này, tạo issue hoặc mô tả trong PR gồm: cách tái hiện, kết quả mong đợi, kết quả thực tế, ảnh chụp và log lỗi đã loại bỏ token/dữ liệu nhạy cảm. Không tự sửa ngoài phạm vi.
 
 ## 5. File dùng chung có nguy cơ conflict
+
+### Tích hợp Pro: route, điều hướng, profile và Capy AI Chat
+
+Member 4 sở hữu page/helper/API/test subscription nêu trên. Member 1 tích hợp route `/console/subscriptions` trong `src/App.jsx` và liên kết admin trong `src/layouts/ManagementLayout.jsx`; giữ guard role và mọi route `/full-test/**`. Thay đổi `src/auth/**` để dùng summary `GET /api/me.subscription` thuộc Member 1. Thành viên khác cần phối hợp owner trước khi sửa các file này.
+
+Các file review/AI trong mục 4 vẫn bị khóa, gồm `src/pages/FullTestReview.jsx`; việc hiển thị `PRO_REQUIRED` và giữ khả năng đọc kết quả sau expiry thuộc trưởng nhóm/người phụ trách AI. API client, auth infrastructure, backend và AI service không thuộc quyền sửa của Member 4.
+
+Capy AI Chat đã được triển khai cho `USER` Pro có entitlement `AI_CHAT`; entitlement này không đồng nghĩa dự án đã có checkout/thanh toán. Các điểm tích hợp chia owner như sau:
+
+- Member 1 sở hữu việc mount/unmount chat theo route, role và entitlement trong `src/App.jsx`; phải giữ Capy ngoài route `/full-test/:attemptId/exam` và đóng chat khi logout/role/entitlement đã biết thay đổi.
+- Member 2 sở hữu helper lấy attempt/câu hỏi đủ điều kiện trong `src/api/userLearning.js` và thẻ giới thiệu Pro không tương tác tại dashboard; không gửi review content hoặc dữ liệu đáp án vào API tạo chat.
+- Owner AI/Pro sở hữu cụm file Capy AI Chat tại mục 4, gồm launcher, dialog, state machine, polling và API wrapper.
+- `src/i18n/translations.js` cần đủ key tiếng Anh và tiếng Việt trong cùng thay đổi. CSS launcher được giới hạn trong selector riêng tại `src/index.css`; không sửa selector global.
+
+Mọi thay đổi xuyên qua các boundary trên cần được các owner liên quan review. Frontend chỉ dùng subscription summary để hiển thị; backend vẫn là nơi quyết định quyền truy cập thật sự.
 
 ### `src/i18n/translations.js`
 
@@ -221,6 +252,10 @@ Các bất biến sau không được thay đổi bởi công việc frontend:
 - Không bỏ autosave, xác nhận submit hoặc xử lý attempt đã hoàn thành.
 - Không gọi AI trước khi vào review và không gửi thêm dữ liệu người dùng ngoài payload đã định nghĩa.
 - Không đổi polling interval, timeout, trạng thái AI job hoặc response shape.
+- Capy AI Chat chỉ nhận context attempt đã hoàn thành và số câu hỏi; frontend không chuyển đáp án, explanation, translation hoặc transcript vào payload chat.
+- Capy AI Chat không xuất hiện trong route làm bài. Không dùng launcher/chat để vượt qua trạng thái khóa hoặc tiết lộ nội dung thi.
+- Đóng dialog chỉ dừng polling phía trình duyệt; không giả định job backend đã bị hủy. Mở lại hội thoại pending phải tiếp tục polling.
+- Khi backend trả `PRO_REQUIRED`, giữ lịch sử đã tải ở chế độ chỉ đọc và chặn gửi mới; không giả lập entitlement từ local storage/frontend state.
 - Không giả lập role bằng local storage hoặc frontend state. Role từ `GET /api/me` và backend là nguồn quyết định.
 - Không bỏ qua `401/403` bằng cách mở route hoặc ẩn lỗi.
 

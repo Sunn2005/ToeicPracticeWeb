@@ -66,6 +66,89 @@ test("clearing CSRF state makes the next unsafe request obtain a new token", asy
   assert.equal(new Headers(calls[3].options.headers).get("X-XSRF-TOKEN"), "second-token");
 });
 
+test("unsafe request refreshes CSRF and retries once after CSRF_TOKEN_INVALID", async () => {
+  const calls = installFetchQueue(
+    jsonResponse({ token: "stale-token" }),
+    jsonResponse({ code: "CSRF_TOKEN_INVALID", message: "Stale" }, 403),
+    jsonResponse({ token: "fresh-token" }),
+    jsonResponse({ saved: true }),
+  );
+
+  const result = await apiFetch("/api/attempts/attempt-1/answers", {
+    method: "PATCH",
+    body: JSON.stringify({ answers: { 101: "C" } }),
+  });
+
+  assert.deepEqual(result, { saved: true });
+  assert.equal(calls.length, 4);
+  assert.match(calls[0].url, /\/api\/v1\/auth\/csrf$/);
+  assert.equal(new Headers(calls[1].options.headers).get("X-XSRF-TOKEN"), "stale-token");
+  assert.match(calls[2].url, /\/api\/v1\/auth\/csrf$/);
+  assert.equal(new Headers(calls[3].options.headers).get("X-XSRF-TOKEN"), "fresh-token");
+  assert.equal(calls[3].options.body, calls[1].options.body);
+});
+
+test("a repeated CSRF_TOKEN_INVALID response is propagated after one retry", async () => {
+  const calls = installFetchQueue(
+    jsonResponse({ token: "stale-token" }),
+    jsonResponse({ code: "CSRF_TOKEN_INVALID", message: "Stale" }, 403),
+    jsonResponse({ token: "fresh-token" }),
+    jsonResponse({ code: "CSRF_TOKEN_INVALID", message: "Still invalid" }, 403),
+  );
+
+  await assert.rejects(
+    () => apiFetch("/api/attempts/attempt-1/submit", { method: "POST" }),
+    (error) => {
+      assert.equal(error instanceof ApiError, true);
+      assert.equal(error.status, 403);
+      assert.equal(error.body.code, "CSRF_TOKEN_INVALID");
+      assert.equal(error.message, "Still invalid");
+      return true;
+    },
+  );
+
+  assert.equal(calls.length, 4);
+});
+
+test("non-CSRF forbidden responses are not retried", async () => {
+  const calls = installFetchQueue(
+    jsonResponse({ token: "csrf-token" }),
+    jsonResponse({ code: "ACCESS_DENIED", message: "Forbidden" }, 403),
+  );
+
+  await assert.rejects(
+    () => apiFetch("/api/admin/subscriptions/user-1", { method: "DELETE" }),
+    (error) => error instanceof ApiError && error.body.code === "ACCESS_DENIED",
+  );
+
+  assert.equal(calls.length, 2);
+});
+
+test("CSRF retry preserves FormData boundary ownership and AbortSignal", async () => {
+  const calls = installFetchQueue(
+    jsonResponse({ token: "stale-token" }),
+    jsonResponse({ code: "CSRF_TOKEN_INVALID", message: "Stale" }, 403),
+    jsonResponse({ token: "fresh-token" }),
+    jsonResponse({ uploaded: true }),
+  );
+  const body = new FormData();
+  body.set("file", new Blob(["data"]), "test.txt");
+  const controller = new AbortController();
+
+  await apiFetch("/api/employee/media", {
+    method: "POST",
+    body,
+    signal: controller.signal,
+  });
+
+  assert.equal(calls.length, 4);
+  for (const index of [1, 3]) {
+    assert.equal(calls[index].options.body, body);
+    assert.equal(calls[index].options.signal, controller.signal);
+    assert.equal(new Headers(calls[index].options.headers).has("Content-Type"), false);
+  }
+});
+
 test("FormData keeps the browser-generated multipart boundary", async () => {
   const calls = installFetchQueue(
     jsonResponse({ token: "csrf-token" }),
@@ -115,8 +198,9 @@ test("public requests also include credentials so optional sessions are consiste
 
 test("session helpers exchange only the temporary ID token and clear CSRF on logout", async () => {
   const calls = installFetchQueue(
-    jsonResponse({ token: "csrf-token" }),
+    jsonResponse({ token: "anonymous-csrf-token" }),
     jsonResponse({ uid: "uid-1", role: "USER" }),
+    jsonResponse({ token: "session-csrf-token" }),
     emptyResponse(204),
     jsonResponse({ token: "new-csrf-token" }),
   );
@@ -127,8 +211,27 @@ test("session helpers exchange only the temporary ID token and clear CSRF on log
 
   assert.equal(profile.uid, "uid-1");
   assert.deepEqual(JSON.parse(calls[1].options.body), { idToken: "temporary-id-token" });
-  assert.match(calls[2].url, /\/api\/v1\/auth\/logout$/);
+  assert.equal(new Headers(calls[1].options.headers).get("X-XSRF-TOKEN"), "anonymous-csrf-token");
+  assert.match(calls[2].url, /\/api\/v1\/auth\/csrf$/);
+  assert.match(calls[3].url, /\/api\/v1\/auth\/logout$/);
+  assert.equal(new Headers(calls[3].options.headers).get("X-XSRF-TOKEN"), "session-csrf-token");
   assert.equal(nextToken, "new-csrf-token");
+});
+
+test("successful session creation clears the pre-authentication CSRF token", async () => {
+  const calls = installFetchQueue(
+    jsonResponse({ token: "anonymous-token" }),
+    jsonResponse({ uid: "uid-1", role: "USER" }),
+    jsonResponse({ token: "session-token" }),
+  );
+
+  assert.equal(await getCsrfToken(), "anonymous-token");
+  await createSession("temporary-id-token");
+  assert.equal(await getCsrfToken(), "session-token");
+
+  assert.equal(calls.length, 3);
+  assert.equal(new Headers(calls[1].options.headers).get("X-XSRF-TOKEN"), "anonymous-token");
+  assert.match(calls[2].url, /\/api\/v1\/auth\/csrf$/);
 });
 
 function installFetchQueue(...responses) {

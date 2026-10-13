@@ -1,4 +1,5 @@
 import { Analytics } from "@vercel/analytics/react";
+import { useCallback, useEffect, useState } from "react";
 import {
   BrowserRouter,
   Navigate,
@@ -12,9 +13,10 @@ import FullTestExam from "./pages/FullTestExam";
 import FullTestIntro from "./pages/FullTestIntro";
 import FullTestResult from "./pages/FullTestResult";
 import FullTestReview from "./pages/FullTestReview";
-import { LanguageProvider } from "./i18n/LanguageContext";
+import { LanguageProvider, useLanguage } from "./i18n/LanguageContext";
 import LoadingScreen from "./components/LoadingScreen";
 import FloatingPet from "./components/FloatingPet";
+import AIChatBox from "./components/ai-chat/AIChatBox";
 import { AuthProvider } from "./auth/AuthContext";
 import { useAuth } from "./auth/useAuth";
 import ProtectedRoute from "./auth/ProtectedRoute";
@@ -25,6 +27,7 @@ import MyTestsPage from "./pages/employee/MyTestsPage";
 import CreateTestPage from "./pages/employee/CreateTestPage";
 import ReviewQueuePage from "./pages/admin/ReviewQueuePage";
 import ReviewHistoryPage from "./pages/admin/ReviewHistoryPage";
+import SubscriptionManagementPage from "./pages/admin/SubscriptionManagementPage";
 import TestReviewPage from "./pages/admin/TestReviewPage";
 import ForbiddenPage from "./pages/errors/ForbiddenPage";
 import UserLayout from "./layouts/UserLayout";
@@ -32,9 +35,55 @@ import UserDashboard from "./pages/user/UserDashboard";
 import TestCatalogPage from "./pages/user/TestCatalogPage";
 import AttemptHistoryPage from "./pages/user/AttemptHistoryPage";
 import ProfilePage from "./pages/user/ProfilePage";
+import { useAIChat } from "./hooks/useAIChat";
+import { getChatEligibleAttempts, getChatQuestionChoices } from "./api/userLearning";
+import { hasEffectiveAIChat } from "./components/floatingPetInteraction";
+
+function LearnerChatShell({ user, role, profile, pathname }) {
+  const { language } = useLanguage();
+  const [open, setOpen] = useState(false);
+  const [attempts, setAttempts] = useState([]);
+  const isExamRoute = /^\/full-test\/[^/]+\/exam(?:\/|$)/i.test(pathname);
+  const enabled = Boolean(user)
+    && String(role || "").toUpperCase() === "USER"
+    && hasEffectiveAIChat(profile?.subscription)
+    && !isExamRoute;
+  const chat = useAIChat({ enabled: open && enabled, locale: language });
+  const openChat = useCallback(() => setOpen(true), []);
+  const closeChat = useCallback(() => setOpen(false), []);
+
+  useEffect(() => {
+    if (!open || !enabled) return undefined;
+    const controller = new AbortController();
+    getChatEligibleAttempts({ signal: controller.signal })
+      .then(setAttempts)
+      .catch((error) => {
+        if (error?.name !== "AbortError") setAttempts([]);
+      });
+    return () => controller.abort();
+  }, [enabled, open]);
+
+  return (
+    <>
+      <FloatingPet
+        user={user}
+        role={role}
+        profile={profile}
+        onOpenChat={openChat}
+      />
+      <AIChatBox
+        open={open && enabled}
+        onClose={closeChat}
+        chat={chat}
+        attempts={attempts}
+        getQuestionChoices={getChatQuestionChoices}
+      />
+    </>
+  );
+}
 
 function AppRoutes() {
-  const { user, role, authLoading } = useAuth();
+  const { user, role, profile, authLoading } = useAuth();
   const location = useLocation();
 
   if (authLoading) {
@@ -95,6 +144,10 @@ function AppRoutes() {
             <Route path="/console/tests" element={<MyTestsPage />} />
             <Route path="/console/tests/new" element={<CreateTestPage />} />
             <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
+              <Route
+                path="/console/subscriptions"
+                element={<SubscriptionManagementPage />}
+              />
               <Route path="/console/reviews" element={<ReviewQueuePage />} />
               <Route
                 path="/console/reviews/:testId"
@@ -109,7 +162,13 @@ function AppRoutes() {
         </Route>
       </Routes>
       {!location.pathname.startsWith("/console") && (
-        <FloatingPet user={user} role={role} />
+        <LearnerChatShell
+          key={`${location.key}:${user?.uid || "guest"}:${role}:${hasEffectiveAIChat(profile?.subscription)}`}
+          user={user}
+          role={role}
+          profile={profile}
+          pathname={location.pathname}
+        />
       )}
     </>
   );

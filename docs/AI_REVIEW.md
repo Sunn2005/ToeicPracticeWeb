@@ -183,3 +183,78 @@ Data và vận hành:
 - User model chưa có điểm mục tiêu, nên `targetScore` và `scoreGap` luôn `null`.
 - File Test 1 đã có metadata 200/200. Các file local Test 2 và Test 3 chưa có bốn metadata field; cần gắn tag và import lại trước khi dùng AI review cho hai đề đó. AI Service cố ý trả `INVALID_INPUT` thay vì tự bịa metadata.
 - Kiểm thử tự động dùng mock; smoke test thật với Gemini, Firestore và RabbitMQ cần credential/service local tương ứng.
+
+## Capy AI Chat
+
+Capy Chat là workflow riêng với AI Analysis toàn bài. BE-Core giữ authorization, entitlement, attempt safety, ownership, idempotency, quota và persistence; AI Service chỉ nhận input đã được thu nhỏ để tạo câu trả lời TOEIC. Không service nào log chat content, prompt, response, credential hoặc payload chứa dữ liệu review.
+
+### Luồng xử lý
+
+1. User Pro tạo conversation chung hoặc gắn đúng một câu của attempt owned đã hoàn thành.
+2. Khi gửi, BE-Core kiểm tra `AI_CHAT`, đối chiếu mọi attempt đang làm, validate tối đa 1.000 characters và atomically tạo user message, pending assistant, job, quota.
+3. Key lặp cùng payload trả aggregate cũ; key lặp khác payload bị từ chối. Chỉ aggregate có `newlyAccepted=true` mới được publish.
+4. Request chứa identifiers, locale, current message, tối đa 12 prior successful messages và optional context allowlist của một câu. Không chứa profile, audio URL, sibling question hoặc raw attempt.
+5. AI Service transactionally claim `jobId`, áp lại cap 12 messages/12.000 Unicode content characters, đặt prompt TOEIC-only/chống injection và gọi Gemini structured output.
+6. AI Service lưu terminal result vào Firestore trước khi publish. Listener retry hoặc Rabbit redelivery đọc lại đúng result đã lưu thay vì gọi Gemini lần nữa.
+7. BE-Core atomically finalize assistant/job; delivery terminal lặp không ghi đè kết quả đầu tiên. Frontend chỉ poll BE-Core.
+
+### RabbitMQ contract
+
+| Hướng | Queue | Routing key |
+| --- | --- | --- |
+| BE-Core → AI Service | `toeic.ai.chat.request` | `ai.chat.request` |
+| AI Service → BE-Core | `toeic.ai.chat.result` | `ai.chat.result` |
+
+Request queue dùng DLX/DLQ hiện có. Cả request/result đều durable và message được publish persistent. Request schema:
+
+```json
+{
+  "userId": "user-001",
+  "conversationId": "conversation-uuid",
+  "jobId": "job-id",
+  "userMessageId": "user-message-id",
+  "assistantMessageId": "assistant-message-id",
+  "locale": "vi",
+  "history": [{"role":"ASSISTANT","content":"..."}],
+  "currentMessage": "...",
+  "questionContext": null
+}
+```
+
+Result schema:
+
+```json
+{
+  "userId": "user-001",
+  "conversationId": "conversation-uuid",
+  "jobId": "job-id",
+  "assistantMessageId": "assistant-message-id",
+  "status": "SUCCEEDED",
+  "answer": "...",
+  "errorCode": null
+}
+```
+
+Provider failure dùng `status=FAILED`, `answer=null`, `errorCode=AI_UNAVAILABLE`. Logs chỉ ghi identifiers, status và kết quả finalize.
+
+Nếu publish result thất bại sau khi Gemini đã trả lời, Spring listener retry hoặc broker redelivery phải đặt request vào recovery mode. Recovery claim đọc terminal result từ outbox và publish lại nguyên giá trị đã lưu; không tạo câu trả lời Gemini mới. Retry nội bộ của listener được nhận diện bằng Rabbit `retryCount`, không chỉ cờ broker `redelivered`.
+
+### Firestore contract
+
+- `aiChatConversations/{conversationId}`: owner, title, locale, optional context identifiers, `ACTIVE|DELETED`, timestamps.
+- `aiChatConversations/{conversationId}/messages/{messageId}`: `USER|ASSISTANT`, content, `PENDING|SUCCEEDED|FAILED`, job/error/timestamps.
+- `aiChatJobs/{jobId}`: internal ownership, deterministic user-scoped idempotency key mapping, message identifiers và terminal state.
+- `aiChatUsage/{uid_yyyy-MM-dd}`: daily accepted count, audit timestamps, reset time theo `Asia/Ho_Chi_Minh`.
+- `aiChatUsage/{uid}_burst`: authoritative rolling-minute timestamps và monotonic last admission.
+- `aiChatUsage/{uid}_conversations`: shared active-conversation count guard.
+- `aiChatGenerationResults/{jobId}`: outbox do AI Service sở hữu, gồm identifiers, `PROCESSING|SUCCEEDED|FAILED`, answer/error terminal và processing/completed timestamps. Collection này không lưu history, current message hoặc question context.
+
+Query list conversation cần composite index cho `userId`, `status`, `lastMessageAt DESC`. Guard documents không được xóa bởi daily cleanup. Nếu có manual Firestore writes ngoài DAO tin cậy, phải repair guard count trước khi tiếp tục mutation.
+
+Không xóa document outbox đang `PROCESSING`. Terminal outbox chỉ được cleanup sau khi job tương ứng ở BE-Core đã terminal và đã qua retention window vận hành; phiên bản hiện tại chưa tự động cleanup collection này.
+
+### Cấu hình giới hạn
+
+BE-Core: `AI_CHAT_DAILY_LIMIT=30`, `AI_CHAT_BURST_LIMIT=5`, `AI_CHAT_CONVERSATION_LIMIT=10`, `AI_CHAT_MESSAGE_CHARACTER_LIMIT=1000`, `AI_CHAT_HISTORY_MESSAGE_LIMIT=12`. `AI_CHAT_READ_LIMIT=100` giới hạn số item trả/đọc nội bộ.
+
+AI Service: `AI_CHAT_HISTORY_MESSAGE_LIMIT=12`, `AI_CHAT_HISTORY_CHARACTER_LIMIT=12000`. Hai service phải dùng cùng RabbitMQ và routing contract; chỉ AI Service giữ `GEMINI_API_KEY`.

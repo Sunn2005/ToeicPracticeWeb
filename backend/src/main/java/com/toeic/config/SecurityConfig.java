@@ -87,7 +87,8 @@ public class SecurityConfig {
                                 "/api/me",
                                 "/api/users/me/**",
                                 "/api/attempts/**",
-                                "/api/ai/jobs/**"
+                                "/api/ai/jobs/**",
+                                "/api/ai/chat/**"
                         ).authenticated()
 
                         // Tạo attempt cũng cần đăng nhập
