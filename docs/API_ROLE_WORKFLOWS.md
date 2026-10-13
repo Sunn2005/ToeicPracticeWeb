@@ -862,6 +862,16 @@ Message có `role=USER|ASSISTANT`, `status=PENDING|SUCCEEDED|FAILED`. Assistant 
 
 Quota được charge atomically một lần khi message hợp lệ được chấp nhận: 30/ngày lịch `Asia/Ho_Chi_Minh`, reset lúc 00:00 kế tiếp, và tối đa 5 lượt trong rolling 60 giây. Server dùng admission time không giảm để request commit đảo thứ tự quanh nửa đêm không vượt giới hạn.
 
+### 7A.3b Thử lại tin nhắn thất bại
+
+- **Method/path:** `POST /api/ai/chat/conversations/{conversationId}/messages/{messageId}/retry`, trong đó `{messageId}` là id của **assistant message đang `FAILED`**.
+- **Body:** không có.
+- **Response:** `202 Accepted`, cùng response shape với 7A.3 (`userMessage`, `assistantMessage`, `job`, `quotaSummary`, `newlyAccepted`). Khác biệt:
+  - Tái dùng đúng cặp user/assistant message cũ — **không tạo tin nhắn user mới, không trừ quota**.
+  - `job.id` là id mới; assistant message được reset về `PENDING` (`errorCode`/`completedAt` xóa).
+  - `newlyAccepted=false` khi lượt retry đã được chấp nhận mà job vẫn `PENDING` (double-click hoặc mất response): không tạo job mới, server publish lại job đó.
+- **Điều kiện lỗi thêm:** `400 CHAT_MESSAGE_INVALID` khi message không phải assistant hoặc không ở trạng thái `FAILED`/`PENDING` hợp lệ để retry; `403 PRO_REQUIRED` khi Pro hết hạn (hết hạn vẫn đọc lịch sử nhưng không được retry); `404 NOT_FOUND` khi conversation/message không thuộc user.
+
 ### 7A.4 Poll job
 
 - **Method/path:** `GET /api/ai/chat/jobs/{jobId}`.
@@ -878,7 +888,7 @@ Quota được charge atomically một lần khi message hợp lệ được ch�
 | HTTP | Code | Điều kiện |
 | --- | --- | --- |
 | `400` | `CHAT_CONTEXT_INVALID` | Locale hoặc cặp context identifiers không hợp lệ. |
-| `400` | `CHAT_MESSAGE_INVALID` | Content/key rỗng, quá dài, malformed hoặc key được reuse cho payload khác. |
+| `400` | `CHAT_MESSAGE_INVALID` | Content/key rỗng, quá dài, malformed, key được reuse cho payload khác, hoặc retry khi assistant message không ở trạng thái cho phép. |
 | `403` | `PRO_REQUIRED` | Mutation khi thiếu `AI_CHAT` có hiệu lực. |
 | `404` | `NOT_FOUND` | Conversation/job/context không tồn tại, bị xóa, ngoài scope hoặc thuộc user khác. |
 | `409` | `ATTEMPT_NOT_COMPLETED` | Attempt context chưa cho phép review. |
