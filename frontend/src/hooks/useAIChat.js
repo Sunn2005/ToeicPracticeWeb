@@ -4,6 +4,7 @@ import {
   deleteConversation,
   getConversation,
   listConversations,
+  retryChatMessage,
   sendChatMessage,
   waitForChatJob,
 } from "../api/aiChat.js";
@@ -148,14 +149,24 @@ export function useAIChat({ enabled, locale }) {
   }, [pollJob, state.activeConversationId, state.canSend, state.sending]);
 
   const retryMessage = useCallback(async (failedMessageId) => {
-    const failedIndex = state.messages.findIndex(({ id }) => id === failedMessageId);
-    if (failedIndex < 0) return null;
-    const originalUserMessage = state.messages
-      .slice(0, failedIndex)
-      .reverse()
-      .find(({ role, content }) => role === "USER" && content);
-    return originalUserMessage ? sendMessage(originalUserMessage.content) : null;
-  }, [sendMessage, state.messages]);
+    if (!state.activeConversationId || !state.canSend || state.sending) return null;
+    const conversationId = state.activeConversationId;
+    dispatch({ type: AI_CHAT_ACTIONS.SEND_STARTED });
+    try {
+      // Retry tái dùng assistant message FAILED phía server: không tạo tin nhắn
+      // user mới và không trừ quota (endpoint retry riêng).
+      const accepted = await retryChatMessage(conversationId, failedMessageId);
+      dispatch({ type: AI_CHAT_ACTIONS.MESSAGE_ACCEPTED, accepted, conversationId });
+      void pollJob(accepted.job.id, conversationId);
+      return accepted;
+    } catch (error) {
+      dispatch({
+        type: AI_CHAT_ACTIONS.REQUEST_FAILED,
+        ...requestError(error, "CHAT_SEND_FAILED"),
+      });
+      throw error;
+    }
+  }, [pollJob, state.activeConversationId, state.canSend, state.sending]);
 
   const removeConversation = useCallback(async (conversationId) => {
     try {

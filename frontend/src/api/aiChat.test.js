@@ -7,6 +7,7 @@ import {
   getChatJob,
   getConversation,
   listConversations,
+  retryChatMessage,
   sendChatMessage,
   waitForChatJob,
 } from "./aiChat.js";
@@ -91,6 +92,29 @@ test("conversation mutations send exact methods and body shapes", async () => {
   );
   assert.equal(calls[3].options.method, "DELETE");
   assert.equal(calls[3].options.body, undefined);
+});
+
+test("retrying a failed assistant message posts to the retry endpoint", async () => {
+  const calls = installResponses(
+    json({ token: "csrf" }),
+    json({
+      userMessage: { id: "user-1" },
+      assistantMessage: { id: "assistant-1", status: "PENDING" },
+      job: { id: "retry-job" },
+      newlyAccepted: true,
+    }, 202),
+  );
+
+  const accepted = await retryChatMessage("conversation/one", "assistant/1");
+
+  assert.equal(accepted.job.id, "retry-job");
+  assert.equal(
+    calls[1].url,
+    `${API_BASE_URL}/api/ai/chat/conversations/conversation%2Fone/messages/assistant%2F1/retry`,
+  );
+  assert.equal(calls[1].options.method, "POST");
+  assert.equal(calls[1].options.body, undefined);
+  assert.equal(calls[1].options.credentials, "include");
 });
 
 test("job reads encode identifiers and polling returns the first terminal state", async () => {

@@ -34,6 +34,13 @@ export function sendChatMessage(conversationId, payload, options = {}) {
   );
 }
 
+export function retryChatMessage(conversationId, messageId, options = {}) {
+  return apiFetch(
+    `/api/ai/chat/conversations/${encodeURIComponent(conversationId)}/messages/${encodeURIComponent(messageId)}/retry`,
+    { ...options, method: "POST" },
+  );
+}
+
 export function deleteConversation(conversationId, options = {}) {
   return apiFetch(
     `/api/ai/chat/conversations/${encodeURIComponent(conversationId)}`,

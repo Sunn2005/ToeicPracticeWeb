@@ -47,21 +47,12 @@ function mergeById(current, incoming) {
 }
 
 function collapseFailedRetries(messages) {
-  const visible = [];
-  for (const message of messages) {
-    const failedAssistant = visible.at(-1);
-    const originalUser = visible.at(-2);
-    if (message.role === "USER"
-        && failedAssistant?.role === "ASSISTANT"
-        && failedAssistant.status === "FAILED"
-        && originalUser?.role === "USER"
-        && originalUser.content === message.content) {
-      visible.pop();
-      continue;
-    }
-    visible.push(message);
-  }
-  return visible;
+  // Retry giờ gọi endpoint retry riêng và tái dùng đúng message id cũ phía server,
+  // nên một tin nhắn USER đứng sau assistant FAILED luôn là tin nhắn mới hoàn toàn —
+  // không bao giờ là bản retry. Trùng lặp theo id đã được mergeById/deduplicateById
+  // gộp ở tầng trên, vì vậy không còn gộp theo nội dung nữa: việc gộp theo nội dung
+  // từng gây lỗi gộp nhầm hai tin nhắn giống hệt nhau gửi liên tiếp.
+  return messages;
 }
 
 function upsertConversation(conversations, conversation) {

@@ -40,10 +40,13 @@ function modeName(attempt, t) {
 export default function UserDashboard() {
   const { language, t } = useLanguage();
   const navigate = useNavigate();
-  const { user, profile } = useAuth();
+  const { user, profile, role } = useAuth();
   const { attempts, loading, error } = useUserAttempts();
   const name = profile?.displayName || user?.displayName || "Học viên";
   const hasProAI = hasEffectiveAIChat(profile?.subscription);
+  // Card upsell Pro chỉ dành cho học viên thường chưa có Pro: route /dashboard
+  // không chặn role nên EMPLOYEE/ADMIN đăng nhập cũng vào được trang này.
+  const showProCard = !hasProAI && role === "USER";
 
   const data = useMemo(() => {
     const completed = attempts.filter((attempt) => attempt.status === "COMPLETED");
@@ -88,7 +91,7 @@ export default function UserDashboard() {
         <button type="button" onClick={() => navigate("/tests")} className="rounded-lg bg-sky-500 px-7 py-3 font-semibold text-white shadow-sm transition hover:bg-sky-600">{t("practiceNow")}</button>
       </section>
 
-      {!hasProAI && (
+      {showProCard && (
         <article className="overflow-hidden rounded-2xl border border-violet-200 bg-gradient-to-r from-violet-50 via-white to-sky-50 p-6 shadow-sm sm:p-7">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
             <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white text-3xl shadow-sm ring-1 ring-violet-100" aria-hidden="true">🦫</span>
