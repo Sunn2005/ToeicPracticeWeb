@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 @Repository
@@ -225,6 +226,63 @@ public class FirestoreAIChatDao implements AIChatDao {
         });
     }
 
+    @Override
+    public AcceptedChatMessage retryFailedMessage(String userId, String conversationId, String assistantMessageId,
+            long now, int dailyLimit) throws Exception {
+        positive(dailyLimit);
+        var conversationReference = conversationRef(conversationId);
+        var assistantReference = messageRef(conversationId, assistantMessageId);
+        return transact(transaction -> {
+            var conversation = conversationFrom(transaction.get(conversationReference).get());
+            if (!activeOwned(conversation, userId)) throw notFound();
+            var assistant = messageFrom(transaction.get(assistantReference).get());
+            if (assistant == null || assistant.getRole() != AIChatMessage.Role.ASSISTANT) throw notFound();
+            if (assistant.getStatus() == AIChatMessage.Status.SUCCEEDED) throw invalidRetry();
+            if (assistant.getJobId() == null) throw invalidRetry();
+            var job = jobFrom(transaction.get(jobRef(assistant.getJobId())).get());
+            if (assistant.getStatus() == AIChatMessage.Status.PENDING) {
+                // Một lượt retry đã được chấp nhận và job vẫn đang chạy: trả về job đó
+                // thay vì tạo job mới (chống double-click / mất response).
+                if (job == null || job.getStatus() != AIChatJob.Status.PENDING
+                        || !Objects.equals(userId, job.getUserId())
+                        || !Objects.equals(conversationId, job.getConversationId())
+                        || !Objects.equals(assistantMessageId, job.getAssistantMessageId())) throw invalidRetry();
+                var userMessage = messageFrom(transaction.get(messageRef(conversationId, job.getUserMessageId())).get());
+                if (userMessage == null) throw invalidRetry();
+                return new AcceptedChatMessage(conversation, userMessage, assistant, job,
+                        currentSummary(transaction, userId, now, dailyLimit), false);
+            }
+            // FAILED: tạo job mới gắn vào cặp message cũ. Retry không trừ quota.
+            if (job == null || job.getStatus() != AIChatJob.Status.FAILED
+                    || !Objects.equals(userId, job.getUserId())
+                    || !Objects.equals(conversationId, job.getConversationId())
+                    || !Objects.equals(assistantMessageId, job.getAssistantMessageId())) throw invalidRetry();
+            var userMessage = messageFrom(transaction.get(messageRef(conversationId, job.getUserMessageId())).get());
+            if (userMessage == null || userMessage.getRole() != AIChatMessage.Role.USER) throw invalidRetry();
+            var retryJob = new AIChatJob();
+            retryJob.setId(UUID.randomUUID().toString());
+            retryJob.setUserId(userId);
+            retryJob.setConversationId(conversationId);
+            retryJob.setUserMessageId(userMessage.getId());
+            retryJob.setAssistantMessageId(assistant.getId());
+            retryJob.setIdempotencyKey("retry:" + job.getId());
+            retryJob.setStatus(AIChatJob.Status.PENDING);
+            retryJob.setCreatedAt(now);
+            retryJob.setUpdatedAt(now);
+            assistant.setStatus(AIChatMessage.Status.PENDING);
+            assistant.setJobId(retryJob.getId());
+            assistant.setErrorCode(null);
+            assistant.setCompletedAt(null);
+            conversation.setUpdatedAt(Math.max(conversation.getUpdatedAt(), now));
+            conversation.setLastMessageAt(Math.max(conversation.getLastMessageAt(), now));
+            transaction.set(assistantReference, assistant);
+            transaction.set(jobRef(retryJob.getId()), retryJob);
+            transaction.set(conversationReference, conversation);
+            return new AcceptedChatMessage(conversation, userMessage, assistant, retryJob,
+                    currentSummary(transaction, userId, now, dailyLimit), true);
+        });
+    }
+
     private Query activeConversations(String userId) {
         return firestore.collection("aiChatConversations").whereEqualTo("userId", userId).whereEqualTo("status", "ACTIVE");
     }
@@ -304,6 +362,14 @@ public class FirestoreAIChatDao implements AIChatDao {
         return new QuotaSummary(dailyLimit, Math.max(0, dailyLimit - quota.getAcceptedCount()), quota.getNextResetAt());
     }
 
+    /** Đọc quota hiện tại của ngày (theo giờ VN) mà không ghi gì thêm — dùng cho retry vì retry không trừ quota. */
+    private QuotaSummary currentSummary(Transaction transaction, String userId, long now, int dailyLimit) throws Exception {
+        LocalDate date = Instant.ofEpochMilli(now).atZone(QUOTA_ZONE).toLocalDate();
+        long resetAt = date.plusDays(1).atStartOfDay(QUOTA_ZONE).toInstant().toEpochMilli();
+        var quota = quotaFrom(transaction.get(usageRef(userId, date)).get(), userId, date, resetAt);
+        return summary(quota, dailyLimit);
+    }
+
     private static List<Long> recentAdmissions(DocumentSnapshot snapshot, long admissionAt) {
         List<Long> recent = new ArrayList<>();
         if (!snapshot.exists()) return recent;
@@ -340,6 +406,10 @@ public class FirestoreAIChatDao implements AIChatDao {
 
     private static ApiCodeException invalidReuse() {
         return new ApiCodeException(HttpStatus.BAD_REQUEST, "CHAT_MESSAGE_INVALID", "Idempotency key does not match the accepted message");
+    }
+
+    private static ApiCodeException invalidRetry() {
+        return new ApiCodeException(HttpStatus.BAD_REQUEST, "CHAT_MESSAGE_INVALID", "Assistant message cannot be retried in its current state");
     }
 
     private <T> T transact(Transaction.Function<T> callback) throws Exception {

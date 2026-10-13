@@ -122,16 +122,16 @@ test("idempotent accepted or terminal updates never duplicate displayed messages
   assert.deepEqual(deliveredAgain.pendingJobIds, []);
 });
 
-test("a failed assistant retry keeps the original question visible only once", () => {
+test("a failed assistant retry reuses the same message ids without duplicating", () => {
   const failedAssistant = {
     ...accepted.assistantMessage,
     status: "FAILED",
     errorCode: "AI_UNAVAILABLE",
   };
+  // Endpoint retry trả về đúng cặp message cũ, assistant reset về PENDING, job mới.
   const retryAccepted = {
     ...accepted,
-    userMessage: { ...accepted.userMessage, id: "user-2", jobId: "job-2" },
-    assistantMessage: { ...accepted.assistantMessage, id: "assistant-2", jobId: "job-2" },
+    assistantMessage: { ...failedAssistant, status: "PENDING", errorCode: null, jobId: "job-2" },
     job: { ...accepted.job, id: "job-2" },
   };
   const opened = reduce(createInitialAIChatState(), AI_CHAT_ACTIONS.CONVERSATION_OPENED, {
@@ -139,8 +139,35 @@ test("a failed assistant retry keeps the original question visible only once", (
   });
   const retried = reduce(opened, AI_CHAT_ACTIONS.MESSAGE_ACCEPTED, { accepted: retryAccepted });
 
-  assert.deepEqual(retried.messages.map(({ id }) => id), ["user-1", "assistant-2"]);
+  assert.deepEqual(retried.messages.map(({ id }) => id), ["user-1", "assistant-1"]);
+  assert.equal(retried.messages[1].status, "PENDING");
   assert.deepEqual(retried.pendingJobIds, ["job-2"]);
+});
+
+test("two identical consecutive user messages are never collapsed", () => {
+  const failedAssistant = {
+    ...accepted.assistantMessage,
+    status: "FAILED",
+    errorCode: "AI_UNAVAILABLE",
+  };
+  const secondUserMessage = { ...accepted.userMessage, id: "user-2", jobId: "job-2" };
+  const secondAssistant = {
+    ...accepted.assistantMessage,
+    id: "assistant-2",
+    jobId: "job-2",
+    status: "PENDING",
+  };
+  const opened = reduce(createInitialAIChatState(), AI_CHAT_ACTIONS.CONVERSATION_OPENED, {
+    detail: {
+      conversation,
+      messages: [accepted.userMessage, failedAssistant, secondUserMessage, secondAssistant],
+    },
+  });
+
+  assert.deepEqual(
+    opened.messages.map(({ id }) => id),
+    ["user-1", "assistant-1", "user-2", "assistant-2"],
+  );
 });
 
 test("deleting the active conversation clears its messages and chooses the next conversation", () => {

@@ -33,6 +33,16 @@ public interface AIChatDao {
 
     Optional<AIChatJob> findJob(String userId, String jobId) throws Exception;
 
+    /**
+     * Thử lại một assistant message đang FAILED mà không trừ quota: reset message về PENDING,
+     * gắn job mới (id mới) vào cặp user/assistant message đã có, rồi trả về aggregate.
+     * Nếu đã có retry job cho message này mà vẫn chưa terminal thì trả về job đó với
+     * newlyAccepted=false và không tạo job mới.
+     * now và dailyLimit do application service tin cậy cung cấp, không lấy từ client.
+     */
+    AcceptedChatMessage retryFailedMessage(String userId, String conversationId, String assistantMessageId,
+            long now, int dailyLimit) throws Exception;
+
     /** First terminal delivery wins. False means missing, deleted, mismatched, or already terminal. */
     boolean finalizeMessage(String userId, String conversationId, String jobId, String assistantMessageId,
             AIChatJob.Status status, String content, String errorCode, long completedAt) throws Exception;

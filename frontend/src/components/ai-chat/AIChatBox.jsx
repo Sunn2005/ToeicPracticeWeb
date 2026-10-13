@@ -12,6 +12,8 @@ const ERROR_TRANSLATION_KEYS = {
   CHAT_BLOCKED_DURING_ATTEMPT: "chatErrorDuringAttempt",
   CHAT_RATE_LIMITED: "chatErrorRateLimited",
   CHAT_DAILY_LIMIT_REACHED: "chatErrorDailyLimit",
+  CHAT_MESSAGE_INVALID: "chatErrorMessageInvalid",
+  CHAT_CONTEXT_INVALID: "chatErrorContextInvalid",
   CONVERSATION_LIMIT_REACHED: "chatErrorConversationLimit",
   AI_UNAVAILABLE: "chatErrorUnavailable",
   CHAT_JOB_TIMEOUT: "chatErrorTimeout",
@@ -182,7 +184,8 @@ export default function AIChatBox({
               setCreating(true);
               setShowHistory(false);
             }}
-            className="min-h-11 rounded-xl border border-sky-200 px-3 text-sm font-bold text-sky-700 hover:bg-sky-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+            disabled={creating}
+            className="min-h-11 rounded-xl border border-sky-200 px-3 text-sm font-bold text-sky-700 hover:bg-sky-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {t("new")}
           </button>

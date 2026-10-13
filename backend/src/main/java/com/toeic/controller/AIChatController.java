@@ -69,6 +69,20 @@ public class AIChatController {
                 chatService.sendMessage(principal.uid(), conversationId, request)));
     }
 
+    /**
+     * Thử lại một assistant message đang FAILED: tái dùng message cũ, tạo job mới,
+     * không trừ quota. Trả 202 với cùng response shape như gửi tin nhắn mới.
+     */
+    @PostMapping("/conversations/{conversationId}/messages/{messageId}/retry")
+    public ResponseEntity<AcceptedMessageResponse> retryMessage(
+            @PathVariable String conversationId,
+            @PathVariable String messageId,
+            @AuthenticationPrincipal ToeicUserPrincipal principal
+    ) throws Exception {
+        return ResponseEntity.accepted().body(AcceptedMessageResponse.from(
+                chatService.retryMessage(principal.uid(), conversationId, messageId)));
+    }
+
     @DeleteMapping("/conversations/{conversationId}")
     public ResponseEntity<Void> deleteConversation(
             @PathVariable String conversationId,

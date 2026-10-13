@@ -158,6 +158,50 @@ public class AIChatService {
         return accepted;
     }
 
+    /**
+     * Thử lại một assistant message đang FAILED: tái dùng cặp message cũ, tạo job mới,
+     * KHÔNG trừ quota. Nếu lượt retry đã được chấp nhận mà job vẫn PENDING (double-click
+     * hoặc mất response) thì publish lại job đó — ai-service dedup theo jobId nên an toàn.
+     */
+    public AIChatDao.AcceptedChatMessage retryMessage(
+            String userId, String conversationId, String assistantMessageId
+    ) throws Exception {
+        requireIdentifier(assistantMessageId);
+        subscriptionService.requireEntitlement(userId, Entitlement.AI_CHAT);
+        attemptService.requireNoInProgressAttempt(userId);
+        AIChatConversation conversation = ownedConversation(userId, conversationId);
+        AIChatQuestionContext questionContext = null;
+        if (conversation.getContextAttemptId() != null) {
+            questionContext = contextService.resolve(
+                    userId, conversation.getContextAttemptId(), conversation.getContextQuestionNumber());
+        }
+        AIChatDao.AcceptedChatMessage retried = chatDao.retryFailedMessage(
+                userId, conversationId, assistantMessageId, clock.millis(), dailyLimit);
+
+        try {
+            List<AIChatRequest.HistoryMessage> history = historyForRequest(
+                    chatDao.listMessages(userId, conversationId, readLimit), retried.userMessage().getId());
+            AIChatRequest generationRequest = new AIChatRequest(
+                    userId, conversationId, retried.job().getId(), retried.userMessage().getId(),
+                    retried.assistantMessage().getId(), conversation.getLocale(), history,
+                    retried.userMessage().getContent(), questionContext);
+            requestPublisher.publish(generationRequest);
+        } catch (Exception postAdmissionFailure) {
+            try {
+                chatDao.finalizeMessage(userId, conversationId, retried.job().getId(),
+                        retried.assistantMessage().getId(), AIChatJob.Status.FAILED,
+                        null, "AI_UNAVAILABLE", clock.millis());
+            } catch (Exception finalizeFailure) {
+                postAdmissionFailure.addSuppressed(finalizeFailure);
+            }
+            ApiCodeException unavailable = new ApiCodeException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "AI_UNAVAILABLE", "AI chat is temporarily unavailable");
+            unavailable.initCause(postAdmissionFailure);
+            throw unavailable;
+        }
+        return retried;
+    }
+
     public void deleteConversation(String userId, String conversationId) throws Exception {
         requireIdentifier(conversationId);
         subscriptionService.requireEntitlement(userId, Entitlement.AI_CHAT);
