@@ -236,6 +236,84 @@ class AIChatServiceTests {
     }
 
     @Test
+    void retryRequiresEntitlementAndOwnershipBeforeDao() throws Exception {
+        doThrow(code("PRO_REQUIRED")).when(subscriptions).requireEntitlement("user", Entitlement.AI_CHAT);
+
+        assertCode("PRO_REQUIRED", () -> service.retryMessage("user", "conversation", "assistant-message"));
+        verify(dao, never()).retryFailedMessage(any(), any(), any(), any(Long.class), any(Integer.class));
+
+        when(dao.findConversation("user", "missing")).thenReturn(Optional.empty());
+        assertCode("NOT_FOUND", () -> service.retryMessage("user", "missing", "assistant-message"));
+        verify(dao, never()).retryFailedMessage(any(), any(), any(), any(Long.class), any(Integer.class));
+    }
+
+    @Test
+    void retryReusesMessagePairAndPublishesWithoutChargingQuota() throws Exception {
+        AIChatMessage failedAssistant = assistant();
+        failedAssistant.setStatus(AIChatMessage.Status.FAILED);
+        failedAssistant.setErrorCode("AI_UNAVAILABLE");
+        AIChatJob retryJob = job();
+        retryJob.setId("retry-job");
+        AIChatDao.AcceptedChatMessage retried = new AIChatDao.AcceptedChatMessage(
+                conversation(), message(), failedAssistant, retryJob,
+                new AIChatDao.QuotaSummary(30, 29, NOW + 1_000), true);
+        when(dao.findConversation("user", "conversation")).thenReturn(Optional.of(conversation()));
+        when(dao.retryFailedMessage("user", "conversation", "assistant-message", NOW, 30))
+                .thenReturn(retried);
+        when(dao.listMessages("user", "conversation", 100)).thenReturn(List.of(message(), failedAssistant));
+
+        AIChatDao.AcceptedChatMessage response = service.retryMessage("user", "conversation", "assistant-message");
+
+        assertTrue(response.newlyAccepted());
+        assertEquals("retry-job", response.job().getId());
+        assertEquals("user-message", response.userMessage().getId());
+        assertEquals("assistant-message", response.assistantMessage().getId());
+        var captor = org.mockito.ArgumentCaptor.forClass(AIChatRequest.class);
+        verify(publisher).publish(captor.capture());
+        AIChatRequest request = captor.getValue();
+        assertEquals("retry-job", request.jobId());
+        assertEquals("user-message", request.userMessageId());
+        assertEquals("assistant-message", request.assistantMessageId());
+        assertEquals("hello", request.currentMessage());
+    }
+
+    @Test
+    void retryRepublishesInflightJobInsteadOfCreatingAnother() throws Exception {
+        AIChatJob inflight = job();
+        AIChatDao.AcceptedChatMessage retried = new AIChatDao.AcceptedChatMessage(
+                conversation(), message(), assistant(), inflight,
+                new AIChatDao.QuotaSummary(30, 29, NOW + 1_000), false);
+        when(dao.findConversation("user", "conversation")).thenReturn(Optional.of(conversation()));
+        when(dao.retryFailedMessage("user", "conversation", "assistant-message", NOW, 30))
+                .thenReturn(retried);
+
+        AIChatDao.AcceptedChatMessage response = service.retryMessage("user", "conversation", "assistant-message");
+
+        assertFalse(response.newlyAccepted());
+        verify(publisher).publish(any(AIChatRequest.class));
+    }
+
+    @Test
+    void retryPublishFailureMarksMessageFailedWithStableCode() throws Exception {
+        when(dao.findConversation("user", "conversation")).thenReturn(Optional.of(conversation()));
+        when(dao.retryFailedMessage("user", "conversation", "assistant-message", NOW, 30))
+                .thenReturn(accepted(true));
+        doThrow(new IllegalStateException("broker down")).when(publisher).publish(any());
+
+        assertCode("AI_UNAVAILABLE", () -> service.retryMessage("user", "conversation", "assistant-message"));
+
+        verify(dao).finalizeMessage("user", "conversation", "job", "assistant-message",
+                AIChatJob.Status.FAILED, null, "AI_UNAVAILABLE", NOW);
+    }
+
+    @Test
+    void retryRejectsBlankAssistantMessageIdBeforeDependencies() throws Exception {
+        assertCode("NOT_FOUND", () -> service.retryMessage("user", "conversation", "  "));
+        verifyNoInteractions(subscriptions);
+        verify(dao, never()).retryFailedMessage(any(), any(), any(), any(Long.class), any(Integer.class));
+    }
+
+    @Test
     void readsRemainAvailableWithoutEntitlementButMutationsDoNot() throws Exception {
         when(dao.listConversations("user", 100)).thenReturn(List.of(conversation()));
         when(dao.findConversation("user", "conversation")).thenReturn(Optional.of(conversation()));

@@ -264,6 +264,83 @@ class FirestoreAIChatDaoTests {
     }
 
     @Test
+    void retryFailedAssistantCreatesNewJobReusingMessagesWithoutChargingQuota() throws Exception {
+        create("chat", "learner", NOW);
+        var first = send("chat", "key", NOW);
+        assertTrue(finish(first.job(), AIChatJob.Status.FAILED, null, "AI_UNAVAILABLE"));
+
+        var retried = dao.retryFailedMessage("learner", "chat", first.assistantMessage().getId(), NOW + 20, 30);
+
+        assertTrue(retried.newlyAccepted());
+        assertEquals(first.userMessage().getId(), retried.userMessage().getId());
+        assertEquals("Explain TOEIC", retried.userMessage().getContent());
+        assertEquals(first.assistantMessage().getId(), retried.assistantMessage().getId());
+        assertNotEquals(first.job().getId(), retried.job().getId());
+        assertEquals(AIChatJob.Status.PENDING, retried.job().getStatus());
+        assertEquals(first.userMessage().getId(), retried.job().getUserMessageId());
+        assertEquals(first.assistantMessage().getId(), retried.job().getAssistantMessageId());
+        assertEquals(AIChatMessage.Status.PENDING, retried.assistantMessage().getStatus());
+        assertEquals(retried.job().getId(), retried.assistantMessage().getJobId());
+        assertNull(retried.assistantMessage().getErrorCode());
+        assertNull(retried.assistantMessage().getCompletedAt());
+        assertTrue(store.documents.containsKey("aiChatJobs/" + retried.job().getId()));
+        // Retry không trừ quota: acceptedCount vẫn 1 như sau lần accept đầu tiên.
+        assertEquals(1, store.documents.get("aiChatUsage/learner_2026-10-03").get("acceptedCount"));
+        assertEquals(29, retried.quotaSummary().remainingDaily());
+        assertEquals(30, retried.quotaSummary().dailyLimit());
+    }
+
+    @Test
+    void retryWhilePendingReturnsInflightJobWithoutCreatingAnother() throws Exception {
+        create("chat", "learner", NOW);
+        var first = send("chat", "key", NOW);
+        var before = store.copyDocuments();
+
+        // Assistant vẫn PENDING (retry đang chạy): double-click trả về job cũ.
+        var again = dao.retryFailedMessage("learner", "chat", first.assistantMessage().getId(), NOW + 5, 30);
+
+        assertFalse(again.newlyAccepted());
+        assertEquals(first.job().getId(), again.job().getId());
+        assertEquals(first.userMessage().getId(), again.userMessage().getId());
+        assertEquals(before, store.documents);
+    }
+
+    @Test
+    void failedRetryCanBeRetriedAgainAfterAnotherFailure() throws Exception {
+        create("chat", "learner", NOW);
+        var first = send("chat", "key", NOW);
+        assertTrue(finish(first.job(), AIChatJob.Status.FAILED, null, "AI_UNAVAILABLE"));
+        var second = dao.retryFailedMessage("learner", "chat", first.assistantMessage().getId(), NOW + 20, 30);
+        assertTrue(dao.finalizeMessage("learner", "chat", second.job().getId(), second.assistantMessage().getId(),
+                AIChatJob.Status.FAILED, null, "AI_UNAVAILABLE", NOW + 30));
+
+        var third = dao.retryFailedMessage("learner", "chat", first.assistantMessage().getId(), NOW + 40, 30);
+
+        assertTrue(third.newlyAccepted());
+        assertNotEquals(second.job().getId(), third.job().getId());
+        assertEquals(first.assistantMessage().getId(), third.assistantMessage().getId());
+        assertEquals(1, store.documents.get("aiChatUsage/learner_2026-10-03").get("acceptedCount"));
+    }
+
+    @Test
+    void retryRejectsSucceededUserForeignAndMissingMessages() throws Exception {
+        create("chat", "learner", NOW);
+        var first = send("chat", "key", NOW);
+        assertTrue(finish(first.job(), AIChatJob.Status.SUCCEEDED, "answer", null));
+        var before = store.copyDocuments();
+
+        assertCode("CHAT_MESSAGE_INVALID", HttpStatus.BAD_REQUEST,
+                () -> dao.retryFailedMessage("learner", "chat", first.assistantMessage().getId(), NOW + 20, 30));
+        assertCode("NOT_FOUND", HttpStatus.NOT_FOUND,
+                () -> dao.retryFailedMessage("learner", "chat", first.userMessage().getId(), NOW + 20, 30));
+        assertCode("NOT_FOUND", HttpStatus.NOT_FOUND,
+                () -> dao.retryFailedMessage("learner", "chat", "missing", NOW + 20, 30));
+        assertCode("NOT_FOUND", HttpStatus.NOT_FOUND,
+                () -> dao.retryFailedMessage("other", "chat", first.assistantMessage().getId(), NOW + 20, 30));
+        assertEquals(before, store.documents);
+    }
+
+    @Test
     void transactionRetryDoesNotMutateCapturedConversationOrDoubleCharge() throws Exception {
         var candidate = conversation("chat", "learner", NOW);
         store.retryNext = true;
