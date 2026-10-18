@@ -70,7 +70,6 @@ export default function UserLayout() {
           <BrandLogo className="h-11 w-11 rounded-xl border border-sky-100 bg-white" />
           <span>
             <strong className="block text-lg leading-tight">CapyTOEIC</strong>
-            <span className="text-[11px] text-slate-500">{t("smarterPractice")}</span>
           </span>
         </button>
 

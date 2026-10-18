@@ -87,8 +87,6 @@ function LoginPage() {
           <div className="absolute -left-28 top-24 h-80 w-80 rounded-full bg-white/8" />
           <div className="absolute -bottom-36 -right-20 h-[28rem] w-[28rem] rounded-full bg-cyan-300/15" />
           <div className="relative flex items-center gap-3 text-xl font-bold">
-            <span className="grid h-11 w-11 place-items-center rounded-xl bg-white text-[#1486ee] shadow-lg shadow-blue-900/10">T</span>
-            <span>TOEIC Master</span>
           </div>
 
           <div className="relative max-w-xl pb-16">

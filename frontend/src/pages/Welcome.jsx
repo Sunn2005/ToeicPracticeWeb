@@ -229,9 +229,6 @@ function Welcome({ user }) {
               <span className="block text-lg font-bold leading-tight text-slate-950">
                 CapyTOEIC
               </span>
-              <span className="hidden text-xs text-slate-500 sm:block">
-                {t("smarterPractice")}
-              </span>
             </span>
           </button>
 
