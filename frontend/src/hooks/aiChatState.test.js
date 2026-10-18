@@ -16,6 +16,7 @@ const conversation = {
 };
 
 const accepted = {
+  conversation: { ...conversation, title: "Why is despite correct?" },
   userMessage: {
     id: "user-1",
     role: "USER",
@@ -66,6 +67,7 @@ test("accepted messages update quota and add one pending job", () => {
   assert.deepEqual(next.messages.map((message) => message.id), ["user-1", "assistant-1"]);
   assert.deepEqual(next.pendingJobIds, ["job-1"]);
   assert.equal(next.quota.remainingDaily, 29);
+  assert.equal(next.conversations[0].title, "Why is despite correct?");
   assert.equal(next.sending, false);
 });
 
@@ -186,6 +188,19 @@ test("deleting the active conversation clears its messages and chooses the next 
   assert.equal(state.activeConversationId, second.id);
   assert.deepEqual(state.messages, []);
   assert.deepEqual(state.pendingJobIds, []);
+});
+
+test("renaming a conversation updates its title without clearing the open history", () => {
+  const opened = reduce(createInitialAIChatState(), AI_CHAT_ACTIONS.CONVERSATION_OPENED, {
+    detail: { conversation, messages: [accepted.userMessage] },
+  });
+  const renamed = reduce(opened, AI_CHAT_ACTIONS.CONVERSATION_RENAMED, {
+    conversation: { ...conversation, title: "Part 5 prepositions" },
+  });
+
+  assert.equal(renamed.conversations[0].title, "Part 5 prepositions");
+  assert.equal(renamed.activeConversationId, conversation.id);
+  assert.deepEqual(renamed.messages, [accepted.userMessage]);
 });
 
 test("PRO_REQUIRED disables sending without deleting visible history", () => {

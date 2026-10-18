@@ -33,8 +33,8 @@ public class ChatAttemptContextService {
                 throw notFound();
             }
             if (exception.getStatusCode().value() == 409) {
-                throw new ApiCodeException(HttpStatus.CONFLICT, "ATTEMPT_NOT_COMPLETED",
-                        "Bài làm chưa cho phép xem lại câu hỏi");
+                throw new ApiCodeException(HttpStatus.FORBIDDEN, "ATTEMPT_NOT_COMPLETED",
+                        "Câu hỏi thuộc bài chưa hoàn thành");
             }
             throw exception;
         }

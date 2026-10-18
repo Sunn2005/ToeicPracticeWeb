@@ -191,7 +191,7 @@ Capy Chat là workflow riêng với AI Analysis toàn bài. BE-Core giữ author
 ### Luồng xử lý
 
 1. User Pro tạo conversation chung hoặc gắn đúng một câu của attempt owned đã hoàn thành.
-2. Khi gửi, BE-Core kiểm tra `AI_CHAT`, đối chiếu mọi attempt đang làm, validate tối đa 1.000 characters và atomically tạo user message, pending assistant, job, quota.
+2. Khi gửi, BE-Core kiểm tra `AI_CHAT`, validate tối đa 1.000 characters và atomically tạo user message, pending assistant, job, quota. Chat chung không bị chặn bởi attempt đang làm; conversation có question context phải được BE-Core xác nhận lại là attempt owned đã `COMPLETED` trước khi tạo và trước mỗi lần gửi.
 3. Key lặp cùng payload trả aggregate cũ; key lặp khác payload bị từ chối. Chỉ aggregate có `newlyAccepted=true` mới được publish.
 4. Request chứa identifiers, locale, current message, tối đa 12 prior successful messages và optional context allowlist của một câu. Không chứa profile, audio URL, sibling question hoặc raw attempt.
 5. AI Service transactionally claim `jobId`, áp lại cap 12 messages/12.000 Unicode content characters, đặt prompt TOEIC-only/chống injection và gọi Gemini structured output.

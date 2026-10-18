@@ -32,6 +32,9 @@ import java.util.concurrent.ExecutionException;
 @Repository
 public class FirestoreAIChatDao implements AIChatDao {
     private static final ZoneId QUOTA_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
+    private static final int TITLE_CODE_POINT_LIMIT = 60;
+    private static final List<String> DEFAULT_TITLES = List.of(
+            "Hội thoại TOEIC mới", "New TOEIC conversation");
     private final Firestore firestore;
 
     public FirestoreAIChatDao(Firestore firestore) {
@@ -111,6 +114,21 @@ public class FirestoreAIChatDao implements AIChatDao {
     }
 
     @Override
+    public AIChatConversation renameConversation(
+            String userId, String conversationId, String title, long now
+    ) throws Exception {
+        var reference = conversationRef(conversationId);
+        return transact(transaction -> {
+            var conversation = conversationFrom(transaction.get(reference).get());
+            if (!activeOwned(conversation, userId)) throw notFound();
+            conversation.setTitle(title);
+            conversation.setUpdatedAt(Math.max(conversation.getUpdatedAt(), now));
+            transaction.set(reference, conversation);
+            return conversation;
+        });
+    }
+
+    @Override
     public AcceptedChatMessage acceptMessage(String userId, String conversationId, String content,
             String idempotencyKey, long now, int dailyLimit, int burstLimit) throws Exception {
         positive(dailyLimit);
@@ -168,6 +186,9 @@ public class FirestoreAIChatDao implements AIChatDao {
             job.setStatus(AIChatJob.Status.PENDING);
             job.setCreatedAt(admissionAt);
             job.setUpdatedAt(admissionAt);
+            if (DEFAULT_TITLES.contains(conversation.getTitle())) {
+                conversation.setTitle(titleFrom(content));
+            }
             conversation.setUpdatedAt(Math.max(conversation.getUpdatedAt(), admissionAt));
             conversation.setLastMessageAt(Math.max(conversation.getLastMessageAt(), admissionAt));
             transaction.set(messageRef(conversationId, userMessage.getId()), userMessage);
@@ -259,6 +280,7 @@ public class FirestoreAIChatDao implements AIChatDao {
                     || !Objects.equals(assistantMessageId, job.getAssistantMessageId())) throw invalidRetry();
             var userMessage = messageFrom(transaction.get(messageRef(conversationId, job.getUserMessageId())).get());
             if (userMessage == null || userMessage.getRole() != AIChatMessage.Role.USER) throw invalidRetry();
+            var quotaSummary = currentSummary(transaction, userId, now, dailyLimit);
             var retryJob = new AIChatJob();
             retryJob.setId(UUID.randomUUID().toString());
             retryJob.setUserId(userId);
@@ -279,7 +301,7 @@ public class FirestoreAIChatDao implements AIChatDao {
             transaction.set(jobRef(retryJob.getId()), retryJob);
             transaction.set(conversationReference, conversation);
             return new AcceptedChatMessage(conversation, userMessage, assistant, retryJob,
-                    currentSummary(transaction, userId, now, dailyLimit), true);
+                    quotaSummary, true);
         });
     }
 
@@ -368,6 +390,14 @@ public class FirestoreAIChatDao implements AIChatDao {
         long resetAt = date.plusDays(1).atStartOfDay(QUOTA_ZONE).toInstant().toEpochMilli();
         var quota = quotaFrom(transaction.get(usageRef(userId, date)).get(), userId, date, resetAt);
         return summary(quota, dailyLimit);
+    }
+
+    private static String titleFrom(String content) {
+        String normalized = content.strip().replaceAll("[\\s\\p{Z}]+", " ");
+        int count = normalized.codePointCount(0, normalized.length());
+        if (count <= TITLE_CODE_POINT_LIMIT) return normalized;
+        int end = normalized.offsetByCodePoints(0, TITLE_CODE_POINT_LIMIT - 1);
+        return normalized.substring(0, end).stripTrailing() + "…";
     }
 
     private static List<Long> recentAdmissions(DocumentSnapshot snapshot, long admissionAt) {

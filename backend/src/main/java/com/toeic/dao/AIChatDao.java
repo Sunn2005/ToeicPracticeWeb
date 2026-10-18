@@ -21,6 +21,9 @@ public interface AIChatDao {
     /** Repeating an owned deletion is a no-op; messages and jobs are retained. */
     void softDeleteConversation(String userId, String conversationId, long now) throws Exception;
 
+    /** Renames an active owned conversation. Foreign, deleted, and missing resources are 404. */
+    AIChatConversation renameConversation(String userId, String conversationId, String title, long now) throws Exception;
+
     /**
      * All reads, quota checks, and message/job/usage writes occur in one transaction.
      * Keys are unique per user. Reuse with different content or conversation is CHAT_MESSAGE_INVALID.

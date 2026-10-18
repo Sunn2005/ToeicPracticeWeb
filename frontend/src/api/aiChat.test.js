@@ -8,6 +8,7 @@ import {
   getConversation,
   listConversations,
   retryChatMessage,
+  renameConversation,
   sendChatMessage,
   waitForChatJob,
 } from "./aiChat.js";
@@ -57,6 +58,7 @@ test("conversation mutations send exact methods and body shapes", async () => {
     json({ token: "csrf" }),
     json({ id: "conversation" }, 201),
     json({ userMessage: {}, assistantMessage: {}, job: { id: "job" } }, 202),
+    json({ id: "conversation", title: "Mẹo Part 5" }),
     new Response(null, { status: 204 }),
   );
 
@@ -65,6 +67,7 @@ test("conversation mutations send exact methods and body shapes", async () => {
     content: "Giải thích câu này",
     idempotencyKey: "message-key",
   });
+  await renameConversation("conversation/one", "Mẹo Part 5");
   assert.equal(await deleteConversation("conversation/one"), null);
 
   assert.equal(calls[1].url, `${API_BASE_URL}/api/ai/chat/conversations`);
@@ -86,12 +89,16 @@ test("conversation mutations send exact methods and body shapes", async () => {
     idempotencyKey: "message-key",
   });
 
+  assert.equal(calls[3].url, `${API_BASE_URL}/api/ai/chat/conversations/conversation%2Fone`);
+  assert.equal(calls[3].options.method, "PATCH");
+  assert.deepEqual(JSON.parse(calls[3].options.body), { title: "Mẹo Part 5" });
+
   assert.equal(
-    calls[3].url,
+    calls[4].url,
     `${API_BASE_URL}/api/ai/chat/conversations/conversation%2Fone`,
   );
-  assert.equal(calls[3].options.method, "DELETE");
-  assert.equal(calls[3].options.body, undefined);
+  assert.equal(calls[4].options.method, "DELETE");
+  assert.equal(calls[4].options.body, undefined);
 });
 
 test("retrying a failed assistant message posts to the retry endpoint", async () => {

@@ -12,19 +12,18 @@ test("mounts the Pro-gated Capy chat shell outside console routes", async () => 
   assert.match(appSource, /key=\{`\$\{location\.key\}:\$\{user\?\.uid \|\| "guest"\}:\$\{role\}/);
 });
 
-test("blocked Capy chat guides the learner to attempt history", async () => {
+test("in-progress attempts show a warning without disabling general Capy chat", async () => {
   const chatSource = await readFile(
     new URL("./components/ai-chat/AIChatBox.jsx", import.meta.url),
     "utf8",
   );
-  const translationsSource = await readFile(
-    new URL("./i18n/translations.js", import.meta.url),
+  const pickerSource = await readFile(
+    new URL("./components/ai-chat/AttemptQuestionContextPicker.jsx", import.meta.url),
     "utf8",
   );
 
-  assert.match(chatSource, /chat\.errorCode === "CHAT_BLOCKED_DURING_ATTEMPT"/);
-  assert.match(chatSource, /to="\/history"/);
-  assert.match(chatSource, /t\("chatViewAttemptHistory"\)/);
-  assert.match(translationsSource, /chatViewAttemptHistory: "View attempt history"/);
-  assert.match(translationsSource, /chatViewAttemptHistory: "Xem lịch sử làm bài"/);
+  assert.match(chatSource, /attempts\.find\(\(\{ status \}\) => status === "IN_PROGRESS"\)/);
+  assert.match(chatSource, /chatAttemptInProgressSuffix/);
+  assert.match(pickerSource, /disabled=\{attempt\.status !== "COMPLETED"\}/);
+  assert.match(pickerSource, /onClick=\{\(\) => onCreate\(\)\}/);
 });

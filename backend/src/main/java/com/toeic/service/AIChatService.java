@@ -3,6 +3,7 @@ package com.toeic.service;
 import com.toeic.controller.ApiCodeException;
 import com.toeic.dao.AIChatDao;
 import com.toeic.dto.CreateChatConversationRequest;
+import com.toeic.dto.RenameChatConversationRequest;
 import com.toeic.dto.SendChatMessageRequest;
 import com.toeic.dto.ai.AIChatQuestionContext;
 import com.toeic.dto.ai.AIChatRequest;
@@ -25,10 +26,10 @@ import java.util.UUID;
 public class AIChatService {
     private static final Set<String> SUPPORTED_LOCALES = Set.of("vi", "en");
     private static final int MAX_IDEMPOTENCY_KEY_LENGTH = 128;
+    private static final int MAX_TITLE_CODE_POINTS = 60;
 
     private final AIChatDao chatDao;
     private final SubscriptionService subscriptionService;
-    private final AttemptService attemptService;
     private final ChatAttemptContextService contextService;
     private final AIChatRequestPublisher requestPublisher;
     private final Clock clock;
@@ -43,7 +44,6 @@ public class AIChatService {
     public AIChatService(
             AIChatDao chatDao,
             SubscriptionService subscriptionService,
-            AttemptService attemptService,
             ChatAttemptContextService contextService,
             AIChatRequestPublisher requestPublisher,
             @Value("${app.ai.chat.daily-limit:30}") int dailyLimit,
@@ -53,14 +53,13 @@ public class AIChatService {
             @Value("${app.ai.chat.message-character-limit:1000}") int messageCharacterLimit,
             @Value("${app.ai.chat.history-message-limit:12}") int historyMessageLimit
     ) {
-        this(chatDao, subscriptionService, attemptService, contextService, requestPublisher, Clock.systemUTC(),
+        this(chatDao, subscriptionService, contextService, requestPublisher, Clock.systemUTC(),
                 dailyLimit, burstLimit, conversationLimit, readLimit, messageCharacterLimit, historyMessageLimit);
     }
 
     public AIChatService(
             AIChatDao chatDao,
             SubscriptionService subscriptionService,
-            AttemptService attemptService,
             ChatAttemptContextService contextService,
             AIChatRequestPublisher requestPublisher,
             Clock clock,
@@ -73,7 +72,6 @@ public class AIChatService {
     ) {
         this.chatDao = chatDao;
         this.subscriptionService = subscriptionService;
-        this.attemptService = attemptService;
         this.contextService = contextService;
         this.requestPublisher = requestPublisher;
         this.clock = clock;
@@ -88,7 +86,6 @@ public class AIChatService {
     public AIChatConversation createConversation(String userId, CreateChatConversationRequest request) throws Exception {
         ValidatedContext validated = validateConversationRequest(request);
         subscriptionService.requireEntitlement(userId, Entitlement.AI_CHAT);
-        attemptService.requireNoInProgressAttempt(userId);
         if (validated.attemptId() != null) {
             contextService.resolve(userId, validated.attemptId(), validated.questionNumber());
         }
@@ -122,7 +119,6 @@ public class AIChatService {
     ) throws Exception {
         ValidatedMessage validated = validateMessage(request);
         subscriptionService.requireEntitlement(userId, Entitlement.AI_CHAT);
-        attemptService.requireNoInProgressAttempt(userId);
         AIChatConversation conversation = ownedConversation(userId, conversationId);
         AIChatQuestionContext questionContext = null;
         if (conversation.getContextAttemptId() != null) {
@@ -168,7 +164,6 @@ public class AIChatService {
     ) throws Exception {
         requireIdentifier(assistantMessageId);
         subscriptionService.requireEntitlement(userId, Entitlement.AI_CHAT);
-        attemptService.requireNoInProgressAttempt(userId);
         AIChatConversation conversation = ownedConversation(userId, conversationId);
         AIChatQuestionContext questionContext = null;
         if (conversation.getContextAttemptId() != null) {
@@ -205,8 +200,16 @@ public class AIChatService {
     public void deleteConversation(String userId, String conversationId) throws Exception {
         requireIdentifier(conversationId);
         subscriptionService.requireEntitlement(userId, Entitlement.AI_CHAT);
-        attemptService.requireNoInProgressAttempt(userId);
         chatDao.softDeleteConversation(userId, conversationId, clock.millis());
+    }
+
+    public AIChatConversation renameConversation(
+            String userId, String conversationId, RenameChatConversationRequest request
+    ) throws Exception {
+        requireIdentifier(conversationId);
+        String title = validateTitle(request);
+        subscriptionService.requireEntitlement(userId, Entitlement.AI_CHAT);
+        return chatDao.renameConversation(userId, conversationId, title, clock.millis());
     }
 
     public AIChatJob getJob(String userId, String jobId) throws Exception {
@@ -256,6 +259,15 @@ public class AIChatService {
         return new ValidatedMessage(content, key);
     }
 
+    private String validateTitle(RenameChatConversationRequest request) {
+        if (request == null || request.title() == null) throw titleInvalid();
+        String title = request.title().strip().replaceAll("[\\s\\p{Z}]+", " ");
+        if (title.isEmpty() || title.codePointCount(0, title.length()) > MAX_TITLE_CODE_POINTS) {
+            throw titleInvalid();
+        }
+        return title;
+    }
+
     private void requireIdentifier(String value) {
         if (value == null || value.isBlank() || value.length() > 256) throw notFound();
     }
@@ -277,6 +289,10 @@ public class AIChatService {
 
     private static ApiCodeException messageInvalid() {
         return new ApiCodeException(HttpStatus.BAD_REQUEST, "CHAT_MESSAGE_INVALID", "Chat message is invalid");
+    }
+
+    private static ApiCodeException titleInvalid() {
+        return new ApiCodeException(HttpStatus.BAD_REQUEST, "CHAT_TITLE_INVALID", "Chat title is invalid");
     }
 
     private static ApiCodeException notFound() {

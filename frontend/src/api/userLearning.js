@@ -34,10 +34,11 @@ export function getAttemptHistory() {
 export async function getChatEligibleAttempts(options = {}) {
   const attempts = await apiFetch("/api/users/me/attempts", options);
   return (attempts || [])
-    .filter((attempt) => attempt?.status === "COMPLETED" && attempt.id)
+    .filter((attempt) => attempt?.id && ["COMPLETED", "IN_PROGRESS"].includes(attempt.status))
     .map((attempt) => ({
       id: attempt.id,
       title: attempt.title || attempt.testTitle || getTestName(attempt.testId),
+      status: attempt.status,
     }));
 }
 

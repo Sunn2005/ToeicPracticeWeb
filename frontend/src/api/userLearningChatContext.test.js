@@ -26,16 +26,18 @@ function installResponse(response) {
   return calls;
 }
 
-test("chat attempt choices derive only identifiers and titles from completed history", async () => {
+test("chat attempt choices retain status for completed and disabled in-progress options", async () => {
   const calls = installResponse(json([
     { id: "attempt-1", testId: "test-1", status: "COMPLETED", result: { totalScore: 800 } },
     { id: "attempt-2", testId: "test-2", status: "IN_PROGRESS" },
-    { id: "attempt-3", testId: "test-3", status: "COMPLETED", title: "Custom title" },
+    { id: "attempt-3", testId: "test-3", status: "CANCELLED", title: "Ignored" },
+    { id: "attempt-4", testId: "test-3", status: "COMPLETED", title: "Custom title" },
   ]));
 
   assert.deepEqual(await getChatEligibleAttempts(), [
-    { id: "attempt-1", title: "Test 1" },
-    { id: "attempt-3", title: "Custom title" },
+    { id: "attempt-1", title: "Test 1", status: "COMPLETED" },
+    { id: "attempt-2", title: "Test 2", status: "IN_PROGRESS" },
+    { id: "attempt-4", title: "Custom title", status: "COMPLETED" },
   ]);
   assert.equal(calls[0].url, `${API_BASE_URL}/api/users/me/attempts`);
   assert.equal(calls[0].options.credentials, "include");

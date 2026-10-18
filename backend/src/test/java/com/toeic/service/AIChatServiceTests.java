@@ -3,6 +3,7 @@ package com.toeic.service;
 import com.toeic.controller.ApiCodeException;
 import com.toeic.dao.AIChatDao;
 import com.toeic.dto.CreateChatConversationRequest;
+import com.toeic.dto.RenameChatConversationRequest;
 import com.toeic.dto.SendChatMessageRequest;
 import com.toeic.dto.ai.AIChatRequest;
 import com.toeic.dto.ai.AIChatQuestionContext;
@@ -26,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -36,7 +38,6 @@ class AIChatServiceTests {
     private static final long NOW = 1_800_000_000_000L;
     private AIChatDao dao;
     private SubscriptionService subscriptions;
-    private AttemptService attempts;
     private ChatAttemptContextService contexts;
     private AIChatRequestPublisher publisher;
     private AIChatService service;
@@ -45,10 +46,9 @@ class AIChatServiceTests {
     void setUp() {
         dao = mock(AIChatDao.class);
         subscriptions = mock(SubscriptionService.class);
-        attempts = mock(AttemptService.class);
         contexts = mock(ChatAttemptContextService.class);
         publisher = mock(AIChatRequestPublisher.class);
-        service = new AIChatService(dao, subscriptions, attempts, contexts, publisher,
+        service = new AIChatService(dao, subscriptions, contexts, publisher,
                 Clock.fixed(Instant.ofEpochMilli(NOW), ZoneOffset.UTC), 30, 5, 10, 100, 1_000, 12);
     }
 
@@ -60,11 +60,11 @@ class AIChatServiceTests {
                 () -> service.createConversation("user", new CreateChatConversationRequest("vi", null, null)));
 
         assertEquals("PRO_REQUIRED", error.getCode());
-        verifyNoInteractions(attempts, contexts, dao);
+        verifyNoInteractions(contexts, dao);
     }
 
     @Test
-    void createChecksAttemptSafetyAndResolvesExactlyTheRequestedContext() throws Exception {
+    void createResolvesExactlyTheRequestedCompletedContext() throws Exception {
         AIChatQuestionContext context = context();
         when(contexts.resolve("user", "attempt", 101)).thenReturn(context);
         when(dao.createConversation(any(), eq(10))).thenAnswer(call -> call.getArgument(0));
@@ -72,7 +72,6 @@ class AIChatServiceTests {
         AIChatConversation created = service.createConversation(
                 "user", new CreateChatConversationRequest("en", "attempt", 101));
 
-        verify(attempts).requireNoInProgressAttempt("user");
         verify(contexts).resolve("user", "attempt", 101);
         assertEquals("user", created.getUserId());
         assertEquals("en", created.getLocale());
@@ -88,7 +87,7 @@ class AIChatServiceTests {
                 "user", new CreateChatConversationRequest("vi", "attempt", null)));
         assertCode("CHAT_CONTEXT_INVALID", () -> service.createConversation(
                 "user", new CreateChatConversationRequest("fr", null, null)));
-        verifyNoInteractions(subscriptions, attempts, contexts, dao);
+        verifyNoInteractions(subscriptions, contexts, dao);
     }
 
     @Test
@@ -110,7 +109,6 @@ class AIChatServiceTests {
                 "user", "conversation", new SendChatMessageRequest("  Giải thích câu này  ", "key"));
 
         assertTrue(response.newlyAccepted());
-        verify(attempts).requireNoInProgressAttempt("user");
         verify(dao).acceptMessage("user", "conversation", "Giải thích câu này", "key", NOW, 30, 5);
     }
 
@@ -122,18 +120,7 @@ class AIChatServiceTests {
                 "user", "conversation", new SendChatMessageRequest("a".repeat(1_001), "key")));
         assertCode("CHAT_MESSAGE_INVALID", () -> service.sendMessage(
                 "user", "conversation", new SendChatMessageRequest("hello", " ")));
-        verifyNoInteractions(subscriptions, attempts, contexts, dao);
-    }
-
-    @Test
-    void sendBlocksInProgressAttemptBeforeConversationOrQuotaReads() throws Exception {
-        doThrow(code("CHAT_BLOCKED_DURING_ATTEMPT")).when(attempts).requireNoInProgressAttempt("user");
-
-        assertCode("CHAT_BLOCKED_DURING_ATTEMPT", () -> service.sendMessage(
-                "user", "conversation", new SendChatMessageRequest("hello", "key")));
-
-        verify(dao, never()).findConversation(any(), any());
-        verify(dao, never()).acceptMessage(any(), any(), any(), any(), any(Long.class), any(Integer.class), any(Integer.class));
+        verifyNoInteractions(subscriptions, contexts, dao);
     }
 
     @Test
@@ -242,6 +229,7 @@ class AIChatServiceTests {
         assertCode("PRO_REQUIRED", () -> service.retryMessage("user", "conversation", "assistant-message"));
         verify(dao, never()).retryFailedMessage(any(), any(), any(), any(Long.class), any(Integer.class));
 
+        doNothing().when(subscriptions).requireEntitlement("user", Entitlement.AI_CHAT);
         when(dao.findConversation("user", "missing")).thenReturn(Optional.empty());
         assertCode("NOT_FOUND", () -> service.retryMessage("user", "missing", "assistant-message"));
         verify(dao, never()).retryFailedMessage(any(), any(), any(), any(Long.class), any(Integer.class));
@@ -327,7 +315,36 @@ class AIChatServiceTests {
 
         doThrow(code("PRO_REQUIRED")).when(subscriptions).requireEntitlement("user", Entitlement.AI_CHAT);
         assertCode("PRO_REQUIRED", () -> service.deleteConversation("user", "conversation"));
+        assertCode("PRO_REQUIRED", () -> service.renameConversation(
+                "user", "conversation", new RenameChatConversationRequest("Tên mới")));
         verify(dao, never()).softDeleteConversation(any(), any(), any(Long.class));
+        verify(dao, never()).renameConversation(any(), any(), any(), any(Long.class));
+    }
+
+    @Test
+    void renameNormalizesTitleAndUsesTrustedTimestamp() throws Exception {
+        when(dao.renameConversation("user", "conversation", "Mẹo Part 5", NOW))
+                .thenAnswer(call -> {
+                    AIChatConversation value = conversation();
+                    value.setTitle(call.getArgument(2));
+                    return value;
+                });
+
+        AIChatConversation renamed = service.renameConversation(
+                "user", "conversation", new RenameChatConversationRequest("  Mẹo\u00A0  Part 5  "));
+
+        assertEquals("Mẹo Part 5", renamed.getTitle());
+        verify(subscriptions).requireEntitlement("user", Entitlement.AI_CHAT);
+        verify(dao).renameConversation("user", "conversation", "Mẹo Part 5", NOW);
+    }
+
+    @Test
+    void renameRejectsBlankAndOversizedTitlesBeforeDependencies() {
+        assertCode("CHAT_TITLE_INVALID", () -> service.renameConversation(
+                "user", "conversation", new RenameChatConversationRequest("   ")));
+        assertCode("CHAT_TITLE_INVALID", () -> service.renameConversation(
+                "user", "conversation", new RenameChatConversationRequest("😀".repeat(61))));
+        verifyNoInteractions(subscriptions, dao);
     }
 
     @Test

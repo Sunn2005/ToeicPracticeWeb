@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import { useLanguage } from "../../i18n/LanguageContext";
 import AttemptQuestionContextPicker from "./AttemptQuestionContextPicker";
 import ChatComposer from "./ChatComposer";
@@ -18,16 +17,9 @@ const ERROR_TRANSLATION_KEYS = {
   AI_UNAVAILABLE: "chatErrorUnavailable",
   CHAT_JOB_TIMEOUT: "chatErrorTimeout",
   ATTEMPT_NOT_COMPLETED: "chatErrorAttemptNotCompleted",
+  CHAT_TITLE_INVALID: "chatErrorTitleInvalid",
   NOT_FOUND: "chatErrorNotFound",
 };
-
-function MenuIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-      <path d="M4 6h16M4 12h16M4 18h16" />
-    </svg>
-  );
-}
 
 function CloseIcon() {
   return (
@@ -87,7 +79,8 @@ export default function AIChatBox({
   const dialogRef = useRef(null);
   const closeRef = useRef(null);
   const previousFocusRef = useRef(null);
-  const [showHistory, setShowHistory] = useState(false);
+  const resizeRef = useRef(null);
+  const [sidebarWidth, setSidebarWidth] = useState(240);
   const [creating, setCreating] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
@@ -128,16 +121,22 @@ export default function AIChatBox({
   const errorText = chat.errorCode
     ? t(ERROR_TRANSLATION_KEYS[chat.errorCode] || "chatErrorGeneric")
     : chat.errorMessage;
-  const blockedDuringAttempt = chat.errorCode === "CHAT_BLOCKED_DURING_ATTEMPT";
+  const inProgressAttempt = attempts.find(({ status }) => status === "IN_PROGRESS");
 
-  const create = async (context) => {
+  const create = async (context, initialMessage) => {
     try {
-      await chat.startConversation(context);
+      if (initialMessage) await chat.startConversationWithMessage(initialMessage);
+      else await chat.startConversation(context);
       setCreating(false);
-      setShowHistory(false);
     } catch {
       // The hook exposes the stable backend error in the panel.
     }
+  };
+
+  const beginResize = (event) => {
+    event.preventDefault();
+    resizeRef.current = { startX: event.clientX, startWidth: sidebarWidth };
+    event.currentTarget.setPointerCapture(event.pointerId);
   };
 
   const confirmDelete = async () => {
@@ -160,20 +159,17 @@ export default function AIChatBox({
         role="dialog"
         aria-modal="true"
         aria-labelledby="capy-chat-title"
-        className="pointer-events-auto absolute inset-0 flex h-[100dvh] flex-col overflow-hidden bg-slate-50 shadow-2xl sm:inset-auto sm:bottom-24 sm:right-5 sm:h-[min(680px,calc(100dvh-7rem))] sm:w-[min(720px,calc(100vw-2.5rem))] sm:rounded-3xl sm:border sm:border-slate-200"
+        className="pointer-events-auto absolute inset-0 flex h-[100dvh] flex-col overflow-hidden bg-slate-50 shadow-2xl min-[680px]:inset-auto min-[680px]:bottom-6 min-[680px]:right-6 min-[680px]:h-[min(720px,calc(100dvh-3rem))] min-[680px]:w-[min(760px,calc(100vw-3rem))] min-[680px]:rounded-3xl min-[680px]:border min-[680px]:border-slate-200 xl:w-[min(900px,calc(50vw-2rem))]"
       >
         <header className="flex min-h-16 items-center gap-3 border-b border-slate-200 bg-white px-3 py-2 sm:px-4">
-          <button
-            type="button"
-            onClick={() => setShowHistory((current) => !current)}
-            aria-expanded={showHistory}
-            aria-controls="capy-chat-history"
-            className="flex h-11 w-11 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:hidden"
-          >
-            <MenuIcon />
-            <span className="sr-only">{t("chatConversationHistory")}</span>
-          </button>
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-100 to-emerald-100 text-xl" aria-hidden="true">🦫</span>
+          <img
+            src="/brand/LogochatboxCapyAI.png"
+            alt=""
+            width="40"
+            height="40"
+            className="h-10 w-10 shrink-0 rounded-2xl object-cover"
+            aria-hidden="true"
+          />
           <div className="min-w-0 flex-1">
             <h2 id="capy-chat-title" className="truncate font-bold text-slate-950">{t("chatTitle")}</h2>
             <p className="truncate text-xs text-slate-500">{activeConversation?.title || t("chatSubtitle")}</p>
@@ -182,22 +178,32 @@ export default function AIChatBox({
             type="button"
             onClick={() => {
               setCreating(true);
-              setShowHistory(false);
             }}
             disabled={creating}
             className="min-h-11 rounded-xl border border-sky-200 px-3 text-sm font-bold text-sky-700 hover:bg-sky-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {t("new")}
+            {t("chatNewThread")}
           </button>
           <button ref={closeRef} type="button" onClick={onClose} aria-label={t("closeChat")} className="flex h-11 w-11 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500">
             <CloseIcon />
           </button>
         </header>
 
-        <div className="relative flex min-h-0 flex-1">
+        {inProgressAttempt && (
+          <div role="status" className="flex items-start gap-3 border-b border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900 min-[680px]:items-center">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-amber-500 font-bold text-white" aria-hidden="true">!</span>
+            <p>
+              <strong>{t("chatAttemptInProgressPrefix")} &quot;{inProgressAttempt.title}&quot;</strong>
+              {` — ${t("chatAttemptInProgressSuffix")}`}
+            </p>
+          </div>
+        )}
+
+        <div className="relative flex min-h-0 flex-1 flex-col min-[680px]:flex-row">
           <aside
             id="capy-chat-history"
-            className={`${showHistory ? "absolute inset-0 z-10 flex" : "hidden"} w-full flex-col border-r border-slate-200 bg-white sm:static sm:flex sm:w-60`}
+            style={{ "--capy-sidebar-width": `${sidebarWidth}px` }}
+            className="relative flex max-h-48 w-full shrink-0 flex-col border-b border-slate-200 bg-white min-[680px]:max-h-none min-[680px]:w-[var(--capy-sidebar-width)] min-[680px]:border-b-0 min-[680px]:border-r"
           >
             <div className="border-b border-slate-100 px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">{t("chatConversationHistory")}</div>
             <div className="min-h-0 flex-1 overflow-y-auto">
@@ -207,11 +213,43 @@ export default function AIChatBox({
                 status={chat.status}
                 onSelect={(id) => {
                   setCreating(false);
-                  setShowHistory(false);
                   void chat.openConversation(id).catch(() => undefined);
                 }}
                 onDelete={setDeleteTarget}
+                onRename={chat.renameConversation}
+                canRename={chat.canSend}
               />
+            </div>
+            <div
+              role="separator"
+              aria-orientation="vertical"
+              aria-label={t("chatResizeHistory")}
+              aria-valuemin="180"
+              aria-valuemax="400"
+              aria-valuenow={sidebarWidth}
+              tabIndex="0"
+              onPointerDown={beginResize}
+              onPointerMove={(event) => {
+                if (!resizeRef.current) return;
+                const { startX, startWidth } = resizeRef.current;
+                setSidebarWidth(Math.min(400, Math.max(180, startWidth + event.clientX - startX)));
+              }}
+              onPointerUp={(event) => {
+                resizeRef.current = null;
+                event.currentTarget.releasePointerCapture(event.pointerId);
+              }}
+              onPointerCancel={() => {
+                resizeRef.current = null;
+              }}
+              onKeyDown={(event) => {
+                if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+                event.preventDefault();
+                const delta = event.key === "ArrowLeft" ? -16 : 16;
+                setSidebarWidth((width) => Math.min(400, Math.max(180, width + delta)));
+              }}
+              className="group absolute -right-1 top-0 hidden h-full w-2 cursor-col-resize touch-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 min-[680px]:block"
+            >
+              <span className="absolute left-1/2 top-1/2 h-16 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-slate-200 transition group-hover:bg-sky-300" />
             </div>
           </aside>
 
@@ -220,11 +258,6 @@ export default function AIChatBox({
               <div role="alert" className="flex items-start justify-between gap-3 border-b border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
                 <span className="min-w-0 flex-1">{errorText}{chat.errorCode ? ` (${chat.errorCode})` : ""}</span>
                 <span className="flex shrink-0 flex-col items-end gap-2 sm:flex-row">
-                  {blockedDuringAttempt && (
-                    <Link to="/history" onClick={onClose} className="font-bold underline">
-                      {t("chatViewAttemptHistory")}
-                    </Link>
-                  )}
                   <button type="button" onClick={chat.clearError} className="font-bold underline">{t("dismiss")}</button>
                 </span>
               </div>
@@ -237,6 +270,7 @@ export default function AIChatBox({
                 attempts={attempts}
                 getQuestionChoices={getQuestionChoices}
                 onCreate={create}
+                onSuggestedPrompt={(prompt) => create(undefined, prompt)}
                 creating={chat.sending}
                 disabled={!chat.canSend}
               />

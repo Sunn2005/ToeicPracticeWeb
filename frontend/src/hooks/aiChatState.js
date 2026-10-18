@@ -6,6 +6,7 @@ export const AI_CHAT_ACTIONS = Object.freeze({
   CONVERSATION_CREATED: "chat/conversation-created",
   CONVERSATION_OPENED: "chat/conversation-opened",
   CONVERSATION_SYNCED: "chat/conversation-synced",
+  CONVERSATION_RENAMED: "chat/conversation-renamed",
   CONVERSATION_DELETED: "chat/conversation-deleted",
   SEND_STARTED: "chat/send-started",
   MESSAGE_ACCEPTED: "chat/message-accepted",
@@ -143,6 +144,13 @@ export function aiChatReducer(state, action) {
       }
       return detailState(state, action.detail);
     }
+    case AI_CHAT_ACTIONS.CONVERSATION_RENAMED:
+      return {
+        ...state,
+        conversations: upsertConversation(state.conversations, action.conversation),
+        errorCode: null,
+        errorMessage: "",
+      };
     case AI_CHAT_ACTIONS.CONVERSATION_DELETED: {
       const conversations = state.conversations.filter(({ id }) => id !== action.conversationId);
       if (state.activeConversationId !== action.conversationId) {
@@ -165,6 +173,7 @@ export function aiChatReducer(state, action) {
       if (conversationId && conversationId !== state.activeConversationId) {
         return {
           ...state,
+          conversations: upsertConversation(state.conversations, action.accepted.conversation),
           quota: action.accepted.quotaSummary || state.quota,
           sending: false,
           errorCode: null,
@@ -177,6 +186,7 @@ export function aiChatReducer(state, action) {
       ]));
       return {
         ...state,
+        conversations: upsertConversation(state.conversations, action.accepted.conversation),
         messages,
         quota: action.accepted.quotaSummary || state.quota,
         pendingJobIds: pendingJobIdsFromMessages(messages),

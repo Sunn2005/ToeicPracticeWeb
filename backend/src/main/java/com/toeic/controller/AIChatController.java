@@ -2,6 +2,7 @@ package com.toeic.controller;
 
 import com.toeic.dao.AIChatDao;
 import com.toeic.dto.CreateChatConversationRequest;
+import com.toeic.dto.RenameChatConversationRequest;
 import com.toeic.dto.SendChatMessageRequest;
 import com.toeic.model.AIChatConversation;
 import com.toeic.model.AIChatJob;
@@ -15,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -92,6 +94,15 @@ public class AIChatController {
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping("/conversations/{conversationId}")
+    public ConversationResponse renameConversation(
+            @PathVariable String conversationId,
+            @RequestBody RenameChatConversationRequest request,
+            @AuthenticationPrincipal ToeicUserPrincipal principal
+    ) throws Exception {
+        return ConversationResponse.from(chatService.renameConversation(principal.uid(), conversationId, request));
+    }
+
     @GetMapping("/jobs/{jobId}")
     public JobResponse getJob(
             @PathVariable String jobId,
@@ -141,6 +152,7 @@ public class AIChatController {
     }
 
     public record AcceptedMessageResponse(
+            ConversationResponse conversation,
             MessageResponse userMessage,
             MessageResponse assistantMessage,
             JobResponse job,
@@ -148,7 +160,8 @@ public class AIChatController {
             boolean newlyAccepted
     ) {
         static AcceptedMessageResponse from(AIChatDao.AcceptedChatMessage value) {
-            return new AcceptedMessageResponse(MessageResponse.from(value.userMessage()),
+            return new AcceptedMessageResponse(ConversationResponse.from(value.conversation()),
+                    MessageResponse.from(value.userMessage()),
                     MessageResponse.from(value.assistantMessage()), JobResponse.from(value.job()),
                     value.quotaSummary(), value.newlyAccepted());
         }

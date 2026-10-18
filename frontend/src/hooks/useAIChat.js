@@ -5,6 +5,7 @@ import {
   getConversation,
   listConversations,
   retryChatMessage,
+  renameConversation,
   sendChatMessage,
   waitForChatJob,
 } from "../api/aiChat.js";
@@ -124,9 +125,8 @@ export function useAIChat({ enabled, locale }) {
     }
   }, [locale]);
 
-  const sendMessage = useCallback(async (content) => {
-    if (!state.activeConversationId || !state.canSend || state.sending) return null;
-    const conversationId = state.activeConversationId;
+  const sendToConversation = useCallback(async (conversationId, content) => {
+    if (!conversationId || !stateRef.current.canSend) return null;
     const attempt = sendAttemptsRef.current.prepare(conversationId, content);
     dispatch({ type: AI_CHAT_ACTIONS.SEND_STARTED });
     try {
@@ -146,7 +146,18 @@ export function useAIChat({ enabled, locale }) {
       });
       throw error;
     }
-  }, [pollJob, state.activeConversationId, state.canSend, state.sending]);
+  }, [pollJob]);
+
+  const sendMessage = useCallback(async (content) => {
+    if (!state.activeConversationId || !state.canSend || state.sending) return null;
+    return sendToConversation(state.activeConversationId, content);
+  }, [sendToConversation, state.activeConversationId, state.canSend, state.sending]);
+
+  const startConversationWithMessage = useCallback(async (content) => {
+    const conversation = await startConversation();
+    await sendToConversation(conversation.id, content);
+    return conversation;
+  }, [sendToConversation, startConversation]);
 
   const retryMessage = useCallback(async (failedMessageId) => {
     if (!state.activeConversationId || !state.canSend || state.sending) return null;
@@ -185,6 +196,20 @@ export function useAIChat({ enabled, locale }) {
     }
   }, [abortAll, openConversation, state.activeConversationId, state.conversations]);
 
+  const renameConversationTitle = useCallback(async (conversationId, title) => {
+    try {
+      const conversation = await renameConversation(conversationId, title);
+      dispatch({ type: AI_CHAT_ACTIONS.CONVERSATION_RENAMED, conversation });
+      return conversation;
+    } catch (error) {
+      dispatch({
+        type: AI_CHAT_ACTIONS.REQUEST_FAILED,
+        ...requestError(error, "CHAT_RENAME_FAILED"),
+      });
+      throw error;
+    }
+  }, []);
+
   useEffect(() => {
     dispatch({ type: AI_CHAT_ACTIONS.ENABLED_CHANGED, enabled });
     let cancelled = false;
@@ -214,8 +239,10 @@ export function useAIChat({ enabled, locale }) {
     refreshConversations,
     openConversation,
     startConversation,
+    startConversationWithMessage,
     sendMessage,
     retryMessage,
+    renameConversation: renameConversationTitle,
     removeConversation,
     resumePendingJobs,
     clearError: () => dispatch({ type: AI_CHAT_ACTIONS.CLEAR_ERROR }),

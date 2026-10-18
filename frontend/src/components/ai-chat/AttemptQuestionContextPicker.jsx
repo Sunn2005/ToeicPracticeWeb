@@ -5,6 +5,7 @@ export default function AttemptQuestionContextPicker({
   attempts,
   getQuestionChoices,
   onCreate,
+  onSuggestedPrompt,
   creating,
   disabled = false,
 }) {
@@ -14,6 +15,12 @@ export default function AttemptQuestionContextPicker({
   const [questions, setQuestions] = useState([]);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
   const [error, setError] = useState("");
+  const suggestions = [
+    t("chatSuggestionPresentPerfect"),
+    t("chatSuggestionPart5"),
+    t("chatSuggestionArticles"),
+  ];
+  const completedAttempts = attempts.filter(({ status }) => status === "COMPLETED");
 
   useEffect(() => {
     if (!attemptId) return undefined;
@@ -32,17 +39,30 @@ export default function AttemptQuestionContextPicker({
   }, [attemptId, getQuestionChoices, t]);
 
   return (
-    <div className="flex flex-1 items-center justify-center overflow-y-auto px-5 py-8">
-      <div className="w-full max-w-md">
-        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-100 text-2xl" aria-hidden="true">🦫</span>
-        <h3 className="mt-4 text-lg font-bold text-slate-950">{t("chatNewConversation")}</h3>
-        <p className="mt-2 text-sm leading-6 text-slate-600">{t("chatContextDescription")}</p>
+    <div className="flex flex-1 justify-center overflow-y-auto px-5 py-7 min-[680px]:px-8 min-[680px]:py-9">
+      <div className="w-full max-w-4xl">
+        <h3 className="text-2xl font-bold text-slate-950 min-[680px]:text-3xl">{t("chatNewConversation")}</h3>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 min-[680px]:text-base">{t("chatContextDescription")}</p>
+
+        <div className="mt-5 flex flex-wrap gap-2" aria-label={t("chatSuggestionsLabel")}>
+          {suggestions.map((suggestion) => (
+            <button
+              key={suggestion}
+              type="button"
+              onClick={() => onSuggestedPrompt(suggestion)}
+              disabled={creating || disabled}
+              className="min-h-11 rounded-full border border-sky-200 bg-sky-50 px-4 text-sm font-medium text-sky-700 transition hover:border-sky-300 hover:bg-sky-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {suggestion}
+            </button>
+          ))}
+        </div>
 
         <button
           type="button"
           onClick={() => onCreate()}
           disabled={creating || disabled}
-          className="mt-5 w-full rounded-xl bg-sky-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-sky-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 disabled:cursor-wait disabled:bg-sky-300"
+          className="mt-5 min-h-12 w-full rounded-xl bg-sky-600 px-4 py-3 text-base font-bold text-white transition hover:bg-sky-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 disabled:cursor-wait disabled:bg-sky-300"
         >
           {t("chatStartGeneral")}
         </button>
@@ -54,7 +74,7 @@ export default function AttemptQuestionContextPicker({
         </div>
 
         <fieldset className="space-y-4">
-          <legend className="text-sm font-bold text-slate-800">{t("chatAskAboutQuestion")}</legend>
+          <legend className="text-lg font-bold text-slate-900">{t("chatAskAboutQuestion")}</legend>
           <div>
             <label htmlFor="capy-chat-attempt" className="mb-1.5 block text-sm font-semibold text-slate-700">{t("chatCompletedAttempt")}</label>
             <select
@@ -73,7 +93,13 @@ export default function AttemptQuestionContextPicker({
             >
               <option value="">{t("chatSelectAttempt")}</option>
               {attempts.map((attempt) => (
-                <option key={attempt.id} value={attempt.id}>{attempt.title}</option>
+                <option
+                  key={attempt.id}
+                  value={attempt.id}
+                  disabled={attempt.status !== "COMPLETED"}
+                >
+                  {attempt.title}{attempt.status !== "COMPLETED" ? ` — ${t("chatAttemptInProgressOption")}` : ""}
+                </option>
               ))}
             </select>
           </div>
@@ -86,20 +112,23 @@ export default function AttemptQuestionContextPicker({
               disabled={disabled || !attemptId || loadingQuestions}
               className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-800 outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-100 disabled:cursor-not-allowed disabled:bg-slate-100"
             >
-              <option value="">{loadingQuestions ? t("loading") : t("chatSelectQuestion")}</option>
+              <option value="">
+                {loadingQuestions ? t("loading") : attemptId ? t("chatSelectQuestion") : t("chatSelectAttemptFirst")}
+              </option>
               {questions.map((number) => <option key={number} value={number}>{t("question")} {number}</option>)}
             </select>
           </div>
           {error && <p role="alert" className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
-          {!attempts.length && <p className="rounded-xl bg-slate-50 px-3 py-2 text-sm leading-6 text-slate-500">{t("chatNoCompletedAttempts")}</p>}
+          {!completedAttempts.length && <p className="rounded-xl bg-slate-50 px-3 py-2 text-sm leading-6 text-slate-500">{t("chatNoCompletedAttempts")}</p>}
           <button
             type="button"
             onClick={() => onCreate({ attemptId, questionNumber: Number(questionNumber) })}
             disabled={creating || disabled || !attemptId || !questionNumber}
-            className="w-full rounded-xl border border-sky-300 px-4 py-3 text-sm font-bold text-sky-700 transition hover:bg-sky-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-400"
+            className="min-h-12 w-full rounded-xl bg-sky-600 px-4 py-3 text-base font-bold text-white transition hover:bg-sky-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
           >
             {t("chatStartWithQuestion")}
           </button>
+          <p className="text-center text-sm leading-6 text-slate-500">{t("chatQuestionSelectionHint")}</p>
         </fieldset>
       </div>
     </div>

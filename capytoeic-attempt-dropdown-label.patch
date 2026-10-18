@@ -1,0 +1,102 @@
+diff --git a/frontend/src/api/userLearning.js b/frontend/src/api/userLearning.js
+index 7aa2262..93dddf6 100644
+--- a/frontend/src/api/userLearning.js
++++ b/frontend/src/api/userLearning.js
+@@ -38,6 +38,13 @@ export async function getChatEligibleAttempts(options = {}) {
+     .map((attempt) => ({
+       id: attempt.id,
+       title: attempt.title || attempt.testTitle || getTestName(attempt.testId),
++      // Keep the fields the picker uses to tell same-title attempts apart
++      // (score, date, practice part). The backend already returns them.
++      score: attempt.score,
++      submittedAt: attempt.submittedAt,
++      type: attempt.type,
++      selectedPart: attempt.selectedPart,
++      selectedParts: attempt.selectedParts,
+     }));
+ }
+ 
+diff --git a/frontend/src/api/userLearningChatContext.test.js b/frontend/src/api/userLearningChatContext.test.js
+index 45aff03..9e8480f 100644
+--- a/frontend/src/api/userLearningChatContext.test.js
++++ b/frontend/src/api/userLearningChatContext.test.js
+@@ -26,16 +26,18 @@ function installResponse(response) {
+   return calls;
+ }
+ 
+-test("chat attempt choices derive only identifiers and titles from completed history", async () => {
++test("chat attempt choices keep the fields that tell same-title attempts apart", async () => {
+   const calls = installResponse(json([
+-    { id: "attempt-1", testId: "test-1", status: "COMPLETED", result: { totalScore: 800 } },
++    { id: "attempt-1", testId: "test-1", status: "COMPLETED", type: "FULL_TEST", score: 800, submittedAt: 1760313600000 },
+     { id: "attempt-2", testId: "test-2", status: "IN_PROGRESS" },
+-    { id: "attempt-3", testId: "test-3", status: "COMPLETED", title: "Custom title" },
++    { id: "attempt-3", testId: "test-3", status: "COMPLETED", title: "Custom title", type: "PRACTICE", selectedPart: 5, score: 620, submittedAt: 1760227200000 },
++    { id: "attempt-4", testId: "test-1", status: "COMPLETED", type: "FULL_TEST", score: 750, submittedAt: 1760400000000 },
+   ]));
+ 
+   assert.deepEqual(await getChatEligibleAttempts(), [
+-    { id: "attempt-1", title: "Test 1" },
+-    { id: "attempt-3", title: "Custom title" },
++    { id: "attempt-1", title: "Test 1", score: 800, submittedAt: 1760313600000, type: "FULL_TEST", selectedPart: undefined, selectedParts: undefined },
++    { id: "attempt-3", title: "Custom title", score: 620, submittedAt: 1760227200000, type: "PRACTICE", selectedPart: 5, selectedParts: undefined },
++    { id: "attempt-4", title: "Test 1", score: 750, submittedAt: 1760400000000, type: "FULL_TEST", selectedPart: undefined, selectedParts: undefined },
+   ]);
+   assert.equal(calls[0].url, `${API_BASE_URL}/api/users/me/attempts`);
+   assert.equal(calls[0].options.credentials, "include");
+diff --git a/frontend/src/components/ai-chat/AttemptQuestionContextPicker.jsx b/frontend/src/components/ai-chat/AttemptQuestionContextPicker.jsx
+index 6312f3e..66af7ba 100644
+--- a/frontend/src/components/ai-chat/AttemptQuestionContextPicker.jsx
++++ b/frontend/src/components/ai-chat/AttemptQuestionContextPicker.jsx
+@@ -1,6 +1,33 @@
+ import { useEffect, useState } from "react";
+ import { useLanguage } from "../../i18n/LanguageContext";
+ 
++// Build a dropdown label that tells same-title attempts apart:
++// "Test 1 · Part 5 · Điểm: 620 · 12/10/2026". Segments with missing data are omitted.
++function formatAttemptDate(value, language) {
++  const time = Number(value);
++  if (!Number.isFinite(time) || time <= 0) return "";
++  const locale = language === "vi" ? "vi-VN" : "en-US";
++  return new Intl.DateTimeFormat(locale, { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(time));
++}
++
++function practicePartLabel(attempt) {
++  if (attempt.type !== "PRACTICE") return "";
++  if (Number.isInteger(attempt.selectedPart)) return `Part ${attempt.selectedPart}`;
++  const parts = Array.isArray(attempt.selectedParts) ? attempt.selectedParts.filter(Number.isInteger) : [];
++  return parts.length ? `Part ${parts.join(", ")}` : "";
++}
++
++function attemptLabel(attempt, language, t) {
++  const segments = [attempt.title];
++  const part = practicePartLabel(attempt);
++  if (part) segments.push(part);
++  const score = Number(attempt.score);
++  if (Number.isFinite(score)) segments.push(`${t("score")}: ${score}`);
++  const date = formatAttemptDate(attempt.submittedAt, language);
++  if (date) segments.push(date);
++  return segments.join(" · ");
++}
++
+ export default function AttemptQuestionContextPicker({
+   attempts,
+   getQuestionChoices,
+@@ -8,7 +35,7 @@ export default function AttemptQuestionContextPicker({
+   creating,
+   disabled = false,
+ }) {
+-  const { t } = useLanguage();
++  const { t, language } = useLanguage();
+   const [attemptId, setAttemptId] = useState("");
+   const [questionNumber, setQuestionNumber] = useState("");
+   const [questions, setQuestions] = useState([]);
+@@ -73,7 +100,7 @@ export default function AttemptQuestionContextPicker({
+             >
+               <option value="">{t("chatSelectAttempt")}</option>
+               {attempts.map((attempt) => (
+-                <option key={attempt.id} value={attempt.id}>{attempt.title}</option>
++                <option key={attempt.id} value={attempt.id}>{attemptLabel(attempt, language, t)}</option>
+               ))}
+             </select>
+           </div>

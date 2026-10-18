@@ -48,6 +48,17 @@ export function deleteConversation(conversationId, options = {}) {
   );
 }
 
+export function renameConversation(conversationId, title, options = {}) {
+  return apiFetch(
+    `/api/ai/chat/conversations/${encodeURIComponent(conversationId)}`,
+    {
+      ...options,
+      method: "PATCH",
+      body: JSON.stringify({ title }),
+    },
+  );
+}
+
 export function getChatJob(jobId, options = {}) {
   return apiFetch(`/api/ai/chat/jobs/${encodeURIComponent(jobId)}`, options);
 }

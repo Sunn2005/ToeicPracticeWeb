@@ -160,8 +160,9 @@ class ChatAttemptContextServiceTests {
         ApiCodeException error = assertThrows(ApiCodeException.class,
                 () -> service.resolve("owner", "attempt", 101));
 
-        assertEquals(HttpStatus.CONFLICT, error.getStatus());
+        assertEquals(HttpStatus.FORBIDDEN, error.getStatus());
         assertEquals("ATTEMPT_NOT_COMPLETED", error.getCode());
+        assertEquals("Câu hỏi thuộc bài chưa hoàn thành", error.getMessage());
         verifyNoInteractions(tests);
         verify(attempts, never()).findAnswers(anyString());
     }

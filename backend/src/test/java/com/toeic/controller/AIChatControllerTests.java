@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -95,6 +96,7 @@ class AIChatControllerTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"content\":\"Explain this\",\"idempotencyKey\":\"key\"}"))
                 .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.conversation.id").value("conversation"))
                 .andExpect(jsonPath("$.userMessage.id").value("user-message"))
                 .andExpect(jsonPath("$.assistantMessage.status").value("PENDING"))
                 .andExpect(jsonPath("$.job.id").value("job"))
@@ -110,6 +112,23 @@ class AIChatControllerTests {
                 .andExpect(status().isNoContent());
 
         verify(service).deleteConversation("user", "conversation");
+    }
+
+    @Test
+    void renameConversationReturnsUpdatedResource() throws Exception {
+        AIChatConversation renamed = conversation("conversation");
+        renamed.setTitle("Mẹo Part 5");
+        when(service.renameConversation(eq("user"), eq("conversation"), any())).thenReturn(renamed);
+
+        mockMvc.perform(patch("/api/ai/chat/conversations/{conversationId}", "conversation")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\":\"Mẹo Part 5\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value("conversation"))
+                .andExpect(jsonPath("$.title").value("Mẹo Part 5"))
+                .andExpect(jsonPath("$.userId").doesNotExist());
+
+        verify(service).renameConversation(eq("user"), eq("conversation"), any());
     }
 
     @Test

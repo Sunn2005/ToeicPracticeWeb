@@ -68,6 +68,24 @@ class FirestoreAIChatDaoTests {
     }
 
     @Test
+    void renamePersistsForOwnerAndHidesForeignDeletedAndMissingResources() throws Exception {
+        create("chat", "learner", NOW);
+
+        var renamed = dao.renameConversation("learner", "chat", "Mẹo Part 5", NOW + 10);
+
+        assertEquals("Mẹo Part 5", renamed.getTitle());
+        assertEquals(NOW + 10, renamed.getUpdatedAt());
+        assertEquals("Mẹo Part 5", dao.findConversation("learner", "chat").orElseThrow().getTitle());
+        assertCode("NOT_FOUND", HttpStatus.NOT_FOUND,
+                () -> dao.renameConversation("other", "chat", "Không được", NOW + 11));
+        assertCode("NOT_FOUND", HttpStatus.NOT_FOUND,
+                () -> dao.renameConversation("learner", "missing", "Không có", NOW + 11));
+        dao.softDeleteConversation("learner", "chat", NOW + 12);
+        assertCode("NOT_FOUND", HttpStatus.NOT_FOUND,
+                () -> dao.renameConversation("learner", "chat", "Đã xoá", NOW + 13));
+    }
+
+    @Test
     void acceptancePersistsPairJobAndQuotaInSpecifiedCollections() throws Exception {
         create("chat", "learner", NOW - 1);
         var accepted = send("chat", "key", NOW);
@@ -91,6 +109,25 @@ class FirestoreAIChatDaoTests {
         assertEquals(NOW, accepted.conversation().getLastMessageAt());
         assertEquals(List.of(accepted.userMessage().getId(), accepted.assistantMessage().getId()),
                 dao.listMessages("learner", "chat", 20).stream().map(AIChatMessage::getId).toList());
+    }
+
+    @Test
+    void firstQuestionBecomesWhitespaceNormalizedBoundedConversationTitle() throws Exception {
+        var conversation = conversation("chat", "learner", NOW - 1);
+        conversation.setTitle("Hội thoại TOEIC mới");
+        dao.createConversation(conversation, 10);
+        String question = "  Vì sao   câu này dùng thì hiện tại hoàn thành khi có một mốc thời gian rất dài?  ";
+
+        var first = dao.acceptMessage("learner", "chat", question, "first", NOW, 30, 5);
+        String generatedTitle = first.conversation().getTitle();
+
+        assertTrue(generatedTitle.codePointCount(0, generatedTitle.length()) <= 60);
+        assertTrue(generatedTitle.endsWith("…"));
+        assertFalse(generatedTitle.contains("  "));
+
+        var second = dao.acceptMessage("learner", "chat", "Câu hỏi khác", "second", NOW + 60_000, 30, 5);
+        assertEquals(generatedTitle, second.conversation().getTitle());
+        assertEquals(generatedTitle, dao.findConversation("learner", "chat").orElseThrow().getTitle());
     }
 
     @Test
