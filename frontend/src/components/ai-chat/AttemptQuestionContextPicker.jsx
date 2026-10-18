@@ -1,6 +1,37 @@
 import { useEffect, useState } from "react";
 import { useLanguage } from "../../i18n/LanguageContext";
 
+function formatAttemptDate(value, language) {
+  const time = Number(value);
+  if (!Number.isFinite(time) || time <= 0) return "";
+  const locale = language === "vi" ? "vi-VN" : "en-US";
+  return new Intl.DateTimeFormat(locale, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(new Date(time));
+}
+
+function practicePartLabel(attempt) {
+  if (attempt.type !== "PRACTICE") return "";
+  if (Number.isInteger(attempt.selectedPart)) return `Part ${attempt.selectedPart}`;
+  const parts = Array.isArray(attempt.selectedParts)
+    ? attempt.selectedParts.filter(Number.isInteger)
+    : [];
+  return parts.length ? `Part ${parts.join(", ")}` : "";
+}
+
+function attemptLabel(attempt, language, t) {
+  const segments = [attempt.title];
+  const part = practicePartLabel(attempt);
+  if (part) segments.push(part);
+  const score = Number(attempt.score);
+  if (Number.isFinite(score)) segments.push(`${t("score")}: ${score}`);
+  const date = formatAttemptDate(attempt.submittedAt, language);
+  if (date) segments.push(date);
+  return segments.join(" · ");
+}
+
 export default function AttemptQuestionContextPicker({
   attempts,
   getQuestionChoices,
@@ -9,7 +40,7 @@ export default function AttemptQuestionContextPicker({
   creating,
   disabled = false,
 }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [attemptId, setAttemptId] = useState("");
   const [questionNumber, setQuestionNumber] = useState("");
   const [questions, setQuestions] = useState([]);
@@ -98,7 +129,7 @@ export default function AttemptQuestionContextPicker({
                   value={attempt.id}
                   disabled={attempt.status !== "COMPLETED"}
                 >
-                  {attempt.title}{attempt.status !== "COMPLETED" ? ` — ${t("chatAttemptInProgressOption")}` : ""}
+                  {attemptLabel(attempt, language, t)}{attempt.status !== "COMPLETED" ? ` — ${t("chatAttemptInProgressOption")}` : ""}
                 </option>
               ))}
             </select>

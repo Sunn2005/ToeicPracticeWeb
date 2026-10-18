@@ -26,18 +26,18 @@ function installResponse(response) {
   return calls;
 }
 
-test("chat attempt choices retain status for completed and disabled in-progress options", async () => {
+test("chat attempt choices retain status and fields that distinguish same-title attempts", async () => {
   const calls = installResponse(json([
-    { id: "attempt-1", testId: "test-1", status: "COMPLETED", result: { totalScore: 800 } },
+    { id: "attempt-1", testId: "test-1", status: "COMPLETED", type: "FULL_TEST", score: 800, submittedAt: 1760313600000 },
     { id: "attempt-2", testId: "test-2", status: "IN_PROGRESS" },
     { id: "attempt-3", testId: "test-3", status: "CANCELLED", title: "Ignored" },
-    { id: "attempt-4", testId: "test-3", status: "COMPLETED", title: "Custom title" },
+    { id: "attempt-4", testId: "test-3", status: "COMPLETED", title: "Custom title", type: "PRACTICE", selectedPart: 5, score: 620, submittedAt: 1760227200000 },
   ]));
 
   assert.deepEqual(await getChatEligibleAttempts(), [
-    { id: "attempt-1", title: "Test 1", status: "COMPLETED" },
-    { id: "attempt-2", title: "Test 2", status: "IN_PROGRESS" },
-    { id: "attempt-4", title: "Custom title", status: "COMPLETED" },
+    { id: "attempt-1", title: "Test 1", status: "COMPLETED", score: 800, submittedAt: 1760313600000, type: "FULL_TEST", selectedPart: undefined, selectedParts: undefined },
+    { id: "attempt-2", title: "Test 2", status: "IN_PROGRESS", score: undefined, submittedAt: undefined, type: undefined, selectedPart: undefined, selectedParts: undefined },
+    { id: "attempt-4", title: "Custom title", status: "COMPLETED", score: 620, submittedAt: 1760227200000, type: "PRACTICE", selectedPart: 5, selectedParts: undefined },
   ]);
   assert.equal(calls[0].url, `${API_BASE_URL}/api/users/me/attempts`);
   assert.equal(calls[0].options.credentials, "include");

@@ -39,6 +39,11 @@ export async function getChatEligibleAttempts(options = {}) {
       id: attempt.id,
       title: attempt.title || attempt.testTitle || getTestName(attempt.testId),
       status: attempt.status,
+      score: attempt.score,
+      submittedAt: attempt.submittedAt,
+      type: attempt.type,
+      selectedPart: attempt.selectedPart,
+      selectedParts: attempt.selectedParts,
     }));
 }
 
