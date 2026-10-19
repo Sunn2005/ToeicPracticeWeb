@@ -209,10 +209,11 @@ Member 4 sở hữu page/helper/API/test subscription nêu trên. Member 1 tích
 
 Các file review/AI trong mục 4 vẫn bị khóa, gồm `src/pages/FullTestReview.jsx`; việc hiển thị `PRO_REQUIRED` và giữ khả năng đọc kết quả sau expiry thuộc trưởng nhóm/người phụ trách AI. API client, auth infrastructure, backend và AI service không thuộc quyền sửa của Member 4.
 
-Capy AI Chat đã được triển khai cho `USER` Pro có entitlement `AI_CHAT`; entitlement này không đồng nghĩa dự án đã có checkout/thanh toán. Các điểm tích hợp chia owner như sau:
+Capy AI Chat đã được triển khai cho `USER` Pro có entitlement `AI_CHAT`; checkout PayOS chỉ tạo link và backend vẫn là nơi kích hoạt entitlement sau khi xác minh webhook. Các điểm tích hợp chia owner như sau:
 
 - Member 1 sở hữu việc mount/unmount chat theo route, role và entitlement trong `src/App.jsx`; phải giữ Capy ngoài route `/full-test/:attemptId/exam` và đóng chat khi logout/role/entitlement đã biết thay đổi.
-- Member 2 sở hữu helper lấy attempt/câu hỏi đủ điều kiện trong `src/api/userLearning.js` và thẻ giới thiệu Pro không tương tác tại dashboard; không gửi review content hoặc dữ liệu đáp án vào API tạo chat.
+- Member 2 sở hữu helper lấy attempt/câu hỏi đủ điều kiện trong `src/api/userLearning.js`; không gửi review content hoặc dữ liệu đáp án vào API tạo chat.
+- Owner AI/Pro sở hữu `src/api/payments.js`, `src/components/ProUpgradeCard.jsx` và `src/pages/user/PaymentResultPage.jsx`; frontend chỉ gửi `planCode` và không suy luận thanh toán thành công từ return URL.
 - Owner AI/Pro sở hữu cụm file Capy AI Chat tại mục 4, gồm launcher, dialog, state machine, polling và API wrapper.
 - `src/i18n/translations.js` cần đủ key tiếng Anh và tiếng Việt trong cùng thay đổi. CSS launcher được giới hạn trong selector riêng tại `src/index.css`; không sửa selector global.
 

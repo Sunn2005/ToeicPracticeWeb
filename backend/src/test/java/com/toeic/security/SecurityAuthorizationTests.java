@@ -3,12 +3,14 @@ package com.toeic.security;
 import com.toeic.config.SecurityConfig;
 import com.toeic.controller.ApiExceptionHandler;
 import com.toeic.controller.AdminSubscriptionController;
+import com.toeic.controller.PaymentController;
 import com.toeic.config.AuthProperties;
 import com.toeic.model.FirebaseIdentity;
 import com.toeic.model.User;
 import com.toeic.model.enums.UserRole;
 import com.toeic.service.CurrentUserService;
 import com.toeic.service.FirebaseSessionService;
+import com.toeic.service.PaymentService;
 import com.toeic.service.SubscriptionService;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
@@ -45,7 +47,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.mockito.Mockito.when;
 
-@WebMvcTest({SecurityAuthorizationTests.SecurityProbeController.class, AdminSubscriptionController.class})
+@WebMvcTest({
+        SecurityAuthorizationTests.SecurityProbeController.class,
+        AdminSubscriptionController.class,
+        PaymentController.class
+})
 @ImportAutoConfiguration({
         SecurityAutoConfiguration.class,
         SecurityFilterAutoConfiguration.class,
@@ -54,6 +60,7 @@ import static org.mockito.Mockito.when;
 @Import({
         SecurityAuthorizationTests.SecurityProbeController.class,
         AdminSubscriptionController.class,
+        PaymentController.class,
         ApiExceptionHandler.class,
         SecurityConfig.class,
         AuthProperties.class,
@@ -74,6 +81,9 @@ class SecurityAuthorizationTests {
 
     @MockitoBean
     private SubscriptionService subscriptionService;
+
+    @MockitoBean
+    private PaymentService paymentService;
 
     @Test
     void productionDomainCanCompleteCorsPreflight() throws Exception {
@@ -121,6 +131,45 @@ class SecurityAuthorizationTests {
         mockMvc.perform(get("/api/ai/chat/conversations")
                         .with(authentication(authenticationFor(UserRole.USER))))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void paymentCreationRequiresAuthenticationAndCsrfButWebhookDoesNot() throws Exception {
+        when(paymentService.availablePlans()).thenReturn(List.of(
+                new PaymentService.PlanOption("PRO_30", 99_000L, 30, false)
+        ));
+        when(paymentService.createProPayment("user-1", "PRO_30"))
+                .thenReturn(new PaymentService.CreatePaymentResult("https://payos.test/checkout/1", 1L));
+        when(paymentService.handleWebhook(org.mockito.ArgumentMatchers.anyMap()))
+                .thenReturn(new PaymentService.WebhookResult(true, "activated"));
+
+        mockMvc.perform(get("/api/payments/pro/plans"))
+                .andExpect(status().isUnauthorized());
+
+        mockMvc.perform(get("/api/payments/pro/plans")
+                        .with(authentication(authenticationFor(UserRole.USER))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].planCode").value("PRO_30"));
+
+        mockMvc.perform(post("/api/payments/pro")
+                        .with(authentication(authenticationFor(UserRole.USER)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"planCode\":\"PRO_30\"}"))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(post("/api/payments/pro")
+                        .with(csrf())
+                        .with(authentication(authenticationFor(UserRole.USER)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"planCode\":\"PRO_30\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.orderCode").value(1L));
+
+        mockMvc.perform(post("/api/payments/webhook")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"data\":{},\"signature\":\"signed\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.handled").value(true));
     }
 
     @Test

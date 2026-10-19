@@ -272,7 +272,17 @@ Firestore lưu tại `subscriptions/{uid}`: `userId`, `planCode`, `status`, `ent
 
 Server tính `effective` bằng `status=ACTIVE && startsAt <= serverNow && serverNow < expiresAt`; thiếu thời điểm làm subscription không có hiệu lực. Quyền chỉ được cấp khi subscription có hiệu lực và danh sách `entitlements` chứa quyền cần thiết. Thời gian hết hạn tự nó không chuẩn hóa status đã lưu; subscription có thể vẫn lưu `ACTIVE` nhưng `effective=false`, còn `EXPIRED` và `REVOKED` luôn không có hiệu lực. Role vẫn lấy từ `users/{uid}.role`, độc lập với Pro.
 
-`AI_CHAT` cấp quyền tạo/xóa hội thoại và gửi tin nhắn qua API Capy Chat ở mục 7A. Lịch sử đã tạo vẫn đọc được sau khi Pro hết hạn hoặc bị thu hồi. Thanh toán chưa được triển khai; admin đang quản lý subscription thủ công.
+`AI_CHAT` cấp quyền tạo/xóa hội thoại và gửi tin nhắn qua API Capy Chat ở mục 7A. Lịch sử đã tạo vẫn đọc được sau khi Pro hết hạn hoặc bị thu hồi. Subscription có thể được quản lý thủ công bởi admin hoặc kích hoạt qua thanh toán PayOS ở mục 3.3.
+
+### 3.3 Thanh toán Pro qua PayOS
+
+`GET /api/payments/pro/plans` yêu cầu đăng nhập và trả danh sách `{ planCode, amount, durationDays, sandboxOnly }` do server quản lý. `POST /api/payments/pro` yêu cầu session và CSRF hợp lệ, body chỉ nhận `{ "planCode": "PRO_30" }`; client không gửi giá hoặc thời hạn. Response thành công gồm `checkoutUrl` và `orderCode`. Pending order cùng user/gói trong 15 phút được tái sử dụng để tránh tạo link trùng.
+
+`POST /api/payments/webhook` là endpoint public duy nhất trong nhóm này và được miễn CSRF vì PayOS không có browser session. Backend bắt buộc xác minh HMAC-SHA256 bằng `PAYOS_CHECKSUM_KEY`, đối chiếu `orderCode`, số tiền và trạng thái order trước khi kích hoạt Pro. Browser redirect tới `/payment/success` chỉ dùng để hiển thị trạng thái chờ xác nhận; không bao giờ tự kích hoạt subscription.
+
+Firestore lưu order tại `paymentOrders/{orderCode}` với các field: `orderCode`, `userId`, `planCode`, `amount`, `durationDays`, `status`, `paymentLinkId`, `checkoutUrl`, `proExpiresAt`, `createdAt`, `paidAt`, `updatedAt`. `status` là `PENDING`, `PAID` hoặc `CANCELLED`. Webhook được xử lý idempotent; ngày Pro được cộng từ `max(serverNow, expiresAt hiện tại)` và expiry tuyệt đối được lưu trên order để retry không cộng ngày lần nữa hoặc hoàn tác một lần thu hồi admin diễn ra sau khi order đã được áp dụng.
+
+Credentials và URL PayOS chỉ lấy từ biến môi trường `PAYOS_CLIENT_ID`, `PAYOS_API_KEY`, `PAYOS_CHECKSUM_KEY`, `PAYOS_BASE_URL`, `PAYOS_RETURN_URL`, `PAYOS_CANCEL_URL`; không đặt trong frontend hoặc commit vào repository. `PAYOS_SANDBOX=true` mới cho phép gói test một ngày.
 
 ## 4. API catalog đề thi công khai
 
@@ -1176,6 +1186,9 @@ Security và application errors đều trả JSON. Frontend nên xử lý theo H
 | `429` | `CHAT_RATE_LIMITED`, `CHAT_DAILY_LIMIT_REACHED` | Vượt quota chat burst/ngày. |
 | `503` | `AI_UNAVAILABLE` | RabbitMQ/Gemini chat tạm thời không sẵn sàng. |
 | `400` | `SUBSCRIPTION_EXPIRY_INVALID` | Expiry subscription không sau thời gian server. |
+| `400` | `PAYMENT_PLAN_INVALID`, `PAYMENT_WEBHOOK_INVALID`, `PAYMENT_WEBHOOK_SIGNATURE_INVALID` | Gói thanh toán hoặc webhook PayOS không hợp lệ. |
+| `403` | `PAYMENT_PLAN_UNAVAILABLE` | Gói chỉ dành cho sandbox nhưng server đang chạy production mode. |
+| `502` | `PAYOS_UNAVAILABLE` | PayOS không tạo được link thanh toán. |
 | `404` | `NOT_FOUND` | Resource không tồn tại hoặc bị che bởi rule ownership/publication. |
 | `409` | `CONFLICT` | Trạng thái workflow/section không cho phép thao tác. |
 | `503` | `SERVICE_UNAVAILABLE` | Storage, RabbitMQ hoặc AI service chưa sẵn sàng. |

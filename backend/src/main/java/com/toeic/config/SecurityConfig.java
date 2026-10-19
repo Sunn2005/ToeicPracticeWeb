@@ -37,7 +37,13 @@ public class SecurityConfig {
             RestAccessDeniedHandler accessDeniedHandler
     ) throws Exception {
         return http
-                .csrf(csrf -> csrf.csrfTokenRepository(csrfTokenRepository()))
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(csrfTokenRepository())
+                        // PayOS posts the webhook without a CSRF token; authenticity
+                        // comes from the PayOS signature verified in PaymentService.
+                        .ignoringRequestMatchers(request ->
+                                HttpMethod.POST.matches(request.getMethod())
+                                        && "/api/payments/webhook".equals(request.getRequestURI())))
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
@@ -60,6 +66,11 @@ public class SecurityConfig {
                         .permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/api/health")
+                        .permitAll()
+
+                        // PayOS webhook is public: authenticity comes from the PayOS
+                        // signature, verified inside PaymentService — never from a session.
+                        .requestMatchers(HttpMethod.POST, "/api/payments/webhook")
                         .permitAll()
 
                         // Chỉ các API đọc catalog đề thi là public.
@@ -88,7 +99,8 @@ public class SecurityConfig {
                                 "/api/users/me/**",
                                 "/api/attempts/**",
                                 "/api/ai/jobs/**",
-                                "/api/ai/chat/**"
+                                "/api/ai/chat/**",
+                                "/api/payments/**"
                         ).authenticated()
 
                         // Tạo attempt cũng cần đăng nhập

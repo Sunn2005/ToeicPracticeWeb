@@ -1,0 +1,1404 @@
+diff --git a/backend/src/main/java/com/toeic/config/PayOSProperties.java b/backend/src/main/java/com/toeic/config/PayOSProperties.java
+new file mode 100644
+index 0000000..7b7aee3
+--- /dev/null
++++ b/backend/src/main/java/com/toeic/config/PayOSProperties.java
+@@ -0,0 +1,76 @@
++package com.toeic.config;
++
++import org.springframework.boot.context.properties.ConfigurationProperties;
++import org.springframework.stereotype.Component;
++
++/**
++ * PayOS credentials come from environment variables (see application.properties).
++ * Never commit real keys. The webhook URL itself is registered in the PayOS dashboard.
++ */
++@Component
++@ConfigurationProperties(prefix = "payos")
++public class PayOSProperties {
++    private String clientId = "";
++    private String apiKey = "";
++    private String checksumKey = "";
++    private String baseUrl = "https://api-merchant.payos.vn";
++    private String returnUrl = "http://localhost:5173/payment/success";
++    private String cancelUrl = "http://localhost:5173/payment/cancel";
++    private boolean sandbox = false;
++
++    public String getClientId() {
++        return clientId;
++    }
++
++    public void setClientId(String clientId) {
++        this.clientId = clientId;
++    }
++
++    public String getApiKey() {
++        return apiKey;
++    }
++
++    public void setApiKey(String apiKey) {
++        this.apiKey = apiKey;
++    }
++
++    public String getChecksumKey() {
++        return checksumKey;
++    }
++
++    public void setChecksumKey(String checksumKey) {
++        this.checksumKey = checksumKey;
++    }
++
++    public String getBaseUrl() {
++        return baseUrl;
++    }
++
++    public void setBaseUrl(String baseUrl) {
++        this.baseUrl = baseUrl;
++    }
++
++    public String getReturnUrl() {
++        return returnUrl;
++    }
++
++    public void setReturnUrl(String returnUrl) {
++        this.returnUrl = returnUrl;
++    }
++
++    public String getCancelUrl() {
++        return cancelUrl;
++    }
++
++    public void setCancelUrl(String cancelUrl) {
++        this.cancelUrl = cancelUrl;
++    }
++
++    public boolean isSandbox() {
++        return sandbox;
++    }
++
++    public void setSandbox(boolean sandbox) {
++        this.sandbox = sandbox;
++    }
++}
+diff --git a/backend/src/main/java/com/toeic/config/SecurityConfig.java b/backend/src/main/java/com/toeic/config/SecurityConfig.java
+index 5b889eb..05fc2ab 100644
+--- a/backend/src/main/java/com/toeic/config/SecurityConfig.java
++++ b/backend/src/main/java/com/toeic/config/SecurityConfig.java
+@@ -37,7 +37,11 @@ public class SecurityConfig {
+             RestAccessDeniedHandler accessDeniedHandler
+     ) throws Exception {
+         return http
+-                .csrf(csrf -> csrf.csrfTokenRepository(csrfTokenRepository()))
++                .csrf(csrf -> csrf
++                        .csrfTokenRepository(csrfTokenRepository())
++                        // PayOS posts the webhook without a CSRF token; authenticity
++                        // comes from the PayOS signature verified in PaymentService.
++                        .ignoringRequestMatchers(HttpMethod.POST, "/api/payments/webhook"))
+                 .cors(Customizer.withDefaults())
+                 .sessionManagement(session ->
+                         session.sessionCreationPolicy(
+@@ -62,6 +66,11 @@ public class SecurityConfig {
+                         .requestMatchers(HttpMethod.GET, "/api/health")
+                         .permitAll()
+ 
++                        // PayOS webhook is public: authenticity comes from the PayOS
++                        // signature, verified inside PaymentService — never from a session.
++                        .requestMatchers(HttpMethod.POST, "/api/payments/webhook")
++                        .permitAll()
++
+                         // Chỉ các API đọc catalog đề thi là public.
+                         .requestMatchers(
+                                 HttpMethod.GET,
+@@ -88,7 +97,8 @@ public class SecurityConfig {
+                                 "/api/users/me/**",
+                                 "/api/attempts/**",
+                                 "/api/ai/jobs/**",
+-                                "/api/ai/chat/**"
++                                "/api/ai/chat/**",
++                                "/api/payments/**"
+                         ).authenticated()
+ 
+                         // Tạo attempt cũng cần đăng nhập
+diff --git a/backend/src/main/java/com/toeic/controller/PaymentController.java b/backend/src/main/java/com/toeic/controller/PaymentController.java
+new file mode 100644
+index 0000000..a25007b
+--- /dev/null
++++ b/backend/src/main/java/com/toeic/controller/PaymentController.java
+@@ -0,0 +1,48 @@
++package com.toeic.controller;
++
++import com.toeic.security.ToeicUserPrincipal;
++import com.toeic.service.PaymentService;
++import org.springframework.security.core.annotation.AuthenticationPrincipal;
++import org.springframework.web.bind.annotation.GetMapping;
++import org.springframework.web.bind.annotation.PostMapping;
++import org.springframework.web.bind.annotation.RequestBody;
++import org.springframework.web.bind.annotation.RequestMapping;
++import org.springframework.web.bind.annotation.RestController;
++
++import java.util.List;
++import java.util.Map;
++
++@RestController
++@RequestMapping("/api/payments")
++public class PaymentController {
++    private final PaymentService paymentService;
++
++    public PaymentController(PaymentService paymentService) {
++        this.paymentService = paymentService;
++    }
++
++    @GetMapping("/pro/plans")
++    public List<PaymentService.PlanOption> plans(@AuthenticationPrincipal ToeicUserPrincipal principal) {
++        return paymentService.availablePlans();
++    }
++
++    @PostMapping("/pro")
++    public PaymentService.CreatePaymentResult create(
++            @AuthenticationPrincipal ToeicUserPrincipal principal,
++            @RequestBody CreatePaymentRequest request
++    ) throws Exception {
++        return paymentService.createProPayment(principal.uid(), request.planCode());
++    }
++
++    /**
++     * PayOS webhook. Public (no session auth) — authenticity comes from the
++     * PayOS signature, verified inside {@link PaymentService}. Only the webhook
++     * activates Pro; the browser redirect to returnUrl is display-only.
++     */
++    @PostMapping("/webhook")
++    public PaymentService.WebhookResult webhook(@RequestBody Map<String, Object> payload) throws Exception {
++        return paymentService.handleWebhook(payload);
++    }
++
++    public record CreatePaymentRequest(String planCode) { }
++}
+diff --git a/backend/src/main/java/com/toeic/dao/PaymentOrderDao.java b/backend/src/main/java/com/toeic/dao/PaymentOrderDao.java
+new file mode 100644
+index 0000000..b711bd2
+--- /dev/null
++++ b/backend/src/main/java/com/toeic/dao/PaymentOrderDao.java
+@@ -0,0 +1,22 @@
++package com.toeic.dao;
++
++import com.toeic.model.PaymentOrder;
++
++import java.util.Optional;
++import java.util.function.Function;
++
++public interface PaymentOrderDao {
++    void save(PaymentOrder order) throws Exception;
++
++    Optional<PaymentOrder> findByOrderCode(long orderCode) throws Exception;
++
++    Optional<PaymentOrder> findLatestPending(String userId, String planCode) throws Exception;
++
++    /**
++     * Same replayable-mutation contract as {@link SubscriptionDao#updateAtomically}.
++     * The current order may be null. Return changed=false for an idempotent no-op.
++     */
++    PaymentOrder updateAtomically(long orderCode, Function<PaymentOrder, Mutation> mutation) throws Exception;
++
++    record Mutation(PaymentOrder order, boolean changed) { }
++}
+diff --git a/backend/src/main/java/com/toeic/dao/firestore/FirestorePaymentOrderDao.java b/backend/src/main/java/com/toeic/dao/firestore/FirestorePaymentOrderDao.java
+new file mode 100644
+index 0000000..e9575fc
+--- /dev/null
++++ b/backend/src/main/java/com/toeic/dao/firestore/FirestorePaymentOrderDao.java
+@@ -0,0 +1,76 @@
++package com.toeic.dao.firestore;
++
++import com.google.cloud.firestore.DocumentSnapshot;
++import com.google.cloud.firestore.Firestore;
++import com.google.cloud.firestore.Query;
++import com.toeic.dao.PaymentOrderDao;
++import com.toeic.model.PaymentOrder;
++import org.springframework.stereotype.Repository;
++
++import java.util.Optional;
++import java.util.concurrent.ExecutionException;
++import java.util.function.Function;
++
++@Repository
++public class FirestorePaymentOrderDao implements PaymentOrderDao {
++    private final Firestore firestore;
++
++    public FirestorePaymentOrderDao(Firestore firestore) {
++        this.firestore = firestore;
++    }
++
++    @Override
++    public void save(PaymentOrder order) throws Exception {
++        firestore.collection("paymentOrders").document(documentId(order.getOrderCode())).set(order).get();
++    }
++
++    @Override
++    public Optional<PaymentOrder> findByOrderCode(long orderCode) throws Exception {
++        DocumentSnapshot snapshot = firestore.collection("paymentOrders")
++                .document(documentId(orderCode)).get().get();
++        return Optional.ofNullable(orderFrom(snapshot));
++    }
++
++    @Override
++    public Optional<PaymentOrder> findLatestPending(String userId, String planCode) throws Exception {
++        var snapshots = firestore.collection("paymentOrders")
++                .whereEqualTo("userId", userId)
++                .whereEqualTo("planCode", planCode)
++                .whereEqualTo("status", "PENDING")
++                .orderBy("createdAt", Query.Direction.DESCENDING)
++                .limit(1)
++                .get().get().getDocuments();
++        return snapshots.isEmpty() ? Optional.empty() : Optional.ofNullable(orderFrom(snapshots.get(0)));
++    }
++
++    @Override
++    public PaymentOrder updateAtomically(long orderCode, Function<PaymentOrder, Mutation> mutation) throws Exception {
++        var document = firestore.collection("paymentOrders").document(documentId(orderCode));
++        try {
++            return firestore.runTransaction(transaction -> {
++                PaymentOrder current = orderFrom(transaction.get(document).get());
++                Mutation result = mutation.apply(current);
++                if (result.changed()) {
++                    transaction.set(document, result.order());
++                }
++                return result.order();
++            }).get();
++        } catch (ExecutionException exception) {
++            if (exception.getCause() instanceof RuntimeException cause) {
++                throw cause;
++            }
++            throw exception;
++        }
++    }
++
++    private PaymentOrder orderFrom(DocumentSnapshot snapshot) {
++        if (snapshot == null || !snapshot.exists()) {
++            return null;
++        }
++        return snapshot.toObject(PaymentOrder.class);
++    }
++
++    private static String documentId(long orderCode) {
++        return String.valueOf(orderCode);
++    }
++}
+diff --git a/backend/src/main/java/com/toeic/model/PaymentOrder.java b/backend/src/main/java/com/toeic/model/PaymentOrder.java
+new file mode 100644
+index 0000000..42ed5a8
+--- /dev/null
++++ b/backend/src/main/java/com/toeic/model/PaymentOrder.java
+@@ -0,0 +1,27 @@
++package com.toeic.model;
++
++import com.toeic.model.enums.PaymentOrderStatus;
++import lombok.Data;
++import lombok.NoArgsConstructor;
++
++@Data
++@NoArgsConstructor
++public class PaymentOrder {
++    /** PayOS orderCode. Also the Firestore document id. Must be unique per order. */
++    private long orderCode;
++    private String userId;
++    private String planCode;
++    private long amount;
++    private int durationDays;
++    private PaymentOrderStatus status;
++    private String paymentLinkId;
++    private String checkoutUrl;
++    /**
++     * Absolute Pro expiry computed when the order flips to PAID. Stored so a retried
++     * webhook reuses the exact same expiry instead of recomputing (and extending) it.
++     */
++    private Long proExpiresAt;
++    private long createdAt;
++    private Long paidAt;
++    private long updatedAt;
++}
+diff --git a/backend/src/main/java/com/toeic/model/ProPlan.java b/backend/src/main/java/com/toeic/model/ProPlan.java
+new file mode 100644
+index 0000000..3e95720
+--- /dev/null
++++ b/backend/src/main/java/com/toeic/model/ProPlan.java
+@@ -0,0 +1,52 @@
++package com.toeic.model;
++
++import java.util.Arrays;
++import java.util.Optional;
++
++/**
++ * Pro plans sold through PayOS. Price and duration are fixed server-side;
++ * the client only ever sends a planCode, never an amount.
++ */
++public enum ProPlan {
++    PRO_30("PRO_30", 99_000L, 30, false, "CapyTOEIC Pro 30 days"),
++    /** Cheap 1-day plan for sandbox testing. Never sold when sandbox mode is off. */
++    PRO_1DAY_TEST("PRO_1DAY_TEST", 10_000L, 1, true, "CapyTOEIC Pro 1 day");
++
++    private final String code;
++    private final long amount;
++    private final int durationDays;
++    private final boolean sandboxOnly;
++    private final String payosDescription;
++
++    ProPlan(String code, long amount, int durationDays, boolean sandboxOnly, String payosDescription) {
++        this.code = code;
++        this.amount = amount;
++        this.durationDays = durationDays;
++        this.sandboxOnly = sandboxOnly;
++        this.payosDescription = payosDescription;
++    }
++
++    public String code() {
++        return code;
++    }
++
++    public long amount() {
++        return amount;
++    }
++
++    public int durationDays() {
++        return durationDays;
++    }
++
++    public boolean sandboxOnly() {
++        return sandboxOnly;
++    }
++
++    public String payosDescription() {
++        return payosDescription;
++    }
++
++    public static Optional<ProPlan> fromCode(String code) {
++        return Arrays.stream(values()).filter(plan -> plan.code.equals(code)).findFirst();
++    }
++}
+diff --git a/backend/src/main/java/com/toeic/model/enums/PaymentOrderStatus.java b/backend/src/main/java/com/toeic/model/enums/PaymentOrderStatus.java
+new file mode 100644
+index 0000000..9728776
+--- /dev/null
++++ b/backend/src/main/java/com/toeic/model/enums/PaymentOrderStatus.java
+@@ -0,0 +1,7 @@
++package com.toeic.model.enums;
++
++public enum PaymentOrderStatus {
++    PENDING,
++    PAID,
++    CANCELLED
++}
+diff --git a/backend/src/main/java/com/toeic/service/PayOSClient.java b/backend/src/main/java/com/toeic/service/PayOSClient.java
+new file mode 100644
+index 0000000..bd0544c
+--- /dev/null
++++ b/backend/src/main/java/com/toeic/service/PayOSClient.java
+@@ -0,0 +1,126 @@
++package com.toeic.service;
++
++import com.fasterxml.jackson.databind.JsonNode;
++import com.fasterxml.jackson.databind.ObjectMapper;
++import com.toeic.config.PayOSProperties;
++import com.toeic.controller.ApiCodeException;
++import org.springframework.http.HttpStatus;
++import org.springframework.stereotype.Service;
++
++import javax.crypto.Mac;
++import javax.crypto.spec.SecretKeySpec;
++import java.net.URI;
++import java.net.http.HttpClient;
++import java.net.http.HttpRequest;
++import java.net.http.HttpResponse;
++import java.nio.charset.StandardCharsets;
++import java.security.MessageDigest;
++import java.time.Duration;
++import java.util.HexFormat;
++import java.util.Map;
++import java.util.TreeMap;
++
++/**
++ * Minimal PayOS client (no official Java SDK): creates payment links and verifies
++ * webhook signatures. Signatures follow PayOS's documented scheme: sort fields
++ * alphabetically, join as {@code key=value} with {@code &}, HMAC-SHA256 hex
++ * with the checksum key.
++ */
++@Service
++public class PayOSClient {
++    private static final Duration TIMEOUT = Duration.ofSeconds(10);
++
++    private final PayOSProperties properties;
++    private final ObjectMapper objectMapper;
++    private final HttpClient httpClient;
++
++    public PayOSClient(PayOSProperties properties, ObjectMapper objectMapper) {
++        this(properties, objectMapper, HttpClient.newBuilder().connectTimeout(TIMEOUT).build());
++    }
++
++    PayOSClient(PayOSProperties properties, ObjectMapper objectMapper, HttpClient httpClient) {
++        this.properties = properties;
++        this.objectMapper = objectMapper;
++        this.httpClient = httpClient;
++    }
++
++    public record PaymentLink(String checkoutUrl, String paymentLinkId) { }
++
++    public PaymentLink createPaymentLink(long orderCode, long amount, String description) throws Exception {
++        Map<String, Object> body = new TreeMap<>();
++        body.put("orderCode", orderCode);
++        body.put("amount", amount);
++        body.put("description", description);
++        body.put("returnUrl", properties.getReturnUrl());
++        body.put("cancelUrl", properties.getCancelUrl());
++        body.put("signature", sign(body));
++
++        HttpRequest request = HttpRequest.newBuilder()
++                .uri(URI.create(properties.getBaseUrl() + "/v2/payment-requests"))
++                .timeout(TIMEOUT)
++                .header("Content-Type", "application/json")
++                .header("x-client-id", properties.getClientId())
++                .header("x-api-key", properties.getApiKey())
++                .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(body), StandardCharsets.UTF_8))
++                .build();
++        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
++        JsonNode root = objectMapper.readTree(response.body());
++        if (!"00".equals(root.path("code").asText())) {
++            throw new ApiCodeException(HttpStatus.BAD_GATEWAY, "PAYOS_UNAVAILABLE",
++                    "PayOS could not create a payment link: " + root.path("desc").asText("unknown error"));
++        }
++        JsonNode data = root.path("data");
++        return new PaymentLink(data.path("checkoutUrl").asText(), data.path("paymentLinkId").asText());
++    }
++
++    /**
++     * Verifies a webhook's {@code signature} over its {@code data} object.
++     * Uses a constant-time comparison so a wrong signature leaks nothing via timing.
++     */
++    public boolean verifyWebhookSignature(Map<String, Object> data, String signature) {
++        if (data == null || signature == null) {
++            return false;
++        }
++        String expected = sign(data);
++        return MessageDigest.isEqual(
++                expected.getBytes(StandardCharsets.UTF_8),
++                signature.getBytes(StandardCharsets.UTF_8));
++    }
++
++    /** Canonical string: keys sorted alphabetically, {@code key=value} joined by {@code &}. */
++    static String canonicalString(Map<String, Object> fields) {
++        var sorted = new TreeMap<String, Object>(fields);
++        var joined = new StringBuilder();
++        for (var entry : sorted.entrySet()) {
++            if (!joined.isEmpty()) {
++                joined.append('&');
++            }
++            joined.append(entry.getKey()).append('=').append(stringValue(entry.getValue()));
++        }
++        return joined.toString();
++    }
++
++    private static String stringValue(Object value) {
++        if (value == null) {
++            return "";
++        }
++        if (value instanceof Number number) {
++            // PayOS signs amounts as plain integers, never "99000.0".
++            return number instanceof Double || number instanceof Float
++                    ? String.valueOf(number.longValue())
++                    : String.valueOf(number);
++        }
++        return String.valueOf(value);
++    }
++
++    String sign(Map<String, Object> fields) {
++        try {
++            Mac mac = Mac.getInstance("HmacSHA256");
++            mac.init(new SecretKeySpec(properties.getChecksumKey().getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
++            byte[] digest = mac.doFinal(canonicalString(fields).getBytes(StandardCharsets.UTF_8));
++            return HexFormat.of().formatHex(digest);
++        } catch (Exception exception) {
++            throw new IllegalStateException("Failed to sign PayOS payload", exception);
++        }
++    }
++}
+diff --git a/backend/src/main/java/com/toeic/service/PaymentService.java b/backend/src/main/java/com/toeic/service/PaymentService.java
+new file mode 100644
+index 0000000..da0a42f
+--- /dev/null
++++ b/backend/src/main/java/com/toeic/service/PaymentService.java
+@@ -0,0 +1,228 @@
++package com.toeic.service;
++
++import com.toeic.config.PayOSProperties;
++import com.toeic.controller.ApiCodeException;
++import com.toeic.dao.PaymentOrderDao;
++import com.toeic.model.PaymentOrder;
++import com.toeic.model.ProPlan;
++import com.toeic.model.enums.PaymentOrderStatus;
++import com.toeic.model.enums.SubscriptionStatus;
++import org.slf4j.Logger;
++import org.slf4j.LoggerFactory;
++import org.springframework.http.HttpStatus;
++import org.springframework.stereotype.Service;
++
++import java.time.Clock;
++import java.util.List;
++import java.util.Map;
++import java.util.concurrent.ThreadLocalRandom;
++
++/**
++ * Sells Pro through PayOS. Only the webhook activates Pro: the browser redirect
++ * (returnUrl) is display-only and never trusted. Webhook handling is idempotent:
++ * PayOS may deliver the same event more than once, and a retry after a crash
++ * must neither double-charge days nor lose the activation.
++ */
++@Service
++public class PaymentService {
++    private static final Logger log = LoggerFactory.getLogger(PaymentService.class);
++    private static final long PENDING_REUSE_MILLIS = 15 * 60 * 1000;
++    private static final long MILLIS_PER_DAY = 24L * 60 * 60 * 1000;
++    /** Actor recorded on subscriptions activated by a paid order. */
++    private static final String PAYOS_ACTOR = "PAYOS";
++
++    private final PaymentOrderDao paymentOrderDao;
++    private final PayOSClient payosClient;
++    private final SubscriptionService subscriptionService;
++    private final PayOSProperties properties;
++    private final Clock clock;
++
++    public PaymentService(PaymentOrderDao paymentOrderDao, PayOSClient payosClient,
++                          SubscriptionService subscriptionService, PayOSProperties properties) {
++        this(paymentOrderDao, payosClient, subscriptionService, properties, Clock.systemUTC());
++    }
++
++    PaymentService(PaymentOrderDao paymentOrderDao, PayOSClient payosClient,
++                   SubscriptionService subscriptionService, PayOSProperties properties, Clock clock) {
++        this.paymentOrderDao = paymentOrderDao;
++        this.payosClient = payosClient;
++        this.subscriptionService = subscriptionService;
++        this.properties = properties;
++        this.clock = clock;
++    }
++
++    public record CreatePaymentResult(String checkoutUrl, long orderCode) { }
++
++    public record PlanOption(String planCode, long amount, int durationDays, boolean sandboxOnly) { }
++
++    public List<PlanOption> availablePlans() {
++        return List.of(ProPlan.values()).stream()
++                .filter(plan -> !plan.sandboxOnly() || properties.isSandbox())
++                .map(plan -> new PlanOption(plan.code(), plan.amount(), plan.durationDays(), plan.sandboxOnly()))
++                .toList();
++    }
++
++    public CreatePaymentResult createProPayment(String userId, String planCode) throws Exception {
++        ProPlan plan = ProPlan.fromCode(planCode)
++                .orElseThrow(() -> new ApiCodeException(HttpStatus.BAD_REQUEST, "PAYMENT_PLAN_INVALID",
++                        "Unknown Pro plan: " + planCode));
++        if (plan.sandboxOnly() && !properties.isSandbox()) {
++            throw new ApiCodeException(HttpStatus.FORBIDDEN, "PAYMENT_PLAN_UNAVAILABLE",
++                    "This plan is only available in sandbox mode");
++        }
++        long now = clock.millis();
++
++        // Reuse a fresh pending order instead of spamming PayOS with duplicate links.
++        var pending = paymentOrderDao.findLatestPending(userId, plan.code());
++        if (pending.isPresent() && now - pending.get().getCreatedAt() < PENDING_REUSE_MILLIS
++                && pending.get().getCheckoutUrl() != null) {
++            return new CreatePaymentResult(pending.get().getCheckoutUrl(), pending.get().getOrderCode());
++        }
++
++        PaymentOrder order = new PaymentOrder();
++        order.setOrderCode(newOrderCode());
++        order.setUserId(userId);
++        order.setPlanCode(plan.code());
++        order.setAmount(plan.amount());
++        order.setDurationDays(plan.durationDays());
++        order.setStatus(PaymentOrderStatus.PENDING);
++        order.setCreatedAt(now);
++        order.setUpdatedAt(now);
++        paymentOrderDao.save(order);
++        try {
++            PayOSClient.PaymentLink link = payosClient.createPaymentLink(
++                    order.getOrderCode(), plan.amount(), plan.payosDescription());
++            order.setPaymentLinkId(link.paymentLinkId());
++            order.setCheckoutUrl(link.checkoutUrl());
++            order.setUpdatedAt(clock.millis());
++            paymentOrderDao.save(order);
++            return new CreatePaymentResult(link.checkoutUrl(), order.getOrderCode());
++        } catch (Exception exception) {
++            cancelQuietly(order);
++            throw new ApiCodeException(HttpStatus.BAD_GATEWAY, "PAYOS_UNAVAILABLE",
++                    "PayOS could not create a payment link");
++        }
++    }
++
++    public record WebhookResult(boolean handled, String reason) { }
++
++    @SuppressWarnings("unchecked")
++    public WebhookResult handleWebhook(Map<String, Object> payload) throws Exception {
++        if (payload == null) {
++            throw new ApiCodeException(HttpStatus.BAD_REQUEST, "PAYMENT_WEBHOOK_INVALID", "Empty webhook payload");
++        }
++        Object dataObject = payload.get("data");
++        if (!(dataObject instanceof Map<?, ?> data)) {
++            throw new ApiCodeException(HttpStatus.BAD_REQUEST, "PAYMENT_WEBHOOK_INVALID", "Webhook payload has no data");
++        }
++        String signature = payload.get("signature") instanceof String value ? value : null;
++        if (!payosClient.verifyWebhookSignature((Map<String, Object>) data, signature)) {
++            throw new ApiCodeException(HttpStatus.BAD_REQUEST, "PAYMENT_WEBHOOK_SIGNATURE_INVALID",
++                    "Webhook signature verification failed");
++        }
++        // Only a successful payment activates Pro. Anything else (cancelled, failed)
++        // is acknowledged without side effects so PayOS stops retrying it.
++        if (!"00".equals(string(data.get("code")))) {
++            return new WebhookResult(false, "not a successful payment");
++        }
++        long orderCode;
++        try {
++            orderCode = Long.parseLong(string(data.get("orderCode")));
++        } catch (NumberFormatException exception) {
++            log.warn("PayOS webhook with invalid orderCode: {}", data.get("orderCode"));
++            return new WebhookResult(false, "invalid orderCode");
++        }
++        var orderOpt = paymentOrderDao.findByOrderCode(orderCode);
++        if (orderOpt.isEmpty()) {
++            // Unknown order (e.g. PayOS dashboard webhook-confirm test): acknowledge, do nothing.
++            return new WebhookResult(false, "unknown order");
++        }
++        PaymentOrder order = orderOpt.get();
++        long paidAmount = number(data.get("amount"));
++        if (paidAmount != order.getAmount()) {
++            log.warn("PayOS webhook amount mismatch for order {}: got {}, expected {}",
++                    orderCode, paidAmount, order.getAmount());
++            return new WebhookResult(false, "amount mismatch");
++        }
++        if (order.getStatus() == PaymentOrderStatus.CANCELLED) {
++            return new WebhookResult(false, "order cancelled");
++        }
++        long now = clock.millis();
++        if (order.getStatus() == PaymentOrderStatus.PENDING) {
++            // Atomic flip: only the first delivery (or first concurrent attempt) wins.
++            // Retries observe PAID below and reuse the stored expiry.
++            paymentOrderDao.updateAtomically(orderCode, current -> {
++                if (current == null || current.getStatus() != PaymentOrderStatus.PENDING) {
++                    return new PaymentOrderDao.Mutation(current, false);
++                }
++                current.setStatus(PaymentOrderStatus.PAID);
++                current.setPaidAt(now);
++                current.setUpdatedAt(now);
++                return new PaymentOrderDao.Mutation(current, true);
++            });
++            order = paymentOrderDao.findByOrderCode(orderCode).orElse(order);
++        }
++        ensureActivation(order, now);
++        return new WebhookResult(true, "activated");
++    }
++
++    /**
++     * Activates Pro for a PAID order. The expiry is computed once and stored on the
++     * order, so a retried webhook reuses it: remaining Pro days are topped up
++     * (base = max(now, current expiry)) and never double-charged.
++     */
++    private void ensureActivation(PaymentOrder order, long now) throws Exception {
++        if (order.getProExpiresAt() == null) {
++            var summary = subscriptionService.getSummary(order.getUserId());
++            long base = summary.status() == SubscriptionStatus.ACTIVE
++                    && summary.expiresAt() != null && summary.expiresAt() > now
++                    ? summary.expiresAt() : now;
++            long proExpiresAt = base + (long) order.getDurationDays() * MILLIS_PER_DAY;
++            paymentOrderDao.updateAtomically(order.getOrderCode(), current -> {
++                if (current == null || current.getProExpiresAt() != null) {
++                    return new PaymentOrderDao.Mutation(current, false);
++                }
++                current.setProExpiresAt(proExpiresAt);
++                current.setUpdatedAt(now);
++                return new PaymentOrderDao.Mutation(current, true);
++            });
++            order = paymentOrderDao.findByOrderCode(order.getOrderCode()).orElse(order);
++        }
++        // activateOrExtend is itself idempotent: a retry with the same expiry is a no-op.
++        subscriptionService.activateOrExtend(order.getUserId(), order.getProExpiresAt(), PAYOS_ACTOR);
++    }
++
++    private void cancelQuietly(PaymentOrder order) {
++        try {
++            paymentOrderDao.updateAtomically(order.getOrderCode(), current -> {
++                if (current == null || current.getStatus() != PaymentOrderStatus.PENDING) {
++                    return new PaymentOrderDao.Mutation(current, false);
++                }
++                current.setStatus(PaymentOrderStatus.CANCELLED);
++                current.setUpdatedAt(clock.millis());
++                return new PaymentOrderDao.Mutation(current, true);
++            });
++        } catch (Exception ignored) {
++            log.warn("Could not cancel payment order {}", order.getOrderCode());
++        }
++    }
++
++    private static long newOrderCode() {
++        return ThreadLocalRandom.current().nextLong(1, Long.MAX_VALUE);
++    }
++
++    private static String string(Object value) {
++        return value == null ? null : String.valueOf(value);
++    }
++
++    private static long number(Object value) {
++        if (value instanceof Number number) {
++            return number.longValue();
++        }
++        try {
++            return Long.parseLong(string(value));
++        } catch (NumberFormatException exception) {
++            return -1;
++        }
++    }
++}
+diff --git a/backend/src/main/resources/application.properties b/backend/src/main/resources/application.properties
+index bac8537..e14662f 100644
+--- a/backend/src/main/resources/application.properties
++++ b/backend/src/main/resources/application.properties
+@@ -61,3 +61,13 @@ app.ai.chat.conversation-limit=${AI_CHAT_CONVERSATION_LIMIT:10}
+ app.ai.chat.read-limit=${AI_CHAT_READ_LIMIT:100}
+ app.ai.chat.message-character-limit=${AI_CHAT_MESSAGE_CHARACTER_LIMIT:1000}
+ app.ai.chat.history-message-limit=${AI_CHAT_HISTORY_MESSAGE_LIMIT:12}
++
++# PayOS (thanh toán gói Pro). Key lấy từ PayOS Dashboard, KHÔNG commit key thật.
++# payos.sandbox=true chỉ mở gói test 10.000đ/1 ngày; production để false.
++payos.client-id=${PAYOS_CLIENT_ID:}
++payos.api-key=${PAYOS_API_KEY:}
++payos.checksum-key=${PAYOS_CHECKSUM_KEY:}
++payos.base-url=${PAYOS_BASE_URL:https://api-merchant.payos.vn}
++payos.return-url=${PAYOS_RETURN_URL:http://localhost:5173/payment/success}
++payos.cancel-url=${PAYOS_CANCEL_URL:http://localhost:5173/payment/cancel}
++payos.sandbox=${PAYOS_SANDBOX:false}
+diff --git a/backend/src/test/java/com/toeic/service/PayOSClientTests.java b/backend/src/test/java/com/toeic/service/PayOSClientTests.java
+new file mode 100644
+index 0000000..4127f35
+--- /dev/null
++++ b/backend/src/test/java/com/toeic/service/PayOSClientTests.java
+@@ -0,0 +1,57 @@
++package com.toeic.service;
++
++import com.fasterxml.jackson.databind.ObjectMapper;
++import com.toeic.config.PayOSProperties;
++import org.junit.jupiter.api.Test;
++
++import java.util.LinkedHashMap;
++import java.util.Map;
++
++import static org.junit.jupiter.api.Assertions.*;
++
++class PayOSClientTests {
++    private final PayOSProperties properties = properties("checksum-key");
++    private final PayOSClient client = new PayOSClient(properties, new ObjectMapper());
++
++    @Test
++    void canonicalStringSortsKeysAlphabetically() {
++        Map<String, Object> fields = new LinkedHashMap<>();
++        fields.put("returnUrl", "https://example.test/ok");
++        fields.put("amount", 99_000);
++        fields.put("orderCode", 123L);
++        fields.put("description", "CapyTOEIC Pro 30 days");
++        fields.put("cancelUrl", "https://example.test/cancel");
++        assertEquals("amount=99000&cancelUrl=https://example.test/cancel"
++                        + "&description=CapyTOEIC Pro 30 days&orderCode=123"
++                        + "&returnUrl=https://example.test/ok",
++                PayOSClient.canonicalString(fields));
++    }
++
++    @Test
++    void webhookSignatureRoundTripsAndRejectsTampering() {
++        Map<String, Object> data = new LinkedHashMap<>();
++        data.put("orderCode", 123L);
++        data.put("amount", 99_000);
++        data.put("code", "00");
++        String signature = client.sign(data);
++        assertTrue(client.verifyWebhookSignature(data, signature));
++        data.put("amount", 1);
++        assertFalse(client.verifyWebhookSignature(data, signature));
++        assertFalse(client.verifyWebhookSignature(data, "deadbeef"));
++        assertFalse(client.verifyWebhookSignature(data, null));
++    }
++
++    @Test
++    void signatureDependsOnChecksumKey() {
++        Map<String, Object> data = Map.of("orderCode", 123L, "amount", 99_000);
++        String signature = client.sign(data);
++        var otherClient = new PayOSClient(properties("other-key"), new ObjectMapper());
++        assertFalse(otherClient.verifyWebhookSignature(data, signature));
++    }
++
++    private static PayOSProperties properties(String checksumKey) {
++        var props = new PayOSProperties();
++        props.setChecksumKey(checksumKey);
++        return props;
++    }
++}
+diff --git a/backend/src/test/java/com/toeic/service/PaymentServiceTests.java b/backend/src/test/java/com/toeic/service/PaymentServiceTests.java
+new file mode 100644
+index 0000000..050c9ae
+--- /dev/null
++++ b/backend/src/test/java/com/toeic/service/PaymentServiceTests.java
+@@ -0,0 +1,243 @@
++package com.toeic.service;
++
++import com.fasterxml.jackson.databind.ObjectMapper;
++import com.toeic.config.PayOSProperties;
++import com.toeic.controller.ApiCodeException;
++import com.toeic.dao.PaymentOrderDao;
++import com.toeic.dao.SubscriptionDao;
++import com.toeic.model.PaymentOrder;
++import com.toeic.model.Subscription;
++import com.toeic.model.enums.PaymentOrderStatus;
++import com.toeic.model.enums.SubscriptionStatus;
++import org.junit.jupiter.api.Test;
++import org.springframework.http.HttpStatus;
++
++import java.time.Clock;
++import java.time.Instant;
++import java.time.ZoneOffset;
++import java.util.ArrayList;
++import java.util.HashMap;
++import java.util.LinkedHashMap;
++import java.util.List;
++import java.util.Map;
++import java.util.Optional;
++import java.util.function.Function;
++
++import static org.junit.jupiter.api.Assertions.*;
++
++class PaymentServiceTests {
++    private static final long NOW = 1_791_000_000_000L;
++    private static final long DAY = 24L * 60 * 60 * 1000;
++
++    private final MemoryPaymentOrderDao orderDao = new MemoryPaymentOrderDao();
++    private final MemorySubscriptionDao subscriptionDao = new MemorySubscriptionDao();
++    private final SubscriptionService subscriptionService = new SubscriptionService(
++            subscriptionDao, Clock.fixed(Instant.ofEpochMilli(NOW), ZoneOffset.UTC));
++    private final PayOSProperties properties = new PayOSProperties();
++    private final StubPayOSClient payosClient = new StubPayOSClient();
++    private final PaymentService service = new PaymentService(orderDao, payosClient, subscriptionService,
++            properties, Clock.fixed(Instant.ofEpochMilli(NOW), ZoneOffset.UTC));
++
++    @Test
++    void unknownPlanIsRejected() {
++        var error = assertThrows(ApiCodeException.class, () -> service.createProPayment("learner", "NOPE"));
++        assertEquals(HttpStatus.BAD_REQUEST, error.getStatus());
++        assertEquals("PAYMENT_PLAN_INVALID", error.getCode());
++    }
++
++    @Test
++    void testPlanIsUnavailableOutsideSandbox() {
++        var error = assertThrows(ApiCodeException.class, () -> service.createProPayment("learner", "PRO_1DAY_TEST"));
++        assertEquals(HttpStatus.FORBIDDEN, error.getStatus());
++        assertEquals("PAYMENT_PLAN_UNAVAILABLE", error.getCode());
++    }
++
++    @Test
++    void createReturnsCheckoutUrlAndReusesFreshPendingOrder() throws Exception {
++        var first = service.createProPayment("learner", "PRO_30");
++        assertTrue(first.checkoutUrl().startsWith("https://payos.test/checkout/"));
++        assertEquals(1, payosClient.createdLinks);
++        assertEquals(1, orderDao.records.size());
++
++        var second = service.createProPayment("learner", "PRO_30");
++        assertEquals(first.checkoutUrl(), second.checkoutUrl());
++        assertEquals(first.orderCode(), second.orderCode());
++        assertEquals(1, payosClient.createdLinks);
++    }
++
++    @Test
++    void webhookRejectsBadSignature() {
++        Map<String, Object> payload = webhookPayload(1L, 99_000L, "00", "bad-signature");
++        var error = assertThrows(ApiCodeException.class, () -> service.handleWebhook(payload));
++        assertEquals(HttpStatus.BAD_REQUEST, error.getStatus());
++        assertEquals("PAYMENT_WEBHOOK_SIGNATURE_INVALID", error.getCode());
++    }
++
++    @Test
++    void webhookIgnoresUnknownOrderAmountMismatchAndNonSuccess() throws Exception {
++        var created = service.createProPayment("learner", "PRO_30");
++        long orderCode = created.orderCode();
++
++        var unknown = service.handleWebhook(signedPayload(999L, 99_000L, "00"));
++        assertFalse(unknown.handled());
++
++        var mismatch = service.handleWebhook(signedPayload(orderCode, 1L, "00"));
++        assertFalse(mismatch.handled());
++        assertEquals(PaymentOrderStatus.PENDING, orderDao.records.get(orderCode).getStatus());
++
++        var cancelled = service.handleWebhook(signedPayload(orderCode, 99_000L, "01"));
++        assertFalse(cancelled.handled());
++        assertEquals(PaymentOrderStatus.PENDING, orderDao.records.get(orderCode).getStatus());
++        assertNull(subscriptionDao.records.get("learner"));
++    }
++
++    @Test
++    void webhookActivatesProForThirtyDays() throws Exception {
++        var created = service.createProPayment("learner", "PRO_30");
++        var result = service.handleWebhook(signedPayload(created.orderCode(), 99_000L, "00"));
++        assertTrue(result.handled());
++
++        PaymentOrder order = orderDao.records.get(created.orderCode());
++        assertEquals(PaymentOrderStatus.PAID, order.getStatus());
++        assertEquals(NOW + 30 * DAY, order.getProExpiresAt());
++
++        var summary = subscriptionService.getSummary("learner");
++        assertTrue(summary.effective());
++        assertEquals("PRO", summary.planCode());
++        assertEquals(NOW + 30 * DAY, summary.expiresAt());
++    }
++
++    @Test
++    void webhookTopsUpRemainingDaysInsteadOfResetting() throws Exception {
++        subscriptionDao.records.put("learner", subscription(NOW, NOW + 10 * DAY));
++        var created = service.createProPayment("learner", "PRO_30");
++        service.handleWebhook(signedPayload(created.orderCode(), 99_000L, "00"));
++
++        var summary = subscriptionService.getSummary("learner");
++        assertEquals(NOW + 40 * DAY, summary.expiresAt());
++    }
++
++    @Test
++    void retriedWebhookReusesStoredExpiryAndDoesNotDoubleExtend() throws Exception {
++        var created = service.createProPayment("learner", "PRO_30");
++        Map<String, Object> payload = signedPayload(created.orderCode(), 99_000L, "00");
++        assertTrue(service.handleWebhook(payload).handled());
++        assertTrue(service.handleWebhook(payload).handled());
++
++        var summary = subscriptionService.getSummary("learner");
++        assertEquals(NOW + 30 * DAY, summary.expiresAt());
++        assertEquals(PaymentOrderStatus.PAID, orderDao.records.get(created.orderCode()).getStatus());
++    }
++
++    @Test
++    void sandboxModeListsTestPlan() {
++        properties.setSandbox(true);
++        assertEquals(List.of("PRO_30", "PRO_1DAY_TEST"),
++                service.availablePlans().stream().map(PaymentService.PlanOption::planCode).toList());
++        assertEquals(List.of("PRO_30"),
++                new PaymentService(orderDao, payosClient, subscriptionService, new PayOSProperties(),
++                        Clock.fixed(Instant.ofEpochMilli(NOW), ZoneOffset.UTC))
++                        .availablePlans().stream().map(PaymentService.PlanOption::planCode).toList());
++    }
++
++    private Map<String, Object> signedPayload(long orderCode, long amount, String code) {
++        return webhookPayload(orderCode, amount, code, null);
++    }
++
++    private Map<String, Object> webhookPayload(long orderCode, long amount, String code, String signature) {
++        Map<String, Object> data = new LinkedHashMap<>();
++        data.put("orderCode", orderCode);
++        data.put("amount", amount);
++        data.put("code", code);
++        Map<String, Object> payload = new LinkedHashMap<>();
++        payload.put("code", "00");
++        payload.put("desc", "success");
++        payload.put("data", data);
++        payload.put("signature", signature != null ? signature : payosClient.sign(data));
++        return payload;
++    }
++
++    private static Subscription subscription(long startsAt, long expiresAt) {
++        var sub = new Subscription();
++        sub.setUserId("learner");
++        sub.setPlanCode("PRO");
++        sub.setStatus(SubscriptionStatus.ACTIVE);
++        sub.setStartsAt(startsAt);
++        sub.setExpiresAt(expiresAt);
++        return sub;
++    }
++
++    static class StubPayOSClient extends PayOSClient {
++        int createdLinks = 0;
++
++        StubPayOSClient() {
++            super(properties(), new ObjectMapper());
++        }
++
++        @Override
++        public PaymentLink createPaymentLink(long orderCode, long amount, String description) {
++            createdLinks++;
++            return new PaymentLink("https://payos.test/checkout/" + orderCode, "link-" + orderCode);
++        }
++
++        private static PayOSProperties properties() {
++            var props = new PayOSProperties();
++            props.setChecksumKey("checksum-key");
++            return props;
++        }
++    }
++
++    static class MemoryPaymentOrderDao implements PaymentOrderDao {
++        final Map<Long, PaymentOrder> records = new HashMap<>();
++
++        @Override
++        public void save(PaymentOrder order) {
++            records.put(order.getOrderCode(), order);
++        }
++
++        @Override
++        public Optional<PaymentOrder> findByOrderCode(long orderCode) {
++            return Optional.ofNullable(records.get(orderCode));
++        }
++
++        @Override
++        public Optional<PaymentOrder> findLatestPending(String userId, String planCode) {
++            return records.values().stream()
++                    .filter(o -> o.getUserId().equals(userId) && o.getPlanCode().equals(planCode)
++                            && o.getStatus() == PaymentOrderStatus.PENDING)
++                    .max((a, b) -> Long.compare(a.getCreatedAt(), b.getCreatedAt()));
++        }
++
++        @Override
++        public PaymentOrder updateAtomically(long orderCode, Function<PaymentOrder, Mutation> mutation) {
++            Mutation result = mutation.apply(records.get(orderCode));
++            if (result.changed()) {
++                records.put(orderCode, result.order());
++            }
++            return result.order();
++        }
++    }
++
++    static class MemorySubscriptionDao implements SubscriptionDao {
++        final Map<String, Subscription> records = new HashMap<>();
++
++        @Override
++        public Optional<Subscription> findByUserId(String userId) {
++            return Optional.ofNullable(records.get(userId));
++        }
++
++        @Override
++        public void save(Subscription subscription) {
++            records.put(subscription.getUserId(), subscription);
++        }
++
++        @Override
++        public Subscription updateAtomically(String userId, Function<Subscription, Mutation> mutation) {
++            Mutation result = mutation.apply(records.get(userId));
++            if (result.changed()) {
++                records.put(userId, result.subscription());
++            }
++            return result.subscription();
++        }
++    }
++}
+diff --git a/frontend/package.json b/frontend/package.json
+index dc61d5c..7611fb7 100644
+--- a/frontend/package.json
++++ b/frontend/package.json
+@@ -7,7 +7,7 @@
+     "dev": "vite",
+     "build": "vite build",
+     "lint": "eslint .",
+-    "test": "node --test src/App.test.js src/api/adminSubscriptions.test.js src/api/aiChat.test.js src/api/client.test.js src/api/practice.test.js src/api/userLearningChatContext.test.js src/auth/sessionState.test.js src/components/ai-chat/focusTrap.test.js src/components/floatingPetInteraction.test.js src/config/examTiming.test.js src/data/testCatalog.test.js src/hooks/aiChatSendAttempts.test.js src/hooks/aiChatState.test.js src/pages/admin/subscriptionManagement.test.js src/utils/aiAnalysis.test.js src/utils/attemptHistory.test.js src/utils/reviewContent.test.js src/utils/testData.test.js",
++    "test": "node --test src/App.test.js src/api/adminSubscriptions.test.js src/api/aiChat.test.js src/api/client.test.js src/api/payments.test.js src/api/practice.test.js src/api/userLearningChatContext.test.js src/auth/sessionState.test.js src/components/ai-chat/focusTrap.test.js src/components/floatingPetInteraction.test.js src/config/examTiming.test.js src/data/testCatalog.test.js src/hooks/aiChatSendAttempts.test.js src/hooks/aiChatState.test.js src/pages/admin/subscriptionManagement.test.js src/utils/aiAnalysis.test.js src/utils/attemptHistory.test.js src/utils/reviewContent.test.js src/utils/testData.test.js",
+     "preview": "vite preview"
+   },
+   "dependencies": {
+diff --git a/frontend/src/App.jsx b/frontend/src/App.jsx
+index 14b0abe..4b1896d 100644
+--- a/frontend/src/App.jsx
++++ b/frontend/src/App.jsx
+@@ -35,6 +35,7 @@ import UserDashboard from "./pages/user/UserDashboard";
+ import TestCatalogPage from "./pages/user/TestCatalogPage";
+ import AttemptHistoryPage from "./pages/user/AttemptHistoryPage";
+ import ProfilePage from "./pages/user/ProfilePage";
++import PaymentResultPage from "./pages/user/PaymentResultPage";
+ import { useAIChat } from "./hooks/useAIChat";
+ import { getChatEligibleAttempts, getChatQuestionChoices } from "./api/userLearning";
+ import { hasEffectiveAIChat } from "./components/floatingPetInteraction";
+@@ -108,6 +109,8 @@ function AppRoutes() {
+           <Route path="/tests" element={<TestCatalogPage />} />
+           <Route path="/history" element={<AttemptHistoryPage />} />
+           <Route path="/profile" element={<ProfilePage />} />
++          <Route path="/payment/success" element={<PaymentResultPage mode="success" />} />
++          <Route path="/payment/cancel" element={<PaymentResultPage mode="cancel" />} />
+           <Route
+             path="/full-test/:attemptId/result"
+             element={<FullTestResult />}
+diff --git a/frontend/src/api/payments.js b/frontend/src/api/payments.js
+new file mode 100644
+index 0000000..6a0284e
+--- /dev/null
++++ b/frontend/src/api/payments.js
+@@ -0,0 +1,12 @@
++import { apiFetch } from "./client.js";
++
++export function getProPlans() {
++  return apiFetch("/api/payments/pro/plans");
++}
++
++export function createProPayment(planCode) {
++  return apiFetch("/api/payments/pro", {
++    method: "POST",
++    body: JSON.stringify({ planCode }),
++  });
++}
+diff --git a/frontend/src/api/payments.test.js b/frontend/src/api/payments.test.js
+new file mode 100644
+index 0000000..fe31bb6
+--- /dev/null
++++ b/frontend/src/api/payments.test.js
+@@ -0,0 +1,47 @@
++import assert from "node:assert/strict";
++import { afterEach, test } from "node:test";
++import { API_BASE_URL, clearCsrfToken } from "./client.js";
++import { createProPayment, getProPlans } from "./payments.js";
++
++const originalFetch = globalThis.fetch;
++
++afterEach(() => {
++  globalThis.fetch = originalFetch;
++  clearCsrfToken();
++});
++
++function json(body) {
++  return new Response(JSON.stringify(body), {
++    status: 200,
++    headers: { "Content-Type": "application/json" },
++  });
++}
++
++function installResponses(...responses) {
++  const calls = [];
++  let index = 0;
++  globalThis.fetch = async (url, options) => {
++    calls.push({ url, options });
++    return responses[Math.min(index++, responses.length - 1)];
++  };
++  return calls;
++}
++
++test("pro plans are fetched from the payments endpoint", async () => {
++  const plans = [{ planCode: "PRO_30", amount: 99000, durationDays: 30, sandboxOnly: false }];
++  const calls = installResponses(json(plans));
++
++  assert.deepEqual(await getProPlans(), plans);
++  assert.equal(calls[0].url, `${API_BASE_URL}/api/payments/pro/plans`);
++  assert.equal(calls[0].options.credentials, "include");
++});
++
++test("creating a pro payment posts only the plan code", async () => {
++  const result = { checkoutUrl: "https://payos.test/checkout/1", orderCode: 1 };
++  const calls = installResponses(json({ token: "csrf" }), json(result));
++
++  assert.deepEqual(await createProPayment("PRO_30"), result);
++  assert.equal(calls[1].url, `${API_BASE_URL}/api/payments/pro`);
++  assert.equal(calls[1].options.method, "POST");
++  assert.deepEqual(JSON.parse(calls[1].options.body), { planCode: "PRO_30" });
++});
+diff --git a/frontend/src/components/ProUpgradeCard.jsx b/frontend/src/components/ProUpgradeCard.jsx
+new file mode 100644
+index 0000000..760285b
+--- /dev/null
++++ b/frontend/src/components/ProUpgradeCard.jsx
+@@ -0,0 +1,90 @@
++import { useEffect, useState } from "react";
++import { useLanguage } from "../i18n/LanguageContext";
++import { createProPayment, getProPlans } from "../api/payments";
++
++function formatVND(amount) {
++  return new Intl.NumberFormat("vi-VN", {
++    style: "currency",
++    currency: "VND",
++    maximumFractionDigits: 0,
++  }).format(amount);
++}
++
++export default function ProUpgradeCard() {
++  const { t } = useLanguage();
++  const [plans, setPlans] = useState([]);
++  const [selected, setSelected] = useState("");
++  const [loadingPlans, setLoadingPlans] = useState(true);
++  const [paying, setPaying] = useState(false);
++  const [error, setError] = useState("");
++
++  useEffect(() => {
++    getProPlans()
++      .then((loaded) => {
++        setPlans(loaded || []);
++        setSelected(loaded?.[0]?.planCode || "");
++      })
++      .catch(() => setError(t("proPlansLoadError")))
++      .finally(() => setLoadingPlans(false));
++  }, [t]);
++
++  async function pay() {
++    if (!selected || paying) return;
++    setPaying(true);
++    setError("");
++    try {
++      const result = await createProPayment(selected);
++      window.location.href = result.checkoutUrl;
++    } catch {
++      setError(t("proPaymentError"));
++      setPaying(false);
++    }
++  }
++
++  return (
++    <article className="overflow-hidden rounded-2xl border border-violet-200 bg-gradient-to-r from-violet-50 via-white to-sky-50 p-6 shadow-sm sm:p-7">
++      <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
++        <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white text-3xl shadow-sm ring-1 ring-violet-100" aria-hidden="true">🦫</span>
++        <div>
++          <span className="rounded-full bg-violet-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-violet-700">{t("proBenefitsBadge")}</span>
++          <h2 className="mt-3 text-xl font-bold text-slate-950">{t("proBenefitsTitle")}</h2>
++          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">{t("proBenefitsDescription")}</p>
++          <ul className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold text-slate-700" aria-label={t("proBenefitsTitle")}>
++            <li>✓ {t("proBenefitsChat")}</li>
++            <li>✓ {t("proBenefitsAnalysis")}</li>
++          </ul>
++        </div>
++      </div>
++
++      <div className="mt-5">
++        <p className="text-sm font-bold text-slate-800">{t("proChoosePlan")}</p>
++        {loadingPlans && <p className="mt-2 text-sm text-slate-500">{t("loading")}</p>}
++        {!loadingPlans && plans.map((plan) => (
++          <label key={plan.planCode} className="mt-2 flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
++            <input
++              type="radio"
++              name="pro-plan"
++              value={plan.planCode}
++              checked={selected === plan.planCode}
++              onChange={() => setSelected(plan.planCode)}
++              className="accent-violet-600"
++            />
++            <span className="text-sm font-semibold text-slate-800">
++              {plan.durationDays} {plan.durationDays === 1 ? t("day") : t("days")} · {formatVND(plan.amount)}
++              {plan.sandboxOnly ? ` · ${t("proPlanTest")}` : ""}
++            </span>
++          </label>
++        ))}
++        {error && <p role="alert" className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
++        <button
++          type="button"
++          onClick={pay}
++          disabled={paying || !selected}
++          className="mt-4 rounded-xl bg-violet-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:bg-violet-300"
++        >
++          {paying ? t("proPaying") : t("proPayNow")}
++        </button>
++      </div>
++    </article>
++  );
++}
+diff --git a/frontend/src/i18n/translations.js b/frontend/src/i18n/translations.js
+index 91d0746..913f37e 100644
+--- a/frontend/src/i18n/translations.js
++++ b/frontend/src/i18n/translations.js
+@@ -520,6 +520,17 @@ export const translations = {
+     proBenefitsDescription: "Pro learners can ask Capy TOEIC questions before or after practice and request AI analysis for completed full tests.",
+     proBenefitsChat: "Capy AI Chat for TOEIC study support",
+     proBenefitsAnalysis: "AI analysis of completed full tests",
++    proChoosePlan: "Choose a plan",
++    proPlanTest: "Test",
++    proPayNow: "Pay now",
++    proPaying: "Creating payment link…",
++    proPlansLoadError: "Couldn't load Pro plans. Please try again.",
++    proPaymentError: "Couldn't create a payment link. Please try again.",
++    proPaymentSuccessTitle: "Payment successful",
++    proPaymentSuccessDescription: "Your Pro plan is now active. If the Pro badge hasn't appeared yet, please refresh the page.",
++    proPaymentCancelTitle: "Payment cancelled",
++    proPaymentCancelDescription: "You cancelled the payment. Pro has not been activated.",
++    proBackToDashboard: "Back to Dashboard",
+     day: "day",
+     days: "days",
+   },
+@@ -1044,6 +1055,17 @@ export const translations = {
+     proBenefitsDescription: "Học viên Pro có thể hỏi Capy về TOEIC trước hoặc sau khi luyện tập và yêu cầu AI phân tích bài Full Test đã hoàn thành.",
+     proBenefitsChat: "Capy AI Chat hỗ trợ học TOEIC",
+     proBenefitsAnalysis: "AI phân tích Full Test đã hoàn thành",
++    proChoosePlan: "Chọn gói",
++    proPlanTest: "Bản test",
++    proPayNow: "Thanh toán",
++    proPaying: "Đang tạo link thanh toán…",
++    proPlansLoadError: "Không tải được gói Pro, thử lại sau.",
++    proPaymentError: "Không tạo được link thanh toán, thử lại sau.",
++    proPaymentSuccessTitle: "Thanh toán thành công",
++    proPaymentSuccessDescription: "Gói Pro đã được kích hoạt. Nếu huy hiệu Pro chưa hiện, hãy tải lại trang.",
++    proPaymentCancelTitle: "Đã hủy thanh toán",
++    proPaymentCancelDescription: "Bạn đã hủy thanh toán. Gói Pro chưa được kích hoạt.",
++    proBackToDashboard: "Về Dashboard",
+     day: "ngày",
+     days: "ngày",
+   },
+diff --git a/frontend/src/pages/user/PaymentResultPage.jsx b/frontend/src/pages/user/PaymentResultPage.jsx
+new file mode 100644
+index 0000000..2adc28b
+--- /dev/null
++++ b/frontend/src/pages/user/PaymentResultPage.jsx
+@@ -0,0 +1,38 @@
++import { useEffect } from "react";
++import { useNavigate } from "react-router-dom";
++import { useAuth } from "../../auth/useAuth";
++import { useLanguage } from "../../i18n/LanguageContext";
++
++export default function PaymentResultPage({ mode }) {
++  const { t } = useLanguage();
++  const { refreshProfile } = useAuth();
++  const navigate = useNavigate();
++  const success = mode === "success";
++
++  useEffect(() => {
++    // The Pro badge reads from the profile: refresh it so the newly paid
++    // subscription shows up without the user reloading the page.
++    if (success) refreshProfile();
++  }, [success, refreshProfile]);
++
++  return (
++    <main className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center px-5 py-10 text-center">
++      <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-3xl shadow-sm ring-1 ring-slate-100" aria-hidden="true">
++        {success ? "🎉" : "↩️"}
++      </span>
++      <h1 className="mt-5 text-2xl font-bold text-slate-950">
++        {success ? t("proPaymentSuccessTitle") : t("proPaymentCancelTitle")}
++      </h1>
++      <p className="mt-3 text-sm leading-6 text-slate-600">
++        {success ? t("proPaymentSuccessDescription") : t("proPaymentCancelDescription")}
++      </p>
++      <button
++        type="button"
++        onClick={() => navigate("/dashboard")}
++        className="mt-6 rounded-xl bg-sky-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-sky-700"
++      >
++        {t("proBackToDashboard")}
++      </button>
++    </main>
++  );
++}
+diff --git a/frontend/src/pages/user/UserDashboard.jsx b/frontend/src/pages/user/UserDashboard.jsx
+index 1af1c53..e041cc6 100644
+--- a/frontend/src/pages/user/UserDashboard.jsx
++++ b/frontend/src/pages/user/UserDashboard.jsx
+@@ -6,6 +6,7 @@ import { getAttemptParts } from "../../utils/attemptHistory";
+ import { getTestName } from "../../data/testCatalog";
+ import { useLanguage } from "../../i18n/LanguageContext";
+ import { hasEffectiveAIChat } from "../../components/floatingPetInteraction";
++import ProUpgradeCard from "../../components/ProUpgradeCard";
+ 
+ function formatDate(timestamp, language) {
+   if (!timestamp) return "—";
+@@ -92,20 +93,7 @@ export default function UserDashboard() {
+       </section>
+ 
+       {showProCard && (
+-        <article className="overflow-hidden rounded-2xl border border-violet-200 bg-gradient-to-r from-violet-50 via-white to-sky-50 p-6 shadow-sm sm:p-7">
+-          <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+-            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white text-3xl shadow-sm ring-1 ring-violet-100" aria-hidden="true">🦫</span>
+-            <div>
+-              <span className="rounded-full bg-violet-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-violet-700">{t("proBenefitsBadge")}</span>
+-              <h2 className="mt-3 text-xl font-bold text-slate-950">{t("proBenefitsTitle")}</h2>
+-              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">{t("proBenefitsDescription")}</p>
+-              <ul className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold text-slate-700" aria-label={t("proBenefitsTitle")}>
+-                <li>✓ {t("proBenefitsChat")}</li>
+-                <li>✓ {t("proBenefitsAnalysis")}</li>
+-              </ul>
+-            </div>
+-          </div>
+-        </article>
++        <ProUpgradeCard />
+       )}
+ 
+       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

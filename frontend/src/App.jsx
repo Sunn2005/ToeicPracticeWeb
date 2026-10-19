@@ -35,6 +35,7 @@ import UserDashboard from "./pages/user/UserDashboard";
 import TestCatalogPage from "./pages/user/TestCatalogPage";
 import AttemptHistoryPage from "./pages/user/AttemptHistoryPage";
 import ProfilePage from "./pages/user/ProfilePage";
+import PaymentResultPage from "./pages/user/PaymentResultPage";
 import { useAIChat } from "./hooks/useAIChat";
 import { getChatEligibleAttempts, getChatQuestionChoices } from "./api/userLearning";
 import { hasEffectiveAIChat } from "./components/floatingPetInteraction";
@@ -108,6 +109,8 @@ function AppRoutes() {
           <Route path="/tests" element={<TestCatalogPage />} />
           <Route path="/history" element={<AttemptHistoryPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/payment/success" element={<PaymentResultPage mode="success" />} />
+          <Route path="/payment/cancel" element={<PaymentResultPage mode="cancel" />} />
           <Route
             path="/full-test/:attemptId/result"
             element={<FullTestResult />}
