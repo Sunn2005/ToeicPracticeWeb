@@ -258,7 +258,7 @@ function TestReviewPage() {
       : new Set();
 
   return (
-    <section className="mx-auto max-w-6xl">
+    <section className="mx-auto max-w-[1500px]">
       <Link to="/console/reviews" className="mb-5 inline-block text-sm font-bold text-[#2188ee] hover:text-blue-700">
         ← Quay lại hàng chờ
       </Link>

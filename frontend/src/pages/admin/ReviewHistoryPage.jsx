@@ -87,7 +87,7 @@ function ReviewHistoryPage() {
     "rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-100";
 
   return (
-    <section className="mx-auto max-w-6xl">
+    <section className="mx-auto max-w-[1500px]">
       <h1 className="text-2xl font-bold text-slate-950 sm:text-3xl">Lịch sử phê duyệt</h1>
       <p className="mt-2 text-sm text-slate-500">Các đề đã được duyệt hoặc trả lại để chỉnh sửa.</p>
 

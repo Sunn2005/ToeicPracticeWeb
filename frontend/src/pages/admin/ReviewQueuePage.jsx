@@ -35,7 +35,7 @@ function ReviewQueuePage() {
   }, [loadQueue]);
 
   return (
-    <section className="mx-auto max-w-6xl">
+    <section className="mx-auto max-w-[1500px]">
       <h1 className="text-2xl font-bold text-slate-950 sm:text-3xl">Yêu cầu chờ duyệt</h1>
       <p className="mt-2 text-sm text-slate-500">Kiểm tra nội dung trước khi phát hành đề thi.</p>
 
