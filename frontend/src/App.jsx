@@ -1,9 +1,9 @@
 import {
-  BrowserRouter,
-  Navigate,
-  Route,
-  Routes,
-  useLocation,
+    BrowserRouter,
+    Navigate,
+    Route,
+    Routes,
+    useLocation,
 } from "react-router-dom";
 import Login from "./pages/Login";
 import PracticePart from "./pages/PracticePart";
@@ -27,85 +27,88 @@ import ReviewQueuePage from "./pages/admin/ReviewQueuePage";
 import ReviewHistoryPage from "./pages/admin/ReviewHistoryPage";
 import TestReviewPage from "./pages/admin/TestReviewPage";
 import ForbiddenPage from "./pages/errors/ForbiddenPage";
+import GuestRoute from "./auth/GuestRoute.jsx";
+import LandingPage from "./pages/public/LandingPage.jsx";
+import SupportPage from "./pages/public/SupportPage.jsx";
+import PublicLayout from "./layouts/PublicLayout.jsx";
+import NotFoundPage from "./pages/errors/NotFoundPage.jsx";
 
 function AppRoutes() {
-  const { user, role, authLoading } = useAuth();
-  const location = useLocation();
+    const { user, role, authLoading } = useAuth();
+    const location = useLocation();
 
-  if (authLoading) {
-    return <LoadingScreen />;
-  }
+    if (authLoading) {
+        return <LoadingScreen />;
+    }
 
-  return (
-    <>
-      <Routes>
-      <Route
-        path="/"
-        element={<Navigate to={user ? "/dashboard" : "/login"} replace />}
-      />
-      <Route
-        path="/login"
-        element={user ? <Navigate to="/dashboard" replace /> : <Login />}
-      />
-      <Route
-        path="/dashboard"
-        element={user ? <Welcome user={user} /> : <Navigate to="/login" replace />}
-      />
-      <Route
-        path="/practice/part5"
-        element={user ? <PracticePart /> : <Navigate to="/login" replace />}
-      />
-      <Route
-        path="/full-test/:testId"
-        element={user ? <FullTestIntro /> : <Navigate to="/login" replace />}
-      />
-      <Route
-        path="/full-test/:attemptId/exam"
-        element={user ? <FullTestExam /> : <Navigate to="/login" replace />}
-      />
-      <Route
-        path="/full-test/:attemptId/result"
-        element={user ? <FullTestResult /> : <Navigate to="/login" replace />}
-      />
-      <Route
-        path="/full-test/:attemptId/review"
-        element={user ? <FullTestReview /> : <Navigate to="/login" replace />}
-      />
-      <Route
-        path="*"
-        element={<Navigate to={user ? "/dashboard" : "/login"} replace />}
-      />
-
-      <Route path="/console" element={<LoginPage />} />
-      <Route path="/console/forbidden" element={<ForbiddenPage />} />
-      <Route element={<ProtectedRoute allowedRoles={["ADMIN", "EMPLOYEE"]} />}>
-        <Route element={<ManagementLayout />}>
-          <Route path="/console/dashboard" element={<AdminDashboard />} />
-          <Route path="/console/tests" element={<MyTestsPage />} />
-          <Route path="/console/tests/new" element={<CreateTestPage />} />
-          <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
-            <Route path="/console/reviews" element={<ReviewQueuePage />} />
-            <Route path="/console/reviews/:testId" element={<TestReviewPage />} />
-            <Route path="/console/review-history" element={<ReviewHistoryPage />} />
-          </Route>
-        </Route>
-      </Route>
-      </Routes>
-      {!location.pathname.startsWith("/console") && <FloatingPet user={user} role={role} />}
-    </>
-  );
+    return (
+        <>
+            <Routes>
+                <Route element={<GuestRoute />}>
+                    <Route element={<PublicLayout />}>
+                        <Route path="/" element={<LandingPage />} />
+                        <Route path="/support" element={<SupportPage />} />
+                    </Route>
+                </Route>
+                <Route
+                    path="/login"
+                    element={user ? <Navigate to="/dashboard" replace /> : <Login />}
+                />
+                <Route
+                    path="/dashboard"
+                    element={user ? <Welcome user={user} /> : <Navigate to="/login" replace />}
+                />
+                <Route
+                    path="/practice/part5"
+                    element={user ? <PracticePart /> : <Navigate to="/login" replace />}
+                />
+                <Route
+                    path="/full-test/:testId"
+                    element={user ? <FullTestIntro /> : <Navigate to="/login" replace />}
+                />
+                <Route
+                    path="/full-test/:attemptId/exam"
+                    element={user ? <FullTestExam /> : <Navigate to="/login" replace />}
+                />
+                <Route
+                    path="/full-test/:attemptId/result"
+                    element={user ? <FullTestResult /> : <Navigate to="/login" replace />}
+                />
+                <Route
+                    path="/full-test/:attemptId/review"
+                    element={user ? <FullTestReview /> : <Navigate to="/login" replace />}
+                />
+                <Route path="*" element={<NotFoundPage />} />
+                <Route path="/console" element={<LoginPage />} />
+                <Route path="/console/forbidden" element={<ForbiddenPage />} />
+                <Route element={<ProtectedRoute allowedRoles={["ADMIN", "EMPLOYEE"]} />}>
+                    <Route element={<ManagementLayout />}>
+                        <Route path="/console/dashboard" element={<AdminDashboard />} />
+                        <Route path="/console/tests" element={<MyTestsPage />} />
+                        <Route path="/console/tests/new" element={<CreateTestPage />} />
+                        <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
+                            <Route path="/console/reviews" element={<ReviewQueuePage />} />
+                            <Route path="/console/reviews/:testId" element={<TestReviewPage />} />
+                            <Route path="/console/review-history" element={<ReviewHistoryPage />} />
+                        </Route>
+                    </Route>
+                </Route>
+            </Routes>
+            {!location.pathname.startsWith("/console") && <FloatingPet user={user} role={role} />}
+        </>
+    );
 }
 
 function App() {
-  return (
-    <LanguageProvider>
-      <AuthProvider>
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
-      </AuthProvider>
-    </LanguageProvider>
-  );
+    return (
+        <LanguageProvider>
+            <AuthProvider>
+                <BrowserRouter>
+                    <AppRoutes />
+                </BrowserRouter>
+            </AuthProvider>
+        </LanguageProvider>
+    );
 }
 
 export default App;
