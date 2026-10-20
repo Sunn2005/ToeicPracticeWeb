@@ -135,8 +135,8 @@ class SecurityAuthorizationTests {
 
     @Test
     void paymentCreationRequiresAuthenticationAndCsrfButWebhookDoesNot() throws Exception {
-        when(paymentService.availablePlans()).thenReturn(List.of(
-                new PaymentService.PlanOption("PRO_30", 99_000L, 30, false)
+        when(paymentService.availablePlans("user-1")).thenReturn(List.of(
+                new PaymentService.PlanOption("PRO_30", 99_000L, 30, false, false)
         ));
         when(paymentService.createProPayment("user-1", "PRO_30"))
                 .thenReturn(new PaymentService.CreatePaymentResult("https://payos.test/checkout/1", 1L));

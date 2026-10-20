@@ -28,6 +28,9 @@ public class PaymentService {
     private static final Logger log = LoggerFactory.getLogger(PaymentService.class);
     private static final long PENDING_REUSE_MILLIS = 15 * 60 * 1000;
     private static final long MILLIS_PER_DAY = 24L * 60 * 60 * 1000;
+    // JSON consumers using JavaScript Number must preserve the exact signed order code.
+    private static final long MAX_SAFE_ORDER_CODE = 9_007_199_254_740_991L;
+    private static final int ORDER_CODE_RESERVATION_ATTEMPTS = 5;
     /** Actor recorded on subscriptions activated by a paid order. */
     private static final String PAYOS_ACTOR = "PAYOS";
 
@@ -82,7 +85,6 @@ public class PaymentService {
         }
 
         PaymentOrder order = new PaymentOrder();
-        order.setOrderCode(newOrderCode());
         order.setUserId(userId);
         order.setPlanCode(plan.code());
         order.setAmount(plan.amount());
@@ -90,7 +92,7 @@ public class PaymentService {
         order.setStatus(PaymentOrderStatus.PENDING);
         order.setCreatedAt(now);
         order.setUpdatedAt(now);
-        paymentOrderDao.save(order);
+        reserveOrder(order);
         try {
             PayOSClient.PaymentLink link = payosClient.createPaymentLink(
                     order.getOrderCode(), plan.amount(), plan.payosDescription());
@@ -100,6 +102,8 @@ public class PaymentService {
             paymentOrderDao.save(order);
             return new CreatePaymentResult(link.checkoutUrl(), order.getOrderCode());
         } catch (Exception exception) {
+            log.warn("PayOS create payment link failed for order {}: {}",
+                    order.getOrderCode(), exception.getMessage(), exception);
             cancelQuietly(order);
             throw new ApiCodeException(HttpStatus.BAD_GATEWAY, "PAYOS_UNAVAILABLE",
                     "PayOS could not create a payment link");
@@ -216,8 +220,21 @@ public class PaymentService {
         }
     }
 
-    private static long newOrderCode() {
-        return ThreadLocalRandom.current().nextLong(1, Long.MAX_VALUE);
+    private void reserveOrder(PaymentOrder order) throws Exception {
+        for (int attempt = 0; attempt < ORDER_CODE_RESERVATION_ATTEMPTS; attempt++) {
+            order.setOrderCode(ThreadLocalRandom.current().nextLong(1, MAX_SAFE_ORDER_CODE + 1));
+            PaymentOrder reserved = paymentOrderDao.updateAtomically(order.getOrderCode(), current -> {
+                if (current != null) {
+                    // A null result signals a collision without changing the existing document.
+                    return new PaymentOrderDao.Mutation(null, false);
+                }
+                return new PaymentOrderDao.Mutation(order, true);
+            });
+            if (reserved != null) {
+                return;
+            }
+        }
+        throw new IllegalStateException("Could not reserve a unique payment order code");
     }
 
     private static String string(Object value) {

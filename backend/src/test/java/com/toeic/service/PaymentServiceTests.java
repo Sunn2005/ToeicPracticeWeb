@@ -90,6 +90,74 @@ class PaymentServiceTests {
     }
 
     @Test
+    void newOrderCodesRemainExactWhenReadAsJavaScriptNumbers() throws Exception {
+        for (int i = 0; i < 100; i++) {
+            var created = service.createProPayment("learner-" + i, "PRO_30");
+            long orderCode = created.orderCode();
+            assertTrue(orderCode > 0 && orderCode <= 9_007_199_254_740_991L);
+            assertEquals(orderCode, (long) (double) orderCode);
+            assertEquals(orderCode, orderDao.records.get(orderCode).getOrderCode());
+        }
+        assertEquals(100, orderDao.records.size());
+    }
+
+    @Test
+    void orderCodeCollisionRetriesWithoutOverwritingExistingOrder() throws Exception {
+        PaymentOrder existing = new PaymentOrder();
+        existing.setUserId("existing-owner");
+        existing.setPlanCode("PRO_1DAY");
+        existing.setAmount(10_000L);
+        existing.setStatus(PaymentOrderStatus.PAID);
+        var collidingDao = new MemoryPaymentOrderDao() {
+            @Override
+            public PaymentOrder updateAtomically(long orderCode, Function<PaymentOrder, Mutation> mutation) {
+                if (records.isEmpty()) {
+                    existing.setOrderCode(orderCode);
+                    records.put(orderCode, existing);
+                }
+                return super.updateAtomically(orderCode, mutation);
+            }
+        };
+        var collisionService = new PaymentService(collidingDao, payosClient, subscriptionService,
+                Clock.fixed(Instant.ofEpochMilli(NOW), ZoneOffset.UTC));
+
+        var created = collisionService.createProPayment("learner", "PRO_30");
+
+        assertNotEquals(existing.getOrderCode(), created.orderCode());
+        assertSame(existing, collidingDao.records.get(existing.getOrderCode()));
+        assertEquals("existing-owner", existing.getUserId());
+        assertEquals(PaymentOrderStatus.PAID, existing.getStatus());
+        assertEquals(2, collidingDao.records.size());
+        assertEquals("learner", collidingDao.records.get(created.orderCode()).getUserId());
+        assertEquals(1, payosClient.createdLinks);
+    }
+
+    @Test
+    void repeatedOrderCodeCollisionsStopBeforeCallingPayOS() {
+        var collidingDao = new MemoryPaymentOrderDao() {
+            @Override
+            public PaymentOrder updateAtomically(long orderCode, Function<PaymentOrder, Mutation> mutation) {
+                PaymentOrder existing = new PaymentOrder();
+                existing.setOrderCode(orderCode);
+                existing.setUserId("existing-owner");
+                existing.setStatus(PaymentOrderStatus.PAID);
+                records.put(orderCode, existing);
+                return super.updateAtomically(orderCode, mutation);
+            }
+        };
+        var collisionService = new PaymentService(collidingDao, payosClient, subscriptionService,
+                Clock.fixed(Instant.ofEpochMilli(NOW), ZoneOffset.UTC));
+
+        assertThrows(IllegalStateException.class, () -> collisionService.createProPayment("learner", "PRO_30"));
+
+        assertEquals(5, collidingDao.records.size());
+        assertTrue(collidingDao.records.values().stream()
+                .allMatch(order -> "existing-owner".equals(order.getUserId())
+                        && order.getStatus() == PaymentOrderStatus.PAID));
+        assertEquals(0, payosClient.createdLinks);
+    }
+
+    @Test
     void webhookRejectsBadSignature() {
         Map<String, Object> payload = webhookPayload(1L, 99_000L, "00", "bad-signature");
         var error = assertThrows(ApiCodeException.class, () -> service.handleWebhook(payload));
