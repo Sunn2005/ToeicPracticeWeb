@@ -47,9 +47,10 @@ export default function MediaUploader({
       if (uploadedUrl) {
         onChange(uploadedUrl);
       } else {
-        // Fallback: create an object URL for local preview if server returns raw object
-        const localUrl = URL.createObjectURL(file);
-        onChange(localUrl);
+        // Never store a temporary blob: URL as if it were the uploaded
+        // file: it dies with the browser session and would be saved into
+        // the test as a broken link. Surface the failure instead.
+        setError("Máy chủ không trả về đường dẫn tệp. Vui lòng thử lại hoặc nhập URL trực tiếp.");
       }
     } catch (err) {
       setError(err?.message || "Tải lên tệp thất bại. Vui lòng nhập URL trực tiếp.");
