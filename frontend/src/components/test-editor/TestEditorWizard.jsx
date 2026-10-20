@@ -9,6 +9,7 @@ import {
   updateEmployeeTest,
   submitEmployeeTest,
 } from "../../api/employeeTests";
+import { generateMockToeicTest } from "../../utils/mockToeicTest";
 
 const STEPS = [
   { id: 1, title: "Thông tin đề" },
@@ -72,6 +73,26 @@ export default function TestEditorWizard({ initialTest, mode = "create" }) {
 
   const updateParts = (newParts) => {
     setTest((current) => ({ ...current, parts: newParts }));
+  };
+
+  // Quick-load a complete 200-question sample test for validation/preview.
+  // TestValidationSummary renders its "Nạp đề mẫu" buttons only when this
+  // callback is provided, so the wizard must pass it explicitly.
+  const handleLoadMockTest = () => {
+    if (
+      !window.confirm(
+        "Nạp đề mẫu 200 câu sẽ thay thế toàn bộ dữ liệu đề hiện tại. Bạn có chắc chắn?",
+      )
+    ) {
+      return;
+    }
+    setTest((current) => ({
+      ...generateMockToeicTest(),
+      // Keep the existing id in edit mode so saving updates the same test.
+      ...(current.testId ? { testId: current.testId } : {}),
+    }));
+    setError("");
+    setSuccessMsg("Đã nạp đề mẫu 200 câu. Hãy kiểm tra lại dữ liệu trước khi lưu.");
   };
 
   // Compute question counts for summary
@@ -317,7 +338,11 @@ export default function TestEditorWizard({ initialTest, mode = "create" }) {
         )}
 
         {step === 4 && (
-          <TestValidationSummary test={test} onGoToStep={(s) => setStep(s)} />
+          <TestValidationSummary
+            test={test}
+            onGoToStep={(s) => setStep(s)}
+            onLoadMockTest={handleLoadMockTest}
+          />
         )}
 
         {step === 5 && <TestPreview test={test} />}
