@@ -8,31 +8,40 @@ function EditTestPage() {
   const navigate = useNavigate();
 
   const [test, setTest] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(Boolean(testId));
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    if (!testId) {
-      setError("Không tìm thấy mã đề thi.");
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
+  // Reset when navigating to a different test (render-phase adjustment).
+  const [prevTestId, setPrevTestId] = useState(testId);
+  if (testId !== prevTestId) {
+    setPrevTestId(testId);
+    setTest(null);
+    setLoading(Boolean(testId));
     setError("");
+  }
 
+  useEffect(() => {
+    if (!testId) return;
+
+    let cancelled = false;
     getEmployeeTest(testId)
       .then((data) => {
+        if (cancelled) return;
         if (!data) throw new Error("Không tìm thấy dữ liệu đề thi.");
         setTest(data);
       })
       .catch((err) => {
-        setError(err?.message || "Không thể tải thông tin đề thi.");
+        if (!cancelled) setError(err?.message || "Không thể tải thông tin đề thi.");
       })
       .finally(() => {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       });
+    return () => {
+      cancelled = true;
+    };
   }, [testId]);
+
+  const displayError = testId ? error : "Không tìm thấy mã đề thi.";
 
   if (loading) {
     return (
@@ -45,7 +54,7 @@ function EditTestPage() {
     );
   }
 
-  if (error || !test) {
+  if (displayError || !test) {
     return (
       <div className="mx-auto max-w-xl py-16 text-center">
         <div className="rounded-2xl border border-red-200 bg-white p-8 shadow-sm">
@@ -53,7 +62,7 @@ function EditTestPage() {
           <h2 className="mt-3 text-lg font-bold text-slate-900">
             Không thể tải đề thi
           </h2>
-          <p className="mt-2 text-sm text-red-600">{error || "Đề thi không tồn tại."}</p>
+          <p className="mt-2 text-sm text-red-600">{displayError || "Đề thi không tồn tại."}</p>
           <button
             type="button"
             onClick={() => navigate("/console/tests")}

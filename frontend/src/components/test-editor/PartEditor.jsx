@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import QuestionEditor from "./QuestionEditor";
 import QuestionGroupEditor from "./QuestionGroupEditor";
 
@@ -39,11 +39,15 @@ export default function PartEditor({
   );
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  useEffect(() => {
+  // Adjust the active part when the parent passes a new focus target
+  // (React docs pattern: adjust state during render instead of an effect).
+  const [prevInitialPartNumber, setPrevInitialPartNumber] = useState(initialPartNumber);
+  if (initialPartNumber !== prevInitialPartNumber) {
+    setPrevInitialPartNumber(initialPartNumber);
     if (initialPartNumber && availableParts.some((p) => p.partNumber === initialPartNumber)) {
       setActivePartNumber(initialPartNumber);
     }
-  }, [initialPartNumber, availableParts]);
+  }
 
   // Find or create current part
   const currentPart = useMemo(() => {
@@ -82,7 +86,17 @@ export default function PartEditor({
     return [];
   }, [currentPart, isIndividualQuestionPart, isPart3or4, isPart6, isPart7]);
 
-  useEffect(() => {
+  // Select the focused question when the focus target or the active part
+  // changes (same render-phase adjustment pattern as above).
+  const [prevQuestionFocus, setPrevQuestionFocus] = useState({
+    questionNumber: initialQuestionNumber,
+    partNumber: activePartNumber,
+  });
+  if (
+    prevQuestionFocus.questionNumber !== initialQuestionNumber ||
+    prevQuestionFocus.partNumber !== activePartNumber
+  ) {
+    setPrevQuestionFocus({ questionNumber: initialQuestionNumber, partNumber: activePartNumber });
     if (initialQuestionNumber && listItems.length > 0) {
       const foundIdx = listItems.findIndex((item) => {
         if (item.questionNumber === initialQuestionNumber) return true;
@@ -93,7 +107,7 @@ export default function PartEditor({
         setSelectedIndex(foundIdx);
       }
     }
-  }, [initialQuestionNumber, listItems]);
+  }
 
   // Update a part in the overall parts array
   const saveUpdatedPart = (updatedPart) => {

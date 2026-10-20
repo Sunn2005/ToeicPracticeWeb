@@ -79,8 +79,6 @@ export default function TestPreview({ test }) {
           </div>
         ) : (
           partUnits.map((unit) => {
-            const isGroup = (unit.questions || []).length > 1;
-
             return (
               <div
                 key={unit.key}

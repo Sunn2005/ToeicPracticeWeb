@@ -8,23 +8,39 @@ function TestPreviewPage() {
   const navigate = useNavigate();
 
   const [test, setTest] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(Boolean(testId));
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    if (!testId) {
-      setError("Không tìm thấy mã đề.");
-      setLoading(false);
-      return;
-    }
+  // Reset when navigating to a different test (render-phase adjustment).
+  const [prevTestId, setPrevTestId] = useState(testId);
+  if (testId !== prevTestId) {
+    setPrevTestId(testId);
+    setTest(null);
+    setLoading(Boolean(testId));
+    setError("");
+  }
 
-    setLoading(true);
+  useEffect(() => {
+    if (!testId) return;
+
+    let cancelled = false;
     getEmployeeTest(testId)
-      .then(setTest)
-      .catch((err) => setError(err?.message || "Không thể tải đề thi."))
-      .finally(() => setLoading(false));
+      .then((data) => {
+        if (!cancelled) setTest(data);
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err?.message || "Không thể tải đề thi.");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [testId]);
+
+  const displayError = testId ? error : "Không tìm thấy mã đề.";
 
   const handleSubmit = async () => {
     if (!window.confirm("Bạn muốn gửi đề thi này để Admin phê duyệt?")) return;
@@ -50,11 +66,11 @@ function TestPreviewPage() {
     );
   }
 
-  if (error || !test) {
+  if (displayError || !test) {
     return (
       <div className="mx-auto max-w-xl py-16 text-center">
         <div className="rounded-2xl border border-red-200 bg-white p-8">
-          <p className="text-sm text-red-600">{error || "Không tìm thấy đề thi."}</p>
+          <p className="text-sm text-red-600">{displayError || "Không tìm thấy đề thi."}</p>
           <button
             type="button"
             onClick={() => navigate("/console/tests")}

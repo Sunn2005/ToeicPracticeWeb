@@ -32,9 +32,24 @@ function MyTestsPage() {
     }
   }, []);
 
+  // Initial load: state already starts as loading with no error, so only
+  // async completions update state here. Manual refreshes reuse load().
   useEffect(() => {
-    load();
-  }, [load]);
+    let cancelled = false;
+    getEmployeeTests()
+      .then((data) => {
+        if (!cancelled) setTests(Array.isArray(data) ? data : []);
+      })
+      .catch((loadError) => {
+        if (!cancelled) setError(loadError.message || "Không thể tải danh sách đề thi.");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleDelete = async (testId, title) => {
     if (!window.confirm(`Bạn có chắc chắn muốn xóa đề thi "${title || testId}"?`)) {
