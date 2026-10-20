@@ -57,22 +57,7 @@ public class MediaStorageService {
         String safeName = originalName.replaceAll("[^a-zA-Z0-9._-]", "-");
         String objectName = "toeic-media/" + employeeUid + "/" + UUID.randomUUID() + "-" + safeName;
         String downloadToken = UUID.randomUUID().toString();
-        Bucket bucket;
-        try {
-            bucket = StorageClient.getInstance(firebaseApp).bucket(storageBucket);
-        } catch (IllegalArgumentException exception) {
-            // StorageClient.bucket(name) throws IllegalArgumentException when
-            // the bucket is not visible to the service account: either
-            // Firebase Storage has not been enabled for the project (the
-            // default bucket was never created) or FIREBASE_STORAGE_BUCKET
-            // names a different bucket. Report that instead of an opaque 500.
-            throw new ResponseStatusException(
-                    HttpStatus.SERVICE_UNAVAILABLE,
-                    "Bucket '" + storageBucket + "' không tồn tại hoặc chưa được kích hoạt. "
-                            + "Hãy bật Firebase Storage cho project và kiểm tra lại biến FIREBASE_STORAGE_BUCKET.",
-                    exception
-            );
-        }
+        Bucket bucket = StorageClient.getInstance(firebaseApp).bucket(storageBucket);
         Blob blob = bucket.create(objectName, file.getBytes(), file.getContentType());
         blob = blob.toBuilder()
                 .setMetadata(Map.of("firebaseStorageDownloadTokens", downloadToken))
