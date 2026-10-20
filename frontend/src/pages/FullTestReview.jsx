@@ -56,6 +56,10 @@ function TrashIcon() {
 
 function ReviewHeader({ data, currentPart, maxScore, onResults, onDashboard, onDelete }) {
   const { t } = useLanguage();
+  const isPractice = data.attempt.type === "PRACTICE";
+  const accuracy = data.result.totalQuestions
+    ? Math.round((data.result.totalCorrect / data.result.totalQuestions) * 100)
+    : 0;
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
       <div className="flex w-full items-center justify-between gap-3 px-3 py-2.5 sm:px-5 lg:px-6">
@@ -72,10 +76,10 @@ function ReviewHeader({ data, currentPart, maxScore, onResults, onDashboard, onD
           <LanguageSwitcher />
           <div className="rounded-lg bg-emerald-50 px-3 py-1.5 text-center text-emerald-800 ring-1 ring-emerald-200 sm:px-4">
             <p className="hidden text-[9px] font-semibold uppercase tracking-widest opacity-70 sm:block">
-              {t("score")}
+              {isPractice ? t("accuracy") : t("score")}
             </p>
             <p className="text-sm font-bold tabular-nums sm:text-base">
-              {data.result.totalScore}/{maxScore}
+              {isPractice ? `${accuracy}%` : `${data.result.totalScore}/${maxScore}`}
             </p>
           </div>
           <button

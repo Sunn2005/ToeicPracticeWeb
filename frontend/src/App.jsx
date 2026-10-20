@@ -1,3 +1,5 @@
+import { Analytics } from "@vercel/analytics/react";
+import { useCallback, useEffect, useState } from "react";
 import {
     BrowserRouter,
     Navigate,
@@ -7,14 +9,14 @@ import {
 } from "react-router-dom";
 import Login from "./pages/Login";
 import PracticePart from "./pages/PracticePart";
-import Welcome from "./pages/Welcome";
 import FullTestExam from "./pages/FullTestExam";
 import FullTestIntro from "./pages/FullTestIntro";
 import FullTestResult from "./pages/FullTestResult";
 import FullTestReview from "./pages/FullTestReview";
-import { LanguageProvider } from "./i18n/LanguageContext";
+import { LanguageProvider, useLanguage } from "./i18n/LanguageContext";
 import LoadingScreen from "./components/LoadingScreen";
 import FloatingPet from "./components/FloatingPet";
+import AIChatBox from "./components/ai-chat/AIChatBox";
 import { AuthProvider } from "./auth/AuthContext";
 import { useAuth } from "./auth/useAuth";
 import ProtectedRoute from "./auth/ProtectedRoute";
@@ -25,6 +27,7 @@ import MyTestsPage from "./pages/employee/MyTestsPage";
 import CreateTestPage from "./pages/employee/CreateTestPage";
 import ReviewQueuePage from "./pages/admin/ReviewQueuePage";
 import ReviewHistoryPage from "./pages/admin/ReviewHistoryPage";
+import SubscriptionManagementPage from "./pages/admin/SubscriptionManagementPage";
 import TestReviewPage from "./pages/admin/TestReviewPage";
 import ForbiddenPage from "./pages/errors/ForbiddenPage";
 import GuestRoute from "./auth/GuestRoute.jsx";

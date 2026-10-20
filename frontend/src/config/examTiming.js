@@ -1,6 +1,7 @@
 export const TIMER_TYPES = {
   COUNTDOWN: "countdown",
   ELAPSED: "elapsed",
+  UNTIMED: "untimed",
 };
 
 export const PART_TIME_LIMITS = {
@@ -50,7 +51,12 @@ export function getExamDuration(mode, part, parts, timeLimitSeconds) {
   return MODE_TIME_LIMITS[normalizedMode] ?? null;
 }
 
-export function getTimerType() {
+export function getTimerType(attemptOrMode) {
+  if (attemptOrMode && typeof attemptOrMode === "object") {
+    return attemptOrMode.timed === false
+      ? TIMER_TYPES.UNTIMED
+      : TIMER_TYPES.COUNTDOWN;
+  }
   return TIMER_TYPES.COUNTDOWN;
 }
 
@@ -58,7 +64,11 @@ export function getTimerSeconds(attempt, serverNow) {
   if (!attempt?.startedAt) return 0;
 
   const elapsed = Math.max(0, Math.floor((serverNow - attempt.startedAt) / 1000));
-  if (getTimerType(attempt.mode, attempt.selectedPart) === TIMER_TYPES.ELAPSED) {
+  const timerType = getTimerType(attempt);
+  if (timerType === TIMER_TYPES.UNTIMED) {
+    return 0;
+  }
+  if (timerType === TIMER_TYPES.ELAPSED) {
     return elapsed;
   }
 
@@ -76,15 +86,8 @@ export function isLastListeningUnit(currentUnit, listeningUnits) {
   return currentUnit.key === listeningUnits[listeningUnits.length - 1].key;
 }
 
-export function shouldSubmitAfterListeningAudio(attempt, currentUnit, listeningUnits) {
-  if (String(attempt?.type || "").toUpperCase() === "PRACTICE") return false;
-  if (!isLastListeningUnit(currentUnit, listeningUnits)) return false;
-  const mode = normalizeMode(attempt?.mode);
-  if (mode === "LISTENING") return true;
-  const selectedParts = normalizeSelectedParts(attempt?.selectedParts, attempt?.selectedPart);
-  return mode === "PART"
-    && selectedParts.length > 0
-    && selectedParts.every((part) => part <= 4);
+export function shouldSubmitAfterListeningAudio() {
+  return false;
 }
 
 export function shouldDisableSubmit(attempt, busy = false) {

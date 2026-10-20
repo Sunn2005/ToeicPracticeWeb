@@ -18,12 +18,14 @@ test("calculates attempt duration and dashboard history statistics", () => {
   const now = Date.now();
   const attempts = [
     {
+      type: "FULL_TEST",
       status: "COMPLETED",
       startedAt: now - 60_000,
       submittedAt: now,
       result: { totalCorrect: 8, totalQuestions: 10 },
     },
     {
+      type: "PRACTICE",
       status: "COMPLETED",
       startedAt: now - 120_000,
       submittedAt: now,
@@ -34,8 +36,10 @@ test("calculates attempt duration and dashboard history statistics", () => {
 
   assert.equal(getAttemptDurationSeconds(attempts[0]), 60);
   assert.deepEqual(getHistoryStats(attempts), {
-    completed: 2,
-    accuracy: 75,
+    completed: 1,
+    practiceCompleted: 1,
+    inProgress: 1,
+    accuracy: 80,
     streak: 1,
   });
 });

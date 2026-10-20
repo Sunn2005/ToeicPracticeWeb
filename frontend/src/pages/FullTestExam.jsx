@@ -15,7 +15,6 @@ import {
   getTimerType,
   isLastListeningUnit,
   shouldDisableSubmit,
-  shouldSubmitAfterListeningAudio,
 } from "../config/examTiming";
 import {
   buildNavigatorGroups,
@@ -41,7 +40,7 @@ function secondsUntil(endAt, serverNow) {
   return Math.max(0, Math.ceil((endAt - serverNow) / 1000));
 }
 
-function SubmitDialog({ unansweredCount, submitting, onCancel, onConfirm }) {
+function SubmitDialog({ unansweredCount, submitting, practice, onCancel, onConfirm }) {
   const { t } = useLanguage();
   const hasUnansweredQuestions = unansweredCount > 0;
 
@@ -53,9 +52,11 @@ function SubmitDialog({ unansweredCount, submitting, onCancel, onConfirm }) {
         aria-labelledby="submit-title"
         className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl sm:p-7"
       >
-        <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">{t("submitTest")}</p>
+        <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">
+          {practice ? t("finishPractice") : t("submitTest")}
+        </p>
         <h2 id="submit-title" className="mt-2 text-xl font-bold text-slate-950 sm:text-2xl">
-          {t("submitAnswersNow")}
+          {practice ? t("finishPracticeNow") : t("submitAnswersNow")}
         </h2>
         <p className="mt-4 leading-7 text-slate-600">
           {hasUnansweredQuestions ? (
@@ -84,10 +85,59 @@ function SubmitDialog({ unansweredCount, submitting, onCancel, onConfirm }) {
             disabled={submitting}
             className="flex-1 rounded-xl bg-emerald-600 px-4 py-3 font-semibold text-white hover:bg-emerald-700 disabled:bg-emerald-300"
           >
-            {submitting ? t("saving") : t("submitTest")}
+            {submitting ? t("saving") : practice ? t("finishPractice") : t("submitTest")}
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function ListeningCompleteScreen({ attempt, answeredCount, unansweredCount, remainingSeconds, submitting, onSubmit, onExit }) {
+  const { t } = useLanguage();
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-900">
+      <ExamHeader
+        testId={attempt.testId}
+        section="AWAITING_SUBMISSION"
+        type={attempt.type}
+        mode={attempt.mode}
+        selectedPart={attempt.selectedPart}
+        selectedParts={attempt.selectedParts}
+        firstQuestion={attempt.firstQuestionNumber}
+        lastQuestion={attempt.lastQuestionNumber}
+        remainingSeconds={remainingSeconds ?? 0}
+        timerType={attempt.timed === false ? TIMER_TYPES.UNTIMED : TIMER_TYPES.COUNTDOWN}
+        onExit={onExit}
+      />
+      <main className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-3xl items-center px-5 py-10">
+        <section className="w-full rounded-3xl border border-emerald-200 bg-white p-7 text-center shadow-xl shadow-emerald-100/70 sm:p-10">
+          <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-3xl text-emerald-700">✓</span>
+          <h1 className="mt-5 text-2xl font-bold text-slate-950 sm:text-3xl">
+            {t("listeningCompletedTitle")}
+          </h1>
+          <p className="mt-3 text-base text-slate-600">
+            {t("answeredSummaryPrefix")} <strong className="text-slate-950">{answeredCount}/{attempt.totalQuestions}</strong> {t("questions")}.
+          </p>
+          {unansweredCount > 0 && (
+            <p className="mt-3 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              {t("unansweredWarningPrefix")} <strong>{unansweredCount} {t("unanswered").toLowerCase()}</strong>. {t("listeningAnswersLocked")}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={onSubmit}
+            disabled={submitting}
+            className="mt-7 w-full rounded-xl bg-sky-600 px-5 py-3.5 font-bold text-white shadow-lg shadow-sky-200 transition hover:bg-sky-700 disabled:cursor-wait disabled:bg-sky-300 sm:w-auto sm:min-w-72"
+          >
+            {submitting
+              ? t("saving")
+              : attempt.type === "PRACTICE"
+                ? t("finishPracticeAndViewResults")
+                : t("submitAndViewResults")}
+          </button>
+        </section>
+      </main>
     </div>
   );
 }
@@ -193,9 +243,12 @@ function FullTestExam() {
   );
 
   const attempt = payload?.attempt;
-  const timerType = getTimerType(attempt?.mode, attempt?.selectedPart);
+  const timerType = getTimerType(attempt);
   const currentQuestion = attempt?.currentQuestionNumber || 1;
-  const currentUnits = attempt?.currentSection === "LISTENING" ? listeningUnits : readingUnits;
+  const awaitingListeningSubmission = attempt?.currentSection === "AWAITING_SUBMISSION";
+  const currentUnits = attempt?.currentSection === "LISTENING" || awaitingListeningSubmission
+    ? listeningUnits
+    : readingUnits;
   const currentUnit = findUnit(currentUnits, currentQuestion);
   const isPractice = attempt?.type === "PRACTICE";
   const currentPracticeFeedback = currentUnit
@@ -508,7 +561,7 @@ function FullTestExam() {
     }
   }, [attemptId, navigate, saveCurrentAnswers, waitForPendingSaves]);
 
-  const timeoutRemainingSeconds = timerType === TIMER_TYPES.ELAPSED
+  const timeoutRemainingSeconds = timerType !== TIMER_TYPES.COUNTDOWN
     ? null
     : attempt?.mode === "PART"
       ? remainingSeconds
@@ -569,26 +622,12 @@ function FullTestExam() {
 
   const advanceListeningAfterAudio = async () => {
     if (!currentUnit || audioAdvanceInFlight.current) return;
-    if (isPractice
-        && isLastListeningUnit(currentUnit, listeningUnits)
-        && readingUnits.length === 0) return;
     audioAdvanceInFlight.current = true;
     setBusy(true);
     setError("");
     setAudioAdvanceError("");
     try {
       await saveCurrentAnswers();
-      if (shouldSubmitAfterListeningAudio(attempt, currentUnit, listeningUnits)) {
-        const submitted = await submitExamOnce({ saveCurrent: false });
-        if (!submitted && !submitInFlight.current && !hasSubmitted.current) {
-          audioAdvanceInFlight.current = false;
-          setAudioAdvanceError(
-            t("submitFailedAfterSave"),
-          );
-        }
-        return;
-      }
-
       const nextAttempt = await apiFetch(
         `/api/attempts/${attemptId}/listening/next`,
         { method: "POST" },
@@ -602,7 +641,9 @@ function FullTestExam() {
       setPayload((previous) => ({ ...previous, attempt: nextAttempt }));
       setAnswers(nextAttempt.answers || answersRef.current);
       answersRef.current = nextAttempt.answers || answersRef.current;
-      if (attempt.currentSection === "LISTENING" && nextAttempt.currentSection === "READING") {
+      if (nextAttempt.currentSection === "AWAITING_SUBMISSION") {
+        setSaveState("Autosaved");
+      } else if (attempt.currentSection === "LISTENING" && nextAttempt.currentSection === "READING") {
         setSectionNotice(true);
       }
       setSaveState("Autosaved");
@@ -641,7 +682,7 @@ function FullTestExam() {
 
   const exitExam = () => {
     const shouldExit = window.confirm(
-      t("exitConfirm"),
+      isPractice ? t("practiceExitConfirm") : t("exitConfirm"),
     );
     if (shouldExit) navigate("/dashboard");
   };
@@ -678,6 +719,20 @@ function FullTestExam() {
           </button>
         </div>
       </div>
+    );
+  }
+
+  if (payload && awaitingListeningSubmission) {
+    return (
+      <ListeningCompleteScreen
+        attempt={attempt}
+        answeredCount={answeredCount}
+        unansweredCount={unansweredCount}
+        remainingSeconds={timerType === TIMER_TYPES.COUNTDOWN ? sectionRemainingSeconds : remainingSeconds}
+        submitting={busy}
+        onSubmit={() => submitExamOnce({ saveCurrent: false })}
+        onExit={exitExam}
+      />
     );
   }
 
@@ -960,11 +1015,11 @@ function FullTestExam() {
                       ? advanceListeningAfterAudio
                       : () => moveReading(nextReadingQuestion)}
                     onSubmit={() => setShowSubmit(true)}
+                    submitLabel={isPractice ? t("finishPractice") : t("submitTest")}
                     previousDisabled={isListening || previousReadingQuestion === null || busy}
                     nextDisabled={isListening
                       ? isPractice
-                        ? busy || (isLastListeningUnit(currentUnit, listeningUnits)
-                          && readingUnits.length === 0)
+                        ? busy
                         : busy || (Boolean(mediaAudio) && !audioAdvanceError)
                       : nextReadingQuestion === null || busy}
                     submitDisabled={shouldDisableSubmit(attempt, busy)}
@@ -1000,6 +1055,7 @@ function FullTestExam() {
         <SubmitDialog
           unansweredCount={unansweredCount}
           submitting={busy}
+          practice={isPractice}
           onCancel={() => setShowSubmit(false)}
           onConfirm={() => submitExamOnce()}
         />

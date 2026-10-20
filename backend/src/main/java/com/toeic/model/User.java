@@ -1,11 +1,9 @@
 package com.toeic.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import com.toeic.model.enums.UserRole;
 
-@AllArgsConstructor
 @NoArgsConstructor
 @Data
 public class User {
@@ -13,6 +11,10 @@ public class User {
     private String email;
     private String displayName;
     private String photoUrl;
+    private Integer targetScore;
+    private String phoneNumber;
+    private String dateOfBirth;
+    private String gender;
     private UserRole role;
     private Long createdAt;
     private Long lastLoginAt;

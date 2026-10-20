@@ -19,6 +19,7 @@ public class AttemptResult {
     private Integer selectedPart;
     private List<Integer> selectedParts;
     private Integer timeLimitSeconds;
+    private Boolean timed;
     private Integer firstQuestionNumber;
     private Integer lastQuestionNumber;
     private Integer listeningTotalQuestions;

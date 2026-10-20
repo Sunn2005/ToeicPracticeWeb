@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -22,6 +23,12 @@ import java.util.List;
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    private final AuthProperties authProperties;
+
+    public SecurityConfig(AuthProperties authProperties) {
+        this.authProperties = authProperties;
+    }
+
     @Bean
     SecurityFilterChain securityFilterChain(
             HttpSecurity http,
@@ -30,7 +37,13 @@ public class SecurityConfig {
             RestAccessDeniedHandler accessDeniedHandler
     ) throws Exception {
         return http
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(csrfTokenRepository())
+                        // PayOS posts the webhook without a CSRF token; authenticity
+                        // comes from the PayOS signature verified in PaymentService.
+                        .ignoringRequestMatchers(request ->
+                                HttpMethod.POST.matches(request.getMethod())
+                                        && "/api/payments/webhook".equals(request.getRequestURI())))
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
@@ -49,7 +62,15 @@ public class SecurityConfig {
                         .requestMatchers("/error")
                         .permitAll()
 
+                        .requestMatchers("/api/v1/auth/**")
+                        .permitAll()
+
                         .requestMatchers(HttpMethod.GET, "/api/health")
+                        .permitAll()
+
+                        // PayOS webhook is public: authenticity comes from the PayOS
+                        // signature, verified inside PaymentService — never from a session.
+                        .requestMatchers(HttpMethod.POST, "/api/payments/webhook")
                         .permitAll()
 
                         // Chỉ các API đọc catalog đề thi là public.
@@ -77,7 +98,9 @@ public class SecurityConfig {
                                 "/api/me",
                                 "/api/users/me/**",
                                 "/api/attempts/**",
-                                "/api/ai/jobs/**"
+                                "/api/ai/jobs/**",
+                                "/api/ai/chat/**",
+                                "/api/payments/**"
                         ).authenticated()
 
                         // Tạo attempt cũng cần đăng nhập
@@ -95,6 +118,15 @@ public class SecurityConfig {
                 .build();
     }
 
+    private CookieCsrfTokenRepository csrfTokenRepository() {
+        CookieCsrfTokenRepository repository = CookieCsrfTokenRepository.withHttpOnlyFalse();
+        repository.setCookieCustomizer(cookie -> cookie
+                .secure(authProperties.isCookieSecure())
+                .sameSite(authProperties.getCookieSameSite())
+                .path("/"));
+        return repository;
+    }
+
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -108,7 +140,7 @@ public class SecurityConfig {
                 "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
         ));
         configuration.setAllowedHeaders(List.of(
-                "Authorization", "Content-Type", "Accept"
+                "Content-Type", "Accept", "X-XSRF-TOKEN"
         ));
         configuration.setExposedHeaders(List.of("Location"));
         configuration.setAllowCredentials(true);

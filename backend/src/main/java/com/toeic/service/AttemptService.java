@@ -1,6 +1,7 @@
 package com.toeic.service;
 
 import com.toeic.dao.AttemptDao;
+import com.toeic.controller.ApiCodeException;
 import com.toeic.dto.AttemptResultDto;
 import com.toeic.model.AttemptResult;
 import com.toeic.model.Attempt;
@@ -30,6 +31,7 @@ public class AttemptService {
     public static final String COMPLETED = AttemptStatus.COMPLETED.name();
     public static final String LISTENING = AttemptSection.LISTENING.name();
     public static final String READING = AttemptSection.READING.name();
+    public static final String AWAITING_SUBMISSION = AttemptSection.AWAITING_SUBMISSION.name();
     public static final String FINISHED = AttemptSection.FINISHED.name();
     public static final String MODE_FULL = "FULL";
     public static final String MODE_LISTENING = "LISTENING";
@@ -121,6 +123,7 @@ public class AttemptService {
         testService.getMetadata(testId);
         AttemptScope scope = resolveScope(requestedMode, selectedPart, requestedParts, durationMinutes);
         String attemptType = normalizeAttemptType(requestedType);
+        boolean timed = !PRACTICE.equals(attemptType) || durationMinutes != null;
 
         Attempt active = findCurrentAttempt(
                 userId,
@@ -151,9 +154,12 @@ public class AttemptService {
         attempt.setMode(scope.mode());
         attempt.setSelectedPart(scope.selectedPart());
         attempt.setSelectedParts(scope.selectedParts());
-        attempt.setTimeLimitSeconds(Math.toIntExact(
-                (MODE_FULL.equals(scope.mode()) ? FULL_TEST_DURATION_MS : scope.durationMs()) / 1000L
-        ));
+        attempt.setTimed(timed);
+        attempt.setTimeLimitSeconds(timed
+                ? Math.toIntExact(
+                        (MODE_FULL.equals(scope.mode()) ? FULL_TEST_DURATION_MS : scope.durationMs()) / 1000L
+                )
+                : null);
         attempt.setStatus(IN_PROGRESS);
         attempt.setCurrentSection(scope.section());
         attempt.setCurrentQuestionNumber(scope.firstQuestion());
@@ -163,16 +169,16 @@ public class AttemptService {
         attempt.setStartedAt(now);
         attempt.setUpdatedAt(now);
         attempt.setSectionStartedAt(now);
-        attempt.setSectionEndAt(now + scope.durationMs());
-        attempt.setOverallEndAt(now + (MODE_FULL.equals(scope.mode())
-                ? FULL_TEST_DURATION_MS
-                : scope.durationMs()));
+        attempt.setSectionEndAt(timed ? now + scope.durationMs() : null);
+        attempt.setOverallEndAt(timed
+                ? now + (MODE_FULL.equals(scope.mode()) ? FULL_TEST_DURATION_MS : scope.durationMs())
+                : null);
         if (LISTENING.equals(scope.section())) {
             attempt.setListeningStartedAt(now);
-            attempt.setListeningEndAt(now + scope.durationMs());
+            attempt.setListeningEndAt(timed ? now + scope.durationMs() : null);
         } else {
             attempt.setReadingStartedAt(now);
-            attempt.setReadingEndAt(now + scope.durationMs());
+            attempt.setReadingEndAt(timed ? now + scope.durationMs() : null);
         }
         attempt.setSubmittedAt(null);
         attempt.setScore(null);
@@ -210,6 +216,22 @@ public class AttemptService {
     public Map<String, Object> getAttempt(String userId, String attemptId) throws Exception {
         Attempt attempt = reconcileTimeout(getOwnedAttempt(userId, attemptId));
         return toResponse(attempt, true);
+    }
+
+    public void requireNoInProgressAttempt(String userId) throws Exception {
+        for (Attempt attempt : attemptDao.findByUserId(userId)) {
+            if (!IN_PROGRESS.equals(attempt.getStatus())) {
+                continue;
+            }
+            applyLegacyScope(attempt);
+            if (IN_PROGRESS.equals(reconcileTimeout(attempt).getStatus())) {
+                throw new ApiCodeException(
+                        HttpStatus.CONFLICT,
+                        "CHAT_BLOCKED_DURING_ATTEMPT",
+                        "Không thể trò chuyện trong khi đang làm bài"
+                );
+            }
+        }
     }
 
     public Map<String, Object> getExam(String userId, String attemptId) throws Exception {
@@ -355,10 +377,9 @@ public class AttemptService {
             if (hasSelectedReadingPart(attempt)) {
                 transitionToReading(attempt, System.currentTimeMillis());
                 saveAttempt(attempt);
-            } else if (PRACTICE.equals(attemptType(attempt))) {
-                return toResponse(attempt, true);
             } else {
-                attempt = submitInternal(attempt, false);
+                markListeningReadyToSubmit(attempt);
+                saveAttempt(attempt);
             }
         } else {
             attempt.setCurrentQuestionNumber(next);
@@ -505,7 +526,19 @@ public class AttemptService {
                 && now >= attempt.getSectionEndAt()) {
             return submitInternal(attempt, true);
         }
+        if (AWAITING_SUBMISSION.equals(attempt.getCurrentSection())
+                && attempt.getSectionEndAt() != null
+                && now >= attempt.getSectionEndAt()) {
+            return submitInternal(attempt, true);
+        }
         return attempt;
+    }
+
+    private void markListeningReadyToSubmit(Attempt attempt) {
+        long now = System.currentTimeMillis();
+        attempt.setCurrentSection(AWAITING_SUBMISSION);
+        attempt.setListeningEndAt(now);
+        attempt.setUpdatedAt(now);
     }
 
     private void transitionToReading(Attempt attempt, long readingStart) {
@@ -515,16 +548,20 @@ public class AttemptService {
         attempt.setListeningEndAt(readingStart);
         attempt.setReadingStartedAt(readingStart);
         attempt.setSectionStartedAt(readingStart);
-        if (MODE_FULL.equals(mode(attempt))) {
+        if (isTimed(attempt) && MODE_FULL.equals(mode(attempt))) {
             attempt.setReadingEndAt(readingStart + READING_DURATION_MS);
             attempt.setSectionEndAt(readingStart + READING_DURATION_MS);
             attempt.setOverallEndAt(readingStart + READING_DURATION_MS);
-        } else {
+        } else if (isTimed(attempt)) {
             Long sessionEnd = attempt.getOverallEndAt() == null
                     ? attempt.getSectionEndAt()
                     : attempt.getOverallEndAt();
             attempt.setReadingEndAt(sessionEnd);
             attempt.setSectionEndAt(sessionEnd);
+        } else {
+            attempt.setReadingEndAt(null);
+            attempt.setSectionEndAt(null);
+            attempt.setOverallEndAt(null);
         }
         attempt.setUpdatedAt(now);
     }
@@ -582,6 +619,7 @@ public class AttemptService {
                 .selectedPart(attempt.getSelectedPart())
                 .selectedParts(selectedParts(attempt))
                 .timeLimitSeconds(attempt.getTimeLimitSeconds())
+                .timed(isTimed(attempt))
                 .firstQuestionNumber(firstQuestion)
                 .lastQuestionNumber(lastQuestion)
                 .listeningTotalQuestions(listeningTotal)
@@ -631,6 +669,7 @@ public class AttemptService {
         response.put("selectedPart", attempt.getSelectedPart());
         response.put("selectedParts", selectedParts(attempt));
         response.put("timeLimitSeconds", attempt.getTimeLimitSeconds());
+        response.put("timed", isTimed(attempt));
         response.put("status", attempt.getStatus());
         response.put("currentSection", attempt.getCurrentSection());
         response.put("currentQuestionNumber", attempt.getCurrentQuestionNumber());
@@ -791,7 +830,10 @@ public class AttemptService {
                     .mapToInt(part -> PART_RANGES[part - 1][1] - PART_RANGES[part - 1][0] + 1)
                     .sum());
         }
-        if (attempt.getTimeLimitSeconds() == null) {
+        if (attempt.getTimed() == null) {
+            attempt.setTimed(!PRACTICE.equals(attemptType(attempt)));
+        }
+        if (isTimed(attempt) && attempt.getTimeLimitSeconds() == null) {
             if (attempt.getStartedAt() != null && attempt.getOverallEndAt() != null) {
                 attempt.setTimeLimitSeconds(Math.toIntExact(
                         Math.max(0L, (attempt.getOverallEndAt() - attempt.getStartedAt()) / 1000L)
@@ -800,7 +842,7 @@ public class AttemptService {
                 attempt.setTimeLimitSeconds(defaultTimeLimitSeconds(attempt));
             }
         }
-        if (attempt.getOverallEndAt() == null) {
+        if (isTimed(attempt) && attempt.getOverallEndAt() == null) {
             if (MODE_FULL.equals(mode(attempt)) && attempt.getStartedAt() != null) {
                 attempt.setOverallEndAt(attempt.getStartedAt() + FULL_TEST_DURATION_MS);
             } else {
@@ -833,6 +875,10 @@ public class AttemptService {
         return attempt.getType() == null || attempt.getType().isBlank()
                 ? FULL_TEST
                 : attempt.getType();
+    }
+
+    private boolean isTimed(Attempt attempt) {
+        return !Boolean.FALSE.equals(attempt.getTimed());
     }
 
     private int firstQuestion(Attempt attempt) {

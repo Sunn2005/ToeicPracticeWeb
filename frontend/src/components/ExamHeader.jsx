@@ -19,7 +19,8 @@ function ExamHeader({
 }) {
   const { t } = useLanguage();
   const isElapsed = timerType === TIMER_TYPES.ELAPSED;
-  const isUrgent = !isElapsed && remainingSeconds <= 300;
+  const isUntimed = timerType === TIMER_TYPES.UNTIMED;
+  const isUrgent = !isElapsed && !isUntimed && remainingSeconds <= 300;
   const scopedParts = (selectedParts?.length ? selectedParts : [selectedPart])
     .filter(Boolean)
     .join(" + ");
@@ -40,7 +41,7 @@ function ExamHeader({
         <div className="min-w-0">
           <p className="truncate text-sm font-bold text-slate-950">{getTestName(testId)} · {modeLabel}</p>
           <p className="truncate text-xs font-medium text-slate-500">
-            {section === "LISTENING" ? t("listening") : t("reading")} · {t("questions")} {firstQuestion}–{lastQuestion}
+            {section === "LISTENING" || section === "AWAITING_SUBMISSION" ? t("listening") : t("reading")} · {t("questions")} {firstQuestion}–{lastQuestion}
           </p>
         </div>
 
@@ -52,10 +53,10 @@ function ExamHeader({
             }`}
           >
             <p className="hidden text-[9px] font-semibold uppercase tracking-widest opacity-70 sm:block">
-              {isElapsed ? t("elapsed") : t("remaining")}
+              {isUntimed ? t("untimed") : isElapsed ? t("elapsed") : t("remaining")}
             </p>
             <p className="font-mono text-sm font-bold tabular-nums sm:text-base">
-              {formatClock(remainingSeconds)}
+              {isUntimed ? "∞" : formatClock(remainingSeconds)}
             </p>
           </div>
           <button

@@ -29,9 +29,7 @@ public class FirebaseConfig {
             @Value("${firebase.storage-bucket:}") String storageBucket
     ) throws IOException {
         if (!serviceAccountResource.exists()) {
-            throw new IllegalStateException(
-                    "Không tìm thấy Firebase service account: " + serviceAccountResource.getDescription()
-            );
+            throw new IllegalStateException("Không tìm thấy Firebase service account");
         }
 
         ServiceAccountCredentials credentials;
@@ -74,8 +72,8 @@ public class FirebaseConfig {
         FirebaseOptions options = optionsBuilder.build();
 
         FirebaseApp app = FirebaseApp.initializeApp(options);
-        log.info("Initialized FirebaseApp name={}, projectId={}, serviceAccount={}",
-                app.getName(), app.getOptions().getProjectId(), serviceAccountResource.getDescription());
+        log.info("Initialized FirebaseApp name={}, projectId={}",
+                app.getName(), app.getOptions().getProjectId());
         return app;
     }
 

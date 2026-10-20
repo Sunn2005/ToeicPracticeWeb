@@ -1,10 +1,12 @@
 package com.toeic.service;
 
 import com.toeic.dao.AttemptDao;
+import com.toeic.controller.ApiCodeException;
 import com.toeic.dto.AttemptResultDto;
 import com.toeic.model.Attempt;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 import java.util.LinkedHashMap;
@@ -15,11 +17,84 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class AttemptServiceTests {
+
+    @Test
+    void blocksChatDuringAnActiveUntimedPracticeAttempt() throws Exception {
+        AttemptDao dao = mock(AttemptDao.class);
+        AttemptService service = new AttemptService(dao, mock(TestService.class));
+        Attempt active = inProgressAttempt("practice", List.of(5), "READING", 101);
+        active.setType("PRACTICE");
+        active.setTimed(false);
+        active.setSectionEndAt(null);
+        active.setOverallEndAt(null);
+        when(dao.findByUserId("user-1")).thenReturn(List.of(active));
+
+        ApiCodeException error = assertThrows(ApiCodeException.class,
+                () -> service.requireNoInProgressAttempt("user-1"));
+
+        assertEquals(HttpStatus.CONFLICT, error.getStatus());
+        assertEquals("CHAT_BLOCKED_DURING_ATTEMPT", error.getCode());
+        assertEquals("IN_PROGRESS", active.getStatus());
+    }
+
+    @Test
+    void reconcilesElapsedReadingAttemptBeforeAllowingChat() throws Exception {
+        AttemptDao dao = mock(AttemptDao.class);
+        TestService tests = mock(TestService.class);
+        AttemptService service = new AttemptService(dao, tests);
+        Attempt elapsed = inProgressAttempt("elapsed", List.of(5), "READING", 101);
+        elapsed.setSectionEndAt(System.currentTimeMillis() - 60_000L);
+        when(dao.findByUserId("user-1")).thenReturn(List.of(elapsed));
+        when(dao.findAnswers("elapsed")).thenReturn(Map.of(101, "A"));
+        Map<Integer, String> key = new LinkedHashMap<>();
+        for (int number = 1; number <= 200; number++) key.put(number, "A");
+        when(tests.getAnswerKey("test-1")).thenReturn(key);
+
+        assertDoesNotThrow(() -> service.requireNoInProgressAttempt("user-1"));
+
+        assertEquals("COMPLETED", elapsed.getStatus());
+        assertTrue(elapsed.getResult().getAutoSubmitted());
+        assertEquals(1, elapsed.getResult().getTotalCorrect());
+        verify(dao).save(elapsed);
+    }
+
+    @Test
+    void stillBlocksChatWhenElapsedListeningTransitionsToReading() throws Exception {
+        AttemptDao dao = mock(AttemptDao.class);
+        AttemptService service = new AttemptService(dao, mock(TestService.class));
+        Attempt elapsed = inProgressAttempt("full", List.of(1, 2, 3, 4, 5, 6, 7), "LISTENING", 1);
+        elapsed.setMode("FULL");
+        elapsed.setSectionEndAt(System.currentTimeMillis() - 60_000L);
+        when(dao.findByUserId("user-1")).thenReturn(List.of(elapsed));
+
+        ApiCodeException error = assertThrows(ApiCodeException.class,
+                () -> service.requireNoInProgressAttempt("user-1"));
+
+        assertEquals("CHAT_BLOCKED_DURING_ATTEMPT", error.getCode());
+        assertEquals("IN_PROGRESS", elapsed.getStatus());
+        assertEquals("READING", elapsed.getCurrentSection());
+        verify(dao).save(elapsed);
+    }
+
+    @Test
+    void allowsChatWhenThereAreNoActiveAttempts() throws Exception {
+        AttemptDao dao = mock(AttemptDao.class);
+        AttemptService service = new AttemptService(dao, mock(TestService.class));
+        when(dao.findByUserId("user-1")).thenReturn(List.of());
+        assertDoesNotThrow(() -> service.requireNoInProgressAttempt("user-1"));
+
+        Attempt completed = inProgressAttempt("done", List.of(5), "FINISHED", 101);
+        completed.setStatus("COMPLETED");
+        when(dao.findByUserId("user-1")).thenReturn(List.of(completed));
+        assertDoesNotThrow(() -> service.requireNoInProgressAttempt("user-1"));
+    }
 
     @Test
     void createsAttemptThroughDaoWithoutKnowingFirestore() throws Exception {
@@ -158,7 +233,7 @@ class AttemptServiceTests {
                 "PART",
                 5,
                 List.of(5),
-                20,
+                null,
                 "PRACTICE"
         );
 
@@ -166,6 +241,9 @@ class AttemptServiceTests {
         verify(attemptDao).save(captor.capture());
         assertEquals("PRACTICE", captor.getValue().getType());
         assertEquals("practice-attempt", captor.getValue().getId());
+        assertFalse(captor.getValue().getTimed());
+        assertNull(captor.getValue().getTimeLimitSeconds());
+        assertNull(captor.getValue().getSectionEndAt());
     }
 
     @Test
@@ -279,7 +357,7 @@ class AttemptServiceTests {
     }
 
     @Test
-    void keepsPracticeListeningOpenAtLastUnitUntilUserSubmits() throws Exception {
+    void marksPracticeListeningReadyAtLastUnitUntilUserSubmits() throws Exception {
         AttemptDao attemptDao = mock(AttemptDao.class);
         TestService testService = mock(TestService.class);
         AttemptService attemptService = new AttemptService(attemptDao, testService);
@@ -292,7 +370,26 @@ class AttemptServiceTests {
         Map<String, Object> response = attemptService.nextListening("user-1", "practice-part-1");
 
         assertEquals("IN_PROGRESS", response.get("status"));
+        assertEquals("AWAITING_SUBMISSION", response.get("currentSection"));
         assertEquals(6, response.get("currentQuestionNumber"));
+    }
+
+    @Test
+    void marksMockListeningReadyAtLastUnitInsteadOfAutoSubmitting() throws Exception {
+        AttemptDao attemptDao = mock(AttemptDao.class);
+        TestService testService = mock(TestService.class);
+        AttemptService attemptService = new AttemptService(attemptDao, testService);
+        Attempt attempt = inProgressAttempt("mock-listening", List.of(4), "LISTENING", 98);
+        attempt.setMode("LISTENING");
+
+        when(attemptDao.findById("mock-listening")).thenReturn(Optional.of(attempt));
+        when(attemptDao.findAnswers("mock-listening")).thenReturn(Map.of(98, "A"));
+
+        Map<String, Object> response = attemptService.nextListening("user-1", "mock-listening");
+
+        assertEquals("IN_PROGRESS", response.get("status"));
+        assertEquals("AWAITING_SUBMISSION", response.get("currentSection"));
+        verify(attemptDao).save(attempt);
     }
 
     private Attempt inProgressAttempt(

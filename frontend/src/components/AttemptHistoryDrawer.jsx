@@ -28,7 +28,7 @@ function EyeIcon() {
   );
 }
 
-function AttemptHistoryCard({ attempt, test, onDelete, onReview, onReviewIncorrect }) {
+function AttemptHistoryCard({ attempt, test, onDelete, onResume, onReview, onReviewIncorrect }) {
   const { language, t } = useLanguage();
   const completed = attempt.status === "COMPLETED";
   const isPractice = attempt.type === "PRACTICE";
@@ -52,7 +52,7 @@ function AttemptHistoryCard({ attempt, test, onDelete, onReview, onReviewIncorre
 
   return (
     <article
-      onClick={() => onReview(attempt)}
+      onClick={() => completed ? onReview(attempt) : onResume(attempt)}
       className="cursor-pointer rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-sky-300 hover:shadow-md sm:p-5"
     >
       <div className="flex items-start justify-between gap-3">
@@ -112,7 +112,7 @@ function AttemptHistoryCard({ attempt, test, onDelete, onReview, onReviewIncorre
         <span>{date}</span>
         <span aria-hidden="true">•</span>
         <span>{durationMinutes} {t("minuteShort")}</span>
-        {completed && result.totalScore != null && (
+        {completed && !isPractice && result.totalScore != null && (
           <>
             <span aria-hidden="true">•</span>
             <span className="font-bold text-sky-700">{t("score")}: {result.totalScore}</span>
@@ -120,29 +120,42 @@ function AttemptHistoryCard({ attempt, test, onDelete, onReview, onReviewIncorre
         )}
       </p>
 
-      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+      {completed ? (
+        <div className="mt-4 grid gap-2 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              onReview(attempt);
+            }}
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700"
+          >
+            <EyeIcon /> {t("review")}
+          </button>
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              onReviewIncorrect(attempt);
+            }}
+            disabled={!wrong}
+            className="rounded-xl border border-amber-200 px-4 py-2.5 text-sm font-bold text-amber-700 transition hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {t("reviewIncorrect")} ({wrong})
+          </button>
+        </div>
+      ) : (
         <button
           type="button"
           onClick={(event) => {
             event.stopPropagation();
-            onReview(attempt);
+            onResume(attempt);
           }}
-          className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700"
+          className="mt-4 w-full rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-sky-700"
         >
-          <EyeIcon /> {t("review")}
+          {t("continueAttempt")}
         </button>
-        <button
-          type="button"
-          onClick={(event) => {
-            event.stopPropagation();
-            onReviewIncorrect(attempt);
-          }}
-          disabled={completed && !wrong}
-          className="rounded-xl border border-amber-200 px-4 py-2.5 text-sm font-bold text-amber-700 transition hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          {t("reviewIncorrect")}{completed ? ` (${wrong})` : ""}
-        </button>
-      </div>
+      )}
     </article>
   );
 }
@@ -177,7 +190,7 @@ function DeleteConfirmation({ attempt, deleting, error, onCancel, onConfirm }) {
   );
 }
 
-function AttemptHistoryDrawer({ open, attempts, tests, selectedTest, loading, error, onClose, onDelete, onReview, onReviewIncorrect }) {
+function AttemptHistoryDrawer({ open, attempts, tests, selectedTest, loading, error, onClose, onDelete, onResume, onReview, onReviewIncorrect }) {
   const { t } = useLanguage();
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
@@ -245,6 +258,7 @@ function AttemptHistoryDrawer({ open, attempts, tests, selectedTest, loading, er
                   attempt={attempt}
                   test={tests.find((item) => item.id === attempt.testId)}
                   onDelete={setDeleteTarget}
+                  onResume={onResume}
                   onReview={onReview}
                   onReviewIncorrect={onReviewIncorrect}
                 />

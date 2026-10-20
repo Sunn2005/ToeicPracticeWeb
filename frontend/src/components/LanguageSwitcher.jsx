@@ -2,6 +2,7 @@ import { useLanguage } from "../i18n/LanguageContext";
 
 function LanguageSwitcher({ className = "" }) {
   const { language, setLanguage, toggleLanguage, t } = useLanguage();
+  const targetLanguage = language === "en" ? t("vietnamese") : t("english");
 
   return (
     <div
@@ -10,9 +11,9 @@ function LanguageSwitcher({ className = "" }) {
       <button
         type="button"
         onClick={toggleLanguage}
-        aria-label={`${t("language")}: ${language === "en" ? t("english") : t("vietnamese")}`}
-        title={language === "en" ? t("vietnamese") : t("english")}
-        className="rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-xs font-bold text-sky-700 shadow-sm transition hover:bg-sky-50 focus:outline-none focus:ring-2 focus:ring-sky-300 sm:hidden"
+        aria-label={`${t("switchToLanguage")} ${targetLanguage}`}
+        title={`${t("switchToLanguage")} ${targetLanguage}`}
+        className="flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-xs font-bold text-sky-700 shadow-sm transition hover:bg-sky-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 motion-reduce:transition-none sm:hidden"
       >
         {language.toUpperCase()}
       </button>
@@ -33,7 +34,7 @@ function LanguageSwitcher({ className = "" }) {
             aria-pressed={language === value}
             aria-label={label}
             title={label}
-            className={`rounded-lg px-2.5 py-1.5 text-xs font-bold transition focus:outline-none focus:ring-2 focus:ring-sky-300 ${
+            className={`min-h-9 rounded-lg px-2.5 py-1.5 text-xs font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-1 motion-reduce:transition-none ${
               language === value
                 ? "bg-sky-500 text-white shadow-sm"
                 : "text-slate-500 hover:bg-slate-100 hover:text-slate-800"

@@ -28,9 +28,7 @@ function PartGroup({ title, parts, selectedParts, onToggle }) {
                   onChange={() => onToggle(item.part)}
                   className="h-4 w-4 accent-sky-600"
                 />
-                <span className={`text-sm font-bold ${selected ? "text-sky-700" : "text-slate-800"}`}>
-                  {t("part")} {item.part}
-                </span>
+                <span><span className={`block text-sm font-bold ${selected ? "text-sky-700" : "text-slate-800"}`}>{t("part")} {item.part}</span><span className="mt-0.5 block text-xs text-slate-500">{item.label}</span></span>
               </span>
               <span className="text-sm font-medium text-slate-500">{item.questions} {t("questions")}</span>
             </label>
@@ -113,15 +111,13 @@ function TestModeModal({ test, initialTab = "exam", onClose, onStart }) {
     mode: "PART",
     part: selectedParts.length === 1 ? selectedParts[0] : null,
     parts: selectedParts,
-    durationMinutes: customTimeEnabled
-      ? parsedCustomMinutes
-      : suggestedMinutes,
+    durationMinutes: customTimeEnabled ? parsedCustomMinutes : null,
     experience,
   });
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-3 backdrop-blur-sm sm:p-6"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-3 sm:p-6"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget && !startingKey) onClose();
       }}
@@ -130,17 +126,17 @@ function TestModeModal({ test, initialTab = "exam", onClose, onStart }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="test-mode-title"
-        className="max-h-[94vh] w-full max-w-6xl overflow-y-auto rounded-3xl bg-slate-50 shadow-2xl"
+        className="max-h-[94vh] w-full max-w-5xl overflow-y-auto rounded-2xl bg-white shadow-2xl"
       >
-        <header className="sticky top-0 z-10 flex items-start justify-between gap-5 border-b border-slate-200 bg-white/95 px-5 py-5 backdrop-blur-xl sm:px-8">
+        <header className="sticky top-0 z-20 flex items-start justify-between gap-5 border-b border-slate-200 bg-white px-5 py-5 sm:px-8">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-sky-600">
+            <p className="hidden text-xs font-bold uppercase tracking-[0.18em] text-sky-600">
               {t("chooseMode")}
             </p>
-            <h2 id="test-mode-title" className="mt-1 text-2xl font-bold text-slate-950">
-              {test.name}
+            <h2 id="test-mode-title" className="text-2xl font-bold text-slate-950">
+              {test.title || test.name}
             </h2>
-            <p className="mt-1 text-sm text-slate-500">{test.title}</p>
+            <p className="mt-1 text-sm text-slate-500">Chọn chế độ và nội dung bạn muốn luyện</p>
           </div>
           <button
             type="button"
@@ -153,13 +149,13 @@ function TestModeModal({ test, initialTab = "exam", onClose, onStart }) {
           </button>
         </header>
 
-        <div className="p-5 sm:p-8">
-          <div className="inline-flex rounded-xl bg-slate-200/70 p-1">
+        <div className="p-5 sm:p-7">
+          <div className="inline-flex border-b border-slate-200">
             <button
               type="button"
               onClick={() => setActiveTab("exam")}
-              className={`rounded-lg px-5 py-2.5 text-sm font-bold transition ${
-                activeTab === "exam" ? "bg-white text-sky-700 shadow-sm" : "text-slate-500"
+              className={`border-b-2 px-5 py-2.5 text-sm font-bold transition ${
+                activeTab === "exam" ? "border-sky-500 text-sky-600" : "border-transparent text-slate-500"
               }`}
             >
               {t("test")}
@@ -167,12 +163,17 @@ function TestModeModal({ test, initialTab = "exam", onClose, onStart }) {
             <button
               type="button"
               onClick={() => setActiveTab("practice")}
-              className={`rounded-lg px-5 py-2.5 text-sm font-bold transition ${
-                activeTab === "practice" ? "bg-white text-slate-700 shadow-sm" : "text-slate-500"
+              className={`border-b-2 px-5 py-2.5 text-sm font-bold transition ${
+                activeTab === "practice" ? "border-sky-500 text-sky-600" : "border-transparent text-slate-500"
               }`}
             >
               {t("practice")}
             </button>
+          </div>
+
+          <div className={`mt-5 rounded-lg border px-4 py-3 text-sm ${activeTab === "practice" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-sky-200 bg-sky-50 text-sky-800"}`}>
+            <strong>{activeTab === "practice" ? "Học theo nhịp của bạn." : "Mô phỏng điều kiện thi thật."}</strong>{" "}
+            {activeTab === "practice" ? "Xem đáp án và giải thích ngay, không giới hạn thời gian mặc định." : "Bài làm có tính giờ; Listening chỉ phát một lần và đáp án chỉ hiển thị sau khi nộp."}
           </div>
 
           {error && (
@@ -182,11 +183,12 @@ function TestModeModal({ test, initialTab = "exam", onClose, onStart }) {
           )}
 
           <>
-              <div className="mt-6 grid gap-4 md:grid-cols-3">
+              <div className="mt-6 grid gap-3 md:grid-cols-3">
                 {EXAM_MODES.map((mode) => (
                   <ExamModeCard
                     key={mode.id}
                     mode={mode}
+                    experience={activeTab}
                     starting={startingKey === mode.id}
                     disabled={Boolean(startingKey)}
                     onStart={startMode}
@@ -194,7 +196,7 @@ function TestModeModal({ test, initialTab = "exam", onClose, onStart }) {
                 ))}
               </div>
 
-              <section className="mt-8 border-t border-slate-200 pt-7">
+              <section className="mt-6 border-t border-slate-200 pt-6">
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <h3 className="text-xl font-bold text-slate-950">
@@ -233,12 +235,17 @@ function TestModeModal({ test, initialTab = "exam", onClose, onStart }) {
                   <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                     <div>
                       <h4 className="font-bold text-slate-900">{t("testDuration")}</h4>
-                      {!customTimeEnabled && selectedParts.length > 0 && (
+                      {!customTimeEnabled && selectedParts.length > 0 && activeTab === "exam" && (
                         <p className="mt-3 text-sm text-slate-500">
                           <span className="mr-2 rounded-full border border-sky-200 bg-sky-50 px-3 py-1.5 font-bold text-sky-600">
                             {suggestedMinutes} {t("minuteShort")}
                           </span>
                           {t("suggestedTime")}
+                        </p>
+                      )}
+                      {!customTimeEnabled && selectedParts.length > 0 && activeTab === "practice" && (
+                        <p className="mt-3 text-sm font-semibold text-emerald-700">
+                          {t("untimedPractice")}
                         </p>
                       )}
                     </div>

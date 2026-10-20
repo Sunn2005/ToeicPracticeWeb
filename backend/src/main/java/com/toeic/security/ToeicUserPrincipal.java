@@ -27,14 +27,14 @@ public record ToeicUserPrincipal(
     }
 
     public User toUser() {
-        return new User(
-                uid,
-                email,
-                displayName,
-                photoUrl,
-                role,
-                createdAt,
-                lastLoginAt
-        );
+        User user = new User();
+        user.setUid(uid);
+        user.setEmail(email);
+        user.setDisplayName(displayName);
+        user.setPhotoUrl(photoUrl);
+        user.setRole(role);
+        user.setCreatedAt(createdAt);
+        user.setLastLoginAt(lastLoginAt);
+        return user;
     }
 }

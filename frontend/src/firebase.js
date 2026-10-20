@@ -1,9 +1,8 @@
 // Import the functions you need from the SDKs you need
 import { getApp, getApps, initializeApp } from "firebase/app";
 import {
-  browserLocalPersistence,
+  inMemoryPersistence,
   browserPopupRedirectResolver,
-  browserSessionPersistence,
   getAuth,
   initializeAuth,
 } from "firebase/auth";
@@ -28,7 +27,7 @@ const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const createAuth = () => {
   try {
     return initializeAuth(app, {
-      persistence: [browserLocalPersistence, browserSessionPersistence],
+      persistence: inMemoryPersistence,
       popupRedirectResolver: browserPopupRedirectResolver,
     });
   } catch (error) {

@@ -88,6 +88,8 @@ public class FirestoreAttemptDao implements AttemptDao {
                         "mode",
                         "selectedPart",
                         "selectedParts",
+                        "timeLimitSeconds",
+                        "timed",
                         "status",
                         "currentSection",
                         "currentQuestionNumber",
@@ -168,6 +170,7 @@ public class FirestoreAttemptDao implements AttemptDao {
         attempt.setSelectedPart(integerValue(data.get("selectedPart"), "selectedPart"));
         attempt.setSelectedParts(integerListValue(data.get("selectedParts"), "selectedParts"));
         attempt.setTimeLimitSeconds(integerValue(data.get("timeLimitSeconds"), "timeLimitSeconds"));
+        attempt.setTimed(booleanValue(data.get("timed"), "timed"));
         attempt.setStatus(stringValue(data.get("status")));
         attempt.setCurrentSection(stringValue(data.get("currentSection")));
         attempt.setCurrentQuestionNumber(integerValue(
@@ -265,6 +268,7 @@ public class FirestoreAttemptDao implements AttemptDao {
                     .selectedPart(integerValue(source.get("selectedPart"), "result.selectedPart"))
                     .selectedParts(integerListValue(source.get("selectedParts"), "result.selectedParts"))
                     .timeLimitSeconds(integerValue(source.get("timeLimitSeconds"), "result.timeLimitSeconds"))
+                    .timed(booleanValue(source.get("timed"), "result.timed"))
                     .firstQuestionNumber(integerValue(source.get("firstQuestionNumber"), "result.firstQuestionNumber"))
                     .lastQuestionNumber(integerValue(source.get("lastQuestionNumber"), "result.lastQuestionNumber"))
                     .listeningTotalQuestions(integerValue(source.get("listeningTotalQuestions"), "result.listeningTotalQuestions"))

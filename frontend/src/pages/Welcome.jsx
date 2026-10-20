@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-import { auth } from "../firebase";
+import { useAuth } from "../auth/useAuth";
 import { apiFetch, publicApiFetch } from "../api/client";
 import TestList from "../components/TestList";
 import TestModeModal from "../components/TestModeModal";
@@ -15,7 +14,7 @@ import {
   readAttemptHistoryCache,
   writeAttemptHistoryCache,
 } from "../api/userLearning";
-import { getHistoryStats, getSubmittedAttempts } from "../utils/attemptHistory";
+import { getHistoryStats } from "../utils/attemptHistory";
 import BrandLogo from "../components/BrandLogo";
 
 function UserAvatar({ user, displayName, size = "large" }) {
@@ -48,14 +47,16 @@ function UserAvatar({ user, displayName, size = "large" }) {
 function Welcome({ user }) {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState("");
   const [selectedTest, setSelectedTest] = useState(null);
   const [modalTab, setModalTab] = useState("exam");
   const [tests, setTests] = useState(TOEIC_TESTS);
-  const [attempts, setAttempts] = useState([]);
+  const initialHistory = readAttemptHistoryCache(user?.uid);
+  const [attempts, setAttempts] = useState(() => initialHistory || []);
   const [historyTest, setHistoryTest] = useState(null);
-  const [historyLoading, setHistoryLoading] = useState(true);
+  const [historyLoading, setHistoryLoading] = useState(() => !initialHistory);
   const [historyError, setHistoryError] = useState("");
   const [resumePrompt, setResumePrompt] = useState(null);
   const [restartingAttempt, setRestartingAttempt] = useState(false);
@@ -91,16 +92,12 @@ function Welcome({ user }) {
   useEffect(() => {
     let active = true;
     const cached = readAttemptHistoryCache(user?.uid);
-    if (cached) {
-      setAttempts(getSubmittedAttempts(cached));
-      setHistoryLoading(false);
-    }
 
     getAttemptHistory()
       .then((history) => {
         if (!active) return;
         writeAttemptHistoryCache(user?.uid, history);
-        setAttempts(getSubmittedAttempts(history));
+        setAttempts(history);
         setHistoryError("");
       })
       .catch((requestError) => {
@@ -121,7 +118,7 @@ function Welcome({ user }) {
     setSignOutError("");
 
     try {
-      await signOut(auth);
+      await logout();
       navigate("/login", { replace: true });
     } catch (error) {
       console.error("Unable to sign out:", error);
@@ -211,6 +208,10 @@ function Welcome({ user }) {
     }
   };
 
+  const resumeAttempt = (attempt) => {
+    navigate(`/full-test/${attempt.id}/exam`, { state: { attempt } });
+  };
+
   const learningStats = useMemo(() => getHistoryStats(attempts), [attempts]);
 
   return (
@@ -227,9 +228,6 @@ function Welcome({ user }) {
             <span className="hidden sm:block">
               <span className="block text-lg font-bold leading-tight text-slate-950">
                 CapyTOEIC
-              </span>
-              <span className="hidden text-xs text-slate-500 sm:block">
-                {t("smarterPractice")}
               </span>
             </span>
           </button>
@@ -453,6 +451,7 @@ function Welcome({ user }) {
         error={historyError}
         onClose={() => setHistoryTest(null)}
         onDelete={handleDeleteAttempt}
+        onResume={resumeAttempt}
         onReview={(attempt) => openAttemptReview(attempt)}
         onReviewIncorrect={(attempt) => openAttemptReview(attempt, "INCORRECT")}
       />

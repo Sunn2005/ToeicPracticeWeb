@@ -1,8 +1,11 @@
-import { auth } from "../firebase";
-
 export const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ||
-  "https://toeicpracticeweb.onrender.com";
+  import.meta.env?.VITE_API_BASE_URL ||
+  (import.meta.env?.DEV
+    ? "http://localhost:8080"
+    : "https://api.capytoeic.id.vn");
+
+const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
+let csrfTokenPromise = null;
 
 export class ApiError extends Error {
   constructor(message, status, body) {
@@ -22,61 +25,82 @@ async function parseResponse(response) {
   return text || null;
 }
 
-async function request(path, options, forceRefresh) {
-  const user = auth.currentUser;
-  if (!user) {
-    throw new ApiError("Please sign in to continue.", 401, null);
-  }
+function errorFromResponse(response, body) {
+  const message =
+    body?.detail ||
+    body?.message ||
+    body?.error ||
+    (typeof body === "string" ? body : `Request failed (${response.status})`);
+  return new ApiError(message, response.status, body);
+}
 
-  const idToken = await user.getIdToken(forceRefresh);
+export function clearCsrfToken() {
+  csrfTokenPromise = null;
+}
+
+export async function getCsrfToken() {
+  if (!csrfTokenPromise) {
+    csrfTokenPromise = fetch(`${API_BASE_URL}/api/v1/auth/csrf`, {
+      credentials: "include",
+    })
+      .then(async (response) => {
+        const body = await parseResponse(response);
+        if (!response.ok) {
+          throw errorFromResponse(response, body);
+        }
+        if (!body?.token) {
+          throw new ApiError("CSRF token response is invalid.", 500, body);
+        }
+        return body.token;
+      })
+      .catch((error) => {
+        csrfTokenPromise = null;
+        throw error;
+      });
+  }
+  return csrfTokenPromise;
+}
+
+async function request(path, options = {}) {
+  const method = String(options.method || "GET").toUpperCase();
   const headers = new Headers(options.headers || {});
+  const unsafe = !SAFE_METHODS.has(method);
   const isFormData =
     typeof FormData !== "undefined" && options.body instanceof FormData;
-  if (!isFormData && !headers.has("Content-Type")) {
+
+  if (options.body != null && !isFormData && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
-  headers.set("Authorization", `Bearer ${idToken}`);
+  if (unsafe) {
+    headers.set("X-XSRF-TOKEN", await getCsrfToken());
+  }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers,
-  });
-  const body = await parseResponse(response);
+  const execute = async () => {
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      method,
+      headers: new Headers(headers),
+      credentials: "include",
+    });
+    return { response, body: await parseResponse(response) };
+  };
 
+  let { response, body } = await execute();
+  if (unsafe && response.status === 403 && body?.code === "CSRF_TOKEN_INVALID") {
+    clearCsrfToken();
+    headers.set("X-XSRF-TOKEN", await getCsrfToken());
+    ({ response, body } = await execute());
+  }
   if (!response.ok) {
-    const message =
-      body?.detail ||
-      body?.message ||
-      body?.error ||
-      (typeof body === "string" ? body : `Request failed (${response.status})`);
-    throw new ApiError(message, response.status, body);
+    throw errorFromResponse(response, body);
   }
   return body;
 }
 
-export async function apiFetch(
-  path,
-  { forceRefresh = false, ...options } = {},
-) {
-  try {
-    return await request(path, options, forceRefresh);
-  } catch (error) {
-    if (error instanceof ApiError && error.status === 401 && !forceRefresh) {
-      return request(path, options, true);
-    }
-    throw error;
-  }
+export function apiFetch(path, options = {}) {
+  return request(path, options);
 }
 
-export async function publicApiFetch(path) {
-  const response = await fetch(`${API_BASE_URL}${path}`);
-  const body = await parseResponse(response);
-  if (!response.ok) {
-    throw new ApiError(
-      body?.detail || body?.message || `Unable to load data (${response.status})`,
-      response.status,
-      body,
-    );
-  }
-  return body;
+export function publicApiFetch(path, options = {}) {
+  return request(path, options);
 }

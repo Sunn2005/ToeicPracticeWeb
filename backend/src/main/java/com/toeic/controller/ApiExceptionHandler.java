@@ -17,6 +17,17 @@ import java.util.Map;
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
+    @ExceptionHandler(ApiCodeException.class)
+    public ResponseEntity<ApiErrorResponse> handleApiCode(
+            ApiCodeException exception,
+            HttpServletRequest request
+    ) {
+        int status = exception.getStatus().value();
+        return ResponseEntity.status(exception.getStatus()).body(
+                ApiErrorResponse.of(status, exception.getCode(), exception.getMessage(), request.getRequestURI())
+        );
+    }
+
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ApiErrorResponse> handleResponseStatus(
             ResponseStatusException exception,

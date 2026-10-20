@@ -11,21 +11,44 @@ Tài liệu này mô tả contract hiện tại của REST API trong `backend`: 
 - Upload media dùng `multipart/form-data`.
 - Các thời điểm như `createdAt`, `updatedAt`, `startedAt`, `submittedAt` là Unix timestamp theo millisecond (`Long`).
 - Những field chưa có dữ liệu có thể trả về `null`.
-- API không dùng session phía server; token phải được gửi lại trong mỗi request được bảo vệ.
+- API không lưu session trong bộ nhớ server. Trình duyệt gửi Firebase session cookie đã ký trong mỗi request được bảo vệ.
 
 ### Xác thực
 
-Mọi endpoint được bảo vệ yêu cầu header:
+Sau khi đăng nhập bằng Firebase Web SDK, frontend gửi ID token mới phát hành một lần tới `POST /api/v1/auth/session`. Backend xác minh token và trả Firebase session cookie có các thuộc tính `HttpOnly`, `Secure` trên production, `SameSite=Lax`, `Path=/` và thời hạn cố định 7 ngày.
 
-```http
-Authorization: Bearer <Firebase-ID-token>
-```
+Mọi endpoint được bảo vệ đọc cookie `session`; frontend phải gọi API với `credentials: "include"`. ID token, refresh token và session cookie không được lưu thủ công trong localStorage. Localhost qua HTTP phải chạy backend với `AUTH_COOKIE_SECURE=false`; production giữ `AUTH_COOKIE_SECURE=true`.
+
+Các request `POST`, `PUT`, `PATCH` và `DELETE` phải gửi CSRF token. Frontend lấy token từ `GET /api/v1/auth/csrf` và gửi lại qua header `X-XSRF-TOKEN`; cookie CSRF tương ứng được trình duyệt gửi tự động.
 
 `GUEST` là phiên trình duyệt chưa đăng nhập và không được lưu trong Firestore. Profile đã đăng nhập nằm tại `users/{uid}`; tài khoản mới mặc định có role `USER`.
 
 Firestore `users/{uid}.role` là nguồn dữ liệu duy nhất dùng để phân quyền. Role `EMPLOYEE` hoặc `ADMIN` phải được gán bằng quy trình quản trị tin cậy. Không nhận role từ request body, local storage hoặc state của frontend.
 
 Spring Security ánh xạ role thành `ROLE_USER`, `ROLE_EMPLOYEE`, `ROLE_ADMIN`.
+
+### Endpoint phiên đăng nhập
+
+#### Lấy CSRF token
+
+- **Method/path:** `GET /api/v1/auth/csrf`.
+- **Quyền:** public.
+- **Response:** `200 OK`, `{ "token": "..." }`, đồng thời khởi tạo cookie CSRF.
+
+#### Tạo session
+
+- **Method/path:** `POST /api/v1/auth/session`.
+- **Quyền:** public nhưng bắt buộc CSRF.
+- **Body:** `{ "idToken": "<fresh Firebase ID token>" }`.
+- **Response:** `200 OK`, profile hiện tại trong JSON và session cookie trong `Set-Cookie`.
+- Backend chỉ chấp nhận lần xác thực Firebase diễn ra trong 5 phút gần nhất và không trả credential trong JSON.
+
+#### Đăng xuất
+
+- **Method/path:** `POST /api/v1/auth/logout`.
+- **Quyền:** public nhưng bắt buộc CSRF.
+- **Response:** `204 No Content` và cookie `session` hết hạn.
+- Logout trình duyệt hiện tại không thu hồi phiên trên các thiết bị khác.
 
 ### Ma trận phân quyền
 
@@ -35,6 +58,7 @@ Spring Security ánh xạ role thành `ROLE_USER`, `ROLE_EMPLOYEE`, `ROLE_ADMIN`
 | `POST /api/tests/{testId}/attempts` | Không | Có | Có | Có |
 | `/api/me`, `/api/users/me/**`, `/api/attempts/**` | Không | Có | Có | Có |
 | `/api/ai/jobs/**` | Không | Có | Có | Có |
+| `/api/ai/chat/**` | Không | Có; mutation cần `AI_CHAT` | Có; mutation cần `AI_CHAT` | Có; mutation cần `AI_CHAT` |
 | `/api/employee/**` | Không | Không | Có | Có |
 | `/api/admin/**` | Không | Không | Không | Có |
 | `/api/internal/**` | Không | Không | Không | Có; endpoint còn phải được bật bằng cấu hình |
@@ -226,11 +250,64 @@ Response trong lúc thi luôn loại bỏ đệ quy các field bí mật: `corre
   "email": "user@example.com",
   "displayName": "Nguyen Van A",
   "photoUrl": "https://example.com/avatar.png",
+  "targetScore": 800,
+  "phoneNumber": "+84901234567",
+  "dateOfBirth": "2001-09-18",
+  "gender": "MALE",
   "role": "USER",
   "createdAt": 1789020000000,
-  "lastLoginAt": 1789020000000
+  "lastLoginAt": 1789020000000,
+  "subscription": {
+    "planCode": "PRO",
+    "status": "ACTIVE",
+    "startsAt": 1789020000000,
+    "expiresAt": 1791612000000,
+    "entitlements": ["AI_CHAT", "AI_ANALYSIS"],
+    "effective": true
+  }
 }
 ```
+
+`subscription` luôn có đúng sáu field: `planCode`, `status`, `startsAt`, `expiresAt`, `entitlements`, `effective`. Không trả UID hay metadata audit. Khi chưa có subscription, bốn field đầu là `null`, `entitlements=[]`, `effective=false`.
+
+### 3.1A Cập nhật profile hiện tại
+
+- **Mục đích:** cập nhật các field hồ sơ do chính người dùng quản lý.
+- **Method/type:** `PATCH`, request và response `application/json`.
+- **Path:** `/api/me`.
+- **Quyền:** mọi user đã đăng nhập; backend luôn lấy UID từ session, không nhận UID hoặc role từ body.
+- **Response thành công:** `200 OK`, cùng schema với `GET /api/me`.
+
+```json
+{
+  "displayName": "Nguyen Van A",
+  "photoUrl": "https://example.com/avatar.png",
+  "targetScore": 800,
+  "phoneNumber": "+84901234567",
+  "dateOfBirth": "2001-09-18",
+  "gender": "MALE"
+}
+```
+
+`displayName` bắt buộc có 1-80 ký tự. `targetScore` có thể `null`, nếu có phải từ 10 đến 990 và chia hết cho 5. `phoneNumber`, `dateOfBirth`, `gender` là tùy chọn; gửi `null` hoặc chuỗi trống để xóa. Số điện thoại gồm 8-15 chữ số, có thể bắt đầu bằng `+`. Ngày sinh dùng định dạng ISO `YYYY-MM-DD` và không được ở tương lai. Giới tính nhận `MALE`, `FEMALE`, `OTHER` hoặc `PREFER_NOT_TO_SAY` (không phân biệt chữ hoa/thường và response luôn chuẩn hóa thành chữ hoa). Request không được dùng để sửa `uid`, `email`, `role`, `createdAt`, `lastLoginAt` hoặc `subscription`.
+
+### 3.2 Schema subscription và quyền Pro
+
+Firestore lưu tại `subscriptions/{uid}`: `userId`, `planCode`, `status`, `entitlements`, `startsAt`, `expiresAt`, `activatedBy`, `revokedBy`, `revokedAt`, `createdAt`, `updatedAt`. Các thời điểm là Unix millisecond; audit actor là UID admin. `planCode=PRO`, `status` là `ACTIVE`, `EXPIRED` hoặc `REVOKED`; quyền hiện tại gồm `AI_CHAT`, `AI_ANALYSIS`. Các thao tác quản trị thủ công hiện chỉ ghi `ACTIVE` (kích hoạt/gia hạn) hoặc `REVOKED` (thu hồi).
+
+Server tính `effective` bằng `status=ACTIVE && startsAt <= serverNow && serverNow < expiresAt`; thiếu thời điểm làm subscription không có hiệu lực. Quyền chỉ được cấp khi subscription có hiệu lực và danh sách `entitlements` chứa quyền cần thiết. Thời gian hết hạn tự nó không chuẩn hóa status đã lưu; subscription có thể vẫn lưu `ACTIVE` nhưng `effective=false`, còn `EXPIRED` và `REVOKED` luôn không có hiệu lực. Role vẫn lấy từ `users/{uid}.role`, độc lập với Pro.
+
+`AI_CHAT` cấp quyền tạo/xóa hội thoại và gửi tin nhắn qua API Capy Chat ở mục 7A. Lịch sử đã tạo vẫn đọc được sau khi Pro hết hạn hoặc bị thu hồi. Subscription có thể được quản lý thủ công bởi admin hoặc kích hoạt qua thanh toán PayOS ở mục 3.3.
+
+### 3.3 Thanh toán Pro qua PayOS
+
+`GET /api/payments/pro/plans` yêu cầu đăng nhập và trả danh sách `{ planCode, amount, durationDays, sandboxOnly }` do server quản lý. `POST /api/payments/pro` yêu cầu session và CSRF hợp lệ, body chỉ nhận `{ "planCode": "PRO_30" }`; client không gửi giá hoặc thời hạn. Response thành công gồm `checkoutUrl` và `orderCode`. Pending order cùng user/gói trong 15 phút được tái sử dụng để tránh tạo link trùng.
+
+`POST /api/payments/webhook` là endpoint public duy nhất trong nhóm này và được miễn CSRF vì PayOS không có browser session. Backend bắt buộc xác minh HMAC-SHA256 bằng `PAYOS_CHECKSUM_KEY`, đối chiếu `orderCode`, số tiền và trạng thái order trước khi kích hoạt Pro. Browser redirect tới `/payment/success` chỉ dùng để hiển thị trạng thái chờ xác nhận; không bao giờ tự kích hoạt subscription.
+
+Firestore lưu order tại `paymentOrders/{orderCode}` với các field: `orderCode`, `userId`, `planCode`, `amount`, `durationDays`, `status`, `paymentLinkId`, `checkoutUrl`, `proExpiresAt`, `createdAt`, `paidAt`, `updatedAt`. `status` là `PENDING`, `PAID` hoặc `CANCELLED`. Webhook được xử lý idempotent; ngày Pro được cộng từ `max(serverNow, expiresAt hiện tại)` và expiry tuyệt đối được lưu trên order để retry không cộng ngày lần nữa hoặc hoàn tác một lần thu hồi admin diễn ra sau khi order đã được áp dụng.
+
+Credentials và URL PayOS chỉ lấy từ biến môi trường `PAYOS_CLIENT_ID`, `PAYOS_API_KEY`, `PAYOS_CHECKSUM_KEY`, `PAYOS_BASE_URL`, `PAYOS_RETURN_URL`, `PAYOS_CANCEL_URL`; không đặt trong frontend hoặc commit vào repository. `PAYOS_SANDBOX=true` mới cho phép gói test một ngày.
 
 ## 4. API catalog đề thi công khai
 
@@ -563,7 +640,9 @@ Frontend mới nên dùng `POST /api/attempts/{attemptId}/submit`.
 - **Path:** `/api/attempts/{attemptId}/ai-analysis`.
 - **Quyền:** đã đăng nhập; chỉ owner.
 - **Body:** không có.
+- **Query:** `refresh: boolean`, mặc định `false`; `true` yêu cầu phân tích lại kết quả đã hoàn thành.
 - **Điều kiện:** attempt phải có `type=FULL_TEST`, `mode=FULL`, `status=COMPLETED`.
+- **Quyền Pro:** tạo mới, thử lại job thất bại và refresh cần entitlement `AI_ANALYSIS` đang có hiệu lực. Thiếu quyền trả `403 PRO_REQUIRED` trước khi lưu hoặc publish job.
 - **Response thành công:** `200 OK`.
 
 ```json
@@ -575,7 +654,9 @@ Frontend mới nên dùng `POST /api/attempts/{attemptId}/submit`.
 }
 ```
 
-Trạng thái có thể là `NOT_REQUESTED`, `PENDING`, `PROCESSING`, `COMPLETED`, `FAILED`. Gọi lại khi đang xử lý hoặc đã hoàn thành không tạo job trùng; server trả trạng thái hiện tại.
+Trạng thái có thể là `NOT_REQUESTED`, `PENDING`, `PROCESSING`, `COMPLETED`, `FAILED`. Gọi lại khi đang xử lý hoặc đã hoàn thành với `refresh=false` không tạo job trùng; server trả trạng thái hiện tại.
+
+Job `PENDING`/`PROCESSING` luôn trả trạng thái hiện tại kể cả `refresh=true`. Kết quả `COMPLETED` với `refresh=false` cũng trả trạng thái hiện tại; các trường hợp idempotent này không yêu cầu Pro còn hiệu lực.
 
 - **Lỗi chính:** `409 CONFLICT` nếu không phải Full Test đầy đủ hoặc chưa hoàn thành; `503 SERVICE_UNAVAILABLE` nếu không publish được yêu cầu sang AI Service.
 
@@ -610,6 +691,8 @@ Trạng thái có thể là `NOT_REQUESTED`, `PENDING`, `PROCESSING`, `COMPLETED
 ```
 
 Khi chưa hoàn thành, `result` là `null`. Nếu trạng thái là `COMPLETED` nhưng document kết quả chưa tồn tại, server trả `409 CONFLICT`.
+
+GET không yêu cầu entitlement Pro; owner vẫn đọc được kết quả đã hoàn thành sau khi subscription hết hạn hoặc bị thu hồi. Ownership check vẫn áp dụng cho cả attempt và kết quả.
 
 ## 7. API AI giải thích một câu hỏi
 
@@ -681,6 +764,194 @@ Khi thành công:
 ```
 
 Khi thất bại, `status=FAILED`, `result=null` và `error` chứa thông báo lỗi. Job không tồn tại hoặc thuộc user khác đều trả `404 NOT_FOUND`.
+
+## 7A. API Capy AI Chat
+
+Tất cả endpoint dùng Firebase UID từ session đã xác thực; không nhận `userId`, ownership, entitlement, đáp án hoặc lịch sử từ client. Conversation/job không tồn tại và resource của user khác đều trả cùng `404 NOT_FOUND`. Response công khai không trả `userId` hoặc `idempotencyKey` nội bộ.
+
+Mutation `POST`/`PATCH`/`DELETE` yêu cầu entitlement `AI_CHAT` đang có hiệu lực. Chat TOEIC chung vẫn dùng được khi user còn attempt `IN_PROGRESS`; chỉ conversation gắn câu hỏi mới bị kiểm tra lại trạng thái attempt trước khi tạo và trước mỗi lần gửi. `GET` chỉ yêu cầu đăng nhập, nên user hết hạn/thu hồi Pro vẫn đọc được lịch sử cũ.
+
+### 7A.1 Tạo conversation
+
+- **Method/path:** `POST /api/ai/chat/conversations`.
+- **Body:** `locale` chỉ nhận `vi|en`; `attemptId` và `questionNumber` phải cùng có hoặc cùng vắng mặt.
+
+```json
+{
+  "locale": "vi",
+  "attemptId": "attempt-123",
+  "questionNumber": 101
+}
+```
+
+Context chỉ hợp lệ với đúng một câu thuộc attempt của user, đã `COMPLETED` và nằm trong scope. Frontend chỉ gửi identifiers; BE-Core tự lấy các review field được phép. Với chat TOEIC chung, gửi `{ "locale": "vi" }`.
+
+- **Response:** `201 Created`.
+
+```json
+{
+  "id": "conversation-uuid",
+  "title": "Hội thoại TOEIC mới",
+  "locale": "vi",
+  "contextAttemptId": "attempt-123",
+  "contextQuestionNumber": 101,
+  "status": "ACTIVE",
+  "createdAt": 1791093600000,
+  "updatedAt": 1791093600000,
+  "lastMessageAt": 1791093600000
+}
+```
+
+Tối đa 10 conversation `ACTIVE`; conversation đã soft-delete không tính vào giới hạn.
+
+### 7A.2 Liệt kê và mở conversation
+
+- `GET /api/ai/chat/conversations` trả `200 OK`, mảng conversation active sắp xếp theo `lastMessageAt` mới nhất trước.
+- `GET /api/ai/chat/conversations/{conversationId}` trả `200 OK`:
+
+```json
+{
+  "conversation": {
+    "id": "conversation-uuid",
+    "title": "Hội thoại TOEIC mới",
+    "locale": "vi",
+    "contextAttemptId": null,
+    "contextQuestionNumber": null,
+    "status": "ACTIVE",
+    "createdAt": 1791093600000,
+    "updatedAt": 1791093601000,
+    "lastMessageAt": 1791093601000
+  },
+  "messages": [
+    {
+      "id": "message-id",
+      "role": "USER",
+      "content": "Giải thích giúp mình cách dùng despite.",
+      "status": "SUCCEEDED",
+      "jobId": "job-id",
+      "errorCode": null,
+      "createdAt": 1791093601000,
+      "completedAt": 1791093601000
+    }
+  ]
+}
+```
+
+Message có `role=USER|ASSISTANT`, `status=PENDING|SUCCEEDED|FAILED`. Assistant `PENDING` có `content=null`; assistant `FAILED` có `errorCode` và giữ `content=null`.
+
+### 7A.3 Gửi tin nhắn
+
+- **Method/path:** `POST /api/ai/chat/conversations/{conversationId}/messages`.
+- **Body:** `content` được trim, tối đa 1.000 Unicode characters; `idempotencyKey` không rỗng, tối đa 128 ký tự và phải duy nhất theo user.
+
+```json
+{
+  "content": "Vì sao câu này dùng despite?",
+  "idempotencyKey": "95cbcb8e-f88a-4ae2-b510-575047a7d590"
+}
+```
+
+- **Response:** `202 Accepted`. Một key lặp với cùng conversation/content trả lại đúng aggregate cũ với `newlyAccepted=false`, không charge quota và không publish lại.
+
+```json
+{
+  "conversation": {
+    "id": "conversation-uuid",
+    "title": "Vì sao câu này dùng despite?",
+    "locale": "vi",
+    "contextAttemptId": null,
+    "contextQuestionNumber": null,
+    "status": "ACTIVE",
+    "createdAt": 1791093600000,
+    "updatedAt": 1791093601000,
+    "lastMessageAt": 1791093601000
+  },
+  "userMessage": {
+    "id": "user-message-id",
+    "role": "USER",
+    "content": "Vì sao câu này dùng despite?",
+    "status": "SUCCEEDED",
+    "jobId": "job-id",
+    "errorCode": null,
+    "createdAt": 1791093601000,
+    "completedAt": 1791093601000
+  },
+  "assistantMessage": {
+    "id": "assistant-message-id",
+    "role": "ASSISTANT",
+    "content": null,
+    "status": "PENDING",
+    "jobId": "job-id",
+    "errorCode": null,
+    "createdAt": 1791093601000,
+    "completedAt": null
+  },
+  "job": {
+    "id": "job-id",
+    "conversationId": "conversation-uuid",
+    "userMessageId": "user-message-id",
+    "assistantMessageId": "assistant-message-id",
+    "status": "PENDING",
+    "errorCode": null,
+    "createdAt": 1791093601000,
+    "updatedAt": 1791093601000,
+    "completedAt": null
+  },
+  "quotaSummary": {
+    "dailyLimit": 30,
+    "remainingDaily": 29,
+    "nextResetAt": 1791133200000
+  },
+  "newlyAccepted": true
+}
+```
+
+Tin nhắn user đầu tiên thay tiêu đề mặc định bằng nội dung câu hỏi đã chuẩn hóa khoảng trắng và giới hạn 60 Unicode code points. Các tin nhắn sau không đổi tiêu đề.
+
+Quota được charge atomically một lần khi message hợp lệ được chấp nhận: 30/ngày lịch `Asia/Ho_Chi_Minh`, reset lúc 00:00 kế tiếp, và tối đa 5 lượt trong rolling 60 giây. Server dùng admission time không giảm để request commit đảo thứ tự quanh nửa đêm không vượt giới hạn.
+
+### 7A.3b Thử lại tin nhắn thất bại
+
+- **Method/path:** `POST /api/ai/chat/conversations/{conversationId}/messages/{messageId}/retry`, trong đó `{messageId}` là id của **assistant message đang `FAILED`**.
+- **Body:** không có.
+- **Response:** `202 Accepted`, cùng response shape với 7A.3 (`userMessage`, `assistantMessage`, `job`, `quotaSummary`, `newlyAccepted`). Khác biệt:
+  - Tái dùng đúng cặp user/assistant message cũ — **không tạo tin nhắn user mới, không trừ quota**.
+  - `job.id` là id mới; assistant message được reset về `PENDING` (`errorCode`/`completedAt` xóa).
+  - `newlyAccepted=false` khi lượt retry đã được chấp nhận mà job vẫn `PENDING` (double-click hoặc mất response): không tạo job mới, server publish lại job đó.
+- **Điều kiện lỗi thêm:** `400 CHAT_MESSAGE_INVALID` khi message không phải assistant hoặc không ở trạng thái `FAILED`/`PENDING` hợp lệ để retry; `403 PRO_REQUIRED` khi Pro hết hạn (hết hạn vẫn đọc lịch sử nhưng không được retry); `404 NOT_FOUND` khi conversation/message không thuộc user.
+
+### 7A.4 Poll job
+
+- **Method/path:** `GET /api/ai/chat/jobs/{jobId}`.
+- **Response:** `200 OK`, cùng schema `job` ở response `202`; `status=PENDING|SUCCEEDED|FAILED`. Khi terminal, `completedAt` có giá trị; khi failed, `errorCode` có mã ổn định. Frontend poll đến terminal với timeout/abort riêng, rồi đọc lại conversation để lấy assistant message cuối cùng.
+
+### 7A.5 Đổi tên conversation
+
+- **Method/path:** `PATCH /api/ai/chat/conversations/{conversationId}`.
+- **Body:** `{ "title": "Mẹo Part 5: giới từ" }`.
+- **Response:** `200 OK`, schema conversation như API tạo/list.
+- `title` được trim, chuẩn hóa chuỗi khoảng trắng và phải dài từ 1 đến 60 Unicode code points. Chỉ owner có entitlement `AI_CHAT` hiệu lực được đổi tên conversation active.
+
+### 7A.6 Xóa conversation
+
+- **Method/path:** `DELETE /api/ai/chat/conversations/{conversationId}`.
+- **Response:** `204 No Content`.
+- Đây là soft delete: conversation biến mất khỏi list/read và không được gửi cho Gemini; message/job vẫn được giữ. Thao tác lặp trên conversation owned đã xóa là no-op ở tầng lưu trữ, nhưng normal lookup vẫn không công khai resource đã xóa.
+
+### 7A.7 Lỗi ổn định
+
+| HTTP | Code | Điều kiện |
+| --- | --- | --- |
+| `400` | `CHAT_CONTEXT_INVALID` | Locale hoặc cặp context identifiers không hợp lệ. |
+| `400` | `CHAT_MESSAGE_INVALID` | Content/key rỗng, quá dài, malformed, key được reuse cho payload khác, hoặc retry khi assistant message không ở trạng thái cho phép. |
+| `400` | `CHAT_TITLE_INVALID` | Tiêu đề rỗng hoặc dài quá 60 Unicode code points. |
+| `403` | `PRO_REQUIRED` | Mutation khi thiếu `AI_CHAT` có hiệu lực. |
+| `404` | `NOT_FOUND` | Conversation/job/context không tồn tại, bị xóa, ngoài scope hoặc thuộc user khác. |
+| `403` | `ATTEMPT_NOT_COMPLETED` | Câu hỏi thuộc attempt chưa hoàn thành; backend không trả nội dung review. |
+| `409` | `CONVERSATION_LIMIT_REACHED` | Đã có 10 conversation active. |
+| `429` | `CHAT_RATE_LIMITED` | Vượt 5 lượt trong rolling minute. |
+| `429` | `CHAT_DAILY_LIMIT_REACHED` | Hết 30 lượt trong ngày Việt Nam. |
+| `503` | `AI_UNAVAILABLE` | Không publish được hoặc provider tạm thời lỗi. |
 
 ## 8. API Employee quản lý đề
 
@@ -830,6 +1101,24 @@ Tất cả endpoint trong mục này yêu cầu role `ADMIN`.
 - **Params/body:** không có.
 - **Response thành công:** `200 OK`, mảng `TestMetadata` có status `APPROVED`/`REJECTED` và `reviewedAt` khác `null`, sắp xếp lần review mới nhất trước.
 
+### 9.6 Quản lý subscription Pro
+
+Tất cả endpoint dưới đây yêu cầu role `ADMIN`, session hợp lệ; PUT/DELETE còn cần CSRF như quy ước chung. `uid` là UID người nhận subscription, không phải UID người thực hiện. Actor `activatedBy`/`revokedBy` lấy từ principal đã xác thực, không từ body.
+
+| Method/path | Body | Response |
+| --- | --- | --- |
+| `GET /api/admin/subscriptions/{uid}` | Không có | `200 OK`, summary sáu field tại mục 3.1. |
+| `PUT /api/admin/subscriptions/{uid}` | Chỉ `{ "expiresAt": 1791612000000 }` | `200 OK`, summary sau kích hoạt/gia hạn. |
+| `DELETE /api/admin/subscriptions/{uid}` | Không có | `200 OK`, summary sau thu hồi (không phải `204`). |
+
+GET với subscription chưa tồn tại trả summary rỗng, không trả `404`. PUT yêu cầu `expiresAt` bắt buộc, là Unix millisecond sau thời gian server; thiếu/null trả `400 VALIDATION_ERROR`, body không deserialize được trả `400 INVALID_REQUEST_BODY`, thời hạn không ở tương lai trả `400 SUBSCRIPTION_EXPIRY_INVALID`. Không gửi `planCode`, `status`, quyền, ngày bắt đầu hoặc audit fields.
+
+PUT tạo subscription mới hoặc kích hoạt lại subscription hết hạn/bị thu hồi với `startsAt=serverNow`. Khi status `ACTIVE` và expiry hiện tại còn ở tương lai, PUT giữ ngày bắt đầu (nếu có), chỉ kéo dài expiry; expiry yêu cầu bằng hoặc sớm hơn expiry hiện tại là no-op sau khi đã validate thời điểm tương lai. Khi ghi, server đặt `PRO`, `ACTIVE`, `[AI_CHAT, AI_ANALYSIS]`, cập nhật `activatedBy`/`updatedAt`, xóa metadata thu hồi và giữ `createdAt` cũ.
+
+DELETE đánh dấu `REVOKED`, cập nhật `revokedBy`, `revokedAt`, `updatedAt`; không xóa document. Subscription chưa tồn tại hoặc đã `REVOKED` là no-op và vẫn trả `200 OK`. Thiếu session trả `401 AUTHENTICATION_REQUIRED`; sai role trả `403 ACCESS_DENIED`.
+
+PUT và DELETE đọc, quyết định và ghi subscription trong cùng một Firestore transaction. Khi có cập nhật đồng thời, server tính lại trên document mới nhất để giữ quy tắc không rút ngắn expiry, tính idempotent và metadata audit.
+
 ## 10. API nội bộ kiểm thử AI
 
 ### 10.1 Publish trực tiếp một yêu cầu giải thích
@@ -880,6 +1169,18 @@ NOT_REQUESTED -> PENDING -> PROCESSING -> COMPLETED
                     \----------\-------> FAILED
 ```
 
+### Capy AI Chat
+
+```text
+accepted: USER/SUCCEEDED + ASSISTANT/PENDING + JOB/PENDING
+                                      -> ASSISTANT/SUCCEEDED + JOB/SUCCEEDED
+                                      -> ASSISTANT/FAILED    + JOB/FAILED
+```
+
+Terminal delivery đầu tiên thắng; result lặp hoặc identifiers không khớp không ghi đè. Transport duplicate không charge hoặc publish lại.
+
+AI Service dùng `aiChatGenerationResults/{jobId}` làm outbox terminal trước khi publish `ai.chat.result`. Document chỉ chứa job/user/conversation/assistant-message identifiers, trạng thái, answer hoặc stable error code và timestamps; không chứa history, current message hay question context. Khi listener retry hoặc Rabbit redelivery, AI Service replay terminal result đã lưu thay vì gọi Gemini lại. Outbox `PROCESSING` không được cleanup; terminal outbox chỉ cleanup sau khi BE-Core job đã terminal và qua retention window vận hành.
+
 ## 12. Error response
 
 Security và application errors đều trả JSON. Frontend nên xử lý theo HTTP status và `code`, không so khớp nội dung tiếng Việt của `message`.
@@ -903,6 +1204,16 @@ Security và application errors đều trả JSON. Frontend nên xử lý theo H
 | `401` | `AUTHENTICATION_REQUIRED` | Thiếu, sai hoặc hết hạn Firebase ID token. |
 | `403` | `ACCESS_DENIED` | User đã đăng nhập nhưng thiếu role cần thiết. |
 | `403` | `FORBIDDEN` | Lỗi quyền sở hữu/nghiệp vụ do service trả về. |
+| `403` | `PRO_REQUIRED` | Tạo/thử lại/refresh AI analysis khi thiếu entitlement Pro có hiệu lực. |
+| `400` | `CHAT_CONTEXT_INVALID`, `CHAT_MESSAGE_INVALID`, `CHAT_TITLE_INVALID` | Context, nội dung hoặc tiêu đề chat không hợp lệ. |
+| `403` | `ATTEMPT_NOT_COMPLETED` | Câu hỏi chat thuộc bài chưa hoàn thành. |
+| `409` | `CONVERSATION_LIMIT_REACHED` | Đã đạt giới hạn conversation đang hoạt động. |
+| `429` | `CHAT_RATE_LIMITED`, `CHAT_DAILY_LIMIT_REACHED` | Vượt quota chat burst/ngày. |
+| `503` | `AI_UNAVAILABLE` | RabbitMQ/Gemini chat tạm thời không sẵn sàng. |
+| `400` | `SUBSCRIPTION_EXPIRY_INVALID` | Expiry subscription không sau thời gian server. |
+| `400` | `PAYMENT_PLAN_INVALID`, `PAYMENT_WEBHOOK_INVALID`, `PAYMENT_WEBHOOK_SIGNATURE_INVALID` | Gói thanh toán hoặc webhook PayOS không hợp lệ. |
+| `403` | `PAYMENT_PLAN_UNAVAILABLE` | Gói chỉ dành cho sandbox nhưng server đang chạy production mode. |
+| `502` | `PAYOS_UNAVAILABLE` | PayOS không tạo được link thanh toán. |
 | `404` | `NOT_FOUND` | Resource không tồn tại hoặc bị che bởi rule ownership/publication. |
 | `409` | `CONFLICT` | Trạng thái workflow/section không cho phép thao tác. |
 | `503` | `SERVICE_UNAVAILABLE` | Storage, RabbitMQ hoặc AI service chưa sẵn sàng. |

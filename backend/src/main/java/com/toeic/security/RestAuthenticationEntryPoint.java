@@ -29,18 +29,34 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
             HttpServletResponse response,
             AuthenticationException exception
     ) throws IOException, ServletException {
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setCharacterEncoding("UTF-8");
         String message = exception instanceof BadCredentialsException
                 && exception.getMessage() != null
                 ? exception.getMessage()
                 : "Bạn cần đăng nhập để tiếp tục";
+        writeError(
+                request,
+                response,
+                HttpStatus.UNAUTHORIZED,
+                "AUTHENTICATION_REQUIRED",
+                message
+        );
+    }
+
+    public void writeError(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            HttpStatus status,
+            String code,
+            String message
+    ) throws IOException {
+        response.setStatus(status.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
         objectMapper.writeValue(
                 response.getOutputStream(),
                 ApiErrorResponse.of(
-                        HttpStatus.UNAUTHORIZED.value(),
-                        "AUTHENTICATION_REQUIRED",
+                        status.value(),
+                        code,
                         message,
                         request.getRequestURI()
                 )

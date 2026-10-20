@@ -34,13 +34,13 @@ export function getTestTitle(testId) {
 }
 
 export const TOEIC_PARTS = [
-  { part: 1, section: "LISTENING", questions: 6 },
-  { part: 2, section: "LISTENING", questions: 25 },
-  { part: 3, section: "LISTENING", questions: 39 },
-  { part: 4, section: "LISTENING", questions: 30 },
-  { part: 5, section: "READING", questions: 30 },
-  { part: 6, section: "READING", questions: 16 },
-  { part: 7, section: "READING", questions: 54 },
+  { part: 1, section: "LISTENING", questions: 6, label: "Mô tả tranh" },
+  { part: 2, section: "LISTENING", questions: 25, label: "Hỏi–đáp" },
+  { part: 3, section: "LISTENING", questions: 39, label: "Hội thoại" },
+  { part: 4, section: "LISTENING", questions: 30, label: "Bài nói" },
+  { part: 5, section: "READING", questions: 30, label: "Hoàn thành câu" },
+  { part: 6, section: "READING", questions: 16, label: "Hoàn thành đoạn văn" },
+  { part: 7, section: "READING", questions: 54, label: "Đọc hiểu" },
 ];
 
 export const EXAM_MODES = [
