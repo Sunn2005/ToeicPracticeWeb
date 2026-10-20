@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { updateUserProfile } from "../../api/userLearning";
 import { useAuth } from "../../auth/useAuth";
 import { useLanguage } from "../../i18n/LanguageContext";
+import ProAvatarBadge from "../../components/user/ProAvatarBadge";
 
 const MAX_PHOTO_BYTES = 2 * 1024 * 1024;
 const AVATAR_SIZE = 256;
@@ -132,17 +133,20 @@ function EditProfileForm({ profile, t }) {
 
       <fieldset disabled={saving} className="min-w-0">
         <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center">
-          {previewUrl ? (
-            <img
-              src={previewUrl}
-              alt={displayName}
-              className="h-16 w-16 rounded-full border border-slate-200 object-cover"
-            />
-          ) : (
-            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-sky-100 text-xl font-bold text-sky-600">
-              {getInitials(displayName || profile.displayName)}
-            </span>
-          )}
+          <span className="relative inline-flex w-fit shrink-0">
+            {previewUrl ? (
+              <img
+                src={previewUrl}
+                alt={displayName}
+                className="h-16 w-16 rounded-full border border-slate-200 object-cover"
+              />
+            ) : (
+              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-sky-100 text-xl font-bold text-sky-600">
+                {getInitials(displayName || profile.displayName)}
+              </span>
+            )}
+            <ProAvatarBadge subscription={profile.subscription} />
+          </span>
           <div>
             <div className="flex flex-wrap gap-2">
               <button

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/useAuth";
 import { useLanguage } from "../../i18n/LanguageContext";
+import ProAvatarBadge from "../../components/user/ProAvatarBadge";
 import {
   aggregatePartAccuracy,
   computeStudyStreak,
@@ -26,15 +27,6 @@ function getInitials(displayName) {
   return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase();
 }
 
-function formatJoinDate(timestamp, language) {
-  if (!timestamp) return "—";
-  return new Intl.DateTimeFormat(language === "vi" ? "vi-VN" : "en-US", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }).format(new Date(timestamp));
-}
-
 function partBarColor(percent) {
   if (percent >= 85) return "bg-emerald-500";
   if (percent >= 75) return "bg-sky-500";
@@ -56,7 +48,7 @@ function StatCard({ icon, value, label }) {
 }
 
 export default function ProfilePage() {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { profile, profileLoading, profileError } = useAuth();
   const [stats, setStats] = useState(null);
@@ -108,6 +100,7 @@ export default function ProfilePage() {
   }
 
   const name = profile.displayName || "—";
+  const isPro = profile.subscription?.planCode === "PRO" && profile.subscription?.effective === true;
   const targetScore = Number(profile.targetScore) || 0;
   const averageScore = Number(stats?.averageScore) || 0;
   const goalPercent = targetScore > 0 ? Math.min(100, Math.round((averageScore / targetScore) * 100)) : 0;
@@ -115,28 +108,44 @@ export default function ProfilePage() {
   return (
     <div className="mx-auto max-w-[1380px]">
       {/* Profile header card */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-          {profile.photoUrl ? (
-            <img
-              src={profile.photoUrl}
-              alt={name}
-              referrerPolicy="no-referrer"
-              className="h-16 w-16 rounded-full border border-slate-200 object-cover"
-            />
-          ) : (
-            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-sky-100 text-xl font-bold text-sky-600">
-              {getInitials(profile.displayName)}
-            </span>
-          )}
+      <section className="rounded-3xl border border-white/80 bg-gradient-to-r from-blue-100 via-blue-50 to-slate-50 p-6 shadow-[0_12px_30px_-12px_rgba(30,64,100,0.35)] sm:p-8">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-7">
+          <span className="relative inline-flex w-fit shrink-0">
+            {profile.photoUrl ? (
+              <img
+                src={profile.photoUrl}
+                alt={name}
+                referrerPolicy="no-referrer"
+                className="h-24 w-24 rounded-full border-[6px] border-white object-cover shadow-lg sm:h-28 sm:w-28"
+              />
+            ) : (
+              <span className="flex h-24 w-24 items-center justify-center rounded-full border-[6px] border-white bg-sky-100 text-3xl font-bold text-sky-600 shadow-lg sm:h-28 sm:w-28">
+                {getInitials(profile.displayName)}
+              </span>
+            )}
+            <ProAvatarBadge subscription={profile.subscription} large />
+          </span>
           <div className="min-w-0 flex-1">
-            <h2 className="truncate text-xl font-bold text-slate-950">{name}</h2>
-            <p className="truncate text-sm text-slate-500">{profile.email || ""}</p>
+            <h2 className="break-words text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl lg:text-4xl">{name}</h2>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-blue-200 px-4 py-1.5 text-sm font-medium text-blue-800">
+                {t("learner")}
+              </span>
+              {isPro && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-300 px-4 py-1.5 text-sm font-semibold text-amber-900">
+                  <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
+                    <path d="m12 2.5 2.9 5.88 6.49.94-4.7 4.58 1.11 6.47L12 17.32l-5.8 3.05 1.1-6.47-4.69-4.58 6.49-.94L12 2.5Z" />
+                  </svg>
+                  Pro
+                </span>
+              )}
+            </div>
+            <p className="mt-3 break-all text-sm text-slate-500">{profile.email || ""}</p>
           </div>
           <button
             type="button"
             onClick={() => navigate("/profile/edit")}
-            className="shrink-0 rounded-lg border border-sky-500 px-5 py-2 text-sm font-semibold text-sky-600 transition hover:bg-sky-50"
+            className="shrink-0 self-start rounded-xl border border-sky-200 bg-white/80 px-5 py-2.5 text-sm font-semibold text-sky-700 transition hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 sm:self-center"
           >
             {t("editProfile")}
           </button>

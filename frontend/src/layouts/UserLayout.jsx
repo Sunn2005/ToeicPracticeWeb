@@ -35,10 +35,10 @@ function NavIcon({ name }) {
 
 function UserAvatar({ photoUrl, name }) {
   if (photoUrl) {
-    return <img src={photoUrl} alt="" referrerPolicy="no-referrer" className="h-10 w-10 rounded-full object-cover" />;
+    return <img src={photoUrl} alt="" referrerPolicy="no-referrer" className="h-10 w-10 rounded-full border-2 border-white object-cover shadow-sm" />;
   }
   return (
-    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100 font-bold text-sky-700">
+    <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-sky-100 font-bold text-sky-700 shadow-sm">
       {(name || "U").charAt(0).toUpperCase()}
     </span>
   );
@@ -53,6 +53,7 @@ export default function UserLayout() {
   const [signingOut, setSigningOut] = useState(false);
   const name = profile?.displayName || user?.displayName || "Học viên";
   const photoUrl = profile?.photoUrl || user?.photoURL;
+  const isPro = profile?.subscription?.planCode === "PRO" && profile?.subscription?.effective === true;
   const pageTitle = /^\/full-test\/[^/]+\/result$/.test(location.pathname)
     ? t("detailedResults")
     : PAGE_TITLES[location.pathname] ? t(PAGE_TITLES[location.pathname]) : "CapyTOEIC";
@@ -112,11 +113,28 @@ export default function UserLayout() {
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
             </button>
             <span className="hidden h-8 w-px bg-slate-200 sm:block" />
-            <button type="button" onClick={() => navigate("/profile")} className="flex items-center gap-3 text-left">
-              <UserAvatar photoUrl={photoUrl} name={name} />
+            <button
+              type="button"
+              onClick={() => navigate("/profile")}
+              aria-label={`${t("personalProfile")}: ${name}${isPro ? `, ${t("proAccountBadge")}` : ""}`}
+              className="flex items-center gap-3 rounded-lg py-1 text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-500"
+            >
+              <span className="relative inline-flex shrink-0">
+                <UserAvatar photoUrl={photoUrl} name={name} />
+              </span>
               <span className="hidden sm:block">
                 <strong className="block max-w-44 truncate text-sm">{name}</strong>
-                <span className="text-xs text-slate-400">{t("learner")}</span>
+                <span className="mt-1 flex items-center gap-1.5">
+                  <span className="rounded-full bg-blue-200 px-2 py-0.5 text-[10px] font-medium leading-4 text-blue-800">{t("learner")}</span>
+                  {isPro && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-300 px-2 py-0.5 text-[10px] font-semibold leading-4 text-amber-900">
+                      <svg aria-hidden="true" viewBox="0 0 24 24" className="h-3 w-3" fill="currentColor">
+                        <path d="m12 2.5 2.9 5.88 6.49.94-4.7 4.58 1.11 6.47L12 17.32l-5.8 3.05 1.1-6.47-4.69-4.58 6.49-.94L12 2.5Z" />
+                      </svg>
+                      Pro
+                    </span>
+                  )}
+                </span>
               </span>
             </button>
           </div>
