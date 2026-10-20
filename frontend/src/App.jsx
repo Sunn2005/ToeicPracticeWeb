@@ -1,11 +1,11 @@
 import { Analytics } from "@vercel/analytics/react";
 import { useCallback, useEffect, useState } from "react";
 import {
-    BrowserRouter,
-    Navigate,
-    Route,
-    Routes,
-    useLocation,
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
 } from "react-router-dom";
 import Login from "./pages/Login";
 import PracticePart from "./pages/PracticePart";
@@ -30,88 +30,168 @@ import ReviewHistoryPage from "./pages/admin/ReviewHistoryPage";
 import SubscriptionManagementPage from "./pages/admin/SubscriptionManagementPage";
 import TestReviewPage from "./pages/admin/TestReviewPage";
 import ForbiddenPage from "./pages/errors/ForbiddenPage";
-import GuestRoute from "./auth/GuestRoute.jsx";
-import LandingPage from "./pages/public/LandingPage.jsx";
-import SupportPage from "./pages/public/SupportPage.jsx";
-import PublicLayout from "./layouts/PublicLayout.jsx";
-import NotFoundPage from "./pages/errors/NotFoundPage.jsx";
+import UserLayout from "./layouts/UserLayout";
+import UserDashboard from "./pages/user/UserDashboard";
+import TestCatalogPage from "./pages/user/TestCatalogPage";
+import AttemptHistoryPage from "./pages/user/AttemptHistoryPage";
+import ProfilePage from "./pages/user/ProfilePage";
+import EditProfilePage from "./pages/user/EditProfilePage";
+import PaymentResultPage from "./pages/user/PaymentResultPage";
+import PricingPage from "./pages/user/PricingPage";
+import { useAIChat } from "./hooks/useAIChat";
+import { getChatEligibleAttempts, getChatQuestionChoices } from "./api/userLearning";
+import { hasEffectiveAIChat } from "./components/floatingPetInteraction";
+
+function LearnerChatShell({ user, role, profile, pathname }) {
+  const { language } = useLanguage();
+  const [open, setOpen] = useState(false);
+  const [attempts, setAttempts] = useState([]);
+  const isExamRoute = /^\/full-test\/[^/]+\/exam(?:\/|$)/i.test(pathname);
+  const enabled = Boolean(user)
+    && String(role || "").toUpperCase() === "USER"
+    && hasEffectiveAIChat(profile?.subscription)
+    && !isExamRoute;
+  const chat = useAIChat({ enabled: open && enabled, locale: language });
+  const openChat = useCallback(() => setOpen(true), []);
+  const closeChat = useCallback(() => setOpen(false), []);
+
+  useEffect(() => {
+    if (!open || !enabled) return undefined;
+    const controller = new AbortController();
+    getChatEligibleAttempts({ signal: controller.signal })
+      .then(setAttempts)
+      .catch((error) => {
+        if (error?.name !== "AbortError") setAttempts([]);
+      });
+    return () => controller.abort();
+  }, [enabled, open]);
+
+  return (
+    <>
+      <FloatingPet
+        user={user}
+        role={role}
+        profile={profile}
+        onOpenChat={openChat}
+      />
+      <AIChatBox
+        open={open && enabled}
+        onClose={closeChat}
+        chat={chat}
+        attempts={attempts}
+        getQuestionChoices={getChatQuestionChoices}
+      />
+    </>
+  );
+}
 
 function AppRoutes() {
-    const { user, role, authLoading } = useAuth();
-    const location = useLocation();
+  const { user, role, profile, authLoading } = useAuth();
+  const location = useLocation();
 
-    if (authLoading) {
-        return <LoadingScreen />;
-    }
+  if (authLoading) {
+    return <LoadingScreen />;
+  }
 
-    return (
-        <>
-            <Routes>
-                <Route element={<GuestRoute />}>
-                    <Route element={<PublicLayout />}>
-                        <Route path="/" element={<LandingPage />} />
-                        <Route path="/support" element={<SupportPage />} />
-                    </Route>
-                </Route>
-                <Route
-                    path="/login"
-                    element={user ? <Navigate to="/dashboard" replace /> : <Login />}
-                />
-                <Route
-                    path="/dashboard"
-                    element={user ? <Welcome user={user} /> : <Navigate to="/login" replace />}
-                />
-                <Route
-                    path="/practice/part5"
-                    element={user ? <PracticePart /> : <Navigate to="/login" replace />}
-                />
-                <Route
-                    path="/full-test/:testId"
-                    element={user ? <FullTestIntro /> : <Navigate to="/login" replace />}
-                />
-                <Route
-                    path="/full-test/:attemptId/exam"
-                    element={user ? <FullTestExam /> : <Navigate to="/login" replace />}
-                />
-                <Route
-                    path="/full-test/:attemptId/result"
-                    element={user ? <FullTestResult /> : <Navigate to="/login" replace />}
-                />
-                <Route
-                    path="/full-test/:attemptId/review"
-                    element={user ? <FullTestReview /> : <Navigate to="/login" replace />}
-                />
-                <Route path="*" element={<NotFoundPage />} />
-                <Route path="/console" element={<LoginPage />} />
-                <Route path="/console/forbidden" element={<ForbiddenPage />} />
-                <Route element={<ProtectedRoute allowedRoles={["ADMIN", "EMPLOYEE"]} />}>
-                    <Route element={<ManagementLayout />}>
-                        <Route path="/console/dashboard" element={<AdminDashboard />} />
-                        <Route path="/console/tests" element={<MyTestsPage />} />
-                        <Route path="/console/tests/new" element={<CreateTestPage />} />
-                        <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
-                            <Route path="/console/reviews" element={<ReviewQueuePage />} />
-                            <Route path="/console/reviews/:testId" element={<TestReviewPage />} />
-                            <Route path="/console/review-history" element={<ReviewHistoryPage />} />
-                        </Route>
-                    </Route>
-                </Route>
-            </Routes>
-            {!location.pathname.startsWith("/console") && <FloatingPet user={user} role={role} />}
-        </>
-    );
+  return (
+    <>
+      <Routes>
+        <Route
+          path="/"
+          element={<Navigate to={user ? "/dashboard" : "/login"} replace />}
+        />
+        <Route
+          path="/login"
+          element={user ? <Navigate to="/dashboard" replace /> : <Login />}
+        />
+        <Route
+          element={user ? <UserLayout /> : <Navigate to="/login" replace />}
+        >
+          <Route path="/dashboard" element={<UserDashboard />} />
+          <Route path="/tests" element={<TestCatalogPage />} />
+          <Route path="/history" element={<AttemptHistoryPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/profile/edit" element={<EditProfilePage />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/payment/success" element={<PaymentResultPage mode="success" />} />
+          <Route path="/payment/cancel" element={<PaymentResultPage mode="cancel" />} />
+          <Route
+            path="/full-test/:attemptId/result"
+            element={<FullTestResult />}
+          />
+        </Route>
+        <Route
+          path="/practice/part5"
+          element={user ? <PracticePart /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/full-test/:testId"
+          element={user ? <FullTestIntro /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/full-test/:attemptId/exam"
+          element={user ? <FullTestExam /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/full-test/:attemptId/review"
+          element={user ? <FullTestReview /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="*"
+          element={<Navigate to={user ? "/dashboard" : "/login"} replace />}
+        />
+
+        <Route path="/console" element={<LoginPage />} />
+        <Route path="/console/forbidden" element={<ForbiddenPage />} />
+        <Route
+          element={<ProtectedRoute allowedRoles={["ADMIN", "EMPLOYEE"]} />}
+        >
+          <Route element={<ManagementLayout />}>
+            <Route path="/console/dashboard" element={<AdminDashboard />} />
+            <Route path="/console/tests" element={<MyTestsPage />} />
+            <Route path="/console/tests/new" element={<CreateTestPage />} />
+            <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
+              <Route
+                path="/console/subscriptions"
+                element={<SubscriptionManagementPage />}
+              />
+              <Route path="/console/reviews" element={<ReviewQueuePage />} />
+              <Route
+                path="/console/reviews/:testId"
+                element={<TestReviewPage />}
+              />
+              <Route
+                path="/console/review-history"
+                element={<ReviewHistoryPage />}
+              />
+            </Route>
+          </Route>
+        </Route>
+      </Routes>
+      {!location.pathname.startsWith("/console") && (
+        <LearnerChatShell
+          key={`${location.key}:${user?.uid || "guest"}:${role}:${hasEffectiveAIChat(profile?.subscription)}`}
+          user={user}
+          role={role}
+          profile={profile}
+          pathname={location.pathname}
+        />
+      )}
+    </>
+  );
 }
 
 function App() {
-    return (
-        <LanguageProvider>
-            <AuthProvider>
-                <BrowserRouter>
-                    <AppRoutes />
-                </BrowserRouter>
-            </AuthProvider>
-        </LanguageProvider>
-    );
+  return (
+    <LanguageProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <AppRoutes />
+          <Analytics />
+        </BrowserRouter>
+      </AuthProvider>
+    </LanguageProvider>
+  );
 }
 
 export default App;
