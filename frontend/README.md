@@ -270,7 +270,8 @@ Capy AI Chat hỗ trợ giải đáp thắc mắc liên quan đến luyện thi 
 - Người dùng thường, `EMPLOYEE`, `ADMIN` và các route quản trị không hiển thị Capy.
 - Capy và khung chat không xuất hiện tại route làm bài `/full-test/:attemptId/exam`.
 - Frontend chỉ dùng subscription summary để quyết định cách hiển thị. Backend vẫn kiểm tra entitlement trên mọi API chat; không được tin role hoặc trạng thái Pro từ local storage/request body.
-- Dashboard người dùng thường chỉ giới thiệu lợi ích Pro. Dự án chưa triển khai checkout hoặc thanh toán nên không được tạo nút mua giả.
+- Dashboard người dùng thường tải danh sách gói từ backend và tạo checkout PayOS bằng `src/api/payments.js`; frontend chỉ gửi `planCode`, không gửi giá hoặc thời hạn.
+- Route `/payment/success` chỉ báo PayOS đã redirect về và refresh profile; quyền Pro chỉ được kích hoạt sau khi backend xác minh webhook. `/payment/cancel` không thay đổi subscription.
 
 ### Tương tác và khả năng truy cập
 
@@ -368,6 +369,7 @@ Client đã hỗ trợ cả JSON và `FormData`. Khi Member 3 triển khai uploa
 | Learning     | `GET /api/users/me/attempts`, `GET /api/users/me/statistics`    | `USER` trở lên          |
 | Exam         | `/api/tests/{testId}/attempts`, `/api/attempts/{attemptId}/...` | Đã đăng nhập            |
 | Capy AI Chat | `/api/ai/chat/conversations`, `/api/ai/chat/jobs/{jobId}`       | `USER` Pro + `AI_CHAT`  |
+| Payment      | `/api/payments/pro`, `/api/payments/pro/plans`                 | Đã đăng nhập            |
 | Employee     | `/api/employee/tests`, `/api/employee/media`                    | `EMPLOYEE` hoặc `ADMIN` |
 | Admin review | `/api/admin/test-submissions`, `/api/admin/review-history`      | `ADMIN`                 |
 

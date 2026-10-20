@@ -9,6 +9,7 @@ import com.toeic.model.enums.Entitlement;
 import com.toeic.model.enums.SubscriptionStatus;
 import com.toeic.model.enums.UserRole;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 import java.util.List;
@@ -21,7 +22,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -93,14 +96,67 @@ class CurrentUserServiceTests {
         user.setRole(UserRole.USER);
         when(userDao.findByUid("uid-1")).thenReturn(Optional.of(user));
 
-        var response = service.updateProfile("uid-1", "Minh Anh", null, 800);
+        var response = service.updateProfile(
+                "uid-1",
+                "Minh Anh",
+                null,
+                800,
+                "+84901234567",
+                "2001-09-18",
+                "female"
+        );
 
         assertEquals("Minh Anh", response.get("displayName"));
         assertEquals(800, response.get("targetScore"));
+        assertEquals("+84901234567", response.get("phoneNumber"));
+        assertEquals("2001-09-18", response.get("dateOfBirth"));
+        assertEquals("FEMALE", response.get("gender"));
+        assertEquals("+84901234567", user.getPhoneNumber());
+        assertEquals("2001-09-18", user.getDateOfBirth());
+        assertEquals("FEMALE", user.getGender());
         assertEquals(new SubscriptionService.SubscriptionSummary(
                 "PRO", SubscriptionStatus.ACTIVE, 1000L, 3000L,
                 List.of(Entitlement.AI_CHAT, Entitlement.AI_ANALYSIS), true), response.get("subscription"));
         verify(userDao).save(user);
+    }
+
+    @Test
+    void clearsOptionalPersonalFieldsWhenTheyAreBlank() throws Exception {
+        UserDao userDao = mock(UserDao.class);
+        CurrentUserService service = new CurrentUserService(userDao, mock(SubscriptionService.class));
+        User user = new User();
+        user.setUid("uid-1");
+        user.setRole(UserRole.USER);
+        user.setPhoneNumber("0901234567");
+        user.setDateOfBirth("2001-09-18");
+        user.setGender("MALE");
+        when(userDao.findByUid("uid-1")).thenReturn(Optional.of(user));
+
+        var response = service.updateProfile("uid-1", "Minh Anh", null, 800, " ", "", null);
+
+        assertNull(response.get("phoneNumber"));
+        assertNull(response.get("dateOfBirth"));
+        assertNull(response.get("gender"));
+        verify(userDao).save(user);
+    }
+
+    @Test
+    void rejectsInvalidPersonalFieldsBeforeSaving() throws Exception {
+        UserDao userDao = mock(UserDao.class);
+        CurrentUserService service = new CurrentUserService(userDao, mock(SubscriptionService.class));
+        User user = new User();
+        user.setUid("uid-1");
+        user.setRole(UserRole.USER);
+        when(userDao.findByUid("uid-1")).thenReturn(Optional.of(user));
+
+        assertThrows(ResponseStatusException.class, () ->
+                service.updateProfile("uid-1", "Minh Anh", null, 800, "abc", null, null));
+        assertThrows(ResponseStatusException.class, () ->
+                service.updateProfile("uid-1", "Minh Anh", null, 800, null, "18/09/2001", null));
+        assertThrows(ResponseStatusException.class, () ->
+                service.updateProfile("uid-1", "Minh Anh", null, 800, null, null, "UNKNOWN"));
+
+        verify(userDao, never()).save(user);
     }
 
     @Test

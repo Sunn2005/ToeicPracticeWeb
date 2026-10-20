@@ -1,17 +1,20 @@
 package com.toeic.service;
 
-import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.Bucket;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.cloud.StorageClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
+import java.net.URI;
 import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -33,53 +36,92 @@ public class MediaStorageService {
             "audio/ogg"
     );
 
-    private final FirebaseApp firebaseApp;
-    private final String storageBucket;
+    private static final String BUCKET = "toeic-media";
+    private final String supabaseUrl;
+    private final String serviceKey;
+    private final HttpClient httpClient;
 
+    @Autowired
     public MediaStorageService(
-            FirebaseApp firebaseApp,
-            @Value("${firebase.storage-bucket:}") String storageBucket
+            @Value("${supabase.url:}") String supabaseUrl,
+            @Value("${supabase.service-key:}") String serviceKey
     ) {
-        this.firebaseApp = firebaseApp;
-        this.storageBucket = storageBucket;
+        this(supabaseUrl, serviceKey, HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(10))
+                .followRedirects(HttpClient.Redirect.NEVER)
+                .build());
     }
 
-    public Map<String, Object> upload(String employeeUid, MultipartFile file) throws Exception {
+    MediaStorageService(String supabaseUrl, String serviceKey, HttpClient httpClient) {
+        this.supabaseUrl = supabaseUrl == null ? "" : supabaseUrl.trim().replaceAll("/+$", "");
+        this.serviceKey = serviceKey == null ? "" : serviceKey.trim();
+        this.httpClient = httpClient;
+    }
+
+    public Map<String, Object> upload(String employeeUid, MultipartFile file) throws IOException {
         validate(file);
-        if (storageBucket == null || storageBucket.isBlank()) {
-            throw new ResponseStatusException(
-                    HttpStatus.SERVICE_UNAVAILABLE,
-                    "Chưa cấu hình biến FIREBASE_STORAGE_BUCKET"
-            );
-        }
+        validateConfiguration();
 
         String originalName = file.getOriginalFilename() == null ? "media" : file.getOriginalFilename();
         String safeName = originalName.replaceAll("[^a-zA-Z0-9._-]", "-");
-        String objectName = "toeic-media/" + employeeUid + "/" + UUID.randomUUID() + "-" + safeName;
-        String downloadToken = UUID.randomUUID().toString();
-        Bucket bucket = StorageClient.getInstance(firebaseApp).bucket(storageBucket);
-        Blob blob = bucket.create(objectName, file.getBytes(), file.getContentType());
-        blob = blob.toBuilder()
-                .setMetadata(Map.of("firebaseStorageDownloadTokens", downloadToken))
-                .build()
-                .update();
+        // objectName is relative to the bucket; each upload gets a new object (no overwrite).
+        String storedName = UUID.randomUUID() + "-" + safeName;
+        String objectName = employeeUid + "/" + storedName;
+        String objectPath = encodeSegment(employeeUid) + "/" + encodeSegment(storedName);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(supabaseUrl + "/storage/v1/object/" + BUCKET + "/" + objectPath))
+                .timeout(Duration.ofSeconds(60))
+                .header("apikey", serviceKey)
+                .header("Authorization", "Bearer " + serviceKey)
+                .header("Content-Type", file.getContentType())
+                .header("x-upsert", "false")
+                .POST(HttpRequest.BodyPublishers.ofByteArray(file.getBytes()))
+                .build();
 
-        String encodedObjectName = URLEncoder.encode(objectName, StandardCharsets.UTF_8)
-                .replace("+", "%20");
-        String url = "https://firebasestorage.googleapis.com/v0/b/"
-                + bucket.getName()
-                + "/o/"
-                + encodedObjectName
-                + "?alt=media&token="
-                + downloadToken;
+        try {
+            HttpResponse<Void> response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+            if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                throw storageUnavailable();
+            }
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw storageUnavailable();
+        } catch (IOException exception) {
+            // Do not expose upstream bodies, headers or exceptions containing credentials.
+            throw storageUnavailable();
+        }
 
         Map<String, Object> response = new LinkedHashMap<>();
-        response.put("url", url);
-        response.put("objectName", blob.getName());
+        response.put("url", supabaseUrl + "/storage/v1/object/public/" + BUCKET + "/" + objectPath);
+        response.put("objectName", objectName);
         response.put("fileName", originalName);
         response.put("contentType", file.getContentType());
         response.put("size", file.getSize());
         return response;
+    }
+
+    private void validateConfiguration() {
+        try {
+            URI uri = URI.create(supabaseUrl);
+            if (!"https".equalsIgnoreCase(uri.getScheme()) || uri.getHost() == null
+                    || uri.getRawUserInfo() != null || uri.getRawQuery() != null
+                    || uri.getRawFragment() != null || !uri.getPath().isEmpty()
+                    || serviceKey.isBlank() || serviceKey.contains("\r") || serviceKey.contains("\n")) {
+                throw new IllegalArgumentException();
+            }
+        } catch (IllegalArgumentException exception) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "Chưa cấu hình hợp lệ SUPABASE_URL và SUPABASE_SERVICE_KEY");
+        }
+    }
+
+    private static String encodeSegment(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8).replace("+", "%20");
+    }
+
+    private static ResponseStatusException storageUnavailable() {
+        return new ResponseStatusException(HttpStatus.BAD_GATEWAY,
+                "Không thể tải media lên storage, vui lòng thử lại sau");
     }
 
     private void validate(MultipartFile file) {

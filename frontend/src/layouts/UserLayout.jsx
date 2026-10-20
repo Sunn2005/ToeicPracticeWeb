@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { to: "/tests", labelKey: "testCatalogNav", icon: "book" },
   { to: "/history", labelKey: "attemptHistory", icon: "history" },
   { to: "/profile", labelKey: "profileNav", icon: "user" },
+  { to: "/pricing", labelKey: "upgradeProNav", icon: "star" },
 ];
 
 const PAGE_TITLES = {
@@ -17,6 +18,8 @@ const PAGE_TITLES = {
   "/tests": "testSets",
   "/history": "attemptHistory",
   "/profile": "personalProfile",
+  "/profile/edit": "profileEditBreadcrumb",
+  "/pricing": "upgradeProNav",
 };
 
 function NavIcon({ name }) {
@@ -25,16 +28,17 @@ function NavIcon({ name }) {
     book: <><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v17H6.5A2.5 2.5 0 0 0 4 22V5.5Z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v17h4.5A2.5 2.5 0 0 1 20 22V5.5Z"/></>,
     history: <><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></>,
     user: <><circle cx="12" cy="8" r="3"/><path d="M6 20a6 6 0 0 1 12 0"/></>,
+    star: <><path d="M12 3l2.7 5.6 6.1.8-4.5 4.2 1.1 6L12 16.7 6.6 19.6l1.1-6L3.2 9.4l6.1-.8L12 3z"/></>,
   };
   return <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.9">{paths[name]}</svg>;
 }
 
 function UserAvatar({ photoUrl, name }) {
   if (photoUrl) {
-    return <img src={photoUrl} alt="" referrerPolicy="no-referrer" className="h-10 w-10 rounded-full object-cover" />;
+    return <img src={photoUrl} alt="" referrerPolicy="no-referrer" className="h-10 w-10 rounded-full border-2 border-white object-cover shadow-sm" />;
   }
   return (
-    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-100 font-bold text-sky-700">
+    <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-sky-100 font-bold text-sky-700 shadow-sm">
       {(name || "U").charAt(0).toUpperCase()}
     </span>
   );
@@ -49,6 +53,7 @@ export default function UserLayout() {
   const [signingOut, setSigningOut] = useState(false);
   const name = profile?.displayName || user?.displayName || "Học viên";
   const photoUrl = profile?.photoUrl || user?.photoURL;
+  const isPro = profile?.subscription?.planCode === "PRO" && profile?.subscription?.effective === true;
   const pageTitle = /^\/full-test\/[^/]+\/result$/.test(location.pathname)
     ? t("detailedResults")
     : PAGE_TITLES[location.pathname] ? t(PAGE_TITLES[location.pathname]) : "CapyTOEIC";
@@ -108,11 +113,28 @@ export default function UserLayout() {
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
             </button>
             <span className="hidden h-8 w-px bg-slate-200 sm:block" />
-            <button type="button" onClick={() => navigate("/profile")} className="flex items-center gap-3 text-left">
-              <UserAvatar photoUrl={photoUrl} name={name} />
+            <button
+              type="button"
+              onClick={() => navigate("/profile")}
+              aria-label={`${t("personalProfile")}: ${name}${isPro ? `, ${t("proAccountBadge")}` : ""}`}
+              className="flex items-center gap-3 rounded-lg py-1 text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-500"
+            >
+              <span className="relative inline-flex shrink-0">
+                <UserAvatar photoUrl={photoUrl} name={name} />
+              </span>
               <span className="hidden sm:block">
                 <strong className="block max-w-44 truncate text-sm">{name}</strong>
-                <span className="text-xs text-slate-400">{t("learner")}</span>
+                <span className="mt-1 flex items-center gap-1.5">
+                  <span className="rounded-full bg-blue-200 px-2 py-0.5 text-[10px] font-medium leading-4 text-blue-800">{t("learner")}</span>
+                  {isPro && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-300 px-2 py-0.5 text-[10px] font-semibold leading-4 text-amber-900">
+                      <svg aria-hidden="true" viewBox="0 0 24 24" className="h-3 w-3" fill="currentColor">
+                        <path d="m12 2.5 2.9 5.88 6.49.94-4.7 4.58 1.11 6.47L12 17.32l-5.8 3.05 1.1-6.47-4.69-4.58 6.49-.94L12 2.5Z" />
+                      </svg>
+                      Pro
+                    </span>
+                  )}
+                </span>
               </span>
             </button>
           </div>

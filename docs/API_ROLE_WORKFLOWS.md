@@ -250,6 +250,10 @@ Response trong lúc thi luôn loại bỏ đệ quy các field bí mật: `corre
   "email": "user@example.com",
   "displayName": "Nguyen Van A",
   "photoUrl": "https://example.com/avatar.png",
+  "targetScore": 800,
+  "phoneNumber": "+84901234567",
+  "dateOfBirth": "2001-09-18",
+  "gender": "MALE",
   "role": "USER",
   "createdAt": 1789020000000,
   "lastLoginAt": 1789020000000,
@@ -266,13 +270,44 @@ Response trong lúc thi luôn loại bỏ đệ quy các field bí mật: `corre
 
 `subscription` luôn có đúng sáu field: `planCode`, `status`, `startsAt`, `expiresAt`, `entitlements`, `effective`. Không trả UID hay metadata audit. Khi chưa có subscription, bốn field đầu là `null`, `entitlements=[]`, `effective=false`.
 
+### 3.1A Cập nhật profile hiện tại
+
+- **Mục đích:** cập nhật các field hồ sơ do chính người dùng quản lý.
+- **Method/type:** `PATCH`, request và response `application/json`.
+- **Path:** `/api/me`.
+- **Quyền:** mọi user đã đăng nhập; backend luôn lấy UID từ session, không nhận UID hoặc role từ body.
+- **Response thành công:** `200 OK`, cùng schema với `GET /api/me`.
+
+```json
+{
+  "displayName": "Nguyen Van A",
+  "photoUrl": "https://example.com/avatar.png",
+  "targetScore": 800,
+  "phoneNumber": "+84901234567",
+  "dateOfBirth": "2001-09-18",
+  "gender": "MALE"
+}
+```
+
+`displayName` bắt buộc có 1-80 ký tự. `targetScore` có thể `null`, nếu có phải từ 10 đến 990 và chia hết cho 5. `phoneNumber`, `dateOfBirth`, `gender` là tùy chọn; gửi `null` hoặc chuỗi trống để xóa. Số điện thoại gồm 8-15 chữ số, có thể bắt đầu bằng `+`. Ngày sinh dùng định dạng ISO `YYYY-MM-DD` và không được ở tương lai. Giới tính nhận `MALE`, `FEMALE`, `OTHER` hoặc `PREFER_NOT_TO_SAY` (không phân biệt chữ hoa/thường và response luôn chuẩn hóa thành chữ hoa). Request không được dùng để sửa `uid`, `email`, `role`, `createdAt`, `lastLoginAt` hoặc `subscription`.
+
 ### 3.2 Schema subscription và quyền Pro
 
 Firestore lưu tại `subscriptions/{uid}`: `userId`, `planCode`, `status`, `entitlements`, `startsAt`, `expiresAt`, `activatedBy`, `revokedBy`, `revokedAt`, `createdAt`, `updatedAt`. Các thời điểm là Unix millisecond; audit actor là UID admin. `planCode=PRO`, `status` là `ACTIVE`, `EXPIRED` hoặc `REVOKED`; quyền hiện tại gồm `AI_CHAT`, `AI_ANALYSIS`. Các thao tác quản trị thủ công hiện chỉ ghi `ACTIVE` (kích hoạt/gia hạn) hoặc `REVOKED` (thu hồi).
 
 Server tính `effective` bằng `status=ACTIVE && startsAt <= serverNow && serverNow < expiresAt`; thiếu thời điểm làm subscription không có hiệu lực. Quyền chỉ được cấp khi subscription có hiệu lực và danh sách `entitlements` chứa quyền cần thiết. Thời gian hết hạn tự nó không chuẩn hóa status đã lưu; subscription có thể vẫn lưu `ACTIVE` nhưng `effective=false`, còn `EXPIRED` và `REVOKED` luôn không có hiệu lực. Role vẫn lấy từ `users/{uid}.role`, độc lập với Pro.
 
-`AI_CHAT` cấp quyền tạo/xóa hội thoại và gửi tin nhắn qua API Capy Chat ở mục 7A. Lịch sử đã tạo vẫn đọc được sau khi Pro hết hạn hoặc bị thu hồi. Thanh toán chưa được triển khai; admin đang quản lý subscription thủ công.
+`AI_CHAT` cấp quyền tạo/xóa hội thoại và gửi tin nhắn qua API Capy Chat ở mục 7A. Lịch sử đã tạo vẫn đọc được sau khi Pro hết hạn hoặc bị thu hồi. Subscription có thể được quản lý thủ công bởi admin hoặc kích hoạt qua thanh toán PayOS ở mục 3.3.
+
+### 3.3 Thanh toán Pro qua PayOS
+
+`GET /api/payments/pro/plans` yêu cầu đăng nhập và trả danh sách `{ planCode, amount, durationDays, sandboxOnly }` do server quản lý. `POST /api/payments/pro` yêu cầu session và CSRF hợp lệ, body chỉ nhận `{ "planCode": "PRO_30" }`; client không gửi giá hoặc thời hạn. Response thành công gồm `checkoutUrl` và `orderCode`. Pending order cùng user/gói trong 15 phút được tái sử dụng để tránh tạo link trùng.
+
+`POST /api/payments/webhook` là endpoint public duy nhất trong nhóm này và được miễn CSRF vì PayOS không có browser session. Backend bắt buộc xác minh HMAC-SHA256 bằng `PAYOS_CHECKSUM_KEY`, đối chiếu `orderCode`, số tiền và trạng thái order trước khi kích hoạt Pro. Browser redirect tới `/payment/success` chỉ dùng để hiển thị trạng thái chờ xác nhận; không bao giờ tự kích hoạt subscription.
+
+Firestore lưu order tại `paymentOrders/{orderCode}` với các field: `orderCode`, `userId`, `planCode`, `amount`, `durationDays`, `status`, `paymentLinkId`, `checkoutUrl`, `proExpiresAt`, `createdAt`, `paidAt`, `updatedAt`. `status` là `PENDING`, `PAID` hoặc `CANCELLED`. Webhook được xử lý idempotent; ngày Pro được cộng từ `max(serverNow, expiresAt hiện tại)` và expiry tuyệt đối được lưu trên order để retry không cộng ngày lần nữa hoặc hoàn tác một lần thu hồi admin diễn ra sau khi order đã được áp dụng.
+
+Credentials và URL PayOS chỉ lấy từ biến môi trường `PAYOS_CLIENT_ID`, `PAYOS_API_KEY`, `PAYOS_CHECKSUM_KEY`, `PAYOS_BASE_URL`, `PAYOS_RETURN_URL`, `PAYOS_CANCEL_URL`; không đặt trong frontend hoặc commit vào repository. `PAYOS_SANDBOX=true` mới cho phép gói test một ngày.
 
 ## 4. API catalog đề thi công khai
 
@@ -987,7 +1022,7 @@ Yêu cầu role `EMPLOYEE` hoặc `ADMIN`. API danh sách/chi tiết chỉ thao 
 
 ### 8.7 Upload media
 
-- **Mục đích:** upload ảnh/audio dùng trong đề lên Firebase Storage.
+- **Mục đích:** upload ảnh/audio dùng trong đề lên bucket public `toeic-media` của Supabase Storage.
 - **Method/type:** `POST`, request `multipart/form-data`, response `application/json`.
 - **Path:** `/api/employee/media`.
 - **Form params:** field `file`, bắt buộc.
@@ -997,17 +1032,29 @@ Yêu cầu role `EMPLOYEE` hoặc `ADMIN`. API danh sách/chi tiết chỉ thao 
 
 ```json
 {
-  "url": "https://firebasestorage.googleapis.com/...",
-  "objectName": "toeic-media/employee-uid/uuid-file.mp3",
+  "url": "https://your-project.supabase.co/storage/v1/object/public/toeic-media/employee-uid/uuid-file.mp3",
+  "objectName": "employee-uid/uuid-file.mp3",
   "fileName": "file.mp3",
   "contentType": "audio/mpeg",
   "size": 1048576
 }
 ```
 
-Frontend không tự đặt header `Content-Type`; trình duyệt cần tự thêm multipart boundary. Deployment phải có biến `FIREBASE_STORAGE_BUCKET`.
+Frontend không tự đặt header `Content-Type`; trình duyệt cần tự thêm multipart boundary. Deployment backend phải có `SUPABASE_URL` (URL gốc project, không kèm `/storage/v1`) và `SUPABASE_SERVICE_KEY` (key đặc quyền chỉ được lưu trên server). Không đưa key vào frontend hoặc biến `VITE_*`.
 
-- **Lỗi chính:** `400 BAD_REQUEST` nếu file rỗng, quá lớn hoặc sai MIME type; `503 SERVICE_UNAVAILABLE` nếu chưa cấu hình storage bucket.
+Bucket `toeic-media` phải tồn tại và bật public trước khi upload; giới hạn bucket phải cho phép các MIME type trên và file tới 15 MB (15 × 1024 × 1024 byte). Public chỉ phục vụ việc đọc media; API upload vẫn yêu cầu Employee/Admin. Bất kỳ ai có URL đều đọc được file, kể cả media đề nháp; không upload đáp án, giải thích, bản dịch hoặc transcript vào bucket public.
+
+`objectName` là đường dẫn tương đối trong bucket, được backend tạo từ UID đã xác thực và UUID; không ghi đè file cũ. Sau upload, frontend lấy `response.url` gán vào `imageUrl`, `audioUrl` hoặc phần tử `imageUrls` đúng cấu trúc đề, rồi gọi API tạo/cập nhật đề để lưu URL cùng nội dung text trên Firestore. Upload riêng không tự lưu đề.
+
+Ví dụ tích hợp bằng wrapper hiện có (trong event handler cần xử lý loading/error):
+
+```js
+const media = await uploadEmployeeMedia(file);
+// Gán media.url vào trường media tương ứng của câu hỏi/group đang sửa.
+```
+
+- **Lỗi chính:** `400 BAD_REQUEST` nếu file rỗng, quá lớn hoặc sai MIME type; `503 SERVICE_UNAVAILABLE` nếu cấu hình Supabase thiếu/không hợp lệ; `502 BAD_GATEWAY` nếu Supabase từ chối upload, lỗi kết nối hoặc timeout. Không trả chi tiết lỗi/credentials từ Supabase cho frontend.
+- File quá lớn bị lớp multipart từ chối trước controller có thể trả `413`; frontend cần xử lý theo HTTP status. Giới hạn toàn bộ multipart request là 16 MB để chứa file 15 MB cùng multipart headers.
 
 ## 9. API Admin duyệt đề
 
@@ -1176,6 +1223,9 @@ Security và application errors đều trả JSON. Frontend nên xử lý theo H
 | `429` | `CHAT_RATE_LIMITED`, `CHAT_DAILY_LIMIT_REACHED` | Vượt quota chat burst/ngày. |
 | `503` | `AI_UNAVAILABLE` | RabbitMQ/Gemini chat tạm thời không sẵn sàng. |
 | `400` | `SUBSCRIPTION_EXPIRY_INVALID` | Expiry subscription không sau thời gian server. |
+| `400` | `PAYMENT_PLAN_INVALID`, `PAYMENT_WEBHOOK_INVALID`, `PAYMENT_WEBHOOK_SIGNATURE_INVALID` | Gói thanh toán hoặc webhook PayOS không hợp lệ. |
+| `403` | `PAYMENT_PLAN_UNAVAILABLE` | Gói chỉ dành cho sandbox nhưng server đang chạy production mode. |
+| `502` | `PAYOS_UNAVAILABLE` | PayOS không tạo được link thanh toán. |
 | `404` | `NOT_FOUND` | Resource không tồn tại hoặc bị che bởi rule ownership/publication. |
 | `409` | `CONFLICT` | Trạng thái workflow/section không cho phép thao tác. |
 | `503` | `SERVICE_UNAVAILABLE` | Storage, RabbitMQ hoặc AI service chưa sẵn sàng. |

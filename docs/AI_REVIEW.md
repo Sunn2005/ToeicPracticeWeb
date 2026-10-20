@@ -65,7 +65,8 @@ BE-Core (`backend/.env`):
 
 ```properties
 FIREBASE_SERVICE_ACCOUNT=file:/absolute/path/to/firebase-service-account.json
-FIREBASE_STORAGE_BUCKET=toeicpractice-1445a.firebasestorage.app
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_KEY=your-server-side-service-key
 CLOUDAMQP_URL=amqp://guest:guest@localhost:5672
 PORT=8080
 IMPORT_TOEIC_DATA=false
