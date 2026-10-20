@@ -250,6 +250,10 @@ Response trong lúc thi luôn loại bỏ đệ quy các field bí mật: `corre
   "email": "user@example.com",
   "displayName": "Nguyen Van A",
   "photoUrl": "https://example.com/avatar.png",
+  "targetScore": 800,
+  "phoneNumber": "+84901234567",
+  "dateOfBirth": "2001-09-18",
+  "gender": "MALE",
   "role": "USER",
   "createdAt": 1789020000000,
   "lastLoginAt": 1789020000000,
@@ -265,6 +269,27 @@ Response trong lúc thi luôn loại bỏ đệ quy các field bí mật: `corre
 ```
 
 `subscription` luôn có đúng sáu field: `planCode`, `status`, `startsAt`, `expiresAt`, `entitlements`, `effective`. Không trả UID hay metadata audit. Khi chưa có subscription, bốn field đầu là `null`, `entitlements=[]`, `effective=false`.
+
+### 3.1A Cập nhật profile hiện tại
+
+- **Mục đích:** cập nhật các field hồ sơ do chính người dùng quản lý.
+- **Method/type:** `PATCH`, request và response `application/json`.
+- **Path:** `/api/me`.
+- **Quyền:** mọi user đã đăng nhập; backend luôn lấy UID từ session, không nhận UID hoặc role từ body.
+- **Response thành công:** `200 OK`, cùng schema với `GET /api/me`.
+
+```json
+{
+  "displayName": "Nguyen Van A",
+  "photoUrl": "https://example.com/avatar.png",
+  "targetScore": 800,
+  "phoneNumber": "+84901234567",
+  "dateOfBirth": "2001-09-18",
+  "gender": "MALE"
+}
+```
+
+`displayName` bắt buộc có 1-80 ký tự. `targetScore` có thể `null`, nếu có phải từ 10 đến 990 và chia hết cho 5. `phoneNumber`, `dateOfBirth`, `gender` là tùy chọn; gửi `null` hoặc chuỗi trống để xóa. Số điện thoại gồm 8-15 chữ số, có thể bắt đầu bằng `+`. Ngày sinh dùng định dạng ISO `YYYY-MM-DD` và không được ở tương lai. Giới tính nhận `MALE`, `FEMALE`, `OTHER` hoặc `PREFER_NOT_TO_SAY` (không phân biệt chữ hoa/thường và response luôn chuẩn hóa thành chữ hoa). Request không được dùng để sửa `uid`, `email`, `role`, `createdAt`, `lastLoginAt` hoặc `subscription`.
 
 ### 3.2 Schema subscription và quyền Pro
 

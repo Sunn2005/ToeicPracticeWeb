@@ -44,7 +44,13 @@ export default function ProUpgradeCard() {
   return (
     <article className="overflow-hidden rounded-2xl border border-violet-200 bg-gradient-to-r from-violet-50 via-white to-sky-50 p-6 shadow-sm sm:p-7">
       <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-        <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white text-3xl shadow-sm ring-1 ring-violet-100" aria-hidden="true">🦫</span>
+        <img
+          src="/brand/CapyPro.png"
+          alt=""
+          width={56}
+          height={56}
+          className="h-14 w-14 shrink-0 rounded-2xl object-contain shadow-sm ring-1 ring-violet-100"
+        />
         <div>
           <span className="rounded-full bg-violet-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-violet-700">{t("proBenefitsBadge")}</span>
           <h2 className="mt-3 text-xl font-bold text-slate-950">{t("proBenefitsTitle")}</h2>

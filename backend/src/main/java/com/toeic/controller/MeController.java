@@ -39,7 +39,10 @@ public class MeController {
                 principal.uid(),
                 request.getDisplayName(),
                 request.getPhotoUrl(),
-                request.getTargetScore()
+                request.getTargetScore(),
+                request.getPhoneNumber(),
+                request.getDateOfBirth(),
+                request.getGender()
         );
     }
 }
