@@ -1022,7 +1022,7 @@ Yêu cầu role `EMPLOYEE` hoặc `ADMIN`. API danh sách/chi tiết chỉ thao 
 
 ### 8.7 Upload media
 
-- **Mục đích:** upload ảnh/audio dùng trong đề lên Firebase Storage.
+- **Mục đích:** upload ảnh/audio dùng trong đề lên bucket public `toeic-media` của Supabase Storage.
 - **Method/type:** `POST`, request `multipart/form-data`, response `application/json`.
 - **Path:** `/api/employee/media`.
 - **Form params:** field `file`, bắt buộc.
@@ -1032,17 +1032,29 @@ Yêu cầu role `EMPLOYEE` hoặc `ADMIN`. API danh sách/chi tiết chỉ thao 
 
 ```json
 {
-  "url": "https://firebasestorage.googleapis.com/...",
-  "objectName": "toeic-media/employee-uid/uuid-file.mp3",
+  "url": "https://your-project.supabase.co/storage/v1/object/public/toeic-media/employee-uid/uuid-file.mp3",
+  "objectName": "employee-uid/uuid-file.mp3",
   "fileName": "file.mp3",
   "contentType": "audio/mpeg",
   "size": 1048576
 }
 ```
 
-Frontend không tự đặt header `Content-Type`; trình duyệt cần tự thêm multipart boundary. Deployment phải có biến `FIREBASE_STORAGE_BUCKET`.
+Frontend không tự đặt header `Content-Type`; trình duyệt cần tự thêm multipart boundary. Deployment backend phải có `SUPABASE_URL` (URL gốc project, không kèm `/storage/v1`) và `SUPABASE_SERVICE_KEY` (key đặc quyền chỉ được lưu trên server). Không đưa key vào frontend hoặc biến `VITE_*`.
 
-- **Lỗi chính:** `400 BAD_REQUEST` nếu file rỗng, quá lớn hoặc sai MIME type; `503 SERVICE_UNAVAILABLE` nếu chưa cấu hình storage bucket.
+Bucket `toeic-media` phải tồn tại và bật public trước khi upload; giới hạn bucket phải cho phép các MIME type trên và file tới 15 MB (15 × 1024 × 1024 byte). Public chỉ phục vụ việc đọc media; API upload vẫn yêu cầu Employee/Admin. Bất kỳ ai có URL đều đọc được file, kể cả media đề nháp; không upload đáp án, giải thích, bản dịch hoặc transcript vào bucket public.
+
+`objectName` là đường dẫn tương đối trong bucket, được backend tạo từ UID đã xác thực và UUID; không ghi đè file cũ. Sau upload, frontend lấy `response.url` gán vào `imageUrl`, `audioUrl` hoặc phần tử `imageUrls` đúng cấu trúc đề, rồi gọi API tạo/cập nhật đề để lưu URL cùng nội dung text trên Firestore. Upload riêng không tự lưu đề.
+
+Ví dụ tích hợp bằng wrapper hiện có (trong event handler cần xử lý loading/error):
+
+```js
+const media = await uploadEmployeeMedia(file);
+// Gán media.url vào trường media tương ứng của câu hỏi/group đang sửa.
+```
+
+- **Lỗi chính:** `400 BAD_REQUEST` nếu file rỗng, quá lớn hoặc sai MIME type; `503 SERVICE_UNAVAILABLE` nếu cấu hình Supabase thiếu/không hợp lệ; `502 BAD_GATEWAY` nếu Supabase từ chối upload, lỗi kết nối hoặc timeout. Không trả chi tiết lỗi/credentials từ Supabase cho frontend.
+- File quá lớn bị lớp multipart từ chối trước controller có thể trả `413`; frontend cần xử lý theo HTTP status. Giới hạn toàn bộ multipart request là 16 MB để chứa file 15 MB cùng multipart headers.
 
 ## 9. API Admin duyệt đề
 
