@@ -22,8 +22,8 @@ public class PaymentController {
     }
 
     @GetMapping("/pro/plans")
-    public List<PaymentService.PlanOption> plans(@AuthenticationPrincipal ToeicUserPrincipal principal) {
-        return paymentService.availablePlans();
+    public List<PaymentService.PlanOption> plans(@AuthenticationPrincipal ToeicUserPrincipal principal) throws Exception {
+        return paymentService.availablePlans(principal.uid());
     }
 
     @PostMapping("/pro")

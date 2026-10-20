@@ -33,10 +33,9 @@ class PaymentServiceTests {
     private final MemorySubscriptionDao subscriptionDao = new MemorySubscriptionDao();
     private final SubscriptionService subscriptionService = new SubscriptionService(
             subscriptionDao, Clock.fixed(Instant.ofEpochMilli(NOW), ZoneOffset.UTC));
-    private final PayOSProperties properties = new PayOSProperties();
     private final StubPayOSClient payosClient = new StubPayOSClient();
     private final PaymentService service = new PaymentService(orderDao, payosClient, subscriptionService,
-            properties, Clock.fixed(Instant.ofEpochMilli(NOW), ZoneOffset.UTC));
+            Clock.fixed(Instant.ofEpochMilli(NOW), ZoneOffset.UTC));
 
     @Test
     void unknownPlanIsRejected() {
@@ -46,10 +45,35 @@ class PaymentServiceTests {
     }
 
     @Test
-    void testPlanIsUnavailableOutsideSandbox() {
-        var error = assertThrows(ApiCodeException.class, () -> service.createProPayment("learner", "PRO_1DAY_TEST"));
+    void trialPlanCanBeBoughtOnlyOncePerAccount() throws Exception {
+        var created = service.createProPayment("learner", "PRO_1DAY");
+        service.handleWebhook(signedPayload(created.orderCode(), 10_000L, "00"));
+        assertEquals(PaymentOrderStatus.PAID, orderDao.records.get(created.orderCode()).getStatus());
+
+        var error = assertThrows(ApiCodeException.class, () -> service.createProPayment("learner", "PRO_1DAY"));
         assertEquals(HttpStatus.FORBIDDEN, error.getStatus());
-        assertEquals("PAYMENT_PLAN_UNAVAILABLE", error.getCode());
+        assertEquals("PAYMENT_TRIAL_ALREADY_USED", error.getCode());
+
+        // A different account can still buy the trial.
+        var other = service.createProPayment("someone-else", "PRO_1DAY");
+        assertTrue(other.checkoutUrl().startsWith("https://payos.test/checkout/"));
+    }
+
+    @Test
+    void trialPlanIsListedWithUsageFlag() throws Exception {
+        var plans = service.availablePlans("learner");
+        assertEquals(List.of("PRO_30", "PRO_1DAY"),
+                plans.stream().map(PaymentService.PlanOption::planCode).toList());
+        var trial = plans.stream().filter(p -> p.planCode().equals("PRO_1DAY")).findFirst().orElseThrow();
+        assertTrue(trial.trial());
+        assertFalse(trial.trialUsed());
+
+        var created = service.createProPayment("learner", "PRO_1DAY");
+        service.handleWebhook(signedPayload(created.orderCode(), 10_000L, "00"));
+
+        var used = service.availablePlans("learner").stream()
+                .filter(p -> p.planCode().equals("PRO_1DAY")).findFirst().orElseThrow();
+        assertTrue(used.trialUsed());
     }
 
     @Test
@@ -143,17 +167,6 @@ class PaymentServiceTests {
         assertFalse(summary.effective());
     }
 
-    @Test
-    void sandboxModeListsTestPlan() {
-        properties.setSandbox(true);
-        assertEquals(List.of("PRO_30", "PRO_1DAY_TEST"),
-                service.availablePlans().stream().map(PaymentService.PlanOption::planCode).toList());
-        assertEquals(List.of("PRO_30"),
-                new PaymentService(orderDao, payosClient, subscriptionService, new PayOSProperties(),
-                        Clock.fixed(Instant.ofEpochMilli(NOW), ZoneOffset.UTC))
-                        .availablePlans().stream().map(PaymentService.PlanOption::planCode).toList());
-    }
-
     private Map<String, Object> signedPayload(long orderCode, long amount, String code) {
         return webhookPayload(orderCode, amount, code, null);
     }
@@ -220,6 +233,13 @@ class PaymentServiceTests {
                     .filter(o -> o.getUserId().equals(userId) && o.getPlanCode().equals(planCode)
                             && o.getStatus() == PaymentOrderStatus.PENDING)
                     .max((a, b) -> Long.compare(a.getCreatedAt(), b.getCreatedAt()));
+        }
+
+        @Override
+        public boolean existsPaidOrder(String userId, String planCode) {
+            return records.values().stream()
+                    .anyMatch(o -> o.getUserId().equals(userId) && o.getPlanCode().equals(planCode)
+                            && o.getStatus() == PaymentOrderStatus.PAID);
         }
 
         @Override

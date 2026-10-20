@@ -28,7 +28,7 @@ function installResponses(...responses) {
 }
 
 test("pro plans are fetched from the payments endpoint", async () => {
-  const plans = [{ planCode: "PRO_30", amount: 99000, durationDays: 30, sandboxOnly: false }];
+  const plans = [{ planCode: "PRO_30", amount: 99000, durationDays: 30, trial: false, trialUsed: false }];
   const calls = installResponses(json(plans));
 
   assert.deepEqual(await getProPlans(), plans);

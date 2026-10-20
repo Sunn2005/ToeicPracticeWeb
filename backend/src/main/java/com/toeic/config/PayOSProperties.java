@@ -16,7 +16,6 @@ public class PayOSProperties {
     private String baseUrl = "https://api-merchant.payos.vn";
     private String returnUrl = "http://localhost:5173/payment/success";
     private String cancelUrl = "http://localhost:5173/payment/cancel";
-    private boolean sandbox = false;
 
     public String getClientId() {
         return clientId;
@@ -64,13 +63,5 @@ public class PayOSProperties {
 
     public void setCancelUrl(String cancelUrl) {
         this.cancelUrl = cancelUrl;
-    }
-
-    public boolean isSandbox() {
-        return sandbox;
-    }
-
-    public void setSandbox(boolean sandbox) {
-        this.sandbox = sandbox;
     }
 }

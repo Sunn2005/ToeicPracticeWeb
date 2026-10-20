@@ -45,6 +45,17 @@ public class FirestorePaymentOrderDao implements PaymentOrderDao {
     }
 
     @Override
+    public boolean existsPaidOrder(String userId, String planCode) throws Exception {
+        return firestore.collection("paymentOrders")
+                .whereEqualTo("userId", userId)
+                .get().get().getDocuments().stream()
+                .map(this::orderFrom)
+                .filter(Objects::nonNull)
+                .anyMatch(order -> Objects.equals(planCode, order.getPlanCode())
+                        && order.getStatus() == PaymentOrderStatus.PAID);
+    }
+
+    @Override
     public PaymentOrder updateAtomically(long orderCode, Function<PaymentOrder, Mutation> mutation) throws Exception {
         var document = firestore.collection("paymentOrders").document(documentId(orderCode));
         try {

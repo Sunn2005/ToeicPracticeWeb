@@ -1,6 +1,5 @@
 package com.toeic.service;
 
-import com.toeic.config.PayOSProperties;
 import com.toeic.controller.ApiCodeException;
 import com.toeic.dao.PaymentOrderDao;
 import com.toeic.model.PaymentOrder;
@@ -35,42 +34,43 @@ public class PaymentService {
     private final PaymentOrderDao paymentOrderDao;
     private final PayOSClient payosClient;
     private final SubscriptionService subscriptionService;
-    private final PayOSProperties properties;
     private final Clock clock;
 
     @Autowired
     public PaymentService(PaymentOrderDao paymentOrderDao, PayOSClient payosClient,
-                          SubscriptionService subscriptionService, PayOSProperties properties) {
-        this(paymentOrderDao, payosClient, subscriptionService, properties, Clock.systemUTC());
+                          SubscriptionService subscriptionService) {
+        this(paymentOrderDao, payosClient, subscriptionService, Clock.systemUTC());
     }
 
     PaymentService(PaymentOrderDao paymentOrderDao, PayOSClient payosClient,
-                   SubscriptionService subscriptionService, PayOSProperties properties, Clock clock) {
+                   SubscriptionService subscriptionService, Clock clock) {
         this.paymentOrderDao = paymentOrderDao;
         this.payosClient = payosClient;
         this.subscriptionService = subscriptionService;
-        this.properties = properties;
         this.clock = clock;
     }
 
     public record CreatePaymentResult(String checkoutUrl, long orderCode) { }
 
-    public record PlanOption(String planCode, long amount, int durationDays, boolean sandboxOnly) { }
+    public record PlanOption(String planCode, long amount, int durationDays, boolean trial, boolean trialUsed) { }
 
-    public List<PlanOption> availablePlans() {
-        return List.of(ProPlan.values()).stream()
-                .filter(plan -> !plan.sandboxOnly() || properties.isSandbox())
-                .map(plan -> new PlanOption(plan.code(), plan.amount(), plan.durationDays(), plan.sandboxOnly()))
-                .toList();
+    public List<PlanOption> availablePlans(String userId) throws Exception {
+        List<PlanOption> plans = new java.util.ArrayList<>();
+        for (ProPlan plan : ProPlan.values()) {
+            boolean trial = plan == ProPlan.PRO_1DAY;
+            boolean trialUsed = trial && paymentOrderDao.existsPaidOrder(userId, plan.code());
+            plans.add(new PlanOption(plan.code(), plan.amount(), plan.durationDays(), trial, trialUsed));
+        }
+        return plans;
     }
 
     public CreatePaymentResult createProPayment(String userId, String planCode) throws Exception {
         ProPlan plan = ProPlan.fromCode(planCode)
                 .orElseThrow(() -> new ApiCodeException(HttpStatus.BAD_REQUEST, "PAYMENT_PLAN_INVALID",
                         "Unknown Pro plan: " + planCode));
-        if (plan.sandboxOnly() && !properties.isSandbox()) {
-            throw new ApiCodeException(HttpStatus.FORBIDDEN, "PAYMENT_PLAN_UNAVAILABLE",
-                    "This plan is only available in sandbox mode");
+        if (plan == ProPlan.PRO_1DAY && paymentOrderDao.existsPaidOrder(userId, plan.code())) {
+            throw new ApiCodeException(HttpStatus.FORBIDDEN, "PAYMENT_TRIAL_ALREADY_USED",
+                    "The 1-day trial plan can only be purchased once per account");
         }
         long now = clock.millis();
 

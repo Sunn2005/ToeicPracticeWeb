@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { to: "/tests", labelKey: "testCatalogNav", icon: "book" },
   { to: "/history", labelKey: "attemptHistory", icon: "history" },
   { to: "/profile", labelKey: "profileNav", icon: "user" },
+  { to: "/pricing", labelKey: "upgradeProNav", icon: "star" },
 ];
 
 const PAGE_TITLES = {
@@ -17,6 +18,7 @@ const PAGE_TITLES = {
   "/tests": "testSets",
   "/history": "attemptHistory",
   "/profile": "personalProfile",
+  "/pricing": "upgradeProNav",
 };
 
 function NavIcon({ name }) {
@@ -25,6 +27,7 @@ function NavIcon({ name }) {
     book: <><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v17H6.5A2.5 2.5 0 0 0 4 22V5.5Z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v17h4.5A2.5 2.5 0 0 1 20 22V5.5Z"/></>,
     history: <><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></>,
     user: <><circle cx="12" cy="8" r="3"/><path d="M6 20a6 6 0 0 1 12 0"/></>,
+    star: <><path d="M12 3l2.7 5.6 6.1.8-4.5 4.2 1.1 6L12 16.7 6.6 19.6l1.1-6L3.2 9.4l6.1-.8L12 3z"/></>,
   };
   return <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.9">{paths[name]}</svg>;
 }

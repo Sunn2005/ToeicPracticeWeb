@@ -8,21 +8,19 @@ import java.util.Optional;
  * the client only ever sends a planCode, never an amount.
  */
 public enum ProPlan {
-    PRO_30("PRO_30", 99_000L, 30, false, "CapyTOEIC Pro 30 days"),
-    /** Cheap 1-day plan for sandbox testing. Never sold when sandbox mode is off. */
-    PRO_1DAY_TEST("PRO_1DAY_TEST", 10_000L, 1, true, "CapyTOEIC Pro 1 day");
+    PRO_30("PRO_30", 99_000L, 30, "CapyTOEIC Pro 30 days"),
+    /** Cheap 1-day trial plan. Each account may buy it only once. */
+    PRO_1DAY("PRO_1DAY", 10_000L, 1, "CapyTOEIC Pro 1 day");
 
     private final String code;
     private final long amount;
     private final int durationDays;
-    private final boolean sandboxOnly;
     private final String payosDescription;
 
-    ProPlan(String code, long amount, int durationDays, boolean sandboxOnly, String payosDescription) {
+    ProPlan(String code, long amount, int durationDays, String payosDescription) {
         this.code = code;
         this.amount = amount;
         this.durationDays = durationDays;
-        this.sandboxOnly = sandboxOnly;
         this.payosDescription = payosDescription;
     }
 
@@ -36,10 +34,6 @@ public enum ProPlan {
 
     public int durationDays() {
         return durationDays;
-    }
-
-    public boolean sandboxOnly() {
-        return sandboxOnly;
     }
 
     public String payosDescription() {
