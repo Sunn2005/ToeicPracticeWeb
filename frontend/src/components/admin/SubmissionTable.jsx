@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import Pagination from "./Pagination";
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 10; // Đúng Figma frame Pending Reviews: 10 dòng/trang.
 
 const STATUS_LABELS = {
   PENDING_REVIEW: "Chờ duyệt",
@@ -257,27 +258,7 @@ function SubmissionTable({ items, loading = false }) {
             <p className="text-sm text-slate-500">
               Đang hiển thị {rangeStart}–{rangeEnd} của {filtered.length}
             </p>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setPage((current) => Math.max(1, current - 1))}
-                disabled={safePage <= 1}
-                className="rounded-lg border border-slate-200 px-3.5 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
-              >
-                Trước
-              </button>
-              <span className="text-sm font-semibold text-slate-700" aria-live="polite">
-                Trang {safePage}/{pageCount}
-              </span>
-              <button
-                type="button"
-                onClick={() => setPage((current) => Math.min(pageCount, current + 1))}
-                disabled={safePage >= pageCount}
-                className="rounded-lg border border-slate-200 px-3.5 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
-              >
-                Sau
-              </button>
-            </div>
+            <Pagination page={safePage} pageCount={pageCount} onPageChange={setPage} />
           </div>
         )}
       </div>

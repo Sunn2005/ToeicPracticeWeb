@@ -209,7 +209,7 @@ function SubmissionPreview({ test, errorPartNumbers = new Set() }) {
   }
 
   return (
-    <div className="grid gap-8 md:grid-cols-[220px_minmax(0,1fr)]">
+    <div className="grid gap-8 md:grid-cols-[280px_minmax(0,1fr)]">
       {/* Cột danh sách Part */}
       <nav aria-label="Danh sách phần thi" className="md:sticky md:top-6 md:self-start">
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">

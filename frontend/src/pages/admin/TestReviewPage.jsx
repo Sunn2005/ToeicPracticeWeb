@@ -93,28 +93,35 @@ function ConflictBanner() {
   );
 }
 
+// Thẻ Thông tin phê duyệt: 1 hàng ngang full chiều rộng, đúng Figma frame 7.
+// Luôn hiện với mọi trạng thái (chờ duyệt cũng có), khi đã duyệt/từ chối
+// thì thêm Người duyệt, Ngày duyệt và Lý do từ chối.
 function ApprovalInfoCard({ test }) {
+  const infoItems = [
+    ["Người tạo đề", test.createdBy || "—"],
+    ["Ngày nộp", formatDateTime(test.submittedAt)],
+    ["Số lượng phần thi", `${test.parts?.length ?? 0} phần`],
+    ["Tổng số câu hỏi", `${test.totalQuestions || 0} câu`],
+  ];
+  if (test.reviewedBy) infoItems.push(["Người duyệt", test.reviewedBy]);
+  if (test.reviewedAt) infoItems.push(["Ngày duyệt", formatDateTime(test.reviewedAt)]);
+
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
       <h2 className="text-base font-bold text-slate-950">Thông tin phê duyệt</h2>
-      <dl className="mt-4 space-y-3 text-sm">
-        <div className="flex justify-between gap-4">
-          <dt className="text-slate-500">Người duyệt</dt>
-          <dd className="font-semibold text-slate-900">{test.reviewedBy || "—"}</dd>
-        </div>
-        <div className="flex justify-between gap-4">
-          <dt className="text-slate-500">Thời gian duyệt</dt>
-          <dd className="font-semibold text-slate-900">{formatDateTime(test.reviewedAt)}</dd>
-        </div>
-        {test.status === "REJECTED" && (
-          <div>
-            <dt className="text-slate-500">Lý do từ chối</dt>
-            <dd className="mt-1 rounded-lg bg-red-50 p-3 font-medium text-red-700">
-              {test.rejectionReason || "—"}
-            </dd>
+      <dl className="mt-4 grid gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
+        {infoItems.map(([label, value]) => (
+          <div key={label}>
+            <dt className="text-xs font-semibold text-slate-500">{label}</dt>
+            <dd className="mt-1 text-sm font-bold text-slate-900">{value}</dd>
           </div>
-        )}
+        ))}
       </dl>
+      {test.status === "REJECTED" && test.rejectionReason && (
+        <p className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">
+          <strong>Lý do từ chối:</strong> {test.rejectionReason}
+        </p>
+      )}
     </div>
   );
 }
@@ -263,9 +270,9 @@ function TestReviewPage() {
         ← Quay lại hàng chờ
       </Link>
 
-      {/* Thẻ tiêu đề: badge trạng thái + tên đề + nút duyệt (Figma frame 7) */}
+      {/* Thẻ tiêu đề: badge + tên đề (trái) và nút Từ chối/Phê duyệt (góc phải trên), đúng Figma frame 7 */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+        <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
           <div>
             <div className="flex flex-wrap gap-2">
               <span className={`rounded-md px-2.5 py-1 text-xs font-bold ${badge.className}`}>
@@ -284,10 +291,11 @@ function TestReviewPage() {
               Mã đề: {testId} · Người tạo: {test.createdBy || "—"}
             </p>
           </div>
-          <div className="rounded-xl bg-blue-50 px-5 py-3 text-center">
-            <strong className="block text-2xl text-blue-700">{test.totalQuestions || 0}</strong>
-            <span className="text-xs font-semibold text-blue-600">câu hỏi</span>
-          </div>
+          {isPending && (
+            <div className="lg:shrink-0">
+              <ReviewActions onApprove={handleApprove} onReject={handleReject} />
+            </div>
+          )}
         </div>
 
         {test.description && (
@@ -295,27 +303,10 @@ function TestReviewPage() {
             {test.description}
           </p>
         )}
-
-        <div className="mt-6 grid gap-3 sm:grid-cols-4">
-          {[
-            ["Loại", test.type === "PRACTICE" ? "Mini Test" : "Full Test"],
-            ["Listening", `${test.listeningMinutes ?? 45} phút`],
-            ["Reading", `${test.readingMinutes ?? 75} phút`],
-            ["Số Part", test.parts?.length ?? 0],
-          ].map(([label, value]) => (
-            <div key={label} className="rounded-xl border border-slate-200 p-4">
-              <p className="text-xs font-semibold text-slate-500">{label}</p>
-              <p className="mt-1 font-bold text-slate-900">{value}</p>
-            </div>
-          ))}
-        </div>
-
-        {isPending && (
-          <div className="mt-6">
-            <ReviewActions onApprove={handleApprove} onReject={handleReject} />
-          </div>
-        )}
       </div>
+
+      {/* Thẻ Thông tin phê duyệt: 1 hàng ngang full chiều rộng, đúng Figma frame 7 */}
+      <ApprovalInfoCard test={test} />
 
       {conflict && <ConflictBanner />}
 
@@ -334,9 +325,6 @@ function TestReviewPage() {
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
         <SubmissionPreview test={test} errorPartNumbers={errorPartNumbers} />
         <aside className="space-y-6">
-          {(test.status === "APPROVED" || test.status === "REJECTED") && (
-            <ApprovalInfoCard test={test} />
-          )}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="mb-4 text-base font-bold text-slate-950">Dòng thời gian</h2>
             <ReviewTimeline test={test} />
