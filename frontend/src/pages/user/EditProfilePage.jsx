@@ -1,32 +1,11 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { apiFetch } from "../../api/client";
+import { updateUserProfile } from "../../api/userLearning";
 import { useAuth } from "../../auth/useAuth";
 import { useLanguage } from "../../i18n/LanguageContext";
 
 const MAX_PHOTO_BYTES = 2 * 1024 * 1024;
 const AVATAR_SIZE = 256;
-
-// TODO(backend): the User model and PATCH /api/me do not support phone,
-// dateOfBirth or gender yet, so these fields are kept in localStorage as an
-// interim store. Move them to the API request once the backend adds them.
-const extraKey = (uid) => `capy-profile-extra:${uid}`;
-
-function readExtraProfile(uid) {
-  try {
-    return JSON.parse(window.localStorage.getItem(extraKey(uid))) || {};
-  } catch {
-    return {};
-  }
-}
-
-function writeExtraProfile(uid, data) {
-  try {
-    window.localStorage.setItem(extraKey(uid), JSON.stringify(data));
-  } catch {
-    // Private browsing can reject storage; the API fields still save.
-  }
-}
 
 function getInitials(displayName) {
   const words = (displayName || "").trim().split(/\s+/).filter(Boolean);
@@ -77,15 +56,14 @@ function EditProfileForm({ profile, t }) {
   const navigate = useNavigate();
   const { refreshProfile } = useAuth();
   const fileInputRef = useRef(null);
-  const extra = readExtraProfile(profile.uid);
 
   const [displayName, setDisplayName] = useState(profile.displayName || "");
   const [photoUrl, setPhotoUrl] = useState(profile.photoUrl || "");
   const [photoRemoved, setPhotoRemoved] = useState(false);
-  const [phone, setPhone] = useState(extra.phone || "");
-  const [dob, setDob] = useState(extra.dob || "");
-  const [gender, setGender] = useState(extra.gender || "");
-  const [targetScore, setTargetScore] = useState(String(profile.targetScore || 800));
+  const [phone, setPhone] = useState(profile.phoneNumber || "");
+  const [dob, setDob] = useState(profile.dateOfBirth || "");
+  const [gender, setGender] = useState(profile.gender || "");
+  const [targetScore, setTargetScore] = useState(String(profile.targetScore ?? ""));
   const [photoError, setPhotoError] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -116,22 +94,29 @@ function EditProfileForm({ profile, t }) {
 
   const save = async (event) => {
     event.preventDefault();
+    if (saving) return;
     setSaving(true);
     setError("");
     try {
-      await apiFetch("/api/me", {
-        method: "PATCH",
-        body: JSON.stringify({
-          displayName: displayName.trim(),
-          photoUrl: photoRemoved ? null : photoUrl.trim() || null,
-          targetScore: Number(targetScore),
-        }),
+      await updateUserProfile({
+        displayName: displayName.trim(),
+        photoUrl: photoRemoved ? null : photoUrl.trim() || null,
+        targetScore: targetScore === "" ? null : Number(targetScore),
+        phoneNumber: phone.trim() || null,
+        dateOfBirth: dob || null,
+        gender: gender || null,
       });
-      writeExtraProfile(profile.uid, { phone: phone.trim(), dob, gender });
       await refreshProfile();
       navigate("/profile");
     } catch (requestError) {
-      setError(requestError.message || t("profileSaveFailed"));
+      const errorKey = requestError.status === 401
+        ? "profileSessionExpired"
+        : requestError.status === 403
+          ? "profileSaveForbidden"
+          : requestError.status === 400
+            ? "profileInvalidFields"
+            : "profileSaveFailed";
+      setError(t(errorKey));
     } finally {
       setSaving(false);
     }
@@ -145,126 +130,127 @@ function EditProfileForm({ profile, t }) {
       <h2 className="text-lg font-bold text-slate-950">{t("personalInformation")}</h2>
       <p className="mt-1 text-sm text-slate-500">{t("profileEditDesc")}</p>
 
-      <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center">
-        {previewUrl ? (
-          <img
-            src={previewUrl}
-            alt={displayName}
-            className="h-16 w-16 rounded-full border border-slate-200 object-cover"
-          />
-        ) : (
-          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-sky-100 text-xl font-bold text-sky-600">
-            {getInitials(displayName || profile.displayName)}
-          </span>
-        )}
-        <div>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-600"
-            >
-              {t("profileChangePhoto")}
-            </button>
-            {(previewUrl || profile.photoUrl) && (
+      <fieldset disabled={saving} className="min-w-0">
+        <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center">
+          {previewUrl ? (
+            <img
+              src={previewUrl}
+              alt={displayName}
+              className="h-16 w-16 rounded-full border border-slate-200 object-cover"
+            />
+          ) : (
+            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-sky-100 text-xl font-bold text-sky-600">
+              {getInitials(displayName || profile.displayName)}
+            </span>
+          )}
+          <div>
+            <div className="flex flex-wrap gap-2">
               <button
                 type="button"
-                onClick={() => {
-                  setPhotoUrl("");
-                  setPhotoRemoved(true);
-                  setPhotoError("");
-                }}
-                className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                onClick={() => fileInputRef.current?.click()}
+                className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-600"
               >
-                {t("profileRemovePhoto")}
+                {t("profileChangePhoto")}
               </button>
-            )}
+              {(previewUrl || profile.photoUrl) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPhotoUrl("");
+                    setPhotoRemoved(true);
+                    setPhotoError("");
+                  }}
+                  className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                >
+                  {t("profileRemovePhoto")}
+                </button>
+              )}
+            </div>
+            <p className="mt-2 text-xs text-slate-400">{t("profilePhotoHint")}</p>
+            {photoError && <p className="mt-1 text-xs text-red-600">{photoError}</p>}
           </div>
-          <p className="mt-2 text-xs text-slate-400">{t("profilePhotoHint")}</p>
-          {photoError && <p className="mt-1 text-xs text-red-600">{photoError}</p>}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png"
+            className="hidden"
+            onChange={handleFileChange}
+          />
         </div>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/jpeg,image/png"
-          className="hidden"
-          onChange={handleFileChange}
-        />
-      </div>
 
-      <div className="my-6 h-px bg-slate-100" />
+        <div className="my-6 h-px bg-slate-100" />
 
-      <div className="grid gap-5 sm:grid-cols-2">
-        <label className="block">
-          <span className="text-sm font-semibold text-slate-700">
-            {t("fullName")} <span className="text-red-500">*</span>
-          </span>
-          <input
-            required
-            maxLength={80}
-            value={displayName}
-            onChange={(event) => setDisplayName(event.target.value)}
-            className={inputClass}
-          />
-        </label>
-        <label className="block">
-          <span className="text-sm font-semibold text-slate-700">
-            Email <span className="text-red-500">*</span>
-          </span>
-          <input value={profile.email || ""} disabled className={`${inputClass} bg-slate-50 text-slate-500`} />
-          <span className="mt-1 block text-xs text-slate-400">{t("loginEmailLocked")}</span>
-        </label>
-        <label className="block">
-          <span className="text-sm font-semibold text-slate-700">{t("profilePhone")}</span>
-          <input
-            type="tel"
-            value={phone}
-            onChange={(event) => setPhone(event.target.value)}
-            placeholder="0987 654 321"
-            className={inputClass}
-          />
-        </label>
-        <label className="block">
-          <span className="text-sm font-semibold text-slate-700">{t("profileDob")}</span>
-          <input
-            type="date"
-            value={dob}
-            onChange={(event) => setDob(event.target.value)}
-            className={inputClass}
-          />
-        </label>
-        <label className="block">
-          <span className="text-sm font-semibold text-slate-700">{t("profileGender")}</span>
-          <select value={gender} onChange={(event) => setGender(event.target.value)} className={inputClass}>
-            <option value="">—</option>
-            <option value="male">{t("profileGenderMale")}</option>
-            <option value="female">{t("profileGenderFemale")}</option>
-            <option value="other">{t("profileGenderOther")}</option>
-          </select>
-        </label>
-        <label className="block">
-          <span className="text-sm font-semibold text-slate-700">
-            {t("toeicTarget")} <span className="text-red-500">*</span>
-          </span>
-          <select
-            value={targetScore}
-            onChange={(event) => setTargetScore(event.target.value)}
-            className={`${inputClass} bg-white`}
-          >
-            {Array.from({ length: 19 }, (_, index) => 500 + index * 25)
-              .filter((score) => score <= 950)
-              .map((score) => (
-                <option key={score} value={score}>
-                  {score}
-                </option>
-              ))}
-            <option value="990">990</option>
-          </select>
-        </label>
-      </div>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <label className="block">
+            <span className="text-sm font-semibold text-slate-700">
+              {t("fullName")} <span className="text-red-500">*</span>
+            </span>
+            <input
+              required
+              maxLength={80}
+              value={displayName}
+              onChange={(event) => setDisplayName(event.target.value)}
+              className={inputClass}
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-semibold text-slate-700">
+              Email <span className="text-red-500">*</span>
+            </span>
+            <input value={profile.email || ""} disabled className={`${inputClass} bg-slate-50 text-slate-500`} />
+            <span className="mt-1 block text-xs text-slate-400">{t("loginEmailLocked")}</span>
+          </label>
+          <label className="block">
+            <span className="text-sm font-semibold text-slate-700">{t("profilePhone")}</span>
+            <input
+              type="tel"
+              pattern="[+]?[0-9]{8,15}"
+              title={t("profilePhoneHint")}
+              value={phone}
+              onChange={(event) => setPhone(event.target.value)}
+              placeholder="0987654321"
+              className={inputClass}
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-semibold text-slate-700">{t("profileDob")}</span>
+            <input
+              type="date"
+              max={new Date().toISOString().slice(0, 10)}
+              value={dob}
+              onChange={(event) => setDob(event.target.value)}
+              className={inputClass}
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-semibold text-slate-700">{t("profileGender")}</span>
+            <select value={gender} onChange={(event) => setGender(event.target.value)} className={inputClass}>
+              <option value="">—</option>
+              <option value="MALE">{t("profileGenderMale")}</option>
+              <option value="FEMALE">{t("profileGenderFemale")}</option>
+              <option value="OTHER">{t("profileGenderOther")}</option>
+              <option value="PREFER_NOT_TO_SAY">{t("profileGenderPrivate")}</option>
+            </select>
+          </label>
+          <label className="block">
+            <span className="text-sm font-semibold text-slate-700">
+              {t("toeicTarget")}
+            </span>
+            <input
+              type="number"
+              min={10}
+              max={990}
+              step={5}
+              value={targetScore}
+              onChange={(event) => setTargetScore(event.target.value)}
+              className={`${inputClass} bg-white`}
+            />
+          </label>
+        </div>
+      </fieldset>
 
       {error && (
-        <p className="mt-5 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
+        <p role="alert" className="mt-5 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
       )}
 
       <div className="mt-7 flex justify-end gap-3">

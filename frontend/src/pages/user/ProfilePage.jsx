@@ -132,9 +132,6 @@ export default function ProfilePage() {
           <div className="min-w-0 flex-1">
             <h2 className="truncate text-xl font-bold text-slate-950">{name}</h2>
             <p className="truncate text-sm text-slate-500">{profile.email || ""}</p>
-            <p className="mt-0.5 text-xs text-slate-400">
-              {t("profileJoinedDate")}: {formatJoinDate(profile.createdAt, language)}
-            </p>
           </div>
           <button
             type="button"

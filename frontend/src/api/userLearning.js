@@ -68,6 +68,13 @@ export function getStatistics() {
   return apiFetch("/api/users/me/statistics");
 }
 
+export function updateUserProfile({ displayName, photoUrl, targetScore, phoneNumber, dateOfBirth, gender }) {
+  return apiFetch("/api/me", {
+    method: "PATCH",
+    body: JSON.stringify({ displayName, photoUrl, targetScore, phoneNumber, dateOfBirth, gender }),
+  });
+}
+
 const VIETNAM_TIME_ZONE = "Asia/Ho_Chi_Minh";
 
 function dayNumberInVietnam(timestamp) {

@@ -18,6 +18,7 @@ const PAGE_TITLES = {
   "/tests": "testSets",
   "/history": "attemptHistory",
   "/profile": "personalProfile",
+  "/profile/edit": "profileEditBreadcrumb",
   "/pricing": "upgradeProNav",
 };
 
