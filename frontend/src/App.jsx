@@ -27,6 +27,8 @@ import LandingPage from "./pages/public/LandingPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import MyTestsPage from "./pages/employee/MyTestsPage";
 import CreateTestPage from "./pages/employee/CreateTestPage";
+import EditTestPage from "./pages/employee/EditTestPage";
+import TestPreviewPage from "./pages/employee/TestPreviewPage";
 import ReviewQueuePage from "./pages/admin/ReviewQueuePage";
 import ReviewHistoryPage from "./pages/admin/ReviewHistoryPage";
 import SubscriptionManagementPage from "./pages/admin/SubscriptionManagementPage";
@@ -158,6 +160,8 @@ function AppRoutes() {
             <Route path="/console/dashboard" element={<AdminDashboard />} />
             <Route path="/console/tests" element={<MyTestsPage />} />
             <Route path="/console/tests/new" element={<CreateTestPage />} />
+            <Route path="/console/tests/:testId/edit" element={<EditTestPage />} />
+            <Route path="/console/tests/:testId/preview" element={<TestPreviewPage />} />
             <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
               <Route
                 path="/console/subscriptions"
