@@ -1,0 +1,798 @@
+diff --git a/frontend/src/App.jsx b/frontend/src/App.jsx
+index e7c9a79..d306c03 100644
+--- a/frontend/src/App.jsx
++++ b/frontend/src/App.jsx
+@@ -22,6 +22,8 @@ import { useAuth } from "./auth/useAuth";
+ import ProtectedRoute from "./auth/ProtectedRoute";
+ import LoginPage from "./pages/auth/LoginPage";
+ import ManagementLayout from "./layouts/ManagementLayout";
++import PublicLayout from "./layouts/PublicLayout";
++import LandingPage from "./pages/public/LandingPage";
+ import AdminDashboard from "./pages/admin/AdminDashboard";
+ import MyTestsPage from "./pages/employee/MyTestsPage";
+ import CreateTestPage from "./pages/employee/CreateTestPage";
+@@ -98,8 +100,10 @@ function AppRoutes() {
+       <Routes>
+         <Route
+           path="/"
+-          element={<Navigate to={user ? "/dashboard" : "/login"} replace />}
+-        />
++          element={user ? <Navigate to="/dashboard" replace /> : <PublicLayout />}
++        >
++          <Route index element={<LandingPage />} />
++        </Route>
+         <Route
+           path="/login"
+           element={user ? <Navigate to="/dashboard" replace /> : <Login />}
+diff --git a/frontend/src/i18n/translations.js b/frontend/src/i18n/translations.js
+index c3f84cf..89827bb 100644
+--- a/frontend/src/i18n/translations.js
++++ b/frontend/src/i18n/translations.js
+@@ -585,6 +585,74 @@ export const translations = {
+     pricingCurrentPro: "Your Pro is active until",
+     day: "day",
+     days: "days",
++    publicNavLabel: "Main navigation",
++    publicNavFeatures: "Features",
++    publicNavTests: "Tests",
++    publicNavPro: "Pro plans",
++    publicNavLogin: "Log in",
++    publicNavRegister: "Create account",
++    publicFooterTagline: "An online TOEIC practice platform with real-format tests, instant scoring and Capy AI by your side.",
++    publicFooterCourses: "Practice",
++    publicFooterCourse1: "Full Test",
++    publicFooterCourse2: "Practice by Part",
++    publicFooterCourse3: "Pro plans",
++    publicFooterExplore: "Explore",
++    publicFooterExplore1: "Features",
++    publicFooterExplore2: "Log in",
++    publicFooterExplore3: "Create account",
++    publicFooterRights: "All rights reserved.",
++    landingDocTitle: "CapyTOEIC — Smarter TOEIC practice every day",
++    landingHeroBadge: "A new-generation learning platform",
++    landingHeroTitle: "Smarter TOEIC\npractice every day",
++    landingHeroSubtitle: "A complete TOEIC practice platform with real-format tests. Capy AI explains every answer and analyses your strengths and weaknesses after each Full Test.",
++    landingHeroCtaPrimary: "Start for free",
++    landingHeroCtaTests: "Explore tests",
++    landingPreviewScoreLabel: "Full Test score",
++    landingPreviewAiLabel: "Explains every answer",
++    landingStructureLabel: "Exam structure",
++    landingStructureTitle: "TOEIC has 2 sections, 200 questions, 120 minutes",
++    landingListeningMeta: "100 questions · 45 minutes",
++    landingReadingMeta: "100 questions · 75 minutes",
++    landingUnitQuestions: "questions",
++    landingUnitMinutes: "min",
++    landingFeaturesLabel: "Featured capabilities",
++    landingFeaturesTitle: "Everything you need to hit your target",
++    landingFeature1Title: "Real-format practice tests",
++    landingFeature1Desc: "Full Tests with 200 questions and per-Part practice for Parts 1–7, timed exactly like the real exam and scored instantly.",
++    landingFeature2Title: "Track your progress",
++    landingFeature2Desc: "Average and best scores, study streaks and per-Part accuracy are visualised on your profile so you always know where you stand.",
++    landingFeature3Title: "Capy AI explains answers",
++    landingFeature3Desc: "Ask Capy about any question you have completed and get a clear explanation of why the right answer is right, why the others are wrong, plus a study tip.",
++    landingFeature4Title: "AI Full Test analysis",
++    landingFeature4Desc: "After each Full Test, AI points out your weakest Parts and suggests what to focus on next.",
++    landingProBadge: "Pro",
++    landingTestsTitle: "Explore TOEIC tests",
++    landingTestsLoading: "Loading tests…",
++    landingTestsError: "Could not load the test list",
++    landingTestsRetry: "Try again",
++    landingTestsEmpty: "No tests published yet",
++    landingTestsEmptyDesc: "New tests are being prepared. Please check back soon.",
++    landingTestsCta: "Log in to start",
++    landingTestsViewAll: "View all tests →",
++    landingTag_full: "Full Test",
++    landingTag_listening: "Listening Only",
++    landingTag_reading: "Reading Only",
++    landingStat1Label: "Questions in one Full Test",
++    landingStat2Label: "Listening & Reading Parts",
++    landingStat3Label: "Maximum TOEIC score",
++    landingProTitle: "Go Pro with Capy AI",
++    landingProSubtitle: "Unlock Capy AI chat and Full Test analysis — the two study companions that help you improve fastest.",
++    landingProBenefit1: "Capy AI Chat answers your TOEIC questions and explains answers in detail",
++    landingProBenefit2: "AI analysis of every completed Full Test",
++    landingProBenefit3: "Activated instantly after payment — no auto-renewal",
++    landingProTrialPrice: "₫10,000",
++    landingProTrialNote: "1 day · once per account",
++    landingProMonthlyPrice: "₫99,000",
++    landingProMonthlyNote: "30 days · only ~₫3,300/day",
++    landingProCta: "Log in to upgrade",
++    landingCtaTitle: "Ready to conquer TOEIC?",
++    landingCtaSubtitle: "Create a free account today and experience smart score prediction designed just for you.",
++    landingCtaButton: "Start your free trial",
+   },
+   vi: {
+     adminSubscriptionNav: "Gói Pro",
+@@ -1172,5 +1240,73 @@ export const translations = {
+     pricingCurrentPro: "Bạn đang dùng Pro đến",
+     day: "ngày",
+     days: "ngày",
++    publicNavLabel: "Điều hướng chính",
++    publicNavFeatures: "Tính năng",
++    publicNavTests: "Đề thi",
++    publicNavPro: "Gói Pro",
++    publicNavLogin: "Đăng nhập",
++    publicNavRegister: "Đăng ký tài khoản",
++    publicFooterTagline: "Nền tảng luyện thi TOEIC trực tuyến với đề chuẩn format, chấm điểm tức thì và Capy AI đồng hành.",
++    publicFooterCourses: "Luyện thi",
++    publicFooterCourse1: "Full Test",
++    publicFooterCourse2: "Luyện theo từng Part",
++    publicFooterCourse3: "Gói Pro",
++    publicFooterExplore: "Khám phá",
++    publicFooterExplore1: "Tính năng",
++    publicFooterExplore2: "Đăng nhập",
++    publicFooterExplore3: "Đăng ký tài khoản",
++    publicFooterRights: "Tất cả các quyền được bảo lưu.",
++    landingDocTitle: "CapyTOEIC — Luyện TOEIC thông minh mỗi ngày",
++    landingHeroBadge: "Nền tảng thế hệ mới",
++    landingHeroTitle: "Luyện TOEIC thông minh\nmỗi ngày",
++    landingHeroSubtitle: "Nền tảng luyện thi TOEIC toàn diện với đề thi chuẩn format thật. Capy AI giải thích từng đáp án và phân tích điểm mạnh, điểm yếu của bạn sau mỗi Full Test.",
++    landingHeroCtaPrimary: "Bắt đầu miễn phí",
++    landingHeroCtaTests: "Khám phá đề thi",
++    landingPreviewScoreLabel: "Điểm Full Test",
++    landingPreviewAiLabel: "Giải thích từng đáp án",
++    landingStructureLabel: "Cấu trúc bài thi",
++    landingStructureTitle: "TOEIC gồm 2 phần, 200 câu hỏi, 120 phút",
++    landingListeningMeta: "100 câu · 45 phút",
++    landingReadingMeta: "100 câu · 75 phút",
++    landingUnitQuestions: "câu",
++    landingUnitMinutes: "phút",
++    landingFeaturesLabel: "Tính năng nổi bật",
++    landingFeaturesTitle: "Tất cả những gì bạn cần để đạt mục tiêu",
++    landingFeature1Title: "Luyện đề chuẩn format thật",
++    landingFeature1Desc: "Full Test 200 câu và luyện riêng từng Part 1–7, bấm giờ như thi thật, chấm điểm ngay khi nộp bài.",
++    landingFeature2Title: "Theo dõi tiến độ",
++    landingFeature2Desc: "Điểm trung bình, điểm cao nhất, chuỗi ngày học và độ chính xác từng Part được trực quan hoá ngay trong hồ sơ của bạn.",
++    landingFeature3Title: "Capy AI giải thích đáp án",
++    landingFeature3Desc: "Hỏi Capy về bất kỳ câu nào đã làm xong để nhận giải thích vì sao đáp án đúng, vì sao các đáp án còn lại sai, kèm một mẹo ôn tập.",
++    landingFeature4Title: "AI phân tích Full Test",
++    landingFeature4Desc: "Sau mỗi Full Test, AI chỉ ra Part yếu nhất của bạn và gợi ý trọng tâm ôn luyện tiếp theo.",
++    landingProBadge: "Pro",
++    landingTestsTitle: "Khám phá đề thi TOEIC",
++    landingTestsLoading: "Đang tải danh sách đề…",
++    landingTestsError: "Không tải được danh sách đề thi",
++    landingTestsRetry: "Thử lại",
++    landingTestsEmpty: "Chưa có đề thi nào được xuất bản",
++    landingTestsEmptyDesc: "Đề thi mới đang được chuẩn bị. Bạn quay lại sau ít lâu nhé.",
++    landingTestsCta: "Đăng nhập để làm bài",
++    landingTestsViewAll: "Xem tất cả đề thi →",
++    landingTag_full: "Full Test",
++    landingTag_listening: "Listening Only",
++    landingTag_reading: "Reading Only",
++    landingStat1Label: "Câu hỏi trong một Full Test",
++    landingStat2Label: "Part Listening & Reading",
++    landingStat3Label: "Thang điểm TOEIC tối đa",
++    landingProTitle: "Nâng cấp Pro cùng Capy AI",
++    landingProSubtitle: "Mở khoá Capy AI Chat và phân tích Full Test bằng AI — hai trợ thủ giúp bạn tiến bộ nhanh nhất.",
++    landingProBenefit1: "Capy AI Chat hỏi đáp TOEIC và giải thích đáp án chi tiết",
++    landingProBenefit2: "AI phân tích mọi Full Test đã hoàn thành",
++    landingProBenefit3: "Kích hoạt ngay sau khi thanh toán — không tự gia hạn",
++    landingProTrialPrice: "10.000 ₫",
++    landingProTrialNote: "1 ngày · mỗi tài khoản mua 1 lần",
++    landingProMonthlyPrice: "99.000 ₫",
++    landingProMonthlyNote: "30 ngày · chỉ ~3.300 ₫/ngày",
++    landingProCta: "Đăng nhập để nâng cấp",
++    landingCtaTitle: "Sẵn sàng chinh phục TOEIC?",
++    landingCtaSubtitle: "Tạo tài khoản miễn phí ngay hôm nay và trải nghiệm lộ trình tăng điểm được thiết kế riêng cho bạn.",
++    landingCtaButton: "Bắt đầu thi thử miễn phí",
+   },
+ };
+diff --git a/frontend/src/layouts/PublicLayout.jsx b/frontend/src/layouts/PublicLayout.jsx
+index 060847f..ff24bfe 100644
+--- a/frontend/src/layouts/PublicLayout.jsx
++++ b/frontend/src/layouts/PublicLayout.jsx
+@@ -1 +1,190 @@
+-// TODO(Member 1): Implement the guest-facing application shell.
++import { useEffect, useState } from "react";
++import { Link, Outlet, useLocation } from "react-router-dom";
++import LanguageSwitcher from "../components/LanguageSwitcher";
++import { useLanguage } from "../i18n/LanguageContext";
++import BrandLogo from "../components/BrandLogo.jsx";
++
++const NAV_ITEMS = [
++    { to: "/#features", labelKey: "publicNavFeatures" },
++    { to: "/#tests", labelKey: "publicNavTests" },
++    { to: "/#pro", labelKey: "publicNavPro" },
++];
++
++const FOOTER_COURSES = [
++    { to: "/#tests", labelKey: "publicFooterCourse1" },
++    { to: "/#tests", labelKey: "publicFooterCourse2" },
++    { to: "/#pro", labelKey: "publicFooterCourse3" },
++];
++
++const FOOTER_EXPLORE = [
++    { to: "/#features", labelKey: "publicFooterExplore1" },
++    { to: "/login", labelKey: "publicFooterExplore2" },
++    { to: "/login", labelKey: "publicFooterExplore3" },
++];
++
++function Logo({ light = false }) {
++    const { t } = useLanguage();
++    return (
++        <span className="flex items-center gap-3">
++            <BrandLogo className="h-11 w-11 rounded-xl border border-sky-100 bg-white" />
++            <span>
++                <strong className={`block text-lg leading-tight ${light ? "text-white" : "text-slate-900"}`}>
++                    CapyTOEIC
++                </strong>
++                <span className={`block text-sm ${light ? "text-slate-400" : "text-slate-500"}`}>
++                    {t("smarterPractice")}
++                </span>
++            </span>
++        </span>
++    );
++}
++
++function SocialIcon({ name }) {
++    const paths = {
++        facebook: <path d="M14 8h2V5h-2.5A3.5 3.5 0 0 0 10 8.5V11H8v3h2v6h3v-6h2.2l.5-3H13V8.7c0-.4.3-.7.7-.7H14z" />,
++        youtube: <path d="M21 8.2a2.5 2.5 0 0 0-1.8-1.8C17.7 6 12 6 12 6s-5.7 0-7.2.4A2.5 2.5 0 0 0 3 8.2 26 26 0 0 0 2.6 12c0 1.3.1 2.6.4 3.8a2.5 2.5 0 0 0 1.8 1.8C6.3 18 12 18 12 18s5.7 0 7.2-.4a2.5 2.5 0 0 0 1.8-1.8c.3-1.2.4-2.5.4-3.8s-.1-2.6-.4-3.8zM10 14.5v-5l4.3 2.5-4.3 2.5z" />,
++        linkedin: <path d="M6.5 9H4v10h2.5V9zM5.2 5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM20 19v-5.5c0-2.4-1.3-3.6-3.1-3.6-1.4 0-2.1.8-2.4 1.3V9H12v10h2.5v-5.6c0-1.2.7-1.9 1.6-1.9s1.4.7 1.4 1.9V19H20z" />,
++    };
++    return (
++        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden="true">
++            {paths[name]}
++        </svg>
++    );
++}
++
++export default function PublicLayout() {
++    const { t } = useLanguage();
++    const [menuOpen, setMenuOpen] = useState(false);
++    const { pathname, hash } = useLocation();
++
++    // Router links like "/#tests" do not scroll by themselves.
++    useEffect(() => {
++        if (hash) {
++            document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: "smooth" });
++        } else {
++            window.scrollTo(0, 0);
++        }
++    }, [pathname, hash]);
++
++    return (
++        <div className="flex min-h-screen min-h-dvh flex-col bg-white text-slate-900">
++            <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
++                <div className="flex w-full items-center justify-between gap-4 px-5 py-4 sm:px-8 lg:px-10">
++                    <Link to="/" aria-label="CapyTOEIC">
++                        <Logo />
++                    </Link>
++
++                    <nav className="hidden items-center gap-2 md:flex" aria-label={t("publicNavLabel")}>
++                        {NAV_ITEMS.map((item) => (
++                            <Link
++                                key={item.labelKey}
++                                to={item.to}
++                                className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-sky-50 hover:text-sky-700"
++                            >
++                                {t(item.labelKey)}
++                            </Link>
++                        ))}
++                        <LanguageSwitcher className="mx-1" />
++                        <Link
++                            to="/login"
++                            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-200"
++                        >
++                            {t("publicNavLogin")}
++                        </Link>
++                        <Link
++                            to="/login"
++                            className="rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-200"
++                        >
++                            {t("publicNavRegister")}
++                        </Link>
++                    </nav>
++
++                    <button
++                        type="button"
++                        className="rounded-lg border border-slate-200 p-2 text-slate-600 md:hidden"
++                        aria-label={menuOpen ? t("closeMenu") : t("openMenu")}
++                        aria-expanded={menuOpen}
++                        onClick={() => setMenuOpen((open) => !open)}
++                    >
++                        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
++                            {menuOpen ? <path d="m6 6 12 12M18 6 6 18" strokeLinecap="round" /> : <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />}
++                        </svg>
++                    </button>
++                </div>
++
++                {menuOpen && (
++                    <nav className="border-t border-slate-100 px-4 py-3 md:hidden" aria-label={t("publicNavLabel")}>
++                        <div className="flex flex-col gap-1">
++                            {NAV_ITEMS.map((item) => (
++                                <Link
++                                    key={item.labelKey}
++                                    to={item.to}
++                                    onClick={() => setMenuOpen(false)}
++                                    className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-sky-50"
++                                >
++                                    {t(item.labelKey)}
++                                </Link>
++                            ))}
++                            <div className="mt-2 flex items-center gap-2.5 border-t border-slate-100 pt-3">
++                                <LanguageSwitcher />
++                                <Link
++                                    to="/login"
++                                    onClick={() => setMenuOpen(false)}
++                                    className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-center text-sm font-semibold text-slate-700 shadow-sm"
++                                >
++                                    {t("publicNavLogin")}
++                                </Link>
++                                <Link
++                                    to="/login"
++                                    onClick={() => setMenuOpen(false)}
++                                    className="flex-1 rounded-xl bg-sky-600 px-4 py-2.5 text-center text-sm font-semibold text-white shadow-sm"
++                                >
++                                    {t("publicNavRegister")}
++                                </Link>
++                            </div>
++                        </div>
++                    </nav>
++                )}
++            </header>
++
++            <main className="flex-1">
++                <Outlet />
++            </main>
++
++            <footer className="bg-[#111827] text-slate-300">
++                <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1.6fr_1fr_1fr]">
++                    <div>
++                        <Logo light />
++                        <p className="mt-4 max-w-xs text-xs leading-5 text-slate-400">{t("publicFooterTagline")}</p>
++                        <div className="mt-5 flex gap-4 text-slate-400">
++                            {["facebook", "youtube", "linkedin"].map((name) => (
++                                <span key={name} className="transition hover:text-white"><SocialIcon name={name} /></span>
++                            ))}
++                        </div>
++                    </div>
++                    <nav aria-label={t("publicFooterCourses")}>
++                        <p className="text-xs font-bold text-white">{t("publicFooterCourses")}</p>
++                        <ul className="mt-4 space-y-3 text-xs text-slate-400">
++                            {FOOTER_COURSES.map((item) => (
++                                <li key={item.labelKey}><Link to={item.to} className="hover:text-white">{t(item.labelKey)}</Link></li>
++                            ))}
++                        </ul>
++                    </nav>
++                    <nav aria-label={t("publicFooterExplore")}>
++                        <p className="text-xs font-bold text-white">{t("publicFooterExplore")}</p>
++                        <ul className="mt-4 space-y-3 text-xs text-slate-400">
++                            {FOOTER_EXPLORE.map((item) => (
++                                <li key={item.labelKey}><Link to={item.to} className="hover:text-white">{t(item.labelKey)}</Link></li>
++                            ))}
++                        </ul>
++                    </nav>
++                </div>
++                <div className="border-t border-slate-700/60">
++                    <p className="mx-auto w-full max-w-6xl px-4 py-5 text-xs text-slate-400 sm:px-6">
++                        © 2026 CapyTOEIC. {t("publicFooterRights")}
++                    </p>
++                </div>
++            </footer>
++        </div>
++    );
++}
+diff --git a/frontend/src/pages/public/LandingPage.jsx b/frontend/src/pages/public/LandingPage.jsx
+index f350ad4..424e6c3 100644
+--- a/frontend/src/pages/public/LandingPage.jsx
++++ b/frontend/src/pages/public/LandingPage.jsx
+@@ -1 +1,417 @@
+-// TODO(Member 1): Implement the public TOEIC landing and published-test preview.
++import { useEffect, useState } from "react";
++import { Link } from "react-router-dom";
++import { publicApiFetch } from "../../api/client";
++import { useLanguage } from "../../i18n/LanguageContext";
++
++const FEATURED_TEST_LIMIT = 6;
++
++const LISTENING_PARTS = [
++    { name: "Part 1: Photographs", count: 6 },
++    { name: "Part 2: Question-Response", count: 25 },
++    { name: "Part 3: Conversations", count: 39 },
++    { name: "Part 4: Talks", count: 30 },
++];
++
++const READING_PARTS = [
++    { name: "Part 5: Incomplete Sentences", count: 30 },
++    { name: "Part 6: Text Completion", count: 16 },
++    { name: "Part 7: Reading Comprehension", count: 54 },
++];
++
++const FEATURES = [
++    { icon: "book", titleKey: "landingFeature1Title", descKey: "landingFeature1Desc", pro: false },
++    { icon: "chart", titleKey: "landingFeature2Title", descKey: "landingFeature2Desc", pro: false },
++    { icon: "ai", titleKey: "landingFeature3Title", descKey: "landingFeature3Desc", pro: true },
++    { icon: "target", titleKey: "landingFeature4Title", descKey: "landingFeature4Desc", pro: true },
++];
++
++const STATS = [
++    { value: "200", labelKey: "landingStat1Label" },
++    { value: "7", labelKey: "landingStat2Label" },
++    { value: "990", labelKey: "landingStat3Label" },
++];
++
++const PRO_BENEFITS = ["landingProBenefit1", "landingProBenefit2", "landingProBenefit3"];
++
++const TAG_CLASSES = {
++    full: "bg-sky-50 text-sky-600",
++    listening: "bg-emerald-50 text-emerald-600",
++    reading: "bg-violet-50 text-violet-600",
++};
++
++function Icon({ name, className = "h-6 w-6" }) {
++    const paths = {
++        headphones: <path d="M4 15v-3a8 8 0 0 1 16 0v3M4 15a2 2 0 0 1 2-2h1v6H6a2 2 0 0 1-2-2v-2zm16 0a2 2 0 0 0-2-2h-1v6h1a2 2 0 0 0 2-2v-2z" />,
++        book: <path d="M12 6.5C10.5 5.5 8.5 5 6 5H4v13h2c2.5 0 4.5.5 6 1.5M12 6.5C13.5 5.5 15.5 5 18 5h2v13h-2c-2.5 0-4.5.5-6 1.5M12 6.5v13" />,
++        chart: <path d="M5 20V10M12 20V4M19 20v-7" />,
++        ai: <path d="M12 3a4 4 0 0 0-4 4v1a3 3 0 0 0-2 5 3 3 0 0 0 2 5 4 4 0 0 0 8 0 3 3 0 0 0 2-5 3 3 0 0 0-2-5V7a4 4 0 0 0-4-4zM12 3v18" />,
++        target: <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10zM12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2z" />,
++        lock: <path d="M7 11V8a5 5 0 0 1 10 0v3M6 11h12v9H6v-9z" />,
++        clock: <path d="M12 7v5l3 2M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z" />,
++        check: <path d="m5 12.5 4.5 4.5L19 7.5" />,
++        arrowDown: <path d="M12 4v16m0 0 6-6m-6 6-6-6" />,
++    };
++    return (
++        <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
++            {paths[name]}
++        </svg>
++    );
++}
++
++function SectionHeading({ label, title }) {
++    return (
++        <div className="text-center">
++            <span className="inline-block rounded-full bg-sky-100 px-3 py-1 text-xs font-medium uppercase tracking-wide text-sky-700">
++                {label}
++            </span>
++            <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">{title}</h2>
++        </div>
++    );
++}
++
++function HeroPreview() {
++    const { t } = useLanguage();
++    return (
++        <div className="relative mx-auto w-full max-w-lg" aria-hidden="true">
++            <div className="overflow-hidden rounded-3xl bg-linear-to-br from-sky-100 via-sky-50 to-white p-8 shadow-xl shadow-sky-100 sm:p-10">
++                <img
++                    src="/brand/toeic-mascot.png"
++                    alt=""
++                    className="mx-auto w-full max-w-xs object-contain"
++                    draggable="false"
++                />
++            </div>
++            <div className="absolute -left-3 bottom-8 rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-lg shadow-slate-200/70 sm:-left-6">
++                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{t("landingPreviewScoreLabel")}</p>
++                <p className="mt-0.5 text-lg font-extrabold text-slate-900">825<span className="text-sm font-bold text-slate-400">/990</span></p>
++            </div>
++            <div className="absolute -right-3 top-8 flex items-center gap-2.5 rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-lg shadow-slate-200/70 sm:-right-6">
++                <img src="/brand/LogochatboxCapyAI.png" alt="" className="h-9 w-9 rounded-full object-cover" draggable="false" />
++                <div>
++                    <p className="text-sm font-bold text-slate-900">Capy AI</p>
++                    <p className="text-[11px] font-medium text-slate-500">{t("landingPreviewAiLabel")}</p>
++                </div>
++            </div>
++        </div>
++    );
++}
++
++function ExamStructureCard({ icon, title, meta, parts }) {
++    const { t } = useLanguage();
++    return (
++        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-md shadow-slate-200/60">
++            <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-4">
++                <div className="flex items-center gap-3">
++                    <span className="grid h-9 w-9 place-items-center rounded-lg bg-sky-50 text-sky-600">
++                        <Icon name={icon} />
++                    </span>
++                    <h3 className="text-lg font-bold text-slate-900">{title}</h3>
++                </div>
++                <span className="text-sm font-semibold text-slate-700">{meta}</span>
++            </div>
++            <ul className="mt-4 space-y-4">
++                {parts.map((part) => (
++                    <li key={part.name}>
++                        <div className="flex items-center justify-between text-sm">
++                            <span className="font-medium text-slate-700">{part.name}</span>
++                            <span className="font-semibold text-sky-600">{part.count} {t("landingUnitQuestions")}</span>
++                        </div>
++                        <div className="mt-1.5 h-1.5 w-full rounded-full bg-slate-100">
++                            <div className="h-1.5 rounded-full bg-sky-500" style={{ width: `${part.count}%` }} />
++                        </div>
++                    </li>
++                ))}
++            </ul>
++        </div>
++    );
++}
++
++function getTestKind(test) {
++    const questions = test.totalQuestions ?? 200;
++    const minutes = test.duration ?? test.totalMinutes ?? 120;
++    if (questions <= 100 && minutes <= 45) return "listening";
++    if (questions <= 100) return "reading";
++    return "full";
++}
++
++function FeaturedTests() {
++    const { t } = useLanguage();
++    const [tests, setTests] = useState([]);
++    const [status, setStatus] = useState("loading");
++    const [errorMessage, setErrorMessage] = useState("");
++    const [reloadKey, setReloadKey] = useState(0);
++
++    useEffect(() => {
++        let cancelled = false;
++        publicApiFetch("/api/tests")
++            .then((data) => {
++                if (cancelled) return;
++                setTests(Array.isArray(data) ? data.slice(0, FEATURED_TEST_LIMIT) : []);
++                setStatus("success");
++            })
++            .catch((error) => {
++                if (cancelled) return;
++                setErrorMessage(error?.message || "");
++                setStatus("error");
++            });
++
++        return () => {
++            cancelled = true;
++        };
++    }, [reloadKey]);
++
++    const handleRetry = () => {
++        setErrorMessage("");
++        setStatus("loading");
++        setReloadKey((key) => key + 1);
++    };
++
++    if (status === "loading") {
++        return (
++            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" role="status" aria-label={t("landingTestsLoading")}>
++                {Array.from({ length: 3 }).map((_, index) => (
++                    <div key={index} className="animate-pulse rounded-xl border border-slate-200 bg-white p-4">
++                        <div className="h-5 w-20 rounded bg-slate-100" />
++                        <div className="mt-4 h-5 w-3/4 rounded bg-slate-100" />
++                        <div className="mt-2 h-4 w-1/2 rounded bg-slate-100" />
++                        <div className="mt-5 h-8 w-32 rounded-lg bg-slate-100" />
++                    </div>
++                ))}
++            </div>
++        );
++    }
++
++    if (status === "error") {
++        return (
++            <div className="rounded-xl border border-slate-200 bg-white px-6 py-10 text-center">
++                <h3 className="text-base font-bold text-slate-900">{t("landingTestsError")}</h3>
++                {errorMessage && <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">{errorMessage}</p>}
++                <button
++                    type="button"
++                    onClick={handleRetry}
++                    className="mt-5 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-200"
++                >
++                    {t("landingTestsRetry")}
++                </button>
++            </div>
++        );
++    }
++
++    if (tests.length === 0) {
++        return (
++            <div className="rounded-xl border border-slate-200 bg-white px-6 py-10 text-center">
++                <h3 className="text-base font-bold text-slate-900">{t("landingTestsEmpty")}</h3>
++                <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">{t("landingTestsEmptyDesc")}</p>
++            </div>
++        );
++    }
++
++    return (
++        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
++            {tests.map((test) => {
++                const kind = getTestKind(test);
++                const minutes = test.duration ?? test.totalMinutes ?? 120;
++                return (
++                    <article key={test.testId || test.id || test.title} className="flex flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
++                        <div className="flex items-center justify-between gap-3">
++                            <span className={`rounded px-2 py-0.5 text-xs font-semibold ${TAG_CLASSES[kind]}`}>
++                                {t(`landingTag_${kind}`)}
++                            </span>
++                            <span className="flex items-center gap-1 text-xs text-slate-500">
++                                <Icon name="clock" className="h-3.5 w-3.5" />
++                                {minutes} {t("landingUnitMinutes")}
++                            </span>
++                        </div>
++                        <h3 className="mt-3 line-clamp-2 text-base font-bold text-slate-900">{test.title}</h3>
++                        <p className="mt-1 text-xs text-slate-500">
++                            {test.totalQuestions ?? 200} {t("landingUnitQuestions")}
++                        </p>
++                        <div className="mt-4">
++                            <Link
++                                to="/login"
++                                className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-200"
++                            >
++                                <Icon name="lock" className="h-3.5 w-3.5" />
++                                {t("landingTestsCta")}
++                            </Link>
++                        </div>
++                    </article>
++                );
++            })}
++        </div>
++    );
++}
++
++/**
++ * Public landing page rendered at "/" for guests (see App.jsx).
++ * Uses only the public catalog API; every start-attempt action routes
++ * to /login instead of calling authenticated endpoints.
++ */
++export default function LandingPage() {
++    const { t } = useLanguage();
++
++    useEffect(() => {
++        document.title = t("landingDocTitle");
++    }, [t]);
++
++    return (
++        <div className="bg-white">
++            {/* Hero */}
++            <section className="bg-[#f3f6fa]">
++                <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-2">
++                    <div>
++                        <span className="inline-block rounded-full bg-sky-100 px-3 py-1 text-xs font-medium uppercase tracking-wide text-sky-700">
++                            {t("landingHeroBadge")}
++                        </span>
++                        <h1 className="mt-5 text-5xl font-extrabold whitespace-pre-line leading-tight tracking-tight text-slate-900 sm:text-6xl">
++                            {t("landingHeroTitle")}
++                        </h1>
++                        <p className="mt-5 max-w-md text-base leading-7 text-slate-600">{t("landingHeroSubtitle")}</p>
++                        <div className="mt-7 flex flex-wrap items-center gap-5">
++                            <Link
++                                to="/login"
++                                className="inline-flex min-h-11 items-center rounded-xl bg-sky-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-200"
++                            >
++                                {t("landingHeroCtaPrimary")}
++                            </Link>
++                            <Link to="/#tests" className="inline-flex items-center gap-2 text-base font-semibold text-slate-800 hover:text-sky-700">
++                                {t("landingHeroCtaTests")}
++                                <Icon name="arrowDown" className="h-4 w-4" />
++                            </Link>
++                        </div>
++                    </div>
++                    <HeroPreview />
++                </div>
++            </section>
++
++            {/* Exam structure */}
++            <section className="bg-white">
++                <div className="mx-auto w-full max-w-5xl px-4 py-14 sm:px-6 sm:py-16">
++                    <SectionHeading label={t("landingStructureLabel")} title={t("landingStructureTitle")} />
++                    <div className="mt-10 grid items-start gap-6 md:grid-cols-2">
++                        <ExamStructureCard icon="headphones" title="Listening" meta={t("landingListeningMeta")} parts={LISTENING_PARTS} />
++                        <ExamStructureCard icon="book" title="Reading" meta={t("landingReadingMeta")} parts={READING_PARTS} />
++                    </div>
++                </div>
++            </section>
++
++            {/* Features */}
++            <section id="features" className="scroll-mt-16 bg-[#f3f6fa]">
++                <div className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 sm:py-16">
++                    <SectionHeading label={t("landingFeaturesLabel")} title={t("landingFeaturesTitle")} />
++                    <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
++                        {FEATURES.map((feature) => (
++                            <div key={feature.titleKey} className="rounded-xl bg-white p-5 shadow-sm">
++                                <div className="flex items-center justify-between">
++                                    <span className="grid h-9 w-9 place-items-center rounded-lg bg-sky-50 text-sky-600">
++                                        <Icon name={feature.icon} />
++                                    </span>
++                                    {feature.pro && (
++                                        <span className="rounded-full bg-sky-600 px-2 py-0.5 text-[11px] font-bold tracking-wide text-white">
++                                            {t("landingProBadge")}
++                                        </span>
++                                    )}
++                                </div>
++                                <h3 className="mt-4 text-base font-bold text-slate-900">{t(feature.titleKey)}</h3>
++                                <p className="mt-2 text-sm leading-6 text-slate-500">{t(feature.descKey)}</p>
++                            </div>
++                        ))}
++                    </div>
++                </div>
++            </section>
++
++            {/* Explore tests */}
++            <section id="tests" className="scroll-mt-16 bg-white">
++                <div className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 sm:py-16">
++                    <h2 className="text-center text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
++                        {t("landingTestsTitle")}
++                    </h2>
++                    <div className="mt-8">
++                        <FeaturedTests />
++                    </div>
++                    <p className="mt-10 text-center">
++                        <Link to="/login" className="text-sm font-semibold text-sky-700 underline underline-offset-2">
++                            {t("landingTestsViewAll")}
++                        </Link>
++                    </p>
++                </div>
++            </section>
++
++            {/* Stats */}
++            <section className="bg-[#f3f6fa]">
++                <dl className="mx-auto grid w-full max-w-5xl gap-8 px-4 py-14 text-center sm:grid-cols-3 sm:px-6">
++                    {STATS.map((stat) => (
++                        <div key={stat.labelKey} className="flex flex-col">
++                            <dd className="order-1 text-5xl font-extrabold text-sky-600">{stat.value}</dd>
++                            <dt className="order-2 mt-1 text-sm text-slate-600">{t(stat.labelKey)}</dt>
++                        </div>
++                    ))}
++                </dl>
++            </section>
++
++            {/* Pro */}
++            <section id="pro" className="scroll-mt-16 bg-white">
++                <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-4 py-14 sm:px-6 sm:py-16 lg:grid-cols-2">
++                    <div>
++                        <span className="inline-block rounded-full bg-sky-100 px-3 py-1 text-xs font-medium uppercase tracking-wide text-sky-700">
++                            {t("landingProBadge")}
++                        </span>
++                        <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">{t("landingProTitle")}</h2>
++                        <p className="mt-3 max-w-md text-base leading-7 text-slate-600">{t("landingProSubtitle")}</p>
++                        <ul className="mt-6 space-y-3">
++                            {PRO_BENEFITS.map((benefitKey) => (
++                                <li key={benefitKey} className="flex items-start gap-3 text-sm font-medium text-slate-700">
++                                    <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-sky-100 text-sky-700">
++                                        <Icon name="check" className="h-3.5 w-3.5" />
++                                    </span>
++                                    {t(benefitKey)}
++                                </li>
++                            ))}
++                        </ul>
++                        <div className="mt-7 flex items-center gap-4">
++                            <img src="/brand/CapyPro.png" alt="" className="h-16 w-16 rounded-2xl object-cover" draggable="false" />
++                            <p className="text-xs leading-5 text-slate-500">{t("pricingTrustSecure")}</p>
++                        </div>
++                    </div>
++                    <div className="grid gap-4 sm:grid-cols-2">
++                        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
++                            <p className="text-xs font-bold uppercase tracking-wide text-sky-600">{t("pricingTrialBadge")}</p>
++                            <h3 className="mt-2 text-lg font-bold text-slate-900">{t("pricingTrialName")}</h3>
++                            <p className="mt-3 text-3xl font-extrabold text-slate-900">{t("landingProTrialPrice")}</p>
++                            <p className="mt-1 text-sm text-slate-500">{t("landingProTrialNote")}</p>
++                        </div>
++                        <div className="relative rounded-2xl border-2 border-sky-500 bg-white p-6 shadow-md shadow-sky-100">
++                            <span className="absolute -top-3 left-5 rounded-full bg-sky-600 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-white">
++                                {t("pricingPopular")}
++                            </span>
++                            <p className="text-xs font-bold uppercase tracking-wide text-sky-600">{t("landingProBadge")}</p>
++                            <h3 className="mt-2 text-lg font-bold text-slate-900">{t("pricingMonthlyName")}</h3>
++                            <p className="mt-3 text-3xl font-extrabold text-slate-900">{t("landingProMonthlyPrice")}</p>
++                            <p className="mt-1 text-sm text-slate-500">{t("landingProMonthlyNote")}</p>
++                        </div>
++                        <Link
++                            to="/login"
++                            className="inline-flex items-center justify-center rounded-xl bg-sky-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-200 sm:col-span-2"
++                        >
++                            {t("landingProCta")}
++                        </Link>
++                    </div>
++                </div>
++            </section>
++
++            {/* Final CTA */}
++            <section className="bg-linear-to-b from-sky-600 to-blue-800 text-center text-white">
++                <div className="mx-auto w-full max-w-3xl px-4 py-16 sm:px-6">
++                    <h2 className="text-4xl font-extrabold tracking-tight">{t("landingCtaTitle")}</h2>
++                    <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-blue-100 sm:text-base">{t("landingCtaSubtitle")}</p>
++                    <Link
++                        to="/login"
++                        className="mt-7 inline-flex min-h-11 items-center rounded-xl bg-white px-6 py-2.5 text-sm font-bold text-sky-700 shadow-sm transition hover:bg-sky-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/40"
++                    >
++                        {t("landingCtaButton")}
++                    </Link>
++                </div>
++            </section>
++        </div>
++    );
++}

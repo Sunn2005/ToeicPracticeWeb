@@ -22,6 +22,8 @@ import { useAuth } from "./auth/useAuth";
 import ProtectedRoute from "./auth/ProtectedRoute";
 import LoginPage from "./pages/auth/LoginPage";
 import ManagementLayout from "./layouts/ManagementLayout";
+import PublicLayout from "./layouts/PublicLayout";
+import LandingPage from "./pages/public/LandingPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import MyTestsPage from "./pages/employee/MyTestsPage";
 import CreateTestPage from "./pages/employee/CreateTestPage";
@@ -98,7 +100,13 @@ function AppRoutes() {
       <Routes>
         <Route
           path="/"
-          element={<Navigate to={user ? "/dashboard" : "/login"} replace />}
+          element={user ? <Navigate to="/dashboard" replace /> : <PublicLayout />}
+        >
+          <Route index element={<LandingPage />} />
+        </Route>
+        <Route
+          path="/register"
+          element={user ? <Navigate to="/dashboard" replace /> : <Login mode="register" />}
         />
         <Route
           path="/login"

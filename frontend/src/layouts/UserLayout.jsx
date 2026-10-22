@@ -61,7 +61,9 @@ export default function UserLayout() {
   const handleSignOut = async () => {
     setSigningOut(true);
     await logout();
-    navigate("/login", { replace: true });
+    // A document navigation cannot be overwritten by the auth guard's redirect
+    // when logout clears the user before this async handler resumes.
+    window.location.replace("/");
   };
 
   return (

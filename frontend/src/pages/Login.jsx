@@ -1,6 +1,6 @@
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
 import { useAuth } from "../auth/useAuth";
 import BrandLogo from "../components/BrandLogo";
@@ -15,12 +15,17 @@ const GOOGLE_SIGN_IN_ERROR_KEYS = {
   "auth/unauthorized-domain": "unauthorizedDomain",
 };
 
-function Login() {
+function Login({ mode = "login" }) {
+  const isRegister = mode === "register";
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { establishSession, profileError } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    document.title = t(isRegister ? "registerPageTitle" : "loginPageTitle");
+  }, [isRegister, t]);
 
   const loginWithGoogle = async () => {
     if (isLoading) return;
@@ -56,8 +61,8 @@ function Login() {
   ];
 
   const practiceIdeas = [
-    t("miniTest"),
-    t("topicVocabulary"),
+    t("authPracticeFull"),
+    t("authPracticeParts"),
     t("reviewIncorrectAnswers"),
   ];
 
@@ -66,19 +71,19 @@ function Login() {
       <LanguageSwitcher className="fixed right-3 top-3 z-50 sm:right-5 sm:top-5" />
 
       <main className="mx-auto flex min-h-screen min-h-dvh w-full max-w-6xl items-center px-4 pb-8 pt-20 sm:px-6 sm:py-24 lg:py-12">
-        <h1 className="sr-only">{t("loginPageTitle")}</h1>
+        <h1 className="sr-only">{t(isRegister ? "registerPageTitle" : "loginPageTitle")}</h1>
 
         <section
-          aria-label={t("loginPageTitle")}
+          aria-label={t(isRegister ? "registerPageTitle" : "loginPageTitle")}
           className="grid w-full items-center gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12"
         >
           <div className="login-card mx-auto w-full max-w-md lg:order-2">
             <div className="rounded-3xl border border-white/90 bg-white/90 p-5 shadow-xl shadow-sky-200/55 backdrop-blur-xl sm:rounded-4xl sm:p-8">
               <div className="mb-6 flex items-center justify-between gap-4 sm:mb-8">
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-sky-700">{t("welcome")}</p>
+                  <p className="text-sm font-medium text-sky-700">{t(isRegister ? "registerWelcome" : "welcome")}</p>
                   <h2 className="mt-1.5 text-xl font-bold text-slate-950 sm:mt-2 sm:text-2xl">
-                    {t("signInToStart")}
+                    {t(isRegister ? "registerHeading" : "signInToStart")}
                   </h2>
                 </div>
                 <BrandLogo
@@ -93,7 +98,7 @@ function Login() {
                 disabled={isLoading}
                 aria-busy={isLoading}
                 aria-describedby="google-sign-in-support"
-                className="group flex min-h-12 w-full items-center justify-center gap-3 rounded-2xl bg-sky-500 px-4 py-3 text-base font-semibold text-white shadow-md shadow-sky-300/60 transition duration-200 hover:-translate-y-0.5 hover:bg-sky-600 focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white motion-reduce:transform-none motion-reduce:transition-none disabled:cursor-not-allowed disabled:bg-sky-300 disabled:shadow-none"
+                className="group flex min-h-12 w-full items-center justify-center gap-3 rounded-2xl bg-sky-700 px-4 py-3 text-base font-semibold text-white shadow-md shadow-sky-300/60 transition duration-200 hover:-translate-y-0.5 hover:bg-sky-800 focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white motion-reduce:transform-none motion-reduce:transition-none disabled:cursor-not-allowed disabled:bg-sky-300 disabled:shadow-none"
               >
                 <span
                   aria-hidden="true"
@@ -105,14 +110,14 @@ function Login() {
                     "G"
                   )}
                 </span>
-                <span>{isLoading ? t("openingGoogle") : t("continueWithGoogle")}</span>
+                <span>{isLoading ? t("openingGoogle") : t(isRegister ? "registerWithGoogle" : "continueWithGoogle")}</span>
               </button>
 
               <p
                 id="google-sign-in-support"
                 className="mt-3 text-center text-sm leading-6 text-slate-500"
               >
-                {t("googleSignInSupport")}
+                {t(isRegister ? "registerGoogleSupport" : "googleSignInSupport")}
               </p>
 
               {(errorMessage || profileError) && (
@@ -120,9 +125,19 @@ function Login() {
                   role="alert"
                   className="mt-4 [overflow-wrap:anywhere] rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700"
                 >
-                  {errorMessage || profileError}
+                  {errorMessage || t("authSessionUnavailable")}
                 </p>
               )}
+
+              <p className="mt-5 text-center text-sm text-slate-600">
+                {t(isRegister ? "authHaveAccount" : "authNoAccount")} {" "}
+                <Link to={isRegister ? "/login" : "/register"} className="inline-flex min-h-11 items-center rounded-lg px-2 font-semibold text-sky-700 hover:underline focus-visible:outline-2 focus-visible:outline-sky-600">
+                  {t(isRegister ? "publicNavLogin" : "publicNavRegister")}
+                </Link>
+              </p>
+              <Link to="/" className="flex min-h-11 items-center justify-center rounded-lg text-sm font-medium text-slate-600 hover:text-sky-700 focus-visible:outline-2 focus-visible:outline-sky-600">
+                {t("authBackHome")}
+              </Link>
 
               <section
                 aria-labelledby="practice-today-title"
@@ -160,7 +175,7 @@ function Login() {
                 className="h-auto w-full max-w-[320px] sm:max-w-[380px] lg:max-w-[420px]"
               />
               <p className="max-w-xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">
-                {t("loginDescription")}
+                {t(isRegister ? "registerDescription" : "loginDescription")}
               </p>
             </div>
 
