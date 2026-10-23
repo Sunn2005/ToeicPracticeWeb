@@ -3,7 +3,7 @@ import MediaUploader from "./MediaUploader";
 /**
  * PassageEditor
  *
- * @param {Array<{title?: string, text?: string, translation?: string}>} passages - list of passages
+ * @param {Array<{title?: string, content?: string}>} passages - list of passages
  * @param {Array<string>} imageUrls - image URLs for graphical reading passages (receipts, brochures, etc.)
  * @param {function(Array)} onChangePassages - callback when passages change
  * @param {function(Array<string>)} onChangeImageUrls - callback when images change
@@ -16,7 +16,7 @@ export default function PassageEditor({
   onChangeImageUrls,
   showMultiplePassages = false,
 }) {
-  const safePassages = passages.length > 0 ? passages : [{ title: "", text: "", translation: "" }];
+  const safePassages = passages.length > 0 ? passages : [{ title: "", content: "" }];
 
   const handlePassageTextChange = (index, field, value) => {
     const next = safePassages.map((p, i) => (i === index ? { ...p, [field]: value } : p));
@@ -24,7 +24,7 @@ export default function PassageEditor({
   };
 
   const handleAddPassage = () => {
-    onChangePassages([...safePassages, { title: `Đoạn văn ${safePassages.length + 1}`, text: "", translation: "" }]);
+    onChangePassages([...safePassages, { title: `Đoạn văn ${safePassages.length + 1}`, content: "" }]);
   };
 
   const handleRemovePassage = (index) => {
@@ -99,25 +99,10 @@ export default function PassageEditor({
           <div>
             <textarea
               rows={8}
-              value={passage.text || ""}
-              onChange={(e) => handlePassageTextChange(index, "text", e.target.value)}
+              value={passage.content || ""}
+              onChange={(e) => handlePassageTextChange(index, "content", e.target.value)}
               placeholder="Dán hoặc soạn nội dung bài đọc ở đây. Trong Part 6 có thể ghi các vị trí trống như [131], [132]..."
               className="w-full rounded-xl border border-slate-200 bg-white p-4 font-mono text-sm leading-relaxed text-slate-800 outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-100"
-            />
-          </div>
-
-          <div>
-            <label className="mb-1 block text-xs font-semibold text-slate-500">
-              Bản dịch bài đọc (Hiển thị khi học viên xem lời giải):
-            </label>
-            <textarea
-              rows={3}
-              value={passage.translation || ""}
-              onChange={(e) =>
-                handlePassageTextChange(index, "translation", e.target.value)
-              }
-              placeholder="Bản dịch tiếng Việt tham khảo (tùy chọn)..."
-              className="w-full rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-700 outline-none focus:border-blue-400"
             />
           </div>
         </div>

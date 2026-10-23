@@ -31,7 +31,7 @@ export default function MediaUploader({
 
   const accept =
     type === "audio"
-      ? "audio/mp3,audio/mpeg,audio/wav,audio/ogg"
+      ? "audio/mp3,audio/mpeg,audio/mp4,audio/wav,audio/x-wav,audio/ogg"
       : "image/png,image/jpeg,image/webp,image/gif";
 
   const handleFileChange = async (event) => {

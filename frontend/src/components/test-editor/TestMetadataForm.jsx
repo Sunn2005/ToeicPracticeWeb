@@ -56,7 +56,7 @@ export default function TestMetadataForm({ form, onChange }) {
               required
               value={form.title || ""}
               onChange={(e) => updateField("title", e.target.value)}
-              placeholder="VD: ETS TOEIC 2024 Test 05 — Full Assessment"
+              placeholder="VD: Test 05 — Full Assessment"
               className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-900 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-100"
             />
           </div>

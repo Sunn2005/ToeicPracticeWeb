@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import TestMetadataForm from "./TestMetadataForm";
 import PartEditor from "./PartEditor";
@@ -10,6 +10,9 @@ import {
   submitEmployeeTest,
 } from "../../api/employeeTests";
 import { generateMockToeicTest } from "../../utils/mockToeicTest";
+
+import { useLanguage } from "../../i18n/LanguageContext";
+import { normalizeEditorTest, saveEmployeeDraft, saveAndSubmitEmployeeTest, validateEmployeeTest } from "./testEditorState";
 
 const STEPS = [
   { id: 1, title: "Thông tin đề" },
@@ -40,6 +43,8 @@ function createDefaultParts() {
  */
 export default function TestEditorWizard({ initialTest, mode = "create" }) {
   const navigate = useNavigate();
+  const { t } = useLanguage();
+  const mutationRef = useRef(false);
 
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
@@ -50,8 +55,8 @@ export default function TestEditorWizard({ initialTest, mode = "create" }) {
   const [test, setTest] = useState(() => {
     if (initialTest) {
       return {
-        ...initialTest,
-        parts: initialTest.parts?.length ? initialTest.parts : createDefaultParts(),
+        ...normalizeEditorTest(initialTest),
+        parts: initialTest.parts?.length ? normalizeEditorTest(initialTest).parts : createDefaultParts(),
       };
     }
     return {
@@ -117,71 +122,67 @@ export default function TestEditorWizard({ initialTest, mode = "create" }) {
     return { counts, totalListening, totalReading, totalAll };
   }, [test.parts]);
 
-  // Save Draft API Call
+  const busy = saving || submitting;
+  const editable = !test.status || ["DRAFT", "REJECTED"].includes(test.status);
+  const validation = useMemo(() => validateEmployeeTest(test), [test]);
+  const [focus, setFocus] = useState({});
+  const goToIssue = (targetStep, partNumber, questionNumber) => {
+    setFocus({ partNumber, questionNumber });
+    setStep(targetStep);
+  };
+  const requestError = (err) => {
+    if (err?.status === 401) return t("employeeEditorAuthError");
+    if (err?.status === 403) return t("employeeEditorAccessError");
+    if (err?.status === 409) return t("employeeEditorConflictError");
+    if (["employeeEditorCannotSubmit", "employeeEditorMissingSavedId"].includes(err?.message)) return t(err.message);
+    return t("employeeEditorRequestError");
+  };
+  const api = {
+    create: createEmployeeTest,
+    update: updateEmployeeTest,
+    submit: submitEmployeeTest,
+    onSaved: (saved) => setTest((current) => ({ ...current, ...normalizeEditorTest(saved) })),
+  };
+
   const handleSaveDraft = async () => {
+    if (mutationRef.current || !editable) return;
+    mutationRef.current = true;
     setSaving(true);
     setError("");
     setSuccessMsg("");
-
     try {
-      const payload = {
-        ...test,
-        listeningMinutes: Number(test.listeningMinutes) || 45,
-        readingMinutes: Number(test.readingMinutes) || 75,
-        totalMinutes: Number(test.totalMinutes) || 120,
-        totalQuestions: Number(test.totalQuestions) || 200,
-      };
-
-      let savedTest;
-      if (test.testId) {
-        savedTest = await updateEmployeeTest(test.testId, payload);
-      } else {
-        savedTest = await createEmployeeTest(payload);
-        if (savedTest?.testId) {
-          setTest((current) => ({ ...current, testId: savedTest.testId }));
-        }
-      }
-
+      const saved = await saveEmployeeDraft(test, api);
+      if (!saved?.testId) throw new Error("employeeEditorMissingSavedId");
+      api.onSaved(saved);
       setSuccessMsg("Đã lưu bản nháp thành công!");
-      setTimeout(() => setSuccessMsg(""), 4000);
-      return savedTest;
-    } catch (saveErr) {
-      setError(saveErr?.message || "Lưu bản nháp thất bại.");
-      return null;
+    } catch (err) {
+      setError(requestError(err));
     } finally {
+      mutationRef.current = false;
       setSaving(false);
     }
   };
 
-  // Submit Test for Review
   const handleSubmitForReview = async () => {
-    if (!window.confirm("Bạn có chắc chắn muốn gửi đề thi này để Quản trị viên duyệt?")) {
+    if (mutationRef.current || !editable) return;
+    if (validation.errors.length) {
+      setError(t("employeeEditorCannotSubmit"));
+      setStep(4);
       return;
     }
-
+    if (!window.confirm("Bạn có chắc chắn muốn gửi đề thi này để Quản trị viên duyệt?")) return;
+    mutationRef.current = true;
     setSubmitting(true);
     setError("");
-
+    setSuccessMsg("");
     try {
-      // First ensure it is saved
-      let currentId = test.testId;
-      if (!currentId) {
-        const saved = await handleSaveDraft();
-        currentId = saved?.testId;
-      } else {
-        await handleSaveDraft();
-      }
-
-      if (!currentId) {
-        throw new Error("Không thể xác định mã đề thi để gửi duyệt.");
-      }
-
-      await submitEmployeeTest(currentId);
+      await saveAndSubmitEmployeeTest(test, api);
       alert("Đã gửi đề thi lên hàng chờ duyệt thành công!");
       navigate("/console/tests", { replace: true });
-    } catch (submitErr) {
-      setError(submitErr?.message || "Gửi đề thi thất bại.");
+    } catch (err) {
+      setError(requestError(err));
     } finally {
+      mutationRef.current = false;
       setSubmitting(false);
     }
   };
@@ -226,7 +227,7 @@ export default function TestEditorWizard({ initialTest, mode = "create" }) {
           <button
             type="button"
             onClick={handleSaveDraft}
-            disabled={saving}
+            disabled={busy || !editable}
             className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100 disabled:opacity-50"
           >
             {saving ? "Đang lưu..." : "💾 Lưu nháp"}
@@ -253,6 +254,7 @@ export default function TestEditorWizard({ initialTest, mode = "create" }) {
               <button
                 key={s.id}
                 type="button"
+                disabled={busy}
                 onClick={() => setStep(s.id)}
                 className="group relative z-10 flex flex-col items-center bg-white px-2 focus:outline-none cursor-pointer"
               >
@@ -315,8 +317,16 @@ export default function TestEditorWizard({ initialTest, mode = "create" }) {
         </div>
       )}
 
+      {!editable && <p role="status" className="mb-4 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">{t("employeeEditorNotEditable")}</p>}
+      {submitting && <p role="status" className="mb-4 text-sm text-blue-700">{t("employeeEditorSaving")}</p>}
+      {step === 6 && validation.errors.length > 0 && (
+        <p role="alert" className="mb-4 rounded-xl bg-red-50 p-4 text-sm text-red-700">
+          {t("employeeEditorCannotSubmit")}
+          <button type="button" className="ml-3 underline" onClick={() => setStep(4)}>← {STEPS[3].title}</button>
+        </p>
+      )}
       {/* Step Content */}
-      <div className="min-h-[460px]">
+      <fieldset disabled={busy || !editable} className="min-w-0 min-h-[460px]">
         {step === 1 && (
           <TestMetadataForm form={test} onChange={updateMetadata} />
         )}
@@ -326,6 +336,8 @@ export default function TestEditorWizard({ initialTest, mode = "create" }) {
             section="listening"
             parts={test.parts}
             onUpdateParts={updateParts}
+            initialPartNumber={focus.partNumber}
+            initialQuestionNumber={focus.questionNumber}
           />
         )}
 
@@ -334,13 +346,15 @@ export default function TestEditorWizard({ initialTest, mode = "create" }) {
             section="reading"
             parts={test.parts}
             onUpdateParts={updateParts}
+            initialPartNumber={focus.partNumber}
+            initialQuestionNumber={focus.questionNumber}
           />
         )}
 
         {step === 4 && (
           <TestValidationSummary
             test={test}
-            onGoToStep={(s) => setStep(s)}
+            onGoToStep={goToIssue}
             onLoadMockTest={handleLoadMockTest}
           />
         )}
@@ -487,7 +501,7 @@ export default function TestEditorWizard({ initialTest, mode = "create" }) {
                   <button
                     type="button"
                     onClick={handleSaveDraft}
-                    disabled={saving}
+                    disabled={busy || !editable}
                     className="w-full rounded-xl border border-blue-300 bg-white py-3 text-sm font-bold text-blue-600 hover:bg-blue-50 transition shadow-xs"
                   >
                     {saving ? "Đang lưu..." : "💾 Lưu bản nháp"}
@@ -495,7 +509,7 @@ export default function TestEditorWizard({ initialTest, mode = "create" }) {
                   <button
                     type="button"
                     onClick={handleSubmitForReview}
-                    disabled={submitting}
+                    disabled={busy || !editable || validation.errors.length > 0}
                     className="w-full rounded-xl bg-[#2188ee] py-3 text-sm font-bold text-white hover:bg-blue-600 transition shadow-md shadow-blue-200 disabled:opacity-50"
                   >
                     {submitting ? "Đang gửi..." : "🚀 Gửi phê duyệt ngay"}
@@ -505,7 +519,7 @@ export default function TestEditorWizard({ initialTest, mode = "create" }) {
             </div>
           </div>
         )}
-      </div>
+      </fieldset>
 
       {/* Floating Bottom Navigation Bar */}
       <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white/95 px-6 py-4 backdrop-blur-md lg:left-70">
@@ -526,7 +540,7 @@ export default function TestEditorWizard({ initialTest, mode = "create" }) {
             <button
               type="button"
               onClick={handleSaveDraft}
-              disabled={saving}
+              disabled={busy || !editable}
               className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition"
             >
               {saving ? "Đang lưu..." : "Lưu nháp"}
@@ -543,7 +557,7 @@ export default function TestEditorWizard({ initialTest, mode = "create" }) {
               <button
                 type="button"
                 onClick={handleSubmitForReview}
-                disabled={submitting}
+                disabled={busy || !editable || validation.errors.length > 0}
                 className="rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 shadow-md shadow-emerald-200 transition"
               >
                 {submitting ? "Đang xử lý..." : "Gửi duyệt ✓"}

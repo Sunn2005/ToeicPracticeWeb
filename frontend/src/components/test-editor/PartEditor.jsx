@@ -219,8 +219,7 @@ export default function PartEditor({
       const qStart = nextQNum;
       const newPassage = {
         passageNumber: pNum,
-        text: "Questions [131]-[134] refer to the following notice...\n\nNotice content...",
-        passages: [{ title: `Đoạn văn ${pNum}`, text: "Questions [131]-[134] refer to the following notice..." }],
+        content: "Questions [131]-[134] refer to the following notice...\n\nNotice content...",
         questions: Array.from({ length: 4 }, (_, i) => ({
           questionNumber: qStart + i,
           question: `Question ${qStart + i}`,
@@ -240,7 +239,7 @@ export default function PartEditor({
       const newGroup = {
         groupNumber: gNum,
         imageUrls: [],
-        passages: [{ title: "Tài liệu 1", text: "Questions 147-148 refer to the following email..." }],
+        passages: [{ title: "Tài liệu 1", content: "Questions 147-148 refer to the following email..." }],
         questions: [
           { questionNumber: qStart, question: "What is the purpose of the email?", answers: [{ label: "A", content: "" }, { label: "B", content: "" }, { label: "C", content: "" }, { label: "D", content: "" }], correctAnswer: "A" },
           { questionNumber: qStart + 1, question: "What is indicated about the sender?", answers: [{ label: "A", content: "" }, { label: "B", content: "" }, { label: "C", content: "" }, { label: "D", content: "" }], correctAnswer: "A" },

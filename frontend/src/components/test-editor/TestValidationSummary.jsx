@@ -1,4 +1,6 @@
 import { useMemo } from "react";
+import { useLanguage } from "../../i18n/LanguageContext";
+import { validateEmployeeTest, questionsInPart } from "./testEditorState";
 
 const STANDARD_COUNTS = {
   1: { name: "Phần 1: Hình ảnh", expected: 6, step: 2 },
@@ -18,216 +20,31 @@ const STANDARD_COUNTS = {
  * @param {function()} [onLoadMockTest] - callback to auto-populate 200 mock questions for quick test
  */
 export default function TestValidationSummary({ test, onGoToStep, onLoadMockTest }) {
-  // Compute counts per part
-  const { partCounts, totalActualQuestions, errors, warnings } = useMemo(() => {
-    const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 };
-    const errs = [];
-    const warns = [];
-
-    // Title validation
-    if (!test?.title?.trim()) {
-      errs.push({
-        id: "missing-title",
-        type: "error",
-        title: "Chưa đặt tên đề thi",
-        message: "Tên đề thi là bắt buộc để học viên nhận biết.",
-        step: 1,
-      });
-    }
-
-    // Description validation
-    if (!test?.description?.trim() || test.description.length < 20) {
-      warns.push({
-        id: "short-description",
-        type: "warning",
-        title: "Mô tả đề thi quá ngắn",
-        message: "Mô tả đề thi dưới 20 ký tự. Nên bổ sung thông tin chi tiết cho học viên.",
-        step: 1,
-      });
-    }
-
-    const parts = test?.parts || [];
-
-    // Tally questions and scan for question-level errors
-    parts.forEach((p) => {
-      const pNum = p.partNumber;
-
-      // Part 1, 2, 5
-      if (Array.isArray(p.questions)) {
-        counts[pNum] = (counts[pNum] || 0) + p.questions.length;
-
-        p.questions.forEach((q) => {
-          if (!q.correctAnswer) {
-            errs.push({
-              id: `q-no-correct-${q.questionNumber}`,
-              type: "error",
-              title: `Câu ${q.questionNumber} (Part ${pNum}) thiếu đáp án đúng`,
-              message: "Chưa chọn đáp án đúng (A, B, C, D) cho câu hỏi này.",
-              step: pNum <= 4 ? 2 : 3,
-              partNumber: pNum,
-              questionNumber: q.questionNumber,
-            });
-          }
-          if (pNum === 1 && !q.imageUrl) {
-            warns.push({
-              id: `q-no-img-${q.questionNumber}`,
-              type: "warning",
-              title: `Câu ${q.questionNumber} (Part 1) thiếu hình ảnh`,
-              message: "Part 1 yêu cầu hình ảnh minh họa cho tranh.",
-              step: 2,
-              partNumber: pNum,
-              questionNumber: q.questionNumber,
-            });
-          }
-          if ((pNum === 1 || pNum === 2) && !q.audioUrl) {
-            warns.push({
-              id: `q-no-audio-${q.questionNumber}`,
-              type: "warning",
-              title: `Câu ${q.questionNumber} (Part ${pNum}) chưa có audio`,
-              message: "Câu hỏi nghe cần có tệp âm thanh.",
-              step: 2,
-              partNumber: pNum,
-              questionNumber: q.questionNumber,
-            });
-          }
-          if (!q.explanation) {
-            warns.push({
-              id: `q-no-exp-${q.questionNumber}`,
-              type: "warning",
-              title: `Câu ${q.questionNumber} (Part ${pNum}) thiếu lời giải chi tiết`,
-              message: "Học viên sẽ không thấy giải thích ngữ pháp/dấu hiệu sau khi nộp bài.",
-              step: pNum <= 4 ? 2 : 3,
-              partNumber: pNum,
-              questionNumber: q.questionNumber,
-            });
-          }
-        });
-      }
-
-      // Part 3, 4 (groups)
-      if (Array.isArray(p.groups)) {
-        p.groups.forEach((g) => {
-          const qCount = (g.questions || []).length;
-          counts[pNum] = (counts[pNum] || 0) + qCount;
-
-          if (!g.audioUrl) {
-            warns.push({
-              id: `group-no-audio-${g.questionRange}`,
-              type: "warning",
-              title: `Nhóm ${g.questionRange || "mới"} (Part ${pNum}) chưa có audio`,
-              message: "Nhóm nghe cần tệp âm thanh hội thoại / bài nói.",
-              step: 2,
-              partNumber: pNum,
-              questionNumber: g.questions?.[0]?.questionNumber,
-            });
-          }
-          (g.questions || []).forEach((q) => {
-            if (!q.correctAnswer) {
-              errs.push({
-                id: `q-no-correct-${q.questionNumber}`,
-                type: "error",
-                title: `Câu ${q.questionNumber} (Part ${pNum}) thiếu đáp án đúng`,
-                message: "Chưa chọn đáp án đúng cho câu hỏi này.",
-                step: 2,
-                partNumber: pNum,
-                questionNumber: q.questionNumber,
-              });
-            }
-          });
-        });
-      }
-
-      // Part 6 (passages)
-      if (Array.isArray(p.passages)) {
-        p.passages.forEach((pass) => {
-          const qCount = (pass.questions || []).length;
-          counts[pNum] = (counts[pNum] || 0) + qCount;
-
-          if (!pass.text?.trim()) {
-            errs.push({
-              id: `p6-no-text-${pass.passageNumber}`,
-              type: "error",
-              title: `Đoạn văn ${pass.passageNumber} (Part 6) trống nội dung`,
-              message: "Vui lòng nhập văn bản bài đọc cho đoạn này.",
-              step: 3,
-              partNumber: pNum,
-              questionNumber: pass.questions?.[0]?.questionNumber,
-            });
-          }
-          (pass.questions || []).forEach((q) => {
-            if (!q.correctAnswer) {
-              errs.push({
-                id: `q-no-correct-${q.questionNumber}`,
-                type: "error",
-                title: `Câu ${q.questionNumber} (Part 6) thiếu đáp án đúng`,
-                message: "Chưa chọn đáp án đúng.",
-                step: 3,
-                partNumber: pNum,
-                questionNumber: q.questionNumber,
-              });
-            }
-          });
-        });
-      }
-
-      // Part 7 (passageGroups)
-      if (Array.isArray(p.passageGroups)) {
-        p.passageGroups.forEach((g) => {
-          const qCount = (g.questions || []).length;
-          counts[pNum] = (counts[pNum] || 0) + qCount;
-
-          const hasPassageText = g.passages?.some((item) => item.text?.trim());
-          const hasImage = (g.imageUrls || []).length > 0;
-          if (!hasPassageText && !hasImage) {
-            errs.push({
-              id: `p7-no-content-${g.groupNumber}`,
-              type: "error",
-              title: `Bài đọc ${g.groupNumber} (Part 7) chưa có văn bản hoặc hình ảnh`,
-              message: "Vui lòng thêm nội dung bài đọc hoặc ảnh tài liệu.",
-              step: 3,
-              partNumber: pNum,
-              questionNumber: g.questions?.[0]?.questionNumber,
-            });
-          }
-          (g.questions || []).forEach((q) => {
-            if (!q.correctAnswer) {
-              errs.push({
-                id: `q-no-correct-${q.questionNumber}`,
-                type: "error",
-                title: `Câu ${q.questionNumber} (Part 7) thiếu đáp án đúng`,
-                message: "Chưa chọn đáp án đúng.",
-                step: 3,
-                partNumber: pNum,
-                questionNumber: q.questionNumber,
-              });
-            }
-          });
-        });
-      }
-    });
-
-    const total = Object.values(counts).reduce((a, b) => a + b, 0);
-
-    // Question count notice: if Full Test has less than 200 questions, add a helpful warning
-    if (test?.type === "FULL_TEST" && total < 200) {
-      warns.unshift({
-        id: "not-enough-questions-full",
-        type: "warning",
-        title: `Đề thi Full Test hiện có ${total} / 200 câu hỏi`,
-        message:
-          "Bạn có thể tiếp tục bổ sung thêm câu hỏi hoặc bấm nút 'Nạp đề mẫu 200 câu' để kiểm thử nhanh toàn bộ luồng.",
-        step: 2,
-        partNumber: 1,
-      });
-    }
-
-    return {
-      partCounts: counts,
-      totalActualQuestions: total,
-      errors: errs,
-      warnings: warns,
-    };
-  }, [test]);
+  const { t } = useLanguage();
+  const validation = useMemo(() => validateEmployeeTest(test), [test]);
+  const { partCounts, totalActualQuestions } = validation;
+  const format = (key, values = {}) => t(key).replace(/\{(\w+)\}/g, (_, name) => values[name] ?? "");
+  const errors = validation.errors.map((issue) => ({
+    ...issue, title: t("employeeEditorValidationIssue"), message: format(issue.key, issue.values),
+  }));
+  const warnings = (test?.parts || []).flatMap((part) => {
+    const questions = questionsInPart(part);
+    const missingMedia = part.partNumber <= 2
+      ? questions.some((q) => !q.audioUrl || (part.partNumber === 1 && !q.imageUrl))
+      : part.partNumber <= 4 && (part.groups || []).some((g) => !g.audioUrl);
+    const missingContent = part.partNumber === 6
+      ? (part.passages || []).some((p) => !p.content?.trim() && !p.imageUrl)
+      : part.partNumber === 7 && (part.passageGroups || []).some((g) =>
+        !(g.imageUrls || []).length && !(g.passages || []).some((p) => p.content?.trim() || p.imageUrl));
+    return [
+      ...(missingMedia || missingContent ? [{ id: `media-${part.partNumber}`, key: "employeeEditorMediaWarning" }] : []),
+      ...(questions.some((q) => !q.detailedExplanation && !q.explanation)
+        ? [{ id: `explanation-${part.partNumber}`, key: "employeeEditorExplanationWarning" }] : []),
+    ].map((issue) => ({
+      ...issue, title: `Part ${part.partNumber}`, message: format(issue.key),
+      step: part.partNumber <= 4 ? 2 : 3, partNumber: part.partNumber,
+    }));
+  });
 
   const isValid = errors.length === 0;
 

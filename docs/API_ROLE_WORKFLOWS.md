@@ -1014,8 +1014,9 @@ Yêu cầu role `EMPLOYEE` hoặc `ADMIN`. API danh sách/chi tiết chỉ thao 
 
   - Có đúng Part 1–7, không thiếu/trùng `partNumber`.
   - Có đúng 200 câu, đánh số liên tục 1–200, không thiếu/trùng `questionNumber`.
-  - Mỗi câu có đúng bốn đáp án.
-  - `correctAnswer` của mỗi câu là A, B, C hoặc D.
+  - Part 2: mỗi câu có đúng ba đáp án, nhãn A, B, C không trùng; `correctAnswer` là A, B hoặc C.
+  - Các Part còn lại: mỗi câu có đúng bốn đáp án, nhãn A, B, C, D không trùng; `correctAnswer` là A, B, C hoặc D.
+  - Quy tắc lựa chọn này cũng áp dụng khi Admin approve. Không tự động chuyển đổi đề đã duyệt; đề nháp/đề gửi lại phải đáp ứng quy tắc mới.
 
 - **Response thành công:** `200 OK`, object `Test` đầy đủ với `status=PENDING_REVIEW`, `submittedAt` được cập nhật.
 - **Lỗi chính:** `400 BAD_REQUEST` nếu đề không hợp lệ; `403 FORBIDDEN` nếu không phải owner; `409 CONFLICT` nếu đề không còn chỉnh sửa được.

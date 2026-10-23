@@ -166,19 +166,16 @@ export default function QuestionGroupEditor({
         {/* Passage for Part 6 & Part 7 (Reading Group) */}
         {isReadingGroup && (
           <PassageEditor
-            passages={
-              group.passages ||
-              (group.text ? [{ text: group.text, translation: group.translation }] : [])
-            }
-            imageUrls={group.imageUrls || []}
+            passages={partNumber === 6 ? [group] : group.passages || []}
+            imageUrls={partNumber === 6 ? (group.imageUrl ? [group.imageUrl] : []) : group.imageUrls || []}
             onChangePassages={(newPassages) => {
-              if (partNumber === 6) {
-                updateGroupField("text", newPassages[0]?.text || "");
-                updateGroupField("translation", newPassages[0]?.translation || "");
-              }
-              updateGroupField("passages", newPassages);
+              onChange(partNumber === 6
+                ? { ...group, ...newPassages[0] }
+                : { ...group, passages: newPassages });
             }}
-            onChangeImageUrls={(newImages) => updateGroupField("imageUrls", newImages)}
+            onChangeImageUrls={(newImages) => onChange(partNumber === 6
+              ? { ...group, imageUrl: newImages.at(-1) || "" }
+              : { ...group, imageUrls: newImages })}
             showMultiplePassages={partNumber === 7}
           />
         )}

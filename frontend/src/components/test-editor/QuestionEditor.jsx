@@ -19,7 +19,7 @@ export default function QuestionEditor({
   onDuplicate,
 }) {
   const [showExplanationSection, setShowExplanationSection] = useState(
-    Boolean(question.explanation || question.transcript)
+    Boolean(question.detailedExplanation || question.explanation || question.transcript)
   );
 
   const updateField = (field, value) => {
@@ -143,8 +143,7 @@ export default function QuestionEditor({
             type="text"
             value={question.questionTranslation || question.translation || ""}
             onChange={(e) => {
-              updateField("questionTranslation", e.target.value);
-              updateField("translation", e.target.value);
+              onChange({ ...question, questionTranslation: e.target.value, translation: e.target.value });
             }}
             placeholder="Bản dịch tiếng Việt câu hỏi..."
             className="w-full rounded-lg border border-slate-200 bg-slate-50/50 px-3.5 py-2 text-xs text-slate-800 outline-none focus:border-blue-400 focus:bg-white"
@@ -211,10 +210,9 @@ export default function QuestionEditor({
               </label>
               <textarea
                 rows={3}
-                value={question.explanation || question.detailedExplanation || ""}
+                value={question.detailedExplanation ?? question.explanation ?? ""}
                 onChange={(e) => {
-                  updateField("explanation", e.target.value);
-                  updateField("detailedExplanation", e.target.value);
+                  onChange({ ...question, explanation: e.target.value, detailedExplanation: e.target.value });
                 }}
                 placeholder="Giải thích vì sao chọn đáp án này, phân tích ngữ pháp, từ vựng hoặc dấu hiệu nhận biết..."
                 className="w-full rounded-xl border border-slate-200 bg-white p-3.5 text-xs text-slate-800 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"

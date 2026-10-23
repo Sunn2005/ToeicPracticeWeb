@@ -1,3 +1,4 @@
+import { useLanguage } from "../../i18n/LanguageContext";
 
 const DEFAULT_OPTIONS = ["A", "B", "C", "D"];
 
@@ -17,12 +18,13 @@ export default function AnswerOptionEditor({
   onChangeAnswers,
   allowThreeOptions = false,
 }) {
+  const { t } = useLanguage();
   const labels = allowThreeOptions ? ["A", "B", "C"] : DEFAULT_OPTIONS;
 
   // Ensure all labels are present
   const normalizedAnswers = labels.map((label) => {
     const existing = answers.find((a) => a.label?.toUpperCase() === label);
-    return existing || { label, content: "" };
+    return existing ? { ...existing, label } : { label, content: "" };
   });
 
   const handleContentChange = (label, newContent) => {
@@ -46,6 +48,14 @@ export default function AnswerOptionEditor({
         </span>
       </div>
 
+      {allowThreeOptions && answers.length !== 3 && answers.length > 0 && (
+        <div role="alert" className="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
+          <p>{t("employeeEditorPart2Legacy")}</p>
+          <button type="button" className="mt-2 underline" onClick={() => onChangeAnswers(normalizedAnswers)}>
+            {t("employeeEditorUseThreeOptions")}
+          </button>
+        </div>
+      )}
       <div className="space-y-3">
         {normalizedAnswers.map(({ label, content }) => {
           const isCorrect = correctAnswer?.toUpperCase() === label;

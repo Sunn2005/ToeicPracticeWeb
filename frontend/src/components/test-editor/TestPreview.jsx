@@ -85,7 +85,7 @@ export default function TestPreview({ test }) {
                 className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-6"
               >
                 {/* Unit Header / Media */}
-                {(unit.audioUrl || unit.imageUrl || unit.text || unit.passages) && (
+                {(unit.audioUrl || unit.imageUrl || unit.content || unit.passages) && (
                   <div className="space-y-4 border-b border-slate-100 pb-5">
                     {/* Audio */}
                     {unit.audioUrl && (
@@ -130,9 +130,9 @@ export default function TestPreview({ test }) {
                     )}
 
                     {/* Passage text (Part 6 & 7) */}
-                    {(unit.text || unit.passages) && (
+                    {(unit.content || unit.passages) && (
                       <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-5 font-mono text-sm leading-relaxed text-slate-800 whitespace-pre-wrap">
-                        {unit.text ||
+                        {unit.content ||
                           unit.passages?.map((p, i) => (
                             <div key={i} className="mb-4 last:mb-0">
                               {p.title && (
@@ -140,7 +140,7 @@ export default function TestPreview({ test }) {
                                   {p.title}
                                 </h4>
                               )}
-                              <p>{p.text}</p>
+                              <p>{p.content}</p>
                             </div>
                           ))}
                       </div>

@@ -172,14 +172,7 @@ export function generateMockToeicTest(customTitle = "ETS TOEIC 2024 Test 01 — 
     const startQ = 131 + pIdx * 4;
     return {
       passageNumber: pIdx + 1,
-      text: `To: All Department Heads\nFrom: Facilities Management\nSubject: Office Renovations\n\nPlease be advised that the main cafeteria on the 2nd floor will be [${startQ}] for renovations starting next Monday. Construction crews will work diligently to [${startQ + 1}] modern kitchen facilities. During this period, food trucks will be parked in the north lot. We apologize for any [${startQ + 2}] this may cause. If you have special dietary questions, [${startQ + 3}] the catering manager.`,
-      passages: [
-        {
-          title: `Thông báo sửa chữa cơ sở vật chất (Đoạn ${pIdx + 1})`,
-          text: `To: All Department Heads\nFrom: Facilities Management\nSubject: Office Renovations\n\nPlease be advised that the main cafeteria on the 2nd floor will be [${startQ}] for renovations starting next Monday. Construction crews will work diligently to [${startQ + 1}] modern kitchen facilities. During this period, food trucks will be parked in the north lot. We apologize for any [${startQ + 2}] this may cause. If you have special dietary questions, [${startQ + 3}] the catering manager.`,
-          translation: "Thông báo về việc sửa chữa khu vực nhà ăn tầng 2 từ thứ Hai tới...",
-        },
-      ],
+      content: `To: All Department Heads\nFrom: Facilities Management\nSubject: Office Renovations\n\nPlease be advised that the main cafeteria on the 2nd floor will be [${startQ}] for renovations starting next Monday. Construction crews will work diligently to [${startQ + 1}] modern kitchen facilities. During this period, food trucks will be parked in the north lot. We apologize for any [${startQ + 2}] this may cause. If you have special dietary questions, [${startQ + 3}] the catering manager.`,
       questions: [
         {
           questionNumber: startQ,
@@ -264,7 +257,7 @@ export function generateMockToeicTest(customTitle = "ETS TOEIC 2024 Test 01 — 
       passages: [
         {
           title: spec.title,
-          text: `DOCUMENT ${gIdx + 1}: ${spec.title}\n\nDear Team,\nWe are pleased to announce that our annual performance review has concluded with remarkable achievements across all regional branches. Thanks to your tireless efforts, client satisfaction ratings have increased by 18% compared to the previous fiscal year.\n\nPlease review your individualized feedback summaries available in the employee portal by Friday.\n\nSincerely,\nExecutive Committee`,
+          content: `DOCUMENT ${gIdx + 1}: ${spec.title}\n\nDear Team,\nWe are pleased to announce that our annual performance review has concluded with remarkable achievements across all regional branches. Thanks to your tireless efforts, client satisfaction ratings have increased by 18% compared to the previous fiscal year.\n\nPlease review your individualized feedback summaries available in the employee portal by Friday.\n\nSincerely,\nExecutive Committee`,
           translation: "Bản dịch tài liệu tham khảo cho bài đọc...",
         },
       ],

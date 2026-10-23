@@ -2,6 +2,7 @@ package com.toeic.service;
 
 import com.toeic.dao.TestDao;
 import com.toeic.model.Question;
+import com.toeic.model.AnswerOption;
 import com.toeic.model.Test;
 import com.toeic.model.TestPart;
 import org.springframework.http.HttpStatus;
@@ -76,6 +77,7 @@ public class TestManagementSupport {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Part bị thiếu hoặc trùng partNumber");
             }
             for (Question question : part.allQuestions()) {
+                validateAnswerOptions(part.getPartNumber(), question);
                 Integer number = question.getQuestionNumber();
                 if (number == null || questions.put(number, question) != null) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Câu hỏi bị thiếu hoặc trùng questionNumber");
@@ -89,17 +91,29 @@ public class TestManagementSupport {
         if (questions.size() != 200 || !questions.keySet().equals(expectedQuestionNumbers())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Đề phải có đúng 200 câu, đánh số từ 1 đến 200");
         }
-        for (Question question : questions.values()) {
-            if (question.getCorrectAnswer() == null
-                    || !Set.of("A", "B", "C", "D").contains(question.getCorrectAnswer().toUpperCase())) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "Mỗi câu phải có correctAnswer là A, B, C hoặc D"
-                );
+    }
+
+    private void validateAnswerOptions(int partNumber, Question question) {
+        Set<String> expected = partNumber == 2 ? Set.of("A", "B", "C") : Set.of("A", "B", "C", "D");
+        if (question.getCorrectAnswer() == null
+                || !expected.contains(question.getCorrectAnswer().toUpperCase(java.util.Locale.ROOT))) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "correctAnswer phải thuộc các lựa chọn của Part " + partNumber);
+        }
+        if (question.getAnswers() == null || question.getAnswers().size() != expected.size()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Part " + partNumber + " phải có đúng " + expected.size() + " đáp án mỗi câu");
+        }
+        Set<String> labels = new HashSet<>();
+        for (AnswerOption answer : question.getAnswers()) {
+            if (answer == null || answer.getLabel() == null
+                    || !labels.add(answer.getLabel().toUpperCase(java.util.Locale.ROOT))) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nhãn đáp án bị thiếu hoặc trùng");
             }
-            if (question.getAnswers() == null || question.getAnswers().size() != 4) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mỗi câu phải có đúng 4 đáp án");
-            }
+        }
+        if (!labels.equals(expected)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Nhãn đáp án không hợp lệ cho Part " + partNumber);
         }
     }
 
