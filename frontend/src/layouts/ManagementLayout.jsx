@@ -42,6 +42,7 @@ function ManagementLayout() {
     { label: "Tạo đề mới", icon: "create", to: "/console/tests/new", badge: "EMP" },
     { label: "Xét duyệt", icon: "review", to: "/console/reviews", locked: !isAdmin },
     { label: "Lịch sử phê duyệt", icon: "history", to: "/console/review-history", locked: !isAdmin },
+    ...(isAdmin ? [{ label: t("adminRevenueNav"), icon: "dashboard", to: "/console/revenue" }] : []),
     ...(isAdmin ? [{ label: t("adminOrdersNav"), icon: "tests", to: "/console/orders" }] : []),
     ...(isAdmin ? [{ label: t("adminSubscriptionNav"), icon: "lock", to: "/console/subscriptions" }] : []),
   ];

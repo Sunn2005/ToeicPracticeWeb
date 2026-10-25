@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { afterEach, test } from "node:test";
 import { API_BASE_URL } from "./client.js";
-import { getAdminOrder, getAdminOrders } from "./adminPayments.js";
+import { getAdminOrder, getAdminOrders, getAdminRevenue } from "./adminPayments.js";
 const originalFetch = globalThis.fetch;
 afterEach(() => { globalThis.fetch = originalFetch; });
 
@@ -14,8 +14,10 @@ test("order reads use authenticated GET, query and cancellation signal", async (
   const signal = new AbortController().signal;
   await getAdminOrders("status=PAID&page=0&size=20", { signal });
   await getAdminOrder(123, { signal });
+  await getAdminRevenue("granularity=day", { signal });
   assert.equal(calls[0].url, `${API_BASE_URL}/api/admin/payments/orders?status=PAID&page=0&size=20`);
   assert.equal(calls[1].url, `${API_BASE_URL}/api/admin/payments/orders/123`);
+  assert.equal(calls[2].url, `${API_BASE_URL}/api/admin/payments/revenue?granularity=day`);
   for (const { options } of calls) {
     assert.equal(options.method, "GET");
     assert.equal(options.credentials, "include");

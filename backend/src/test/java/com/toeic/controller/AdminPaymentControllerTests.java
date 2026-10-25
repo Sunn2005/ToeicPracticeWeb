@@ -4,6 +4,7 @@ import com.toeic.dao.PaymentOrderDao;
 import com.toeic.dao.UserDao;
 import com.toeic.model.PaymentOrder;
 import com.toeic.service.AdminPaymentService;
+import com.toeic.service.AdminRevenueService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -39,8 +40,11 @@ class AdminPaymentControllerTests {
         @Bean AdminPaymentService service(PaymentOrderDao orders, UserDao users) {
             return new AdminPaymentService(orders, users);
         }
-        @Bean AdminPaymentController controller(AdminPaymentService service) {
-            return new AdminPaymentController(service);
+        @Bean AdminRevenueService revenueService(PaymentOrderDao orders) {
+            return new AdminRevenueService(orders);
+        }
+        @Bean AdminPaymentController controller(AdminPaymentService service, AdminRevenueService revenueService) {
+            return new AdminPaymentController(service, revenueService);
         }
     }
 
@@ -79,6 +83,7 @@ class AdminPaymentControllerTests {
         for (String role : List.of("USER", "EMPLOYEE")) {
             role(role);
             mvc.perform(get("/api/admin/payments/orders")).andExpect(status().isForbidden());
+            mvc.perform(get("/api/admin/payments/revenue")).andExpect(status().isForbidden());
             mvc.perform(get("/api/admin/payments/orders/123")).andExpect(status().isForbidden());
         }
         verifyNoInteractions(orders);
@@ -94,6 +99,38 @@ class AdminPaymentControllerTests {
         mvc.perform(get("/api/admin/payments/orders/123"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.orderCode").value(123))
                 .andExpect(jsonPath("$.checkoutUrl").doesNotExist());
+    }
+
+
+    @Test
+    void adminCanReadRevenueReportWithoutPersonalOrCheckoutData() throws Exception {
+        role("ADMIN");
+        PaymentOrder paid = new PaymentOrder();
+        paid.setOrderCode(456);
+        paid.setStatus(com.toeic.model.enums.PaymentOrderStatus.PAID);
+        paid.setPlanCode("PRO_30");
+        paid.setAmount(99000);
+        paid.setCreatedAt(100);
+        paid.setPaidAt(200L);
+        paid.setUserId("private-user");
+        paid.setCheckoutUrl("https://example.com/private");
+        when(orders.findAll()).thenReturn(List.of(paid));
+        mvc.perform(get("/api/admin/payments/revenue").param("from", "200").param("to", "200"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalRevenue").value(99000))
+                .andExpect(jsonPath("$.paidOrderCount").value(1))
+                .andExpect(jsonPath("$.totalOrderCount").value(0))
+                .andExpect(jsonPath("$.successRate").value(0))
+                .andExpect(jsonPath("$.averageOrderValue").value(99000))
+                .andExpect(jsonPath("$.byPlan[0].planCode").value("PRO_30"))
+                .andExpect(jsonPath("$.series[0].period").value("1970-01-01"))
+                .andExpect(jsonPath("$.series[0].revenue").value(99000))
+                .andExpect(jsonPath("$.series[0].orders").value(1))
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("private"))))
+                .andExpect(jsonPath("$.checkoutUrl").doesNotExist());
+        mvc.perform(get("/api/admin/payments/revenue").param("granularity", "year"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("PAYMENT_REVENUE_FILTER_INVALID"));
     }
 
     @Test

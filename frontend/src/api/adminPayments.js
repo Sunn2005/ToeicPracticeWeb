@@ -7,3 +7,7 @@ export function getAdminOrders(query, options) {
 export function getAdminOrder(orderCode, options) {
   return apiFetch(`/api/admin/payments/orders/${encodeURIComponent(orderCode)}`, options);
 }
+
+export function getAdminRevenue(query, options) {
+  return apiFetch(`/api/admin/payments/revenue?${query}`, options);
+}

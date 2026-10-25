@@ -1143,6 +1143,19 @@ Mỗi đơn có đúng các field `orderCode`, `userId`, `buyerEmail`, `buyerNam
 
 Triển khai hiện đọc toàn bộ collection rồi lọc/phân trang trong bộ nhớ, không giảm lượt đọc Firestore bằng phân trang; chỉ tải thông tin người mua cho các UID khác nhau trên trang kết quả.
 
+### 9.8 Báo cáo doanh thu (chỉ đọc)
+
+`GET /api/admin/payments/revenue?from=&to=&granularity=day` chỉ cho `ADMIN`. `from`/`to` tùy chọn là Unix millisecond, hai cận bao gồm; `granularity` nhận `day` (mặc định) hoặc `month`. Khoảng đảo ngược, đơn vị không hợp lệ hoặc trên 3.660 bucket trả `400 PAYMENT_REVENUE_FILTER_INVALID`; chọn nhóm theo tháng hoặc thu hẹp khoảng thời gian để giảm số bucket.
+
+Response gồm `totalRevenue`, `paidOrderCount`, `totalOrderCount`, `successRate`, `averageOrderValue`, `byPlan`, `series`:
+
+- `totalRevenue`, `paidOrderCount`, `averageOrderValue`: chỉ tính đơn `PAID` có `paidAt` trong khoảng. Đơn thiếu `paidAt` bị loại khỏi các chỉ số doanh thu; không dùng ngày tạo thay thế. Trung bình chia nguyên VND, trả 0 nếu không có đơn thanh toán đủ điều kiện.
+- `byPlan`: `{ planCode, revenue, orders }` từ cùng nhóm thanh toán, sắp xếp doanh thu giảm dần.
+- `series`: `{ period, revenue, orders }` từ cùng nhóm, chia theo ngày `YYYY-MM-DD` hoặc tháng `YYYY-MM` tại `Asia/Ho_Chi_Minh`, tăng dần. Khi có đủ hai cận, điền 0 cho mọi bucket trong khoảng; thiếu một hoặc cả hai cận chỉ trả bucket có dữ liệu.
+- `totalOrderCount`: số đơn **được tạo** trong khoảng. `successRate` là số đơn hiện `PAID` thuộc nhóm đơn tạo này chia `totalOrderCount` (0 nếu mẫu số 0), dạng tỷ lệ 0–1. Tử số này không nhất thiết bằng `paidOrderCount`; tỷ lệ có thể đổi khi đơn được thanh toán sau kỳ báo cáo. Frontend ghi rõ “Tỷ lệ thanh toán của đơn tạo trong kỳ”.
+
+Frontend `/console/revenue` có preset 7/30 ngày bao gồm hôm nay, tháng này hoặc tùy chỉnh, theo ngày lịch Việt Nam; các chỉ số tiền dùng VND. Không trả thông tin người mua hay `checkoutUrl`. API đọc toàn bộ đơn một lần rồi tổng hợp trong service, không ghi dữ liệu hoặc thay đổi luồng PayOS.
+
 ## 10. API nội bộ kiểm thử AI
 
 ### 10.1 Publish trực tiếp một yêu cầu giải thích

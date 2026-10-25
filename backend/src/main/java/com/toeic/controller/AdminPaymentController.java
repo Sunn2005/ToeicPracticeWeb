@@ -1,6 +1,7 @@
 package com.toeic.controller;
 
 import com.toeic.service.AdminPaymentService;
+import com.toeic.service.AdminRevenueService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,8 +15,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminPaymentController {
     private final AdminPaymentService service;
 
-    public AdminPaymentController(AdminPaymentService service) {
+    private final AdminRevenueService revenueService;
+
+    public AdminPaymentController(AdminPaymentService service, AdminRevenueService revenueService) {
         this.service = service;
+        this.revenueService = revenueService;
+    }
+
+    @GetMapping("/revenue")
+    public AdminRevenueService.RevenueReport revenue(
+            @RequestParam(required = false) Long from,
+            @RequestParam(required = false) Long to,
+            @RequestParam(defaultValue = "day") String granularity) throws Exception {
+        return revenueService.getRevenue(from, to, granularity);
     }
 
     @GetMapping("/orders")
