@@ -1132,6 +1132,17 @@ DELETE đánh dấu `REVOKED`, cập nhật `revokedBy`, `revokedAt`, `updatedAt
 
 PUT và DELETE đọc, quyết định và ghi subscription trong cùng một Firestore transaction. Khi có cập nhật đồng thời, server tính lại trên document mới nhất để giữ quy tắc không rút ngắn expiry, tính idempotent và metadata audit.
 
+### 9.7 Tra cứu đơn thanh toán (chỉ đọc)
+
+Chỉ `ADMIN` được truy cập; dùng session đã xác thực như các API admin khác.
+
+- `GET /api/admin/payments/orders?status=&planCode=&userId=&from=&to=&page=0&size=20`: lọc chính xác theo status, planCode, userId khi có giá trị; `from`/`to` là Unix millisecond và lọc ngày tạo đơn với hai cận bao gồm. Frontend đổi ngày lịch theo giờ Việt Nam thành đầu/cuối ngày. Backend sắp xếp `createdAt` giảm dần (cùng thời điểm thì `orderCode` giảm dần), sau đó phân trang; `page` tối thiểu 0, `size` giới hạn 1–100. Trả `{ items, page, size, totalItems, totalPages }`; danh sách trống có `totalPages=0`.
+- `GET /api/admin/payments/orders/{orderCode}`: trả một đơn, hoặc `404 PAYMENT_ORDER_NOT_FOUND`.
+
+Mỗi đơn có đúng các field `orderCode`, `userId`, `buyerEmail`, `buyerName`, `planCode`, `amount`, `durationDays`, `status`, `paymentLinkId`, `createdAt`, `paidAt`, `proExpiresAt`. Mọi thời điểm dùng Unix millisecond; amount là VND. Không trả `checkoutUrl`. Tên/email lấy từ hồ sơ user hiện tại, không phải bản chụp lúc thanh toán; user không tồn tại hoặc không đọc được thì hai field này là null và vẫn trả đơn. Status không hợp lệ trả `400 PAYMENT_ORDER_FILTER_INVALID`. Không có API ghi hoặc thay đổi trạng thái đơn trong tính năng này.
+
+Triển khai hiện đọc toàn bộ collection rồi lọc/phân trang trong bộ nhớ, không giảm lượt đọc Firestore bằng phân trang; chỉ tải thông tin người mua cho các UID khác nhau trên trang kết quả.
+
 ## 10. API nội bộ kiểm thử AI
 
 ### 10.1 Publish trực tiếp một yêu cầu giải thích

@@ -31,6 +31,7 @@ import EditTestPage from "./pages/employee/EditTestPage";
 import TestPreviewPage from "./pages/employee/TestPreviewPage";
 import ReviewQueuePage from "./pages/admin/ReviewQueuePage";
 import ReviewHistoryPage from "./pages/admin/ReviewHistoryPage";
+import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
 import SubscriptionManagementPage from "./pages/admin/SubscriptionManagementPage";
 import TestReviewPage from "./pages/admin/TestReviewPage";
 import ForbiddenPage from "./pages/errors/ForbiddenPage";
@@ -163,6 +164,7 @@ function AppRoutes() {
             <Route path="/console/tests/:testId/edit" element={<EditTestPage />} />
             <Route path="/console/tests/:testId/preview" element={<TestPreviewPage />} />
             <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
+              <Route path="/console/orders" element={<AdminOrdersPage />} />
               <Route
                 path="/console/subscriptions"
                 element={<SubscriptionManagementPage />}

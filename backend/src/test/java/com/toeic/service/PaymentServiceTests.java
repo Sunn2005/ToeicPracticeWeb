@@ -286,6 +286,11 @@ class PaymentServiceTests {
         final Map<Long, PaymentOrder> records = new HashMap<>();
 
         @Override
+        public java.util.List<PaymentOrder> findAll() {
+            return java.util.List.copyOf(records.values());
+        }
+
+        @Override
         public void save(PaymentOrder order) {
             records.put(order.getOrderCode(), order);
         }

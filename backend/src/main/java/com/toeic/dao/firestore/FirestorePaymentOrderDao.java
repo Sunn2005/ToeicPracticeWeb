@@ -21,6 +21,14 @@ public class FirestorePaymentOrderDao implements PaymentOrderDao {
     }
 
     @Override
+    public java.util.List<PaymentOrder> findAll() throws Exception {
+        return firestore.collection("paymentOrders").get().get().getDocuments().stream()
+                .map(this::orderFrom)
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    @Override
     public void save(PaymentOrder order) throws Exception {
         firestore.collection("paymentOrders").document(documentId(order.getOrderCode())).set(order).get();
     }

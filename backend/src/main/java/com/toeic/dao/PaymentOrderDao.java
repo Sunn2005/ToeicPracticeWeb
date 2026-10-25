@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public interface PaymentOrderDao {
+    java.util.List<PaymentOrder> findAll() throws Exception;
+
     void save(PaymentOrder order) throws Exception;
 
     Optional<PaymentOrder> findByOrderCode(long orderCode) throws Exception;
