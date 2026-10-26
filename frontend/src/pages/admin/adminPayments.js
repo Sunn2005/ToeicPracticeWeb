@@ -23,6 +23,13 @@ export function paymentErrorKey(error) {
   if (error?.status === 401) return "adminOrdersAuthError";
   if (error?.status === 403) return "adminOrdersAccessError";
   if (error?.status === 404) return "adminOrdersNotFoundError";
+  const reconciliationErrors = {
+    PAYMENT_ORDER_CANCELLED: "adminOrdersReconcileCancelled",
+    PAYMENT_ORDER_MISMATCH: "adminOrdersReconcileMismatch",
+    PAYMENT_NOT_PAID: "adminOrdersReconcileUnpaid",
+    PAYOS_UNAVAILABLE: "adminOrdersReconcileUnavailable",
+  };
+  if (reconciliationErrors[error?.body?.code]) return reconciliationErrors[error.body.code];
   if (error?.body?.code === "PAYMENT_ORDER_FILTER_INVALID") return "adminOrdersFilterError";
   return "adminOrdersRequestError";
 }

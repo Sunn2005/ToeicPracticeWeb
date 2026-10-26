@@ -235,6 +235,149 @@ class PaymentServiceTests {
         assertFalse(summary.effective());
     }
 
+    private void providerPaid(long code, long amount) {
+        payosClient.info = new PayOSClient.PaymentInfo(code, "link-" + code, amount, amount, 0, "PAID");
+    }
+
+    @Test
+    void reconciliationRecoversOldPaymentFromNowAndWebhookCannotAddDaysAgain() throws Exception {
+        var created = service.createProPayment("learner", "PRO_1DAY");
+        orderDao.records.get(created.orderCode()).setCreatedAt(NOW - 5 * DAY);
+        providerPaid(created.orderCode(), 10_000);
+        service.reconcile(created.orderCode());
+        assertTrue(subscriptionService.getSummary("learner").effective());
+        assertEquals(NOW + DAY, subscriptionService.getSummary("learner").expiresAt());
+        assertNull(orderDao.records.get(created.orderCode()).getPaidAt());
+        service.reconcile(created.orderCode());
+        service.handleWebhook(signedPayload(created.orderCode(), 10_000, "00"));
+        assertEquals(NOW + DAY, subscriptionService.getSummary("learner").expiresAt());
+    }
+
+    @Test
+    void reconciliationAfterWebhookPreservesPaymentTimeAndRevocation() throws Exception {
+        var created = service.createProPayment("learner", "PRO_30");
+        service.handleWebhook(signedPayload(created.orderCode(), 99_000, "00"));
+        subscriptionService.revoke("learner", "admin");
+        providerPaid(created.orderCode(), 99_000);
+        service.reconcile(created.orderCode());
+        assertEquals(NOW, orderDao.records.get(created.orderCode()).getPaidAt());
+        assertEquals(SubscriptionStatus.REVOKED, subscriptionService.getSummary("learner").status());
+        assertFalse(subscriptionService.getSummary("learner").effective());
+    }
+
+    @Test
+    void reconciliationRetriesActivationAfterFailureWithoutChangingReservedExpiry() throws Exception {
+        var created = service.createProPayment("learner", "PRO_1DAY");
+        var order = orderDao.records.get(created.orderCode());
+        order.setStatus(PaymentOrderStatus.PAID);
+        order.setProExpiresAt(NOW + DAY);
+        providerPaid(created.orderCode(), 10_000);
+        service.reconcile(created.orderCode());
+        assertEquals(NOW + DAY, subscriptionService.getSummary("learner").expiresAt());
+    }
+
+    @Test
+    void reconciliationDoesNotReviveAnAlreadyAppliedExpiredOrder() throws Exception {
+        var created = service.createProPayment("learner", "PRO_1DAY");
+        var order = orderDao.records.get(created.orderCode());
+        order.setStatus(PaymentOrderStatus.PAID);
+        order.setProExpiresAt(NOW - DAY);
+        providerPaid(created.orderCode(), 10_000);
+        service.reconcile(created.orderCode());
+        assertFalse(subscriptionService.getSummary("learner").effective());
+        assertEquals(NOW - DAY, order.getProExpiresAt());
+    }
+
+    @Test
+    void reconciliationRejectsUnpaidPartialAndMismatchedProviderDataWithoutMutation() throws Exception {
+        var created = service.createProPayment("learner", "PRO_1DAY");
+        long code = created.orderCode();
+        for (var info : List.of(
+                new PayOSClient.PaymentInfo(code, "link-" + code, 10_000, 0, 10_000, "PENDING"),
+                new PayOSClient.PaymentInfo(code, "link-" + code, 10_000, 1, 9_999, "PAID"),
+                new PayOSClient.PaymentInfo(code, "link-" + code, 10_000, 10_000, 1, "PAID"),
+                new PayOSClient.PaymentInfo(code, "link-" + code, 10_000, 10_000, 0, "CANCELLED"),
+                new PayOSClient.PaymentInfo(code + 1, "link-" + code, 10_000, 10_000, 0, "PAID"),
+                new PayOSClient.PaymentInfo(code, "different-link", 10_000, 10_000, 0, "PAID"),
+                new PayOSClient.PaymentInfo(code, "link-" + code, 99_000, 99_000, 0, "PAID"))) {
+            payosClient.info = info;
+            var error = assertThrows(ApiCodeException.class, () -> service.reconcile(code));
+            assertEquals(HttpStatus.CONFLICT, error.getStatus());
+            assertEquals(info.orderCode() != code || !info.paymentLinkId().equals("link-" + code)
+                    || info.amount() != 10_000 ? "PAYMENT_ORDER_MISMATCH" : "PAYMENT_NOT_PAID", error.getCode());
+            assertEquals(PaymentOrderStatus.PENDING, orderDao.records.get(code).getStatus());
+            assertFalse(subscriptionService.getSummary("learner").effective());
+        }
+    }
+
+    @Test
+    void reconciliationRejectsUnknownAndCancelledOrdersBeforeProviderLookup() throws Exception {
+        assertEquals("PAYMENT_ORDER_NOT_FOUND", assertThrows(ApiCodeException.class,
+                () -> service.reconcile(404)).getCode());
+        var created = service.createProPayment("learner", "PRO_1DAY");
+        orderDao.records.get(created.orderCode()).setStatus(PaymentOrderStatus.CANCELLED);
+        assertEquals("PAYMENT_ORDER_CANCELLED", assertThrows(ApiCodeException.class,
+                () -> service.reconcile(created.orderCode())).getCode());
+        assertEquals(0, payosClient.lookups);
+    }
+
+    @Test
+    void unavailableProviderDoesNotGrantAccessOrChangeOrder() throws Exception {
+        var created = service.createProPayment("learner", "PRO_1DAY");
+        payosClient.unavailable = true;
+        assertEquals("PAYOS_UNAVAILABLE", assertThrows(ApiCodeException.class,
+                () -> service.reconcile(created.orderCode())).getCode());
+        assertEquals(PaymentOrderStatus.PENDING, orderDao.records.get(created.orderCode()).getStatus());
+        assertFalse(subscriptionService.getSummary("learner").effective());
+    }
+
+    @Test
+    void concurrentWebhookAndReconciliationApplyTheSameOrderOnce() throws Exception {
+        var concurrentOrders = new MemoryPaymentOrderDao() {
+            @Override
+            public synchronized PaymentOrder updateAtomically(long code, Function<PaymentOrder, Mutation> mutation) {
+                return super.updateAtomically(code, mutation);
+            }
+        };
+        var concurrentSubscriptions = new MemorySubscriptionDao() {
+            @Override
+            public synchronized Subscription updateAtomically(String uid, Function<Subscription, Mutation> mutation) {
+                return super.updateAtomically(uid, mutation);
+            }
+        };
+        var subs = new SubscriptionService(concurrentSubscriptions,
+                Clock.fixed(Instant.ofEpochMilli(NOW), ZoneOffset.UTC));
+        var payments = new PaymentService(concurrentOrders, payosClient, subs,
+                Clock.fixed(Instant.ofEpochMilli(NOW), ZoneOffset.UTC));
+        var created = payments.createProPayment("learner", "PRO_1DAY");
+        providerPaid(created.orderCode(), 10_000);
+        var start = new java.util.concurrent.CountDownLatch(1);
+        try (var executor = java.util.concurrent.Executors.newFixedThreadPool(2)) {
+            var reconcile = executor.submit(() -> { start.await(); payments.reconcile(created.orderCode()); return true; });
+            var webhook = executor.submit(() -> { start.await(); return payments.handleWebhook(signedPayload(created.orderCode(), 10_000, "00")).handled(); });
+            start.countDown();
+            assertTrue(reconcile.get(5, java.util.concurrent.TimeUnit.SECONDS));
+            assertTrue(webhook.get(5, java.util.concurrent.TimeUnit.SECONDS));
+        }
+        assertEquals(NOW + DAY, subs.getSummary("learner").expiresAt());
+        assertEquals(NOW + DAY, concurrentOrders.records.get(created.orderCode()).getProExpiresAt());
+    }
+
+    @Test
+    void revocationBetweenPaymentReadAndSubscriptionTransactionIsPreserved() throws Exception {
+        var subscriptions = new MemorySubscriptionDao() {
+            @Override
+            public Subscription updateAtomically(String uid, Function<Subscription, Mutation> mutation) {
+                records.get(uid).setStatus(SubscriptionStatus.REVOKED);
+                return super.updateAtomically(uid, mutation);
+            }
+        };
+        subscriptions.records.put("learner", subscription(NOW, NOW + DAY));
+        var subs = new SubscriptionService(subscriptions, Clock.fixed(Instant.ofEpochMilli(NOW), ZoneOffset.UTC));
+        subs.activatePaidOrder("learner", NOW + DAY, "PAYOS");
+        assertEquals(SubscriptionStatus.REVOKED, subs.getSummary("learner").status());
+    }
+
     private Map<String, Object> signedPayload(long orderCode, long amount, String code) {
         return webhookPayload(orderCode, amount, code, null);
     }
@@ -264,6 +407,17 @@ class PaymentServiceTests {
 
     static class StubPayOSClient extends PayOSClient {
         int createdLinks = 0;
+        int lookups = 0;
+        PaymentInfo info;
+        boolean unavailable;
+
+        @Override
+        public PaymentInfo getPaymentInfo(long code) {
+            lookups++;
+            if (unavailable) throw new ApiCodeException(HttpStatus.BAD_GATEWAY, "PAYOS_UNAVAILABLE", "Unavailable");
+            return info;
+        }
+
 
         StubPayOSClient() {
             super(properties(), new ObjectMapper());
@@ -283,7 +437,7 @@ class PaymentServiceTests {
     }
 
     static class MemoryPaymentOrderDao implements PaymentOrderDao {
-        final Map<Long, PaymentOrder> records = new HashMap<>();
+        final Map<Long, PaymentOrder> records = new java.util.concurrent.ConcurrentHashMap<>();
 
         @Override
         public java.util.List<PaymentOrder> findAll() {
@@ -326,7 +480,7 @@ class PaymentServiceTests {
     }
 
     static class MemorySubscriptionDao implements SubscriptionDao {
-        final Map<String, Subscription> records = new HashMap<>();
+        final Map<String, Subscription> records = new java.util.concurrent.ConcurrentHashMap<>();
 
         @Override
         public Optional<Subscription> findByUserId(String userId) {

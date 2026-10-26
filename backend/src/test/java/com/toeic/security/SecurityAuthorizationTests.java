@@ -4,6 +4,9 @@ import com.toeic.config.SecurityConfig;
 import com.toeic.controller.ApiExceptionHandler;
 import com.toeic.controller.AdminSubscriptionController;
 import com.toeic.controller.PaymentController;
+import com.toeic.controller.AdminPaymentController;
+import com.toeic.service.AdminPaymentService;
+import com.toeic.service.AdminRevenueService;
 import com.toeic.config.AuthProperties;
 import com.toeic.model.FirebaseIdentity;
 import com.toeic.model.User;
@@ -50,7 +53,8 @@ import static org.mockito.Mockito.when;
 @WebMvcTest({
         SecurityAuthorizationTests.SecurityProbeController.class,
         AdminSubscriptionController.class,
-        PaymentController.class
+        PaymentController.class,
+        AdminPaymentController.class
 })
 @ImportAutoConfiguration({
         SecurityAutoConfiguration.class,
@@ -61,6 +65,7 @@ import static org.mockito.Mockito.when;
         SecurityAuthorizationTests.SecurityProbeController.class,
         AdminSubscriptionController.class,
         PaymentController.class,
+        AdminPaymentController.class,
         ApiExceptionHandler.class,
         SecurityConfig.class,
         AuthProperties.class,
@@ -84,6 +89,25 @@ class SecurityAuthorizationTests {
 
     @MockitoBean
     private PaymentService paymentService;
+
+    @MockitoBean private AdminPaymentService adminPaymentService;
+    @MockitoBean private AdminRevenueService adminRevenueService;
+
+    @Test
+    void reconciliationRequiresAdminAuthenticationAndCsrf() throws Exception {
+        String path = "/api/admin/payments/orders/123/reconcile";
+        mockMvc.perform(post(path).with(csrf())).andExpect(status().isUnauthorized());
+        for (var role : List.of(UserRole.USER, UserRole.EMPLOYEE)) {
+            mockMvc.perform(post(path).with(csrf()).with(authentication(authenticationFor(role))))
+                    .andExpect(status().isForbidden());
+        }
+        mockMvc.perform(post(path).with(authentication(authenticationFor(UserRole.ADMIN))))
+                .andExpect(status().isForbidden());
+        org.mockito.Mockito.verifyNoInteractions(paymentService);
+        mockMvc.perform(post(path).with(csrf()).with(authentication(authenticationFor(UserRole.ADMIN))))
+                .andExpect(status().isOk());
+        org.mockito.Mockito.verify(paymentService).reconcile(123);
+    }
 
     @Test
     void productionDomainCanCompleteCorsPreflight() throws Exception {

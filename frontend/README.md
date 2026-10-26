@@ -518,3 +518,18 @@ Vite chỉ đọc biến môi trường khi khởi động process.
 ## 15. Thông tin liên hệ trong nhóm
 
 Khi cần quyền Firebase/Render, tài khoản `EMPLOYEE`/`ADMIN`, hoặc thay đổi API contract, liên hệ trưởng nhóm qua kênh nội bộ. Không gửi private key hoặc mật khẩu qua GitHub issue, pull request hay group chat công khai.
+
+### Khôi phục thanh toán Pro bị bỏ lỡ webhook
+
+Admin mở `/console/orders` → chi tiết đơn → **Đối soát với PayOS**. Wrapper
+`reconcileAdminOrder` gửi `POST /api/admin/payments/orders/{orderCode}/reconcile`
+qua `apiFetch` (session + CSRF), không gửi status/giá/UID. Backend xác minh đầy đủ
+với PayOS rồi trả schema chi tiết đơn hiện tại; UI cập nhật chi tiết và tải lại danh
+sách theo bộ lọc. Có trạng thái đang xử lý, khóa bấm lặp và thông báo lỗi theo code.
+Đơn `CANCELLED` không có nút đối soát. Không dựa vào return URL để cấp Pro.
+
+Phải deploy cả backend và frontend trước khi sử dụng trên website công khai.
+Với đơn chưa từng kích hoạt, thời hạn tính từ lúc khôi phục hoặc nối tiếp thời hạn
+Pro còn lại. Retry không cộng ngày trùng/hoàn tác thu hồi sau đó. Ngày thanh toán
+chưa ghi nhận được để trống, không thay bằng thời gian khôi phục. Sau khi đối soát,
+người mua tải lại dashboard. Không yêu cầu thanh toán thêm.

@@ -5,6 +5,7 @@ import com.toeic.dao.UserDao;
 import com.toeic.model.PaymentOrder;
 import com.toeic.service.AdminPaymentService;
 import com.toeic.service.AdminRevenueService;
+import com.toeic.service.PaymentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -26,11 +27,13 @@ import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 class AdminPaymentControllerTests {
     private PaymentOrderDao orders;
     private MockMvc mvc;
+    private PaymentService payments;
 
     @Configuration
     @EnableMethodSecurity
@@ -43,8 +46,9 @@ class AdminPaymentControllerTests {
         @Bean AdminRevenueService revenueService(PaymentOrderDao orders) {
             return new AdminRevenueService(orders);
         }
-        @Bean AdminPaymentController controller(AdminPaymentService service, AdminRevenueService revenueService) {
-            return new AdminPaymentController(service, revenueService);
+        @Bean PaymentService payments() { return mock(PaymentService.class); }
+        @Bean AdminPaymentController controller(AdminPaymentService service, AdminRevenueService revenueService, PaymentService payments) {
+            return new AdminPaymentController(service, revenueService, payments);
         }
     }
 
@@ -59,6 +63,7 @@ class AdminPaymentControllerTests {
     void setUp() throws Exception {
         try (var context = new AnnotationConfigApplicationContext(Config.class)) {
             orders = context.getBean(PaymentOrderDao.class);
+            payments = context.getBean(PaymentService.class);
             mvc = MockMvcBuilders.standaloneSetup(context.getBean(AdminPaymentController.class))
                     .setControllerAdvice(new ApiExceptionHandler(), new SecurityErrors()).build();
         }
@@ -85,8 +90,9 @@ class AdminPaymentControllerTests {
             mvc.perform(get("/api/admin/payments/orders")).andExpect(status().isForbidden());
             mvc.perform(get("/api/admin/payments/revenue")).andExpect(status().isForbidden());
             mvc.perform(get("/api/admin/payments/orders/123")).andExpect(status().isForbidden());
+            mvc.perform(post("/api/admin/payments/orders/123/reconcile")).andExpect(status().isForbidden());
         }
-        verifyNoInteractions(orders);
+        verifyNoInteractions(orders, payments);
     }
 
     @Test
@@ -131,6 +137,19 @@ class AdminPaymentControllerTests {
         mvc.perform(get("/api/admin/payments/revenue").param("granularity", "year"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("PAYMENT_REVENUE_FILTER_INVALID"));
+    }
+
+    @Test
+    void adminCanReconcileAndReceivesExistingSafeOrderView() throws Exception {
+        role("ADMIN");
+        mvc.perform(post("/api/admin/payments/orders/123/reconcile"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.orderCode").value(123))
+                .andExpect(jsonPath("$.checkoutUrl").doesNotExist());
+        verify(payments).reconcile(123);
+        doThrow(new ApiCodeException(org.springframework.http.HttpStatus.CONFLICT,
+                "PAYMENT_NOT_PAID", "Not paid")).when(payments).reconcile(123);
+        mvc.perform(post("/api/admin/payments/orders/123/reconcile"))
+                .andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("PAYMENT_NOT_PAID"));
     }
 
     @Test

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { afterEach, test } from "node:test";
-import { API_BASE_URL } from "./client.js";
-import { getAdminOrder, getAdminOrders, getAdminRevenue } from "./adminPayments.js";
+import { API_BASE_URL, clearCsrfToken } from "./client.js";
+import { getAdminOrder, getAdminOrders, getAdminRevenue, reconcileAdminOrder } from "./adminPayments.js";
 const originalFetch = globalThis.fetch;
 afterEach(() => { globalThis.fetch = originalFetch; });
 
@@ -29,4 +29,24 @@ test("order reads use authenticated GET, query and cancellation signal", async (
 test("order lookup preserves HTTP errors and stable code", async () => {
   globalThis.fetch = async () => new Response(JSON.stringify({ code: "PAYMENT_ORDER_NOT_FOUND" }), { status: 404, headers: { "Content-Type": "application/json" } });
   await assert.rejects(getAdminOrder(404), (error) => error.status === 404 && error.body.code === "PAYMENT_ORDER_NOT_FOUND");
+});
+
+test("reconciliation uses CSRF-protected authenticated POST without client payment fields", async () => {
+  clearCsrfToken();
+  const calls = [];
+  globalThis.fetch = async (url, options) => {
+    calls.push({ url, options });
+    return new Response(JSON.stringify(url.endsWith("/csrf") ? { token: "test-csrf" } : { status: "PAID" }),
+      { headers: { "Content-Type": "application/json" } });
+  };
+  const signal = new AbortController().signal;
+  await reconcileAdminOrder("123/456", { signal });
+  const { url, options } = calls.at(-1);
+  assert.equal(url, `${API_BASE_URL}/api/admin/payments/orders/123%2F456/reconcile`);
+  assert.equal(options.method, "POST");
+  assert.equal(options.credentials, "include");
+  assert.equal(options.signal, signal);
+  assert.equal(options.headers.get("X-XSRF-TOKEN"), "test-csrf");
+  assert.equal(options.body, undefined);
+  clearCsrfToken();
 });

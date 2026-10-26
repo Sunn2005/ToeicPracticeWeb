@@ -52,6 +52,17 @@ public class SubscriptionService {
         return summary(updated, clock.millis());
     }
 
+    /** Check the payment's stored expiry inside the transaction, including revoked subscriptions. */
+    public void activatePaidOrder(String userId, long expiresAt, String actor) throws Exception {
+        subscriptionDao.updateAtomically(userId, current -> {
+            if ((current != null && current.getExpiresAt() != null && current.getExpiresAt() >= expiresAt)
+                    || expiresAt <= clock.millis()) {
+                return new SubscriptionDao.Mutation(current, false);
+            }
+            return activateOrExtend(current, userId, expiresAt, actor);
+        });
+    }
+
     private void validateExpiry(long expiresAt, long now) {
         if (expiresAt <= now) {
             throw new ApiCodeException(HttpStatus.BAD_REQUEST, "SUBSCRIPTION_EXPIRY_INVALID",

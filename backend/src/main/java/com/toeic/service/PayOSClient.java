@@ -48,6 +48,49 @@ public class PayOSClient {
 
     public record PaymentLink(String checkoutUrl, String paymentLinkId) { }
 
+    public record PaymentInfo(long orderCode, String paymentLinkId, long amount,
+                              long amountPaid, long amountRemaining, String status) { }
+
+    /** Read-only provider lookup; never accept payment status from a browser redirect. */
+    public PaymentInfo getPaymentInfo(long orderCode) {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(properties.getBaseUrl() + "/v2/payment-requests/" + orderCode))
+                    .timeout(TIMEOUT)
+                    .header("x-client-id", properties.getClientId())
+                    .header("x-api-key", properties.getApiKey())
+                    .GET().build();
+            HttpResponse<String> response = httpClient.send(request,
+                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                throw new IllegalStateException("Unsuccessful provider response");
+            }
+            JsonNode root = objectMapper.readTree(response.body());
+            JsonNode data = root.path("data");
+            if (!"00".equals(root.path("code").asText()) || !data.isObject()
+                    || !data.path("id").isString() || data.path("id").asText().isBlank()
+                    || !data.path("status").isString()) {
+                throw new IllegalStateException("Invalid provider response");
+            }
+            return new PaymentInfo(requiredLong(data, "orderCode"), data.path("id").asText(),
+                    requiredLong(data, "amount"), requiredLong(data, "amountPaid"),
+                    requiredLong(data, "amountRemaining"), data.path("status").asText());
+        } catch (Exception exception) {
+            if (exception instanceof InterruptedException) Thread.currentThread().interrupt();
+            // Do not expose provider response bodies, credentials or bank details.
+            throw new ApiCodeException(HttpStatus.BAD_GATEWAY, "PAYOS_UNAVAILABLE",
+                    "PayOS payment information is unavailable");
+        }
+    }
+
+    private static long requiredLong(JsonNode data, String field) {
+        JsonNode value = data.path(field);
+        if (!value.isIntegralNumber() || !value.canConvertToLong() || value.longValue() < 0) {
+            throw new IllegalStateException("Invalid provider numeric field");
+        }
+        return value.longValue();
+    }
+
     public PaymentLink createPaymentLink(long orderCode, long amount, String description) throws Exception {
         Map<String, Object> body = new TreeMap<>();
         body.put("orderCode", orderCode);

@@ -49,6 +49,58 @@ class PayOSClientTests {
         assertFalse(otherClient.verifyWebhookSignature(data, signature));
     }
 
+    @Test
+    @SuppressWarnings("unchecked")
+    void lookupUsesAuthenticatedGetAndParsesExactAmounts() throws Exception {
+        var http = org.mockito.Mockito.mock(java.net.http.HttpClient.class);
+        java.net.http.HttpResponse<String> response = org.mockito.Mockito.mock(java.net.http.HttpResponse.class);
+        org.mockito.Mockito.when(response.statusCode()).thenReturn(200);
+        org.mockito.Mockito.when(response.body()).thenReturn("""
+                {"code":"00","data":{"id":"link-123","orderCode":5037922063926303,
+                "amount":10000,"amountPaid":10000,"amountRemaining":0,"status":"PAID"}}
+                """);
+        org.mockito.Mockito.doReturn(response).when(http).send(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+        var config = properties("checksum");
+        config.setClientId("test-client");
+        config.setApiKey("test-key");
+        var lookup = new PayOSClient(config, new ObjectMapper(), http);
+        var info = lookup.getPaymentInfo(5037922063926303L);
+        assertEquals(5037922063926303L, info.orderCode());
+        assertEquals(10000, info.amountPaid());
+        assertEquals("PAID", info.status());
+        var capture = org.mockito.ArgumentCaptor.forClass(java.net.http.HttpRequest.class);
+        org.mockito.Mockito.verify(http).send(capture.capture(), org.mockito.ArgumentMatchers.any());
+        assertEquals("GET", capture.getValue().method());
+        assertEquals("https://api-merchant.payos.vn/v2/payment-requests/5037922063926303", capture.getValue().uri().toString());
+        assertEquals("test-client", capture.getValue().headers().firstValue("x-client-id").orElseThrow());
+        assertEquals("test-key", capture.getValue().headers().firstValue("x-api-key").orElseThrow());
+        assertEquals(java.time.Duration.ofSeconds(10), capture.getValue().timeout().orElseThrow());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void lookupRejectsHttpErrorsMalformedAndIncompleteProviderData() throws Exception {
+        var http = org.mockito.Mockito.mock(java.net.http.HttpClient.class);
+        java.net.http.HttpResponse<String> response = org.mockito.Mockito.mock(java.net.http.HttpResponse.class);
+        org.mockito.Mockito.doReturn(response).when(http).send(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+        var lookup = new PayOSClient(properties("checksum"), new ObjectMapper(), http);
+        for (String body : java.util.List.of("not-json", "null", "{}", "{\"code\":\"01\"}",
+                "{\"code\":\"00\",\"data\":{\"id\":\"link\",\"status\":\"PAID\"}}",
+                "{\"code\":\"00\",\"data\":{\"id\":\"link\",\"status\":\"PAID\",\"orderCode\":1,\"amount\":1.5,\"amountPaid\":2,\"amountRemaining\":0}}")) {
+            org.mockito.Mockito.when(response.statusCode()).thenReturn(200);
+            org.mockito.Mockito.when(response.body()).thenReturn(body);
+            var error = assertThrows(com.toeic.controller.ApiCodeException.class, () -> lookup.getPaymentInfo(1));
+            assertEquals("PAYOS_UNAVAILABLE", error.getCode());
+        }
+        org.mockito.Mockito.when(response.statusCode()).thenReturn(401);
+        assertEquals("PAYOS_UNAVAILABLE", assertThrows(com.toeic.controller.ApiCodeException.class,
+                () -> lookup.getPaymentInfo(1)).getCode());
+        org.mockito.Mockito.doThrow(new java.net.http.HttpTimeoutException("Timeout"))
+                .when(http).send(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+        assertEquals("PAYOS_UNAVAILABLE", assertThrows(com.toeic.controller.ApiCodeException.class,
+                () -> lookup.getPaymentInfo(1)).getCode());
+    }
+
     private static PayOSProperties properties(String checksumKey) {
         var props = new PayOSProperties();
         props.setChecksumKey(checksumKey);

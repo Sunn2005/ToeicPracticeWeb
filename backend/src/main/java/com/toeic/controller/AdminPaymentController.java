@@ -2,9 +2,11 @@ package com.toeic.controller;
 
 import com.toeic.service.AdminPaymentService;
 import com.toeic.service.AdminRevenueService;
+import com.toeic.service.PaymentService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,10 +18,13 @@ public class AdminPaymentController {
     private final AdminPaymentService service;
 
     private final AdminRevenueService revenueService;
+    private final PaymentService paymentService;
 
-    public AdminPaymentController(AdminPaymentService service, AdminRevenueService revenueService) {
+    public AdminPaymentController(AdminPaymentService service, AdminRevenueService revenueService,
+                                  PaymentService paymentService) {
         this.service = service;
         this.revenueService = revenueService;
+        this.paymentService = paymentService;
     }
 
     @GetMapping("/revenue")
@@ -44,6 +49,12 @@ public class AdminPaymentController {
 
     @GetMapping("/orders/{orderCode}")
     public AdminPaymentService.AdminOrderView get(@PathVariable long orderCode) throws Exception {
+        return service.getOrder(orderCode);
+    }
+
+    @PostMapping("/orders/{orderCode}/reconcile")
+    public AdminPaymentService.AdminOrderView reconcile(@PathVariable long orderCode) throws Exception {
+        paymentService.reconcile(orderCode);
         return service.getOrder(orderCode);
     }
 }

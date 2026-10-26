@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Sells Pro through PayOS. Only the webhook activates Pro: the browser redirect
+ * Sells Pro through PayOS. Verified webhook or admin reconciliation activates Pro: the browser redirect
  * (returnUrl) is display-only and never trusted. Webhook handling is idempotent:
  * PayOS may deliver the same event more than once, and a retry after a crash
  * must neither double-charge days nor lose the activation.
@@ -112,6 +112,33 @@ public class PaymentService {
 
     public record WebhookResult(boolean handled, String reason) { }
 
+    public void reconcile(long orderCode) throws Exception {
+        PaymentOrder order = paymentOrderDao.findByOrderCode(orderCode).orElseThrow(() ->
+                new ApiCodeException(HttpStatus.NOT_FOUND, "PAYMENT_ORDER_NOT_FOUND", "Payment order not found"));
+        if (order.getStatus() == PaymentOrderStatus.CANCELLED) {
+            throw new ApiCodeException(HttpStatus.CONFLICT, "PAYMENT_ORDER_CANCELLED", "Order is cancelled");
+        }
+        PayOSClient.PaymentInfo info = payosClient.getPaymentInfo(orderCode);
+        if (info.orderCode() != orderCode || order.getPaymentLinkId() == null
+                || !order.getPaymentLinkId().equals(info.paymentLinkId())
+                || order.getAmount() <= 0 || order.getDurationDays() <= 0
+                || info.amount() != order.getAmount()) {
+            throw new ApiCodeException(HttpStatus.CONFLICT, "PAYMENT_ORDER_MISMATCH",
+                    "PayOS information does not match this order");
+        }
+        if (!"PAID".equals(info.status()) || info.amountPaid() < order.getAmount()
+                || info.amountRemaining() != 0) {
+            throw new ApiCodeException(HttpStatus.CONFLICT, "PAYMENT_NOT_PAID",
+                    "PayOS has not confirmed full payment");
+        }
+        // Lookup does not supply a reliable payment timestamp. Do not fabricate one
+        // for revenue reports; an already recorded paidAt is preserved.
+        if (!applyPaidOrder(order, clock.millis(), null).handled()) {
+            throw new ApiCodeException(HttpStatus.CONFLICT, "PAYMENT_ORDER_CANCELLED", "Order is not payable");
+        }
+        log.info("PayOS reconciliation completed for order {}", orderCode);
+    }
+
     @SuppressWarnings("unchecked")
     public WebhookResult handleWebhook(Map<String, Object> payload) throws Exception {
         if (payload == null) {
@@ -153,7 +180,11 @@ public class PaymentService {
         if (order.getStatus() == PaymentOrderStatus.CANCELLED) {
             return new WebhookResult(false, "order cancelled");
         }
-        long now = clock.millis();
+        return applyPaidOrder(order, clock.millis(), clock.millis());
+    }
+
+    private WebhookResult applyPaidOrder(PaymentOrder order, long now, Long paidAt) throws Exception {
+        long orderCode = order.getOrderCode();
         if (order.getStatus() == PaymentOrderStatus.PENDING) {
             // Atomic flip: only the first delivery (or first concurrent attempt) wins.
             // Retries observe PAID below and reuse the stored expiry.
@@ -162,7 +193,7 @@ public class PaymentService {
                     return new PaymentOrderDao.Mutation(current, false);
                 }
                 current.setStatus(PaymentOrderStatus.PAID);
-                current.setPaidAt(now);
+                current.setPaidAt(paidAt);
                 current.setUpdatedAt(now);
                 return new PaymentOrderDao.Mutation(current, true);
             });
@@ -196,13 +227,7 @@ public class PaymentService {
             });
             order = paymentOrderDao.findByOrderCode(order.getOrderCode()).orElse(order);
         }
-        var currentSummary = subscriptionService.getSummary(order.getUserId());
-        if (currentSummary.expiresAt() != null
-                && currentSummary.expiresAt() >= order.getProExpiresAt()) {
-            return;
-        }
-        // activateOrExtend is itself idempotent: a retry with the same expiry is a no-op.
-        subscriptionService.activateOrExtend(order.getUserId(), order.getProExpiresAt(), PAYOS_ACTOR);
+        subscriptionService.activatePaidOrder(order.getUserId(), order.getProExpiresAt(), PAYOS_ACTOR);
     }
 
     private void cancelQuietly(PaymentOrder order) {

@@ -1132,16 +1132,34 @@ DELETE đánh dấu `REVOKED`, cập nhật `revokedBy`, `revokedAt`, `updatedAt
 
 PUT và DELETE đọc, quyết định và ghi subscription trong cùng một Firestore transaction. Khi có cập nhật đồng thời, server tính lại trên document mới nhất để giữ quy tắc không rút ngắn expiry, tính idempotent và metadata audit.
 
-### 9.7 Tra cứu đơn thanh toán (chỉ đọc)
+### 9.7 Tra cứu và đối soát đơn thanh toán
 
 Chỉ `ADMIN` được truy cập; dùng session đã xác thực như các API admin khác.
 
 - `GET /api/admin/payments/orders?status=&planCode=&userId=&from=&to=&page=0&size=20`: lọc chính xác theo status, planCode, userId khi có giá trị; `from`/`to` là Unix millisecond và lọc ngày tạo đơn với hai cận bao gồm. Frontend đổi ngày lịch theo giờ Việt Nam thành đầu/cuối ngày. Backend sắp xếp `createdAt` giảm dần (cùng thời điểm thì `orderCode` giảm dần), sau đó phân trang; `page` tối thiểu 0, `size` giới hạn 1–100. Trả `{ items, page, size, totalItems, totalPages }`; danh sách trống có `totalPages=0`.
 - `GET /api/admin/payments/orders/{orderCode}`: trả một đơn, hoặc `404 PAYMENT_ORDER_NOT_FOUND`.
 
-Mỗi đơn có đúng các field `orderCode`, `userId`, `buyerEmail`, `buyerName`, `planCode`, `amount`, `durationDays`, `status`, `paymentLinkId`, `createdAt`, `paidAt`, `proExpiresAt`. Mọi thời điểm dùng Unix millisecond; amount là VND. Không trả `checkoutUrl`. Tên/email lấy từ hồ sơ user hiện tại, không phải bản chụp lúc thanh toán; user không tồn tại hoặc không đọc được thì hai field này là null và vẫn trả đơn. Status không hợp lệ trả `400 PAYMENT_ORDER_FILTER_INVALID`. Không có API ghi hoặc thay đổi trạng thái đơn trong tính năng này.
+Mỗi đơn có đúng các field `orderCode`, `userId`, `buyerEmail`, `buyerName`, `planCode`, `amount`, `durationDays`, `status`, `paymentLinkId`, `createdAt`, `paidAt`, `proExpiresAt`. Mọi thời điểm dùng Unix millisecond; amount là VND. Không trả `checkoutUrl`. Tên/email lấy từ hồ sơ user hiện tại, không phải bản chụp lúc thanh toán; user không tồn tại hoặc không đọc được thì hai field này là null và vẫn trả đơn. Status không hợp lệ trả `400 PAYMENT_ORDER_FILTER_INVALID`. GET chỉ đọc; thao tác đối soát có xác minh PayOS được mô tả bên dưới.
 
 Triển khai hiện đọc toàn bộ collection rồi lọc/phân trang trong bộ nhớ, không giảm lượt đọc Firestore bằng phân trang; chỉ tải thông tin người mua cho các UID khác nhau trên trang kết quả.
+
+#### Khôi phục đơn bỏ lỡ webhook (Admin)
+
+`POST /api/admin/payments/orders/{orderCode}/reconcile` yêu cầu role `ADMIN`, session và CSRF hợp lệ; không nhận body. Response `200` dùng đúng schema chi tiết đơn ở trên, không trả dữ liệu ngân hàng hoặc `checkoutUrl`. Các API GET hiện tại không thay đổi.
+
+Backend tra PayOS bằng credentials phía server (`GET /v2/payment-requests/{orderCode}`), đối chiếu chính xác orderCode, paymentLinkId và amount đã lưu. Chỉ áp dụng khi PayOS trả `PAID`, amountPaid ít nhất bằng giá đơn và amountRemaining bằng 0. Không nhận/trust status, giá, UID hoặc quyền Pro từ trình duyệt. Đây là khôi phục thủ công khi webhook bị bỏ lỡ, không phải bước duyệt bắt buộc: thanh toán bình thường vẫn tự kích hoạt qua webhook.
+
+- `404 PAYMENT_ORDER_NOT_FOUND`: không có đơn trong database của backend đang xử lý.
+- `409 PAYMENT_ORDER_CANCELLED`: đơn local đã hủy hoặc không còn payable khi cập nhật.
+- `409 PAYMENT_ORDER_MISMATCH`: mã đơn, mã link, giá hoặc dữ liệu đơn không khớp.
+- `409 PAYMENT_NOT_PAID`: provider chưa xác nhận trả đủ tiền.
+- `502 PAYOS_UNAVAILABLE`: lỗi HTTP/network/timeout hoặc provider trả dữ liệu thiếu/sai định dạng; không cấp quyền khi tra cứu thất bại.
+
+Đối soát dùng chung atomic transition và activation với webhook. Đơn lần đầu được khôi phục cộng số ngày từ `max(serverNow, expiry ACTIVE hiện có)`; expiry tuyệt đối được lưu một lần trên đơn. Retry, webhook đến sau và các thao tác đồng thời cho cùng đơn không cộng lại ngày. Transaction subscription kiểm tra expiry ngay trên trạng thái mới nhất để không hoàn tác lần thu hồi sau khi đã áp dụng đơn. Đơn có expiry đã lưu và đã hết hạn không được bắt đầu lại thời hạn.
+
+Lookup PayOS không bảo đảm có timestamp thanh toán đáng tin cậy, nên đối soát giữ `paidAt` đã ghi nhận hoặc để `null`; không dùng thời gian khôi phục làm ngày thanh toán. Các báo cáo hiện có tiếp tục loại đơn không có `paidAt` khỏi doanh thu theo ngày. UI nêu rõ ngày chưa ghi nhận để trống.
+
+Sau khi deploy backend và frontend: Admin mở `/console/orders`, chọn đơn, bấm **Đối soát với PayOS**; danh sách và chi tiết tự tải lại. Người mua tải lại hồ sơ/dashboard để nhận summary mới. Hai môi trường phải dùng cùng Firestore project/database và đúng kênh PayOS; không gửi secret cho frontend.
 
 ### 9.8 Báo cáo doanh thu (chỉ đọc)
 

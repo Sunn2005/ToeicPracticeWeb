@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { getAdminOrder, getAdminOrders } from "../../api/adminPayments.js";
+import { getAdminOrder, getAdminOrders, reconcileAdminOrder } from "../../api/adminPayments.js";
 import { useLanguage } from "../../i18n/LanguageContext";
 import { buildOrdersQuery, formatOrderAmount, formatOrderDate, orderDateEpoch, orderStatusKey, paymentErrorKey } from "./adminPayments.js";
 
@@ -9,9 +9,29 @@ const statusClasses = { PENDING: "bg-amber-50 text-amber-800", PAID: "bg-green-5
 const columns = ["orderCode", "buyer", "planCode", "amount", "status", "createdAt", "paidAt"];
 const detailFields = ["orderCode", "userId", "buyerName", "buyerEmail", "planCode", "amount", "durationDays", "status", "paymentLinkId", "createdAt", "paidAt", "proExpiresAt"];
 
-function OrderDetail({ orderCode, t, language }) {
+function OrderDetail({ orderCode, t, language, onReconciled }) {
   const [request, setRequest] = useState({ loading: true });
   const [retry, setRetry] = useState(0);
+  const [reconciliation, setReconciliation] = useState(null);
+  const mutation = useRef(null);
+  useEffect(() => () => mutation.current?.abort(), []);
+  async function reconcile() {
+    if (mutation.current) return;
+    const controller = new AbortController();
+    mutation.current = controller;
+    setReconciliation({ loading: true });
+    try {
+      const order = await reconcileAdminOrder(orderCode, { signal: controller.signal });
+      if (controller.signal.aborted) return;
+      setRequest({ order });
+      setReconciliation({ completed: true });
+      onReconciled();
+    } catch (error) {
+      if (!controller.signal.aborted) setReconciliation({ error: paymentErrorKey(error) });
+    } finally {
+      if (mutation.current === controller) mutation.current = null;
+    }
+  }
   useEffect(() => {
     const controller = new AbortController();
     getAdminOrder(orderCode, { signal: controller.signal }).then(
@@ -31,6 +51,15 @@ function OrderDetail({ orderCode, t, language }) {
         return <div key={field} className="min-w-0"><dt className="text-sm text-slate-600">{t(`adminOrders_${field}`)}</dt><dd className="mt-1 break-words text-sm font-semibold">{display}</dd></div>;
       })}
     </dl>}
+    {request.order && request.order.status !== "CANCELLED" && <div className="mt-6 space-y-3 border-t border-slate-200 pt-5" aria-busy={Boolean(reconciliation?.loading)}>
+      <p className="text-sm leading-6 text-slate-600">{t("adminOrdersReconcileHelp")}</p>
+      <button type="button" className={buttonClass} disabled={Boolean(reconciliation?.loading)} onClick={reconcile}>
+        {t(reconciliation?.loading ? "adminOrdersReconciling" : "adminOrdersReconcile")}
+      </button>
+      {reconciliation?.loading && <p role="status" className="text-sm text-slate-600">{t("adminOrdersReconciling")}</p>}
+      {reconciliation?.error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-800">{t(reconciliation.error)}</p>}
+      {reconciliation?.completed && <p role="status" className="rounded-xl bg-green-50 p-3 text-sm text-green-800">{t("adminOrdersReconciled")}</p>}
+    </div>}
   </>;
 }
 
@@ -108,7 +137,7 @@ export default function AdminOrdersPage() {
     </div>
     <dialog ref={dialog} onClose={() => setSelected(null)} aria-labelledby="orders-detail-title" className="fixed inset-0 m-auto max-h-[85dvh] w-[calc(100%-2rem)] max-w-2xl overflow-y-auto rounded-2xl border border-slate-200 bg-white p-6 text-slate-900 shadow-xl backdrop:bg-slate-950/50">
       <div className="flex items-center justify-between gap-4"><h2 id="orders-detail-title" className="text-lg font-bold">{t("adminOrdersDetail")}</h2><button type="button" autoFocus className={buttonClass} onClick={() => dialog.current.close()}>{t("adminOrdersClose")}</button></div>
-      {selected !== null && <OrderDetail key={selected} orderCode={selected} t={t} language={language} />}
+      {selected !== null && <OrderDetail key={selected} orderCode={selected} t={t} language={language} onReconciled={() => setRetry((value) => value + 1)} />}
     </dialog>
   </section>;
 }

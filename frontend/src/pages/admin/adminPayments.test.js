@@ -41,3 +41,15 @@ test("all new translations exist in both languages", () => {
   assert.deepEqual(keys.sort(), Object.keys(translations.vi).filter((key) => key.startsWith("adminOrders")).sort());
   for (const key of keys) assert.ok(translations.en[key] && translations.vi[key]);
 });
+
+test("reconciliation errors use stable codes and translated recovery messages", () => {
+  for (const [code, key] of Object.entries({
+    PAYMENT_ORDER_CANCELLED: "adminOrdersReconcileCancelled",
+    PAYMENT_ORDER_MISMATCH: "adminOrdersReconcileMismatch",
+    PAYMENT_NOT_PAID: "adminOrdersReconcileUnpaid",
+    PAYOS_UNAVAILABLE: "adminOrdersReconcileUnavailable",
+  })) {
+    assert.equal(paymentErrorKey({ status: code === "PAYOS_UNAVAILABLE" ? 502 : 409, body: { code } }), key);
+    assert.ok(translations.en[key] && translations.vi[key]);
+  }
+});
