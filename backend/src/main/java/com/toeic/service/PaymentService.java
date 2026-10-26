@@ -3,7 +3,7 @@ package com.toeic.service;
 import com.toeic.controller.ApiCodeException;
 import com.toeic.dao.PaymentOrderDao;
 import com.toeic.model.PaymentOrder;
-import com.toeic.model.ProPlan;
+import com.toeic.model.enums.ProPlan;
 import com.toeic.model.enums.PaymentOrderStatus;
 import com.toeic.model.enums.SubscriptionStatus;
 import org.slf4j.Logger;

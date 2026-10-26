@@ -1,4 +1,4 @@
-package com.toeic.model;
+package com.toeic.model.enums;
 
 import java.util.Arrays;
 import java.util.Optional;
