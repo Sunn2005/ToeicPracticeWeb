@@ -120,15 +120,13 @@ Không được sửa:
 - Logic làm bài để phù hợp với cấu trúc đề đang tạo.
 - File của Member 1, 2 hoặc 4.
 
-### Member 4 — Admin review workflow và subscription Pro
+### Member 4 — Admin review workflow
 
 Được sửa:
 
 - `src/pages/admin/**`
 - `src/components/admin/**`
 - `src/api/adminReviews.js`
-- `src/api/adminSubscriptions.js` và `src/api/adminSubscriptions.test.js`
-- Trang Pro: `src/pages/admin/SubscriptionManagementPage.jsx`, helper `subscriptionManagement.js` và `subscriptionManagement.test.js`.
 
 Nhiệm vụ chính:
 
@@ -136,8 +134,6 @@ Nhiệm vụ chính:
 - Trang xem chi tiết nội dung cần duyệt.
 - Approve, reject và nhập lý do reject.
 - Lịch sử duyệt.
-- Quản lý Pro tại `/console/subscriptions`: tra UID, kích hoạt/gia hạn với body chỉ `expiresAt`, xác nhận thu hồi; dùng summary server để hiển thị hiệu lực. Route chỉ cho `ADMIN`, điều hướng subscription chỉ xuất hiện cho admin.
-- Wrapper subscription dùng `apiFetch`, encode UID và xử lý status/code; không tự lấy token, suy luận quyền từ expiry trên trình duyệt hoặc gửi audit actor.
 - Xử lý đúng `401`, `403`, `404` và `409` từ backend.
 
 Không được sửa:
@@ -205,7 +201,7 @@ Nếu phát hiện lỗi trong các file này, tạo issue hoặc mô tả trong
 
 ### Tích hợp Pro: route, điều hướng, profile và Capy AI Chat
 
-Member 4 sở hữu page/helper/API/test subscription nêu trên. Member 1 tích hợp route `/console/subscriptions` trong `src/App.jsx` và liên kết admin trong `src/layouts/ManagementLayout.jsx`; giữ guard role và mọi route `/full-test/**`. Thay đổi `src/auth/**` để dùng summary `GET /api/me.subscription` thuộc Member 1. Thành viên khác cần phối hợp owner trước khi sửa các file này.
+Chức năng quản lý gói Pro thủ công (page/helper/API/test và route Console) đã được gỡ theo yêu cầu chủ dự án ngày 2026-10-27. Member 1 tiếp tục sở hữu summary `GET /api/me.subscription` trong `src/auth/**`; summary này phục vụ quyền Pro của người học và không thuộc phần bị gỡ. Giữ mọi route `/full-test/**`.
 
 Các file review/AI trong mục 4 vẫn bị khóa, gồm `src/pages/FullTestReview.jsx`; việc hiển thị `PRO_REQUIRED` và giữ khả năng đọc kết quả sau expiry thuộc trưởng nhóm/người phụ trách AI. API client, auth infrastructure, backend và AI service không thuộc quyền sửa của Member 4.
 
@@ -527,3 +523,13 @@ Một đầu việc chỉ được xem là hoàn thành khi:
 - Lint, test và build thành công.
 - PR được review và merge theo repository rules.
 - Branch sau khi merge không được tái sử dụng cho công việc mới.
+
+## Tích hợp Quản lý nhân viên (2026-10-26)
+
+Chủ dự án đã cho phép triển khai xuyên backend/auth/route/menu và các trang Console liên quan, trực tiếp trên main cho công việc này. Ngoại lệ này không thay đổi quy tắc branch/owner cho công việc khác.
+
+- Page/components/API quản trị nhân viên: `src/pages/admin/StaffManagementPage.jsx`, `src/components/admin/StaffDialog.jsx`, `src/api/adminStaff.js` và test.
+- Member 1 giữ phần tích hợp `src/auth/consolePermissions.js`, guard, LoginPage, App routes, ManagementLayout và summary `profile.consoleAccess`.
+- Các owner Employee/Admin giữ điều kiện hiển thị action và quyền từng API đồng bộ với permission catalog backend. Không mở role ADMIN cho employee để tránh lỗi 403.
+- Translation key mới prefix `staff` nằm trong `src/i18n/staffTranslations.js`, ghép qua `translations.js`; thêm cả EN và VI.
+- Quyền nhân viên chỉ điều khiển Console; không nới ownership, luồng thi, Pro entitlement hoặc AI.

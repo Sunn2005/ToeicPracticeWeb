@@ -1,3 +1,5 @@
+import { useAuth } from "../../auth/useAuth";
+import { canUseConsole } from "../../auth/consolePermissions";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useLanguage } from "../../i18n/LanguageContext";
@@ -6,6 +8,7 @@ import TestPreview from "../../components/test-editor/TestPreview";
 import { getEmployeeTest, submitEmployeeTest } from "../../api/employeeTests";
 
 function TestPreviewPage() {
+  const { profile } = useAuth();
   const { testId } = useParams();
   const navigate = useNavigate();
   const { t } = useLanguage();
@@ -45,7 +48,7 @@ function TestPreviewPage() {
 
   const displayError = testId ? error : "Không tìm thấy mã đề.";
 
-  const editable = test && ["DRAFT", "REJECTED"].includes(test.status);
+  const editable = canUseConsole(profile, "tests.edit") && test && ["DRAFT", "REJECTED"].includes(test.status);
   const validation = validateEmployeeTest(test);
   const handleSubmit = async () => {
     if (submitting || !editable) return;

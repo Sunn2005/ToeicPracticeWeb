@@ -1,10 +1,12 @@
-import { useState } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { canUseConsole, consoleRoutePermission } from "../auth/consolePermissions";
+import { useEffect, useState } from "react";
+import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/useAuth";
 import { useLanguage } from "../i18n/LanguageContext";
 
 const iconPaths = {
   dashboard: ["M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"],
+  staff: ["M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M16 3a4 4 0 0 1 0 8M22 21v-2a4 4 0 0 0-3-3.87", "M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"],
   tests: ["M7 3h7l4 4v14H7z", "M14 3v5h5M10 13h6M10 17h6"],
   create: ["M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z", "M12 8v8M8 12h8"],
   review: ["M7 4h10v17H7zM9 4V2h6v2", "m9 13 2 2 4-5"],
@@ -31,21 +33,29 @@ function initials(profile) {
 
 function ManagementLayout() {
   const navigate = useNavigate();
-  const { profile, role, logout } = useAuth();
+  const { pathname } = useLocation();
+  const { profile, role, logout, refreshProfile } = useAuth();
   const { t } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isAdmin = role === "ADMIN";
 
   const navigation = [
     { label: "Trang tổng quan", icon: "dashboard", to: "/console/dashboard" },
+    { label: t("staffTitle"), icon: "staff", to: "/console/staff" },
     { label: "Quản lý đề thi", icon: "tests", to: "/console/tests", badge: "EMP" },
     { label: "Tạo đề mới", icon: "create", to: "/console/tests/new", badge: "EMP" },
-    { label: "Xét duyệt", icon: "review", to: "/console/reviews", locked: !isAdmin },
-    { label: "Lịch sử phê duyệt", icon: "history", to: "/console/review-history", locked: !isAdmin },
-    ...(isAdmin ? [{ label: t("adminRevenueNav"), icon: "dashboard", to: "/console/revenue" }] : []),
-    ...(isAdmin ? [{ label: t("adminOrdersNav"), icon: "tests", to: "/console/orders" }] : []),
-    ...(isAdmin ? [{ label: t("adminSubscriptionNav"), icon: "lock", to: "/console/subscriptions" }] : []),
-  ];
+    { label: "Xét duyệt", icon: "review", to: "/console/reviews" },
+    { label: "Lịch sử phê duyệt", icon: "history", to: "/console/review-history" },
+    { label: t("adminRevenueNav"), icon: "dashboard", to: "/console/revenue" },
+    { label: t("adminOrdersNav"), icon: "tests", to: "/console/orders" },
+  ].filter((item) => canUseConsole(profile, consoleRoutePermission(item.to)));
+
+  useEffect(() => {
+    const refresh = () => { refreshProfile().catch(() => {}); };
+    refresh();
+    window.addEventListener("focus", refresh);
+    return () => window.removeEventListener("focus", refresh);
+  }, [refreshProfile, pathname]);
 
   const handleLogout = async () => {
     await logout();

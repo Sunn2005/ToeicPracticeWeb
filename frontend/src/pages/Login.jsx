@@ -15,8 +15,7 @@ const GOOGLE_SIGN_IN_ERROR_KEYS = {
   "auth/unauthorized-domain": "unauthorizedDomain",
 };
 
-function Login({ mode = "login" }) {
-  const isRegister = mode === "register";
+function Login() {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { establishSession, profileError } = useAuth();
@@ -24,8 +23,8 @@ function Login({ mode = "login" }) {
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    document.title = t(isRegister ? "registerPageTitle" : "loginPageTitle");
-  }, [isRegister, t]);
+    document.title = t("loginPageTitle");
+  }, [t]);
 
   const loginWithGoogle = async () => {
     if (isLoading) return;
@@ -71,19 +70,19 @@ function Login({ mode = "login" }) {
       <LanguageSwitcher className="fixed right-3 top-3 z-50 sm:right-5 sm:top-5" />
 
       <main className="mx-auto flex min-h-screen min-h-dvh w-full max-w-6xl items-center px-4 pb-8 pt-20 sm:px-6 sm:py-24 lg:py-12">
-        <h1 className="sr-only">{t(isRegister ? "registerPageTitle" : "loginPageTitle")}</h1>
+        <h1 className="sr-only">{t("loginPageTitle")}</h1>
 
         <section
-          aria-label={t(isRegister ? "registerPageTitle" : "loginPageTitle")}
+          aria-label={t("loginPageTitle")}
           className="grid w-full items-center gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12"
         >
           <div className="login-card mx-auto w-full max-w-md lg:order-2">
             <div className="rounded-3xl border border-white/90 bg-white/90 p-5 shadow-xl shadow-sky-200/55 backdrop-blur-xl sm:rounded-4xl sm:p-8">
               <div className="mb-6 flex items-center justify-between gap-4 sm:mb-8">
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-sky-700">{t(isRegister ? "registerWelcome" : "welcome")}</p>
+                  <p className="text-sm font-medium text-sky-700">{t("welcome")}</p>
                   <h2 className="mt-1.5 text-xl font-bold text-slate-950 sm:mt-2 sm:text-2xl">
-                    {t(isRegister ? "registerHeading" : "signInToStart")}
+                    {t("signInToStart")}
                   </h2>
                 </div>
                 <BrandLogo
@@ -110,14 +109,14 @@ function Login({ mode = "login" }) {
                     "G"
                   )}
                 </span>
-                <span>{isLoading ? t("openingGoogle") : t(isRegister ? "registerWithGoogle" : "continueWithGoogle")}</span>
+                <span>{isLoading ? t("openingGoogle") : t("continueWithGoogle")}</span>
               </button>
 
               <p
                 id="google-sign-in-support"
                 className="mt-3 text-center text-sm leading-6 text-slate-500"
               >
-                {t(isRegister ? "registerGoogleSupport" : "googleSignInSupport")}
+                {t("googleLoginAutoCreateSupport")}
               </p>
 
               {(errorMessage || profileError) && (
@@ -129,12 +128,6 @@ function Login({ mode = "login" }) {
                 </p>
               )}
 
-              <p className="mt-5 text-center text-sm text-slate-600">
-                {t(isRegister ? "authHaveAccount" : "authNoAccount")} {" "}
-                <Link to={isRegister ? "/login" : "/register"} className="inline-flex min-h-11 items-center rounded-lg px-2 font-semibold text-sky-700 hover:underline focus-visible:outline-2 focus-visible:outline-sky-600">
-                  {t(isRegister ? "publicNavLogin" : "publicNavRegister")}
-                </Link>
-              </p>
               <Link to="/" className="flex min-h-11 items-center justify-center rounded-lg text-sm font-medium text-slate-600 hover:text-sky-700 focus-visible:outline-2 focus-visible:outline-sky-600">
                 {t("authBackHome")}
               </Link>
@@ -175,7 +168,7 @@ function Login({ mode = "login" }) {
                 className="h-auto w-full max-w-[320px] sm:max-w-[380px] lg:max-w-[420px]"
               />
               <p className="max-w-xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">
-                {t(isRegister ? "registerDescription" : "loginDescription")}
+                {t("loginDescription")}
               </p>
             </div>
 

@@ -51,4 +51,21 @@ class AdminReviewServiceTests {
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
     }
+    @Test
+    void cannotApproveOrRejectOwnSubmission() throws Exception {
+        TestDao dao = mock(TestDao.class);
+        TestManagementSupport support = mock(TestManagementSupport.class);
+        AdminReviewService service = new AdminReviewService(dao, support);
+        com.toeic.model.Test submission = new com.toeic.model.Test();
+        submission.setStatus(TestStatus.PENDING_REVIEW); submission.setCreatedBy("author");
+        when(support.loadFullTest("own")).thenReturn(submission);
+        for (var action : java.util.List.<org.junit.jupiter.api.function.Executable>of(
+                () -> service.approve("author", "own"), () -> service.reject("author", "own", "Reason"))) {
+            var error = assertThrows(com.toeic.controller.ApiCodeException.class, action);
+            assertEquals("SELF_REVIEW_FORBIDDEN", error.getCode());
+        }
+        org.mockito.Mockito.verifyNoInteractions(dao);
+        assertEquals(TestStatus.PENDING_REVIEW, submission.getStatus());
+    }
+
 }

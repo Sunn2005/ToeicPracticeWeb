@@ -24,11 +24,7 @@ public class FirestoreUserDao implements UserDao {
         if (!snapshot.exists()) {
             return Optional.empty();
         }
-        User user = snapshot.toObject(User.class);
-        if (user != null && user.getUid() == null) {
-            user.setUid(uid);
-        }
-        return Optional.ofNullable(user);
+        return Optional.of(FirestoreUserMapper.from(uid, snapshot.getData()));
     }
 
     @Override

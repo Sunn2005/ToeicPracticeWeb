@@ -38,6 +38,7 @@ public class EmployeeTestController {
         this.mediaStorageService = mediaStorageService;
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('tests.view')")
     @GetMapping("/tests")
     public List<Map<String, Object>> list(
             @AuthenticationPrincipal ToeicUserPrincipal principal
@@ -45,6 +46,7 @@ public class EmployeeTestController {
         return employeeTestService.list(principal.uid());
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('tests.add')")
     @PostMapping("/tests")
     @ResponseStatus(HttpStatus.CREATED)
     public Map<String, Object> create(
@@ -54,6 +56,7 @@ public class EmployeeTestController {
         return employeeTestService.create(principal.uid(), request);
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('tests.view')")
     @GetMapping("/tests/{testId}")
     public Map<String, Object> get(
             @PathVariable String testId,
@@ -62,6 +65,7 @@ public class EmployeeTestController {
         return employeeTestService.get(principal.uid(), testId);
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('tests.edit')")
     @PutMapping("/tests/{testId}")
     public Map<String, Object> update(
             @PathVariable String testId,
@@ -71,6 +75,7 @@ public class EmployeeTestController {
         return employeeTestService.update(principal.uid(), testId, request);
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('tests.delete')")
     @DeleteMapping("/tests/{testId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(
@@ -80,6 +85,7 @@ public class EmployeeTestController {
         employeeTestService.delete(principal.uid(), testId);
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('tests.edit')")
     @PostMapping("/tests/{testId}/submit")
     public Map<String, Object> submit(
             @PathVariable String testId,
@@ -88,6 +94,7 @@ public class EmployeeTestController {
         return employeeTestService.submit(principal.uid(), testId);
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('tests.add') or hasAuthority('tests.edit')")
     @PostMapping(value = "/media", consumes = "multipart/form-data")
     @ResponseStatus(HttpStatus.CREATED)
     public Map<String, Object> uploadMedia(

@@ -159,9 +159,9 @@ export default function AIChatBox({
         role="dialog"
         aria-modal="true"
         aria-labelledby="capy-chat-title"
-        className="pointer-events-auto absolute inset-0 flex h-[100dvh] flex-col overflow-hidden bg-slate-50 shadow-2xl min-[680px]:inset-auto min-[680px]:bottom-6 min-[680px]:right-6 min-[680px]:h-[min(720px,calc(100dvh-3rem))] min-[680px]:w-[min(760px,calc(100vw-3rem))] min-[680px]:rounded-3xl min-[680px]:border min-[680px]:border-slate-200 xl:w-[min(900px,calc(50vw-2rem))]"
+        className="pointer-events-auto absolute inset-0 flex h-[100dvh] flex-col overflow-hidden bg-slate-50 shadow-2xl min-[680px]:inset-auto min-[680px]:bottom-6 min-[680px]:right-6 min-[680px]:h-[min(720px,calc(100dvh-3rem))] min-[680px]:w-[min(760px,calc(100vw-3rem))] min-[680px]:rounded-3xl min-[680px]:border min-[680px]:border-slate-200 xl:w-[min(900px,calc(100vw-3rem))]"
       >
-        <header className="flex min-h-16 items-center gap-3 border-b border-slate-200 bg-white px-3 py-2 sm:px-4">
+        <header className="flex min-h-16 shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-3 py-2 sm:px-4">
           <img
             src="/brand/LogochatboxCapyAI.png"
             alt=""
@@ -253,7 +253,7 @@ export default function AIChatBox({
             </div>
           </aside>
 
-          <main className="flex min-w-0 flex-1 flex-col bg-slate-50">
+          <main className="flex min-h-0 min-w-0 flex-1 flex-col bg-slate-50">
             {errorText && (
               <div role="alert" className="flex items-start justify-between gap-3 border-b border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
                 <span className="min-w-0 flex-1">{errorText}{chat.errorCode ? ` (${chat.errorCode})` : ""}</span>

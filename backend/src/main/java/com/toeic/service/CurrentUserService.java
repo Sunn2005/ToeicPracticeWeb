@@ -29,10 +29,12 @@ public class CurrentUserService {
     );
 
     private final UserDao userDao;
+    private final StaffAccessService staffAccessService;
     private final SubscriptionService subscriptionService;
 
-    public CurrentUserService(UserDao userDao, SubscriptionService subscriptionService) {
+    public CurrentUserService(UserDao userDao, SubscriptionService subscriptionService, StaffAccessService staffAccessService) {
         this.userDao = userDao;
+        this.staffAccessService = staffAccessService;
         this.subscriptionService = subscriptionService;
     }
 
@@ -74,6 +76,7 @@ public class CurrentUserService {
         response.put("role", user.getRole() == null ? UserRole.USER.name() : user.getRole().name());
         response.put("createdAt", user.getCreatedAt());
         response.put("lastLoginAt", user.getLastLoginAt());
+        response.put("consoleAccess", staffAccessService.forUser(user));
         response.put("subscription", subscriptionService.getSummary(user.getUid()));
         return response;
     }

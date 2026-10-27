@@ -261,7 +261,7 @@ export default function LandingPage() {
                         <p className="mt-5 max-w-md text-base leading-7 text-slate-600">{t("landingHeroSubtitle")}</p>
                         <div className="mt-7 flex flex-wrap items-center gap-5">
                             <Link
-                                to="/register"
+                                to="/login"
                                 className="inline-flex min-h-11 items-center rounded-xl bg-sky-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-200"
                             >
                                 {t("landingHeroCtaPrimary")}
@@ -395,9 +395,9 @@ export default function LandingPage() {
             <section className="bg-linear-to-b from-sky-600 to-blue-800 text-center text-white">
                 <div className="mx-auto w-full max-w-3xl px-4 py-16 sm:px-6">
                     <h2 className="text-4xl font-extrabold tracking-tight">{t("landingCtaTitle")}</h2>
-                    <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-blue-100 sm:text-base">{t("landingCtaSubtitle")}</p>
+                    <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-blue-100 sm:text-base">{t("landingGoogleSignInSubtitle")}</p>
                     <Link
-                        to="/register"
+                        to="/login"
                         className="mt-7 inline-flex min-h-11 items-center rounded-xl bg-white px-6 py-2.5 text-sm font-bold text-sky-700 shadow-sm transition hover:bg-sky-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/40"
                     >
                         {t("landingCtaButton")}

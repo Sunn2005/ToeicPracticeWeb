@@ -117,7 +117,7 @@ test("non-CSRF forbidden responses are not retried", async () => {
   );
 
   await assert.rejects(
-    () => apiFetch("/api/admin/subscriptions/user-1", { method: "DELETE" }),
+    () => apiFetch("/api/admin/staff/members/user-1", { method: "DELETE" }),
     (error) => error instanceof ApiError && error.body.code === "ACCESS_DENIED",
   );
 

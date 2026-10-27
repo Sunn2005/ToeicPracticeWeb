@@ -19,7 +19,6 @@ const FOOTER_COURSES = [
 const FOOTER_EXPLORE = [
     { to: "/#features", labelKey: "publicFooterExplore1" },
     { to: "/login", labelKey: "publicFooterExplore2" },
-    { to: "/register", labelKey: "publicFooterExplore3" },
 ];
 
 function Logo({ light = false }) {
@@ -88,15 +87,9 @@ export default function PublicLayout() {
                         <LanguageSwitcher className="mx-1" />
                         <Link
                             to="/login"
-                            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-200"
-                        >
-                            {t("publicNavLogin")}
-                        </Link>
-                        <Link
-                            to="/register"
                             className="rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-200"
                         >
-                            {t("publicNavRegister")}
+                            {t("publicNavLogin")}
                         </Link>
                     </nav>
 
@@ -131,16 +124,9 @@ export default function PublicLayout() {
                                 <Link
                                     to="/login"
                                     onClick={() => setMenuOpen(false)}
-                                    className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-center text-sm font-semibold text-slate-700 shadow-sm"
-                                >
-                                    {t("publicNavLogin")}
-                                </Link>
-                                <Link
-                                    to="/register"
-                                    onClick={() => setMenuOpen(false)}
                                     className="flex-1 rounded-xl bg-sky-600 px-4 py-2.5 text-center text-sm font-semibold text-white shadow-sm"
                                 >
-                                    {t("publicNavRegister")}
+                                    {t("publicNavLogin")}
                                 </Link>
                             </div>
                         </div>

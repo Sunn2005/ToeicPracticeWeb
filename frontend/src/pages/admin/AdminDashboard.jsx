@@ -1,3 +1,5 @@
+import { canUseConsole } from "../../auth/consolePermissions";
+import { useLanguage } from "../../i18n/LanguageContext";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { getPendingSubmissions, getReviewHistory } from "../../api/adminReviews";
@@ -49,7 +51,7 @@ function StatIcon({ type }) {
   return <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-7 w-7 text-[#2188ee]"><path d={paths[type]} /></svg>;
 }
 
-function AdminDashboard() {
+function AdminDashboardContent() {
   const { role, profile } = useAuth();
   const isAdmin = role === "ADMIN";
   const [pending, setPending] = useState([]);
@@ -231,4 +233,11 @@ function AdminDashboard() {
   );
 }
 
+function AdminDashboard() {
+  const { profile } = useAuth();
+  const { t } = useLanguage();
+  return canUseConsole(profile, "tests.view") || profile?.role === "ADMIN"
+    ? <AdminDashboardContent />
+    : <section className="rounded-2xl border border-slate-200 bg-white p-8"><h1 className="text-2xl font-bold">{t("staffFeature_dashboard")}</h1><p className="mt-3 text-slate-500">{t("staffConsoleWelcome")}</p></section>;
+}
 export default AdminDashboard;

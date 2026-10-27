@@ -35,18 +35,17 @@ class SubscriptionConcurrencyTests {
         var boundary = new ConcurrentFirestoreBoundary();
         var service = boundary.service();
         try (var executor = Executors.newSingleThreadExecutor(r -> new Thread(r, "delayed-subscription"))) {
-            var shorter = executor.submit(() -> service.activateOrExtend("learner", NOW + 10_000, "short-admin"));
+            var shorter = executor.submit(() -> { service.activatePaidOrder("learner", NOW + 10_000, "payos:short"); return null; });
             try {
                 assertTrue(boundary.snapshotCaptured.await(5, TimeUnit.SECONDS));
-                service.activateOrExtend("learner", NOW + 20_000, "long-admin");
+                service.activatePaidOrder("learner", NOW + 20_000, "payos:long");
             } finally {
                 boundary.otherCommitted.countDown();
             }
-            var result = shorter.get(5, TimeUnit.SECONDS);
+            shorter.get(5, TimeUnit.SECONDS);
             var stored = boundary.current();
             assertEquals(NOW + 20_000, stored.getExpiresAt());
-            assertEquals("long-admin", stored.getActivatedBy());
-            assertEquals(NOW + 20_000, result.expiresAt());
+            assertEquals("payos:long", stored.getActivatedBy());
             assertEquals(NOW - 2000, stored.getCreatedAt());
             assertEquals(1, boundary.retries);
             assertEquals(1, boundary.writes);
@@ -54,26 +53,25 @@ class SubscriptionConcurrencyTests {
     }
 
     @Test
-    void staleRevocationPreservesTheCommittedExtensionAndItsAuditActor() throws Exception {
+    void concurrentRetriesOfSamePaidOrderDoNotApplyTheExpiryTwice() throws Exception {
         var boundary = new ConcurrentFirestoreBoundary();
         var service = boundary.service();
         try (var executor = Executors.newSingleThreadExecutor(r -> new Thread(r, "delayed-subscription"))) {
-            var revocation = executor.submit(() -> service.revoke("learner", "revoke-admin"));
+            var retry = executor.submit(() -> { service.activatePaidOrder("learner", NOW + 10_000, "payos:same"); return null; });
             try {
                 assertTrue(boundary.snapshotCaptured.await(5, TimeUnit.SECONDS));
-                service.activateOrExtend("learner", NOW + 20_000, "long-admin");
+                service.activatePaidOrder("learner", NOW + 10_000, "payos:same");
             } finally {
                 boundary.otherCommitted.countDown();
             }
-            assertFalse(revocation.get(5, TimeUnit.SECONDS).effective());
+            retry.get(5, TimeUnit.SECONDS);
             var stored = boundary.current();
-            assertEquals(SubscriptionStatus.REVOKED, stored.getStatus());
-            assertEquals(NOW + 20_000, stored.getExpiresAt());
-            assertEquals("long-admin", stored.getActivatedBy());
-            assertEquals("revoke-admin", stored.getRevokedBy());
-            assertEquals(NOW, stored.getRevokedAt());
+            assertEquals(SubscriptionStatus.ACTIVE, stored.getStatus());
+            assertEquals(NOW + 10_000, stored.getExpiresAt());
+            assertEquals("payos:same", stored.getActivatedBy());
             assertEquals(NOW - 2000, stored.getCreatedAt());
             assertEquals(1, boundary.retries);
+            assertEquals(1, boundary.writes);
         }
     }
 

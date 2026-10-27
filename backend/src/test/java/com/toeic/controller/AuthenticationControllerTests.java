@@ -70,6 +70,9 @@ class AuthenticationControllerTests {
     private FirebaseSessionService firebaseSessionService;
 
     @MockitoBean
+    private com.toeic.service.StaffAccessService staffAccessService;
+
+    @MockitoBean
     private CurrentUserService currentUserService;
 
     @Test

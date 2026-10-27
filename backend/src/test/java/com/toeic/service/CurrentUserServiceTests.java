@@ -34,7 +34,7 @@ class CurrentUserServiceTests {
     @Test
     void createsAUserProfileWithTheDefaultUserRole() throws Exception {
         UserDao userDao = mock(UserDao.class);
-        CurrentUserService service = new CurrentUserService(userDao, mock(SubscriptionService.class));
+        CurrentUserService service = new CurrentUserService(userDao, mock(SubscriptionService.class), mock(com.toeic.service.StaffAccessService.class));
         FirebaseIdentity identity = new FirebaseIdentity(
                 "uid-1", "user@example.com", "User", null, "ADMIN"
         );
@@ -49,7 +49,7 @@ class CurrentUserServiceTests {
     @Test
     void createsAUserFromVerifiedIdentityWithoutTrustingItsRoleClaim() throws Exception {
         UserDao userDao = mock(UserDao.class);
-        CurrentUserService service = new CurrentUserService(userDao, mock(SubscriptionService.class));
+        CurrentUserService service = new CurrentUserService(userDao, mock(SubscriptionService.class), mock(com.toeic.service.StaffAccessService.class));
         FirebaseIdentity identity = new FirebaseIdentity(
                 "uid-1",
                 "user@example.com",
@@ -68,7 +68,7 @@ class CurrentUserServiceTests {
     @Test
     void repairsLegacyProfileWithoutRoleAsUser() throws Exception {
         UserDao userDao = mock(UserDao.class);
-        CurrentUserService service = new CurrentUserService(userDao, mock(SubscriptionService.class));
+        CurrentUserService service = new CurrentUserService(userDao, mock(SubscriptionService.class), mock(com.toeic.service.StaffAccessService.class));
         User legacyUser = new User();
         legacyUser.setUid("uid-legacy");
         FirebaseIdentity identity = new FirebaseIdentity(
@@ -89,7 +89,7 @@ class CurrentUserServiceTests {
         when(subscriptionService.getSummary("uid-1")).thenReturn(new SubscriptionService.SubscriptionSummary(
                 "PRO", SubscriptionStatus.ACTIVE, 1000L, 3000L,
                 List.of(Entitlement.AI_CHAT, Entitlement.AI_ANALYSIS), true));
-        CurrentUserService service = new CurrentUserService(userDao, subscriptionService);
+        CurrentUserService service = new CurrentUserService(userDao, subscriptionService, mock(com.toeic.service.StaffAccessService.class));
         User user = new User();
         user.setUid("uid-1");
         user.setEmail("user@example.com");
@@ -123,7 +123,7 @@ class CurrentUserServiceTests {
     @Test
     void clearsOptionalPersonalFieldsWhenTheyAreBlank() throws Exception {
         UserDao userDao = mock(UserDao.class);
-        CurrentUserService service = new CurrentUserService(userDao, mock(SubscriptionService.class));
+        CurrentUserService service = new CurrentUserService(userDao, mock(SubscriptionService.class), mock(com.toeic.service.StaffAccessService.class));
         User user = new User();
         user.setUid("uid-1");
         user.setRole(UserRole.USER);
@@ -143,7 +143,7 @@ class CurrentUserServiceTests {
     @Test
     void rejectsInvalidPersonalFieldsBeforeSaving() throws Exception {
         UserDao userDao = mock(UserDao.class);
-        CurrentUserService service = new CurrentUserService(userDao, mock(SubscriptionService.class));
+        CurrentUserService service = new CurrentUserService(userDao, mock(SubscriptionService.class), mock(com.toeic.service.StaffAccessService.class));
         User user = new User();
         user.setUid("uid-1");
         user.setRole(UserRole.USER);
@@ -168,7 +168,7 @@ class CurrentUserServiceTests {
         user.setRole(UserRole.USER);
         when(userDao.findByUid("uid-1")).thenReturn(Optional.of(user));
         when(subscriptionDao.findByUserId("uid-1")).thenReturn(Optional.empty());
-        CurrentUserService service = new CurrentUserService(userDao, new SubscriptionService(subscriptionDao));
+        CurrentUserService service = new CurrentUserService(userDao, new SubscriptionService(subscriptionDao), mock(com.toeic.service.StaffAccessService.class));
 
         var response = service.getProfile("uid-1");
 
@@ -199,7 +199,7 @@ class CurrentUserServiceTests {
         subscription.setEntitlements(List.of(Entitlement.AI_CHAT, Entitlement.AI_ANALYSIS));
         when(subscriptionDao.findByUserId("uid-1")).thenReturn(Optional.of(subscription));
         CurrentUserService service = new CurrentUserService(userDao, new SubscriptionService(
-                subscriptionDao, Clock.fixed(Instant.ofEpochMilli(2000L), ZoneOffset.UTC)));
+                subscriptionDao, Clock.fixed(Instant.ofEpochMilli(2000L), ZoneOffset.UTC)), mock(com.toeic.service.StaffAccessService.class));
 
         var response = service.getProfile("uid-1");
 

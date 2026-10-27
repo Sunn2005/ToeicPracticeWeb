@@ -42,6 +42,9 @@ public class AdminReviewService {
     public Map<String, Object> approve(String adminUid, String testId) throws Exception {
         Test test = support.loadFullTest(testId);
         requirePending(test);
+        if (adminUid.equals(test.getCreatedBy())) {
+            throw new com.toeic.controller.ApiCodeException(HttpStatus.FORBIDDEN, "SELF_REVIEW_FORBIDDEN", "Không thể tự duyệt đề do mình tạo");
+        }
         support.validateForSubmission(test);
         finishReview(test, adminUid, TestStatus.APPROVED, null);
         testDao.save(test);
@@ -51,6 +54,9 @@ public class AdminReviewService {
     public Map<String, Object> reject(String adminUid, String testId, String reason) throws Exception {
         Test test = support.loadFullTest(testId);
         requirePending(test);
+        if (adminUid.equals(test.getCreatedBy())) {
+            throw new com.toeic.controller.ApiCodeException(HttpStatus.FORBIDDEN, "SELF_REVIEW_FORBIDDEN", "Không thể tự duyệt đề do mình tạo");
+        }
         String normalizedReason = reason == null ? "" : reason.trim();
         if (normalizedReason.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lý do từ chối không được để trống");

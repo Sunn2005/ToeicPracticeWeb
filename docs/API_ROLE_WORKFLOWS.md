@@ -1114,23 +1114,9 @@ Tất cả endpoint trong mục này yêu cầu role `ADMIN`.
 - **Params/body:** không có.
 - **Response thành công:** `200 OK`, mảng `TestMetadata` có status `APPROVED`/`REJECTED` và `reviewedAt` khác `null`, sắp xếp lần review mới nhất trước.
 
-### 9.6 Quản lý subscription Pro
+### 9.6 Quản lý subscription Pro — đã gỡ (2026-10-27)
 
-Tất cả endpoint dưới đây yêu cầu role `ADMIN`, session hợp lệ; PUT/DELETE còn cần CSRF như quy ước chung. `uid` là UID người nhận subscription, không phải UID người thực hiện. Actor `activatedBy`/`revokedBy` lấy từ principal đã xác thực, không từ body.
-
-| Method/path | Body | Response |
-| --- | --- | --- |
-| `GET /api/admin/subscriptions/{uid}` | Không có | `200 OK`, summary sáu field tại mục 3.1. |
-| `PUT /api/admin/subscriptions/{uid}` | Chỉ `{ "expiresAt": 1791612000000 }` | `200 OK`, summary sau kích hoạt/gia hạn. |
-| `DELETE /api/admin/subscriptions/{uid}` | Không có | `200 OK`, summary sau thu hồi (không phải `204`). |
-
-GET với subscription chưa tồn tại trả summary rỗng, không trả `404`. PUT yêu cầu `expiresAt` bắt buộc, là Unix millisecond sau thời gian server; thiếu/null trả `400 VALIDATION_ERROR`, body không deserialize được trả `400 INVALID_REQUEST_BODY`, thời hạn không ở tương lai trả `400 SUBSCRIPTION_EXPIRY_INVALID`. Không gửi `planCode`, `status`, quyền, ngày bắt đầu hoặc audit fields.
-
-PUT tạo subscription mới hoặc kích hoạt lại subscription hết hạn/bị thu hồi với `startsAt=serverNow`. Khi status `ACTIVE` và expiry hiện tại còn ở tương lai, PUT giữ ngày bắt đầu (nếu có), chỉ kéo dài expiry; expiry yêu cầu bằng hoặc sớm hơn expiry hiện tại là no-op sau khi đã validate thời điểm tương lai. Khi ghi, server đặt `PRO`, `ACTIVE`, `[AI_CHAT, AI_ANALYSIS]`, cập nhật `activatedBy`/`updatedAt`, xóa metadata thu hồi và giữ `createdAt` cũ.
-
-DELETE đánh dấu `REVOKED`, cập nhật `revokedBy`, `revokedAt`, `updatedAt`; không xóa document. Subscription chưa tồn tại hoặc đã `REVOKED` là no-op và vẫn trả `200 OK`. Thiếu session trả `401 AUTHENTICATION_REQUIRED`; sai role trả `403 ACCESS_DENIED`.
-
-PUT và DELETE đọc, quyết định và ghi subscription trong cùng một Firestore transaction. Khi có cập nhật đồng thời, server tính lại trên document mới nhất để giữ quy tắc không rút ngắn expiry, tính idempotent và metadata audit.
+Không còn trang `/console/subscriptions` hoặc API quản trị `/api/admin/subscriptions/{uid}` (GET/PUT/DELETE); các request đã xác thực Admin đến endpoint cũ trả `404`. Không hỗ trợ cấp/gia hạn/thu hồi Pro thủ công qua Console. Subscription hiện có, summary profile, entitlement AI và kích hoạt từ thanh toán PayOS vẫn được giữ.
 
 ### 9.7 Tra cứu và đối soát đơn thanh toán
 
@@ -1274,3 +1260,69 @@ Security và application errors đều trả JSON. Frontend nên xử lý theo H
 | `503` | `SERVICE_UNAVAILABLE` | Storage, RabbitMQ hoặc AI service chưa sẵn sàng. |
 
 Ngoài các lỗi riêng ghi tại từng endpoint, mọi endpoint được bảo vệ đều có thể trả `401`; endpoint giới hạn role có thể trả `403`.
+
+## Quản lý nhân viên và quyền Console (2026-10-26)
+
+Phần này mở rộng ma trận role ở mục 1: các endpoint xét duyệt, lịch sử duyệt, đơn hàng và doanh thu có thể được cấp cho `EMPLOYEE` bằng quyền nhóm bên dưới. Các API khác giữ nguyên quyền cũ. `/api/admin/staff/**` và đối soát PayOS (`POST /api/admin/payments/orders/{orderCode}/reconcile`) luôn chỉ dành cho `ADMIN` hoạt động.
+
+### Nhóm và quyền hiệu lực
+
+- Firestore `users/{uid}.role` tiếp tục quyết định role. Backend quản lý thêm `staffGroupId`, `staffActive`, `staffNotes`, `staffVersion`. Client không gửi role hoặc actor để thay đổi role trực tiếp.
+- Một người thuộc một nhóm. `staffGroups/{id}` chứa `id`, `name`, `code`, `description`, `permissions` (mảng chuỗi), `version`.
+- Nhóm hệ thống `admin` có toàn bộ quyền cố định, không xóa được. Nhân viên thuộc nhóm này có role `ADMIN`; nhóm nghiệp vụ khác có role `EMPLOYEE`. Chỉ admin được quản lý thành viên và nhóm.
+- Nhóm khởi tạo: `admin`, `creators`, `reviewers`, `business`. Tài khoản legacy không có nhóm được ánh xạ theo role: `ADMIN → admin`, `EMPLOYEE → creators`. Việc ánh xạ có hiệu lực ngay khi đọc quyền, được ghi bền khi mutation quản trị đầu tiên thành công. Không cần chạy script trực tiếp trên production.
+- `staffActive=false` chặn API quản trị/employee và Console, vẫn giữ phiên đăng nhập và quyền học/thi. Không vô hiệu tài khoản Firebase.
+- Xóa thành viên chỉ chuyển về `USER`, xóa liên kết nhóm/ghi chú/trạng thái nội bộ; không xóa account, đề hoặc lịch sử. Không được tự gỡ/quyền hoặc khóa chính admin đang thao tác. Luôn giữ ít nhất một admin hoạt động.
+- Xóa nhóm còn thành viên (kể cả thành viên đang khóa) trả `409 STAFF_GROUP_NOT_EMPTY`.
+- Mutation quản trị dùng transaction Firestore, đọc/ghi `staffManagement/state.revision` để tuần tự hóa thay đổi nhóm/thành viên. Chỉ update các field quản trị của user, không ghi đè profile người học. Version được kiểm tra trong transaction để chống stale writes.
+- Backend lấy quyền từ dữ liệu server trên từng request, không cache theo session cookie. UI refresh profile khi chuyển route/focus và sau lưu. Request đã bắt đầu trước khi thu hồi có thể hoàn tất; request kế tiếp dùng quyền mới.
+
+| Feature | Action áp dụng | API tương ứng |
+| --- | --- | --- |
+| `dashboard` | `view` | Điều hướng tổng quan; dữ liệu vẫn cần quyền của từng nguồn |
+| `staff` | `view`, `add`, `edit`, `delete` | `/api/admin/staff/**`; không cấp cho nhóm employee |
+| `tests` | `view`, `add`, `edit`, `delete` | GET/POST/PUT/DELETE `/api/employee/tests/**`; submit dùng `edit`, media dùng `add` hoặc `edit` |
+| `reviews` | `view`, `edit` | GET submissions; approve/reject dùng `edit` |
+| `history` | `view` | GET `/api/admin/review-history` |
+| `orders` | `view` | GET `/api/admin/payments/orders`, `/orders/{orderCode}` |
+| `revenue` | `view` | GET `/api/admin/payments/revenue` |
+
+Quyền biểu diễn dạng `feature.action`, ví dụ `revenue.view`. Các action thêm/sửa/xóa tự bao gồm `view`; permission không có trong catalog hoặc `staff.*` cho nhóm thường trả `400 STAFF_INVALID`. “Bị khóa” trong ma trận tương ứng không có quyền nào của feature. “Tất cả” chỉ chọn action áp dụng, vô hiệu với feature chỉ có `view`.
+
+`GET /api/me` và response tạo session thêm:
+
+```json
+{"consoleAccess":{"active":true,"groupId":"creators","permissions":["dashboard.view","tests.view","tests.add","tests.edit","tests.delete"]}}
+```
+
+Đây là field bổ sung; response hiện có giữ nguyên. Với USER hoặc nhân viên bị khóa/nhóm bị mất, `active=false`, `permissions=[]`. Không dùng quyền Console để thay đổi quyền Pro/thi hoặc ownership.
+
+### API quản trị nhân viên
+
+Tất cả endpoint dưới đây dùng Firebase session cookie và CSRF cho mutation như mục 1. Chỉ `ADMIN` hoạt động; thiếu session trả `401`, thiếu quyền trả `403 ACCESS_DENIED`.
+
+| Method/path | Body/query | Response |
+| --- | --- | --- |
+| GET `/api/admin/staff` | Không | `200 {groups, members, catalog}` |
+| GET `/api/admin/staff/lookup` | `email` bắt buộc; tìm tài khoản đăng ký, không phân biệt hoa thường | `200 Member` hoặc `404 STAFF_NOT_FOUND` |
+| POST `/api/admin/staff/groups` | `{name,code,description,permissions}` | `201 StaffGroup` |
+| PUT `/api/admin/staff/groups/{id}` | `{name,code,description,permissions,version}` | `200 StaffGroup` |
+| DELETE `/api/admin/staff/groups/{id}` | query `version` | `204` |
+| POST `/api/admin/staff/members` | `{uid,groupId,active,notes,version}` | `201 Member`; account phải chưa là staff |
+| PUT `/api/admin/staff/members/{uid}` | `{groupId,active,notes,version}` | `200 Member` |
+| DELETE `/api/admin/staff/members/{uid}` | query `version` | `204` |
+
+`Member` chỉ gồm `uid,email,displayName,groupId,active,notes,version`. `catalog` là mảng `{id,actions}`. Lookup lấy version tài khoản hiện tại; không tìm/tạo Firebase account từ frontend. Tên và email không được sửa qua API này. UID, role, ownership của dữ liệu học không xuất hiện trong payload quản trị ngoài UID target.
+
+`name`: 1–80 ký tự; `code`: 2–40 ký tự theo `[A-Z][A-Z0-9_]{1,39}`, duy nhất và tự chuẩn hóa chữ hoa; `description`: tối đa 500; `notes`: tối đa 1000. Version legacy mặc định 0, tăng sau mutation. `active` bắt buộc. Tìm/lọc/phân trang danh sách nhân viên thực hiện ở UI (5 dòng/trang). Directory và lookup hiện đọc users trong Firestore phía server; dùng cho quy mô đội ngũ nội bộ, cần chuyển sang truy vấn/index chuyên biệt khi mở rộng số lượng tài khoản lớn.
+
+Lỗi ổn định: `400 STAFF_INVALID`, `404 STAFF_NOT_FOUND`, `409 STAFF_CONFLICT` (version cũ, code trùng hoặc account đã là staff), `409 STAFF_GROUP_NOT_EMPTY`, `403 STAFF_SELF_PROTECTED` (thao tác phá quyền bảo vệ/admin cuối cùng).
+
+### Chống tự xét duyệt
+
+Cả `POST /api/admin/test-submissions/{testId}/approve` và `/reject` trả `403 SELF_REVIEW_FORBIDDEN` khi UID actor trùng `createdBy`. Không thay đổi trạng thái đề hoặc ghi review metadata trong trường hợp này. Quy tắc áp dụng cả Admin và Employee được cấp quyền; các kiểm tra pending, validation và ownership hiện có vẫn được giữ.
+
+
+### Gỡ quản trị gói Pro (2026-10-27)
+
+Catalog không còn feature `subscriptions` hoặc action `grant`/`revoke`; bảng quyền không còn hàng quản lý Pro và cột Cấp/Thu hồi. Khi đọc nhóm đã lưu, backend chỉ lọc ba permission cũ `subscriptions.view`, `subscriptions.grant`, `subscriptions.revoke`, giữ nguyên quyền còn lại. Payload ghi mới chứa các quyền đã gỡ bị từ chối bằng `400 STAFF_INVALID`. Việc lọc không yêu cầu chạy migration hoặc xóa subscription; lần ghi nhóm tiếp theo lưu danh sách quyền hiện hành.

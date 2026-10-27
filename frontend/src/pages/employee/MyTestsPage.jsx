@@ -1,3 +1,5 @@
+import { useAuth } from "../../auth/useAuth";
+import { canUseConsole } from "../../auth/consolePermissions";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -14,6 +16,7 @@ const labels = {
 };
 
 function MyTestsPage() {
+  const { profile } = useAuth();
   const [tests, setTests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -86,12 +89,12 @@ function MyTestsPage() {
           <h1 className="text-2xl font-bold text-slate-950 sm:text-3xl">Quản lý đề thi</h1>
           <p className="mt-2 text-sm text-slate-500">Danh sách đề thi do tài khoản của bạn tạo.</p>
         </div>
-        <Link
+        {canUseConsole(profile, "tests.add") && <Link
           to="/console/tests/new"
           className="inline-flex items-center justify-center rounded-xl bg-[#2188ee] px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-200 hover:bg-blue-600 transition"
         >
           + Tạo đề mới (Wizard)
-        </Link>
+        </Link>}
       </div>
 
       {error && (
@@ -141,7 +144,7 @@ function MyTestsPage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="inline-flex items-center gap-2">
-                        {isEditable && (
+                        {isEditable && canUseConsole(profile, "tests.edit") && (
                           <Link
                             to={`/console/tests/${encodeURIComponent(test.testId)}/edit`}
                             className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700 hover:bg-blue-100 transition"
@@ -157,15 +160,15 @@ function MyTestsPage() {
                         </Link>
                         {isEditable && (
                           <>
-                            <button
+                            {canUseConsole(profile, "tests.edit") && <button
                               type="button"
                               onClick={() => handleSubmit(test.testId)}
                               disabled={isProcessing}
                               className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 transition disabled:opacity-50"
                             >
                               Gửi duyệt
-                            </button>
-                            <button
+                            </button>}
+                            {canUseConsole(profile, "tests.delete") && <button
                               type="button"
                               onClick={() => handleDelete(test.testId, test.title)}
                               disabled={isProcessing}
@@ -173,7 +176,7 @@ function MyTestsPage() {
                               title="Xóa đề"
                             >
                               ✕
-                            </button>
+                            </button>}
                           </>
                         )}
                       </div>
@@ -189,9 +192,9 @@ function MyTestsPage() {
         {!loading && tests.length === 0 && (
           <div className="p-12 text-center">
             <p className="text-sm text-slate-500">Bạn chưa có đề thi nào.</p>
-            <Link to="/console/tests/new" className="mt-3 inline-block text-sm font-bold text-blue-600">
+            {canUseConsole(profile, "tests.add") && <Link to="/console/tests/new" className="mt-3 inline-block text-sm font-bold text-blue-600">
               Tạo đề đầu tiên
-            </Link>
+            </Link>}
           </div>
         )}
       </div>

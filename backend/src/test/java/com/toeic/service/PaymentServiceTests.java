@@ -222,11 +222,11 @@ class PaymentServiceTests {
     }
 
     @Test
-    void retriedWebhookDoesNotUndoALaterAdminRevocation() throws Exception {
+    void retriedWebhookDoesNotUndoExistingHistoricalRevocation() throws Exception {
         var created = service.createProPayment("learner", "PRO_30");
         Map<String, Object> payload = signedPayload(created.orderCode(), 99_000L, "00");
         service.handleWebhook(payload);
-        subscriptionService.revoke("learner", "admin-1");
+        subscriptionDao.records.get("learner").setStatus(SubscriptionStatus.REVOKED); // Existing historical revocation.
 
         assertTrue(service.handleWebhook(payload).handled());
 
@@ -257,7 +257,7 @@ class PaymentServiceTests {
     void reconciliationAfterWebhookPreservesPaymentTimeAndRevocation() throws Exception {
         var created = service.createProPayment("learner", "PRO_30");
         service.handleWebhook(signedPayload(created.orderCode(), 99_000, "00"));
-        subscriptionService.revoke("learner", "admin");
+        subscriptionDao.records.get("learner").setStatus(SubscriptionStatus.REVOKED); // Existing historical revocation.
         providerPaid(created.orderCode(), 99_000);
         service.reconcile(created.orderCode());
         assertEquals(NOW, orderDao.records.get(created.orderCode()).getPaidAt());

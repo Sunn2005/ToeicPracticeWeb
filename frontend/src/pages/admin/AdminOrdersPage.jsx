@@ -1,3 +1,4 @@
+import { useAuth } from "../../auth/useAuth";
 import { useEffect, useRef, useState } from "react";
 import { getAdminOrder, getAdminOrders, reconcileAdminOrder } from "../../api/adminPayments.js";
 import { useLanguage } from "../../i18n/LanguageContext";
@@ -10,6 +11,7 @@ const columns = ["orderCode", "buyer", "planCode", "amount", "status", "createdA
 const detailFields = ["orderCode", "userId", "buyerName", "buyerEmail", "planCode", "amount", "durationDays", "status", "paymentLinkId", "createdAt", "paidAt", "proExpiresAt"];
 
 function OrderDetail({ orderCode, t, language, onReconciled }) {
+  const { role, profile } = useAuth();
   const [request, setRequest] = useState({ loading: true });
   const [retry, setRetry] = useState(0);
   const [reconciliation, setReconciliation] = useState(null);
@@ -51,7 +53,7 @@ function OrderDetail({ orderCode, t, language, onReconciled }) {
         return <div key={field} className="min-w-0"><dt className="text-sm text-slate-600">{t(`adminOrders_${field}`)}</dt><dd className="mt-1 break-words text-sm font-semibold">{display}</dd></div>;
       })}
     </dl>}
-    {request.order && request.order.status !== "CANCELLED" && <div className="mt-6 space-y-3 border-t border-slate-200 pt-5" aria-busy={Boolean(reconciliation?.loading)}>
+    {role === "ADMIN" && profile?.consoleAccess?.active !== false && request.order && request.order.status !== "CANCELLED" && <div className="mt-6 space-y-3 border-t border-slate-200 pt-5" aria-busy={Boolean(reconciliation?.loading)}>
       <p className="text-sm leading-6 text-slate-600">{t("adminOrdersReconcileHelp")}</p>
       <button type="button" className={buttonClass} disabled={Boolean(reconciliation?.loading)} onClick={reconcile}>
         {t(reconciliation?.loading ? "adminOrdersReconciling" : "adminOrdersReconcile")}

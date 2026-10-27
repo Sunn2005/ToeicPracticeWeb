@@ -81,6 +81,21 @@ public class SecurityConfig {
                                 "/api/tests/*/parts/*"
                         ).permitAll()
 
+                        .requestMatchers(HttpMethod.GET, "/api/admin/test-submissions", "/api/admin/test-submissions/*")
+                        .hasAnyAuthority("ROLE_ADMIN", "reviews.view")
+
+                        .requestMatchers(HttpMethod.POST, "/api/admin/test-submissions/*/approve", "/api/admin/test-submissions/*/reject")
+                        .hasAnyAuthority("ROLE_ADMIN", "reviews.edit")
+
+                        .requestMatchers(HttpMethod.GET, "/api/admin/review-history")
+                        .hasAnyAuthority("ROLE_ADMIN", "history.view")
+
+                        .requestMatchers(HttpMethod.GET, "/api/admin/payments/revenue")
+                        .hasAnyAuthority("ROLE_ADMIN", "revenue.view")
+
+                        .requestMatchers(HttpMethod.GET, "/api/admin/payments/orders", "/api/admin/payments/orders/*")
+                        .hasAnyAuthority("ROLE_ADMIN", "orders.view")
+
                         // Admin
                         .requestMatchers("/api/admin/**")
                         .hasRole("ADMIN")

@@ -27,6 +27,7 @@ public class AdminPaymentController {
         this.paymentService = paymentService;
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('revenue.view')")
     @GetMapping("/revenue")
     public AdminRevenueService.RevenueReport revenue(
             @RequestParam(required = false) Long from,
@@ -35,6 +36,7 @@ public class AdminPaymentController {
         return revenueService.getRevenue(from, to, granularity);
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('orders.view')")
     @GetMapping("/orders")
     public AdminPaymentService.AdminOrderPage list(
             @RequestParam(required = false) String status,
@@ -47,6 +49,7 @@ public class AdminPaymentController {
         return service.listOrders(status, planCode, userId, from, to, page, size);
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('orders.view')")
     @GetMapping("/orders/{orderCode}")
     public AdminPaymentService.AdminOrderView get(@PathVariable long orderCode) throws Exception {
         return service.getOrder(orderCode);

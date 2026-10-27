@@ -533,3 +533,18 @@ Với đơn chưa từng kích hoạt, thời hạn tính từ lúc khôi phục
 Pro còn lại. Retry không cộng ngày trùng/hoàn tác thu hồi sau đó. Ngày thanh toán
 chưa ghi nhận được để trống, không thay bằng thời gian khôi phục. Sau khi đối soát,
 người mua tải lại dashboard. Không yêu cầu thanh toán thêm.
+
+## Quản lý nhân viên và nhóm quyền
+
+Admin truy cập `/console/staff` để tạo/sửa/xóa nhóm, cấu hình quyền theo các chức năng hiện có và gán tài khoản đã đăng ký bằng email. Các nhóm thường không thể được cấp quyền quản lý nhân viên. Nhóm Quản trị có đầy đủ quyền cố định và không được xóa.
+
+Menu, route và thao tác lấy quyền từ `profile.consoleAccess` do backend trả; gọi API qua `src/api/adminStaff.js` và client chung (session cookie + CSRF). Không tự lấy token hoặc giả lập role. Backend luôn kiểm tra lại quyền và ownership; nhân viên không được tự approve/reject đề do mình tạo.
+
+Khóa chỉ thu hồi quyền Console; xóa thành viên chỉ gỡ quyền nội bộ, giữ tài khoản/dữ liệu học. Employee legacy tự ánh xạ vào nhóm tạo đề. UI có tìm tên/email, lọc nhóm/trạng thái, phân trang, dialog thêm/sửa và xác nhận xóa; dữ liệu stale trả `STAFF_CONFLICT` cần làm mới. Xem contract chi tiết trong `docs/API_ROLE_WORKFLOWS.md`.
+
+Các key bản dịch mới thuộc `src/i18n/staffTranslations.js` (prefix `staff`, đầy đủ EN/VI), được ghép vào `translations.js`. Kiểm tra trong `npm test`: `consolePermissions.test.js`, `adminStaff.test.js`.
+
+
+### Gỡ quản trị gói Pro (2026-10-27)
+
+Console không còn menu/trang `/console/subscriptions`, API wrapper hoặc quyền cấp/thu hồi Pro thủ công. Ma trận quyền nhân viên chỉ giữ các chức năng hiện có: tổng quan, quản lý nhân viên/đề thi, xét duyệt, lịch sử duyệt, đơn hàng và doanh thu. Người học vẫn mua Pro qua PayOS và sử dụng AI theo entitlement từ backend; subscription hiện có không bị xóa.

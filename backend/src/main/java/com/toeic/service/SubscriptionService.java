@@ -45,13 +45,6 @@ public class SubscriptionService {
         }
     }
 
-    public SubscriptionSummary activateOrExtend(String userId, long expiresAt, String adminUid) throws Exception {
-        validateExpiry(expiresAt, clock.millis());
-        Subscription updated = subscriptionDao.updateAtomically(userId,
-                current -> activateOrExtend(current, userId, expiresAt, adminUid));
-        return summary(updated, clock.millis());
-    }
-
     /** Check the payment's stored expiry inside the transaction, including revoked subscriptions. */
     public void activatePaidOrder(String userId, long expiresAt, String actor) throws Exception {
         subscriptionDao.updateAtomically(userId, current -> {
@@ -71,7 +64,7 @@ public class SubscriptionService {
     }
 
     private SubscriptionDao.Mutation activateOrExtend(
-            Subscription subscription, String userId, long expiresAt, String adminUid) {
+            Subscription subscription, String userId, long expiresAt, String actor) {
         long now = clock.millis();
         validateExpiry(expiresAt, now);
         boolean continuing = subscription != null && subscription.getStatus() == SubscriptionStatus.ACTIVE
@@ -91,26 +84,9 @@ public class SubscriptionService {
         subscription.setStatus(SubscriptionStatus.ACTIVE);
         subscription.setEntitlements(PRO_ENTITLEMENTS);
         subscription.setExpiresAt(expiresAt);
-        subscription.setActivatedBy(adminUid);
+        subscription.setActivatedBy(actor);
         subscription.setRevokedBy(null);
         subscription.setRevokedAt(null);
-        subscription.setUpdatedAt(now);
-        return new SubscriptionDao.Mutation(subscription, true);
-    }
-
-    public SubscriptionSummary revoke(String userId, String adminUid) throws Exception {
-        Subscription updated = subscriptionDao.updateAtomically(userId, current -> revoke(current, adminUid));
-        return summary(updated, clock.millis());
-    }
-
-    private SubscriptionDao.Mutation revoke(Subscription subscription, String adminUid) {
-        long now = clock.millis();
-        if (subscription == null || subscription.getStatus() == SubscriptionStatus.REVOKED) {
-            return new SubscriptionDao.Mutation(subscription, false);
-        }
-        subscription.setStatus(SubscriptionStatus.REVOKED);
-        subscription.setRevokedBy(adminUid);
-        subscription.setRevokedAt(now);
         subscription.setUpdatedAt(now);
         return new SubscriptionDao.Mutation(subscription, true);
     }

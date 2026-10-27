@@ -18,7 +18,9 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.WebUtils;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.ArrayList;
+import com.toeic.service.StaffAccessService;
+import com.toeic.model.enums.UserRole;
 
 @Component
 public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
@@ -26,17 +28,20 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
     private static final String AUTH_PATH_PREFIX = "/api/v1/auth/";
 
     private final CurrentUserService currentUserService;
+    private final StaffAccessService staffAccessService;
     private final FirebaseSessionService firebaseSessionService;
     private final AuthProperties authProperties;
     private final RestAuthenticationEntryPoint authenticationEntryPoint;
 
     public FirebaseAuthenticationFilter(
             CurrentUserService currentUserService,
+            StaffAccessService staffAccessService,
             FirebaseSessionService firebaseSessionService,
             AuthProperties authProperties,
             RestAuthenticationEntryPoint authenticationEntryPoint
     ) {
         this.currentUserService = currentUserService;
+        this.staffAccessService = staffAccessService;
         this.firebaseSessionService = firebaseSessionService;
         this.authProperties = authProperties;
         this.authenticationEntryPoint = authenticationEntryPoint;
@@ -71,9 +76,14 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
             var identity = firebaseSessionService.verifySession(sessionCookie.getValue());
             User user = currentUserService.requireUser(identity);
             ToeicUserPrincipal principal = ToeicUserPrincipal.from(user);
-            var authorities = List.of(
-                    new SimpleGrantedAuthority("ROLE_" + principal.role().name())
-            );
+            var authorities = new ArrayList<SimpleGrantedAuthority>();
+            if (user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.EMPLOYEE) {
+                var access = staffAccessService.forUser(user);
+                authorities.add(new SimpleGrantedAuthority(access.active() ? "ROLE_" + principal.role().name() : "ROLE_USER"));
+                access.permissions().forEach(permission -> authorities.add(new SimpleGrantedAuthority(permission)));
+            } else {
+                authorities.add(new SimpleGrantedAuthority("ROLE_" + principal.role().name()));
+            }
             var authentication = new ToeicAuthenticationToken(principal, authorities);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (ResponseStatusException exception) {

@@ -96,7 +96,8 @@ class SubscriptionServiceTests {
 
     @Test
     void initialActivationPersistsExactlyProBenefitsAndServerAuditFields() throws Exception {
-        var summary = service.activateOrExtend("learner", NOW + 5000, "admin-1");
+        service.activatePaidOrder("learner", NOW + 5000, "payos:order-1");
+        var summary = service.getSummary("learner");
         var stored = dao.records.get("learner");
         assertEquals("learner", stored.getUserId());
         assertEquals("PRO", stored.getPlanCode());
@@ -104,7 +105,7 @@ class SubscriptionServiceTests {
         assertEquals(List.of(Entitlement.AI_CHAT, Entitlement.AI_ANALYSIS), stored.getEntitlements());
         assertEquals(NOW, stored.getStartsAt());
         assertEquals(NOW + 5000, stored.getExpiresAt());
-        assertEquals("admin-1", stored.getActivatedBy());
+        assertEquals("payos:order-1", stored.getActivatedBy());
         assertNull(stored.getRevokedBy());
         assertNull(stored.getRevokedAt());
         assertEquals(NOW, stored.getCreatedAt());
@@ -117,10 +118,10 @@ class SubscriptionServiceTests {
     void sameExpiryRetryPreservesAllAuditFieldsWithoutWriting() throws Exception {
         var stored = subscription(SubscriptionStatus.ACTIVE, NOW - 1000, NOW + 5000);
         dao.records.put("learner", stored);
-        service.activateOrExtend("learner", NOW + 5000, "admin-2");
+        service.activatePaidOrder("learner", NOW + 5000, "payos:order-2");
         assertEquals(NOW - 2000, stored.getCreatedAt());
         assertEquals(NOW - 1000, stored.getUpdatedAt());
-        assertEquals("admin-1", stored.getActivatedBy());
+        assertEquals("payos:order-1", stored.getActivatedBy());
         assertEquals(0, dao.writes);
     }
 
@@ -128,7 +129,8 @@ class SubscriptionServiceTests {
     void smallerActiveExpiryCannotShortenExistingAccess() throws Exception {
         var stored = subscription(SubscriptionStatus.ACTIVE, NOW - 1000, NOW + 5000);
         dao.records.put("learner", stored);
-        var summary = service.activateOrExtend("learner", NOW + 1000, "admin-2");
+        service.activatePaidOrder("learner", NOW + 1000, "payos:order-2");
+        var summary = service.getSummary("learner");
         assertEquals(NOW + 5000, summary.expiresAt());
         assertEquals(0, dao.writes);
     }
@@ -136,13 +138,13 @@ class SubscriptionServiceTests {
     @Test
     void extensionPreservesOriginalStartAndCreatedAt() throws Exception {
         dao.records.put("learner", subscription(SubscriptionStatus.ACTIVE, NOW - 1000, NOW + 5000));
-        service.activateOrExtend("learner", NOW + 10000, "admin-2");
+        service.activatePaidOrder("learner", NOW + 10000, "payos:order-2");
         var stored = dao.records.get("learner");
         assertEquals(NOW + 10000, stored.getExpiresAt());
         assertEquals(NOW - 1000, stored.getStartsAt());
         assertEquals(NOW - 2000, stored.getCreatedAt());
         assertEquals(NOW, stored.getUpdatedAt());
-        assertEquals("admin-2", stored.getActivatedBy());
+        assertEquals("payos:order-2", stored.getActivatedBy());
         assertEquals(1, dao.writes);
     }
 
@@ -153,7 +155,8 @@ class SubscriptionServiceTests {
             stored.setRevokedBy("old-admin");
             stored.setRevokedAt(NOW - 500);
             dao.records.put("learner", stored);
-            var summary = service.activateOrExtend("learner", NOW + 10000, "admin-2");
+            service.activatePaidOrder("learner", NOW + 10000, "payos:order-2");
+            var summary = service.getSummary("learner");
             assertEquals(SubscriptionStatus.ACTIVE, summary.status());
             assertEquals(NOW, summary.startsAt());
             assertTrue(summary.effective());
@@ -164,46 +167,6 @@ class SubscriptionServiceTests {
         assertEquals(3, dao.writes);
     }
 
-    @Test
-    void revocationImmediatelyDeniesAccessAndRetainsHistory() throws Exception {
-        dao.records.put("learner", subscription(SubscriptionStatus.ACTIVE, NOW - 1000, NOW + 5000));
-        var summary = service.revoke("learner", "admin-2");
-        var stored = dao.records.get("learner");
-        assertEquals(SubscriptionStatus.REVOKED, summary.status());
-        assertFalse(summary.effective());
-        assertFalse(service.hasEntitlement("learner", Entitlement.AI_CHAT));
-        assertEquals(NOW + 5000, stored.getExpiresAt());
-        assertEquals(NOW - 2000, stored.getCreatedAt());
-        assertEquals("admin-2", stored.getRevokedBy());
-        assertEquals(NOW, stored.getRevokedAt());
-        assertEquals(NOW, stored.getUpdatedAt());
-        assertEquals(1, dao.writes);
-    }
-
-    @Test
-    void repeatedOrAbsentRevocationDoesNotCreateOrRewriteHistory() throws Exception {
-        assertFalse(service.revoke("absent", "admin-1").effective());
-        var stored = subscription(SubscriptionStatus.REVOKED, NOW - 1000, NOW + 5000);
-        stored.setRevokedBy("admin-1");
-        stored.setRevokedAt(NOW - 500);
-        dao.records.put("learner", stored);
-        service.revoke("learner", "admin-2");
-        assertEquals("admin-1", stored.getRevokedBy());
-        assertEquals(NOW - 500, stored.getRevokedAt());
-        assertEquals(0, dao.writes);
-    }
-
-    @Test
-    void expiryAtOrBeforeServerNowIsRejectedWithoutWriting() {
-        for (long expiry : new long[]{NOW - 1, NOW}) {
-            var error = assertThrows(ApiCodeException.class,
-                    () -> service.activateOrExtend("learner", expiry, "admin-1"));
-            assertEquals(HttpStatus.BAD_REQUEST, error.getStatus());
-            assertEquals("SUBSCRIPTION_EXPIRY_INVALID", error.getCode());
-        }
-        assertEquals(0, dao.writes);
-    }
-
     private static Subscription subscription(SubscriptionStatus status, long startsAt, long expiresAt) {
         var stored = new Subscription();
         stored.setUserId("learner");
@@ -212,7 +175,7 @@ class SubscriptionServiceTests {
         stored.setStartsAt(startsAt);
         stored.setExpiresAt(expiresAt);
         stored.setEntitlements(List.of(Entitlement.AI_CHAT, Entitlement.AI_ANALYSIS));
-        stored.setActivatedBy("admin-1");
+        stored.setActivatedBy("payos:order-1");
         stored.setCreatedAt(NOW - 2000);
         stored.setUpdatedAt(NOW - 1000);
         return stored;

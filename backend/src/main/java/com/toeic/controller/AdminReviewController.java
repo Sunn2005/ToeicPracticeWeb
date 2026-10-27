@@ -27,16 +27,19 @@ public class AdminReviewController {
         this.adminReviewService = adminReviewService;
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('reviews.view')")
     @GetMapping("/test-submissions")
     public List<Map<String, Object>> listSubmissions() throws Exception {
         return adminReviewService.listPending();
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('reviews.view')")
     @GetMapping("/test-submissions/{testId}")
     public Map<String, Object> getSubmission(@PathVariable String testId) throws Exception {
         return adminReviewService.getSubmission(testId);
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('reviews.edit')")
     @PostMapping("/test-submissions/{testId}/approve")
     public Map<String, Object> approve(
             @PathVariable String testId,
@@ -45,6 +48,7 @@ public class AdminReviewController {
         return adminReviewService.approve(principal.uid(), testId);
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('reviews.edit')")
     @PostMapping("/test-submissions/{testId}/reject")
     public Map<String, Object> reject(
             @PathVariable String testId,
@@ -54,6 +58,7 @@ public class AdminReviewController {
         return adminReviewService.reject(principal.uid(), testId, request.reason());
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('history.view')")
     @GetMapping("/review-history")
     public List<Map<String, Object>> reviewHistory() throws Exception {
         return adminReviewService.reviewHistory();

@@ -1,3 +1,6 @@
+import { useAuth } from "../../auth/useAuth";
+import { useLanguage } from "../../i18n/LanguageContext";
+import { canUseConsole } from "../../auth/consolePermissions";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { approveSubmission, getSubmission, rejectSubmission } from "../../api/adminReviews";
@@ -120,6 +123,8 @@ function ApprovalInfoCard({ test }) {
 }
 
 function TestReviewPage() {
+  const { profile } = useAuth();
+  const { t } = useLanguage();
   const { testId } = useParams();
   const navigate = useNavigate();
   const [test, setTest] = useState(null);
@@ -271,7 +276,7 @@ function TestReviewPage() {
               <span className={`rounded-md px-2.5 py-1 text-xs font-bold ${badge.className}`}>
                 {badge.label}
               </span>
-              {isPending && (
+              {isPending && canUseConsole(profile, "reviews.edit") && test.createdBy !== profile?.uid && (
                 <span className="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">
                   Bản nhập
                 </span>
@@ -310,13 +315,14 @@ function TestReviewPage() {
           ))}
         </div>
 
-        {isPending && (
+        {isPending && canUseConsole(profile, "reviews.edit") && test.createdBy !== profile?.uid && (
           <div className="mt-6">
             <ReviewActions onApprove={handleApprove} onReject={handleReject} />
           </div>
         )}
       </div>
 
+      {isPending && test.createdBy === profile?.uid && <p role="status" className="mt-5 rounded-xl bg-amber-50 p-4 text-sm text-amber-800">{t("staffSelfReview")}</p>}
       {conflict && <ConflictBanner />}
 
       {actionError?.kind === "validation" && (

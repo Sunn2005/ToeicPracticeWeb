@@ -24,6 +24,7 @@ import LoginPage from "./pages/auth/LoginPage";
 import ManagementLayout from "./layouts/ManagementLayout";
 import PublicLayout from "./layouts/PublicLayout";
 import LandingPage from "./pages/public/LandingPage";
+import StaffManagementPage from "./pages/admin/StaffManagementPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import MyTestsPage from "./pages/employee/MyTestsPage";
 import CreateTestPage from "./pages/employee/CreateTestPage";
@@ -33,7 +34,6 @@ import ReviewQueuePage from "./pages/admin/ReviewQueuePage";
 import ReviewHistoryPage from "./pages/admin/ReviewHistoryPage";
 import AdminRevenuePage from "./pages/admin/AdminRevenuePage";
 import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
-import SubscriptionManagementPage from "./pages/admin/SubscriptionManagementPage";
 import TestReviewPage from "./pages/admin/TestReviewPage";
 import ForbiddenPage from "./pages/errors/ForbiddenPage";
 import UserLayout from "./layouts/UserLayout";
@@ -109,10 +109,6 @@ function AppRoutes() {
           <Route index element={<LandingPage />} />
         </Route>
         <Route
-          path="/register"
-          element={user ? <Navigate to="/dashboard" replace /> : <Login mode="register" />}
-        />
-        <Route
           path="/login"
           element={user ? <Navigate to="/dashboard" replace /> : <Login />}
         />
@@ -165,12 +161,11 @@ function AppRoutes() {
             <Route path="/console/tests/:testId/edit" element={<EditTestPage />} />
             <Route path="/console/tests/:testId/preview" element={<TestPreviewPage />} />
             <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
+              <Route path="/console/staff" element={<StaffManagementPage />} />
+            </Route>
+            <Route element={<ProtectedRoute allowedRoles={["ADMIN", "EMPLOYEE"]} />}>
               <Route path="/console/revenue" element={<AdminRevenuePage />} />
               <Route path="/console/orders" element={<AdminOrdersPage />} />
-              <Route
-                path="/console/subscriptions"
-                element={<SubscriptionManagementPage />}
-              />
               <Route path="/console/reviews" element={<ReviewQueuePage />} />
               <Route
                 path="/console/reviews/:testId"

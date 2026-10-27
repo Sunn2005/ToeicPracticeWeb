@@ -16,6 +16,10 @@ public class User {
     private String dateOfBirth;
     private String gender;
     private UserRole role;
+    private String staffGroupId;
+    private Boolean staffActive;
+    private String staffNotes;
+    private Long staffVersion;
     private Long createdAt;
     private Long lastLoginAt;
 }

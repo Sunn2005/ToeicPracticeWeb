@@ -1,3 +1,4 @@
+import { canUseConsole, consoleHome, consoleRoutePermission } from "../../auth/consolePermissions";
 import { useEffect, useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
@@ -34,7 +35,7 @@ function authErrorMessage(error) {
 function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, role, profileLoading, establishSession, logout } = useAuth();
+  const { user, role, profile: currentProfile, profileLoading, establishSession, logout } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -46,7 +47,7 @@ function LoginPage() {
   }, []);
 
   if (user && STAFF_ROLES.has(role)) {
-    return <Navigate to="/console/dashboard" replace />;
+    return <Navigate to={consoleHome(currentProfile)} replace />;
   }
 
   const handleSubmit = async (event) => {
@@ -70,7 +71,7 @@ function LoginPage() {
       }
 
       const destination = location.state?.from;
-      navigate(destination?.startsWith("/console") ? destination : "/console/dashboard", {
+      navigate(destination?.startsWith("/console/") && canUseConsole(profile, consoleRoutePermission(destination)) ? destination : consoleHome(profile), {
         replace: true,
       });
     } catch (error) {
