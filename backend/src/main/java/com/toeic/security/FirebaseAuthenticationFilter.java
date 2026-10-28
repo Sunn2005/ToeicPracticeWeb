@@ -75,6 +75,20 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
         try {
             var identity = firebaseSessionService.verifySession(sessionCookie.getValue());
             User user = currentUserService.requireUser(identity);
+            // Firebase auth_time has second precision. Reject even same-second pre-change sessions.
+            if (user.getCredentialsChangedAt() != null && (identity.authenticatedAtEpochSeconds() == null
+                    || identity.authenticatedAtEpochSeconds() <= user.getCredentialsChangedAt() / 1000)) {
+                authenticationEntryPoint.writeError(request, response, HttpStatus.UNAUTHORIZED,
+                        "AUTHENTICATION_REQUIRED", "Mật khẩu đã thay đổi. Vui lòng đăng nhập lại");
+                return;
+            }
+            if (user.getCredentialOperation() != null || (Boolean.TRUE.equals(user.getPasswordChangeRequired())
+                    && !("GET".equals(request.getMethod()) && "/api/me".equals(request.getRequestURI()))
+                    && !("POST".equals(request.getMethod()) && "/api/console/account/password".equals(request.getRequestURI())))) {
+                authenticationEntryPoint.writeError(request, response, HttpStatus.FORBIDDEN,
+                        "STAFF_PASSWORD_CHANGE_REQUIRED", "Cần đổi mật khẩu trước khi tiếp tục");
+                return;
+            }
             ToeicUserPrincipal principal = ToeicUserPrincipal.from(user);
             var authorities = new ArrayList<SimpleGrantedAuthority>();
             if (user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.EMPLOYEE) {

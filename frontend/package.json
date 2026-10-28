@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "test": "node --test src/auth/consolePermissions.test.js src/api/adminStaff.test.js src/pages/admin/adminRevenue.test.js src/pages/admin/adminPayments.test.js src/api/adminPayments.test.js src/App.test.js src/api/aiChat.test.js src/api/client.test.js src/api/payments.test.js src/api/practice.test.js src/api/userLearningChatContext.test.js src/auth/sessionState.test.js src/components/ai-chat/focusTrap.test.js src/components/floatingPetInteraction.test.js src/config/examTiming.test.js src/data/testCatalog.test.js src/hooks/aiChatSendAttempts.test.js src/hooks/aiChatState.test.js src/utils/aiAnalysis.test.js src/utils/attemptHistory.test.js src/utils/reviewContent.test.js src/utils/testData.test.js src/components/test-editor/testEditorState.test.js",
+    "test": "node --test src/api/staffPasswords.test.js src/auth/consolePermissions.test.js src/api/adminStaff.test.js src/pages/admin/adminRevenue.test.js src/pages/admin/adminPayments.test.js src/api/adminPayments.test.js src/App.test.js src/api/aiChat.test.js src/api/client.test.js src/api/payments.test.js src/api/practice.test.js src/api/userLearningChatContext.test.js src/auth/sessionState.test.js src/components/ai-chat/focusTrap.test.js src/components/floatingPetInteraction.test.js src/config/examTiming.test.js src/data/testCatalog.test.js src/hooks/aiChatSendAttempts.test.js src/hooks/aiChatState.test.js src/utils/aiAnalysis.test.js src/utils/attemptHistory.test.js src/utils/reviewContent.test.js src/utils/testData.test.js src/components/test-editor/testEditorState.test.js",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -21,6 +21,8 @@ import { AuthProvider } from "./auth/AuthContext";
 import { useAuth } from "./auth/useAuth";
 import ProtectedRoute from "./auth/ProtectedRoute";
 import LoginPage from "./pages/auth/LoginPage";
+import StaffPasswordPage from "./pages/auth/StaffPasswordPage";
+import ConsoleProfilePage from "./pages/admin/ConsoleProfilePage";
 import ManagementLayout from "./layouts/ManagementLayout";
 import PublicLayout from "./layouts/PublicLayout";
 import LandingPage from "./pages/public/LandingPage";
@@ -99,6 +101,7 @@ function AppRoutes() {
     return <LoadingScreen />;
   }
 
+  if (profile?.passwordChangeRequired && !["/console/change-password", "/console/forgot-password", "/console/reset-password"].includes(location.pathname)) return <Navigate to="/console/change-password" replace />;
   return (
     <>
       <Routes>
@@ -149,12 +152,16 @@ function AppRoutes() {
           element={<Navigate to={user ? "/dashboard" : "/login"} replace />}
         />
 
+        <Route path="/console/forgot-password" element={<StaffPasswordPage key="forgot" mode="forgot" />} />
+        <Route path="/console/reset-password" element={<StaffPasswordPage key="reset" mode="reset" />} />
+        <Route path="/console/change-password" element={<StaffPasswordPage key="change" mode="change" />} />
         <Route path="/console" element={<LoginPage />} />
         <Route path="/console/forbidden" element={<ForbiddenPage />} />
         <Route
           element={<ProtectedRoute allowedRoles={["ADMIN", "EMPLOYEE"]} />}
         >
           <Route element={<ManagementLayout />}>
+            <Route path="/console/profile" element={<ConsoleProfilePage />} />
             <Route path="/console/dashboard" element={<AdminDashboard />} />
             <Route path="/console/tests" element={<MyTestsPage />} />
             <Route path="/console/tests/new" element={<CreateTestPage />} />
@@ -192,13 +199,18 @@ function AppRoutes() {
   );
 }
 
+function SafeAnalytics() {
+  const { pathname } = useLocation();
+  return pathname === "/console/reset-password" ? null : <Analytics />;
+}
+
 function App() {
   return (
     <LanguageProvider>
       <AuthProvider>
         <BrowserRouter>
           <AppRoutes />
-          <Analytics />
+          <SafeAnalytics />
         </BrowserRouter>
       </AuthProvider>
     </LanguageProvider>

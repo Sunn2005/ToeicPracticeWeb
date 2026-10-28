@@ -20,6 +20,17 @@ public class User {
     private Boolean staffActive;
     private String staffNotes;
     private Long staffVersion;
+    private Long credentialsChangedAt;
+    private Long credentialVersion;
+    private Boolean staffProvisioned;
+    private Boolean passwordChangeRequired;
+    private Long temporaryPasswordExpiresAt;
+    private String credentialEmailStatus;
+    private Long credentialLastSentAt;
+    private String credentialOperation;
+    private String staffResetTokenHash;
+    private Long staffResetExpiresAt;
+    private Long staffResetRequestedAt;
     private Long createdAt;
     private Long lastLoginAt;
 }

@@ -29,6 +29,17 @@ final class FirestoreUserMapper {
         user.setStaffNotes((String) data.get("staffNotes"));
         Number staffVersion = (Number) data.get("staffVersion");
         user.setStaffVersion(staffVersion == null ? null : staffVersion.longValue());
+        user.setCredentialsChangedAt(data.get("credentialsChangedAt") instanceof Number value ? value.longValue() : null);
+        user.setCredentialVersion(data.get("credentialVersion") instanceof Number value ? value.longValue() : null);
+        user.setStaffProvisioned((Boolean) data.get("staffProvisioned"));
+        user.setPasswordChangeRequired((Boolean) data.get("passwordChangeRequired"));
+        user.setTemporaryPasswordExpiresAt(data.get("temporaryPasswordExpiresAt") instanceof Number value ? value.longValue() : null);
+        user.setCredentialEmailStatus((String) data.get("credentialEmailStatus"));
+        user.setCredentialLastSentAt(data.get("credentialLastSentAt") instanceof Number value ? value.longValue() : null);
+        user.setCredentialOperation((String) data.get("credentialOperation"));
+        user.setStaffResetTokenHash((String) data.get("staffResetTokenHash"));
+        user.setStaffResetExpiresAt(data.get("staffResetExpiresAt") instanceof Number value ? value.longValue() : null);
+        user.setStaffResetRequestedAt(data.get("staffResetRequestedAt") instanceof Number value ? value.longValue() : null);
         user.setCreatedAt(epochMillis(data.get("createdAt"), "createdAt"));
         user.setLastLoginAt(epochMillis(data.get("lastLoginAt"), "lastLoginAt"));
         return user;

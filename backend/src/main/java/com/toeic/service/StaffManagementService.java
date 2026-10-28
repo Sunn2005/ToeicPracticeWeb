@@ -15,7 +15,7 @@ public class StaffManagementService {
     public StaffManagementService(StaffStore store) { this.store = store; }
     public record GroupRequest(String name, String code, String description, List<String> permissions, Long version) {}
     public record MemberRequest(String uid, String groupId, Boolean active, String notes, Long version) {}
-    public record Member(String uid, String email, String displayName, String groupId, boolean active, String notes, long version) {}
+    public record Member(String uid, String email, String displayName, String groupId, boolean active, String notes, long version, String phoneNumber, boolean provisioned, String emailStatus, Long lastSentAt, boolean passwordChangeRequired) {}
     public record Directory(List<StaffGroup> groups, List<Member> members, List<StaffPermissions.Feature> catalog) {}
 
     public Directory directory() throws Exception {
@@ -93,7 +93,7 @@ public class StaffManagementService {
         if (data.users().values().stream().noneMatch(u -> u.getRole() == UserRole.ADMIN && !Boolean.FALSE.equals(u.getStaffActive()))) throw error("STAFF_SELF_PROTECTED");
     }
     private boolean isStaff(User user) { return user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.EMPLOYEE; }
-    private Member member(User user) { return new Member(user.getUid(), user.getEmail(), user.getDisplayName(), user.getStaffGroupId(), !Boolean.FALSE.equals(user.getStaffActive()), user.getStaffNotes(), version(user.getStaffVersion())); }
+    private Member member(User user) { return new Member(user.getUid(), user.getEmail(), user.getDisplayName(), user.getStaffGroupId(), !Boolean.FALSE.equals(user.getStaffActive()), user.getStaffNotes(), version(user.getStaffVersion()), user.getPhoneNumber(), Boolean.TRUE.equals(user.getStaffProvisioned()), user.getCredentialEmailStatus(), user.getCredentialLastSentAt(), Boolean.TRUE.equals(user.getPasswordChangeRequired())); }
     private long version(Long value) { return value == null ? 0 : value; }
     private void requireVersion(Long requested, Long actual) { if (requested == null || requested != version(actual)) throw error("STAFF_CONFLICT"); }
     private String text(String value, int max, boolean required) {

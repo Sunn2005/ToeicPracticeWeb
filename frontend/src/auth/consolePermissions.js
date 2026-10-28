@@ -3,14 +3,17 @@ const creatorPermissions = ["dashboard.view", "tests.view", "tests.add", "tests.
 export function canUseConsole(profile, permission) {
   if (permission.startsWith("subscriptions.")) return false;
   if (!profile || !["ADMIN", "EMPLOYEE"].includes(profile.role)) return false;
+  if (profile.passwordChangeRequired) return false;
   const access = profile.consoleAccess;
   if (access && !access.active) return false;
+  if (permission === "account.view") return true;
   if (permission.startsWith("staff.")) return profile.role === "ADMIN";
   if (profile.role === "ADMIN") return true;
   return (access?.permissions || creatorPermissions).includes(permission);
 }
 
 export function consoleRoutePermission(pathname) {
+  if (pathname === "/console/profile") return "account.view";
   if (pathname === "/console/tests/new") return "tests.add";
   if (/^\/console\/tests\/[^/]+\/edit$/.test(pathname)) return "tests.edit";
   if (pathname.startsWith("/console/tests")) return "tests.view";
@@ -40,6 +43,7 @@ export function togglePermission(permissions, feature, action, checked) {
 }
 
 export function consoleHome(profile) {
-  return ["/console/dashboard", "/console/tests", "/console/reviews", "/console/review-history", "/console/orders", "/console/revenue", "/console/staff"]
+  if (profile?.passwordChangeRequired) return "/console/change-password";
+  return ["/console/dashboard", "/console/tests", "/console/reviews", "/console/review-history", "/console/orders", "/console/revenue", "/console/staff", "/console/profile"]
     .find((path) => canUseConsole(profile, consoleRoutePermission(path))) || "/console/forbidden";
 }

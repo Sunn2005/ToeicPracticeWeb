@@ -51,6 +51,7 @@ import static org.mockito.Mockito.when;
 @WebMvcTest({
         SecurityAuthorizationTests.SecurityProbeController.class,
         com.toeic.controller.StaffManagementController.class,
+        com.toeic.controller.StaffPasswordController.class,
         com.toeic.controller.EmployeeTestController.class,
         com.toeic.controller.AdminReviewController.class,
         PaymentController.class,
@@ -64,6 +65,7 @@ import static org.mockito.Mockito.when;
 @Import({
         SecurityAuthorizationTests.SecurityProbeController.class,
         com.toeic.controller.StaffManagementController.class,
+        com.toeic.controller.StaffPasswordController.class,
         com.toeic.controller.EmployeeTestController.class,
         com.toeic.controller.AdminReviewController.class,
         PaymentController.class,
@@ -92,6 +94,9 @@ class SecurityAuthorizationTests {
     @MockitoBean
     private PaymentService paymentService;
 
+    @MockitoBean private com.toeic.service.StaffRecoveryLimiter staffRecoveryLimiter;
+    @MockitoBean(name = "staffRecoveryExecutor") private org.springframework.core.task.TaskExecutor staffRecoveryExecutor;
+    @MockitoBean private com.toeic.service.StaffCredentialService staffCredentialService;
     @MockitoBean private com.toeic.service.StaffManagementService staffManagementService;
     @MockitoBean private com.toeic.service.EmployeeTestService employeeTestService;
     @MockitoBean private com.toeic.service.MediaStorageService mediaStorageService;
@@ -382,6 +387,62 @@ class SecurityAuthorizationTests {
             mockMvc.perform(request.with(csrf()).with(authentication(authenticationFor(UserRole.ADMIN))))
                     .andExpect(status().isNotFound());
         }
+    }
+
+    @Test
+    void temporaryPasswordCannotBypassChangeWithDirectApiCalls() throws Exception {
+        var identity = new FirebaseIdentity("employee-1", "staff@example.test", "Staff", null, null);
+        var user = new User(); user.setUid("employee-1"); user.setRole(UserRole.EMPLOYEE); user.setPasswordChangeRequired(true);
+        when(firebaseSessionService.verifySession("temporary")).thenReturn(identity);
+        when(currentUserService.requireUser(identity)).thenReturn(user);
+        when(staffAccessService.forUser(user)).thenReturn(new com.toeic.service.StaffAccessService.Access(true, "creators", List.of("tests.view")));
+        mockMvc.perform(get("/api/employee/tests").cookie(new Cookie("session", "temporary")))
+                .andExpect(status().isForbidden()).andExpect(jsonPath("$.code").value("STAFF_PASSWORD_CHANGE_REQUIRED"));
+        mockMvc.perform(get("/api/users/me/statistics").cookie(new Cookie("session", "temporary"))).andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/console/account/password").cookie(new Cookie("session", "temporary")).with(csrf())
+                .contentType(MediaType.APPLICATION_JSON).content("{\"oldPassword\":\"temporary\",\"newPassword\":\"NewPassword123!\"}"))
+                .andExpect(status().isNoContent());
+        org.mockito.Mockito.verify(staffCredentialService).change("employee-1", "temporary", "NewPassword123!");
+    }
+
+    @Test
+    void revokedCredentialEpochRejectsOldAndSameSecondSessions() throws Exception {
+        var user = new User(); user.setUid("employee-1"); user.setRole(UserRole.EMPLOYEE); user.setCredentialsChangedAt(1_800_000_000_999L);
+        var old = new FirebaseIdentity("employee-1", "staff@example.test", "Staff", null, null, 1_800_000_000L);
+        when(firebaseSessionService.verifySession("old-epoch")).thenReturn(old); when(currentUserService.requireUser(old)).thenReturn(user);
+        mockMvc.perform(get("/api/users/me/statistics").cookie(new Cookie("session", "old-epoch"))).andExpect(status().isUnauthorized());
+        var fresh = new FirebaseIdentity("employee-1", "staff@example.test", "Staff", null, null, 1_800_000_001L);
+        when(firebaseSessionService.verifySession("fresh-epoch")).thenReturn(fresh); when(currentUserService.requireUser(fresh)).thenReturn(user);
+        when(staffAccessService.forUser(user)).thenReturn(new com.toeic.service.StaffAccessService.Access(true, "creators", List.of()));
+        mockMvc.perform(get("/api/users/me/statistics").cookie(new Cookie("session", "fresh-epoch"))).andExpect(status().isOk());
+    }
+
+    @Test
+    void passwordRecoveryIsPublicCsrfProtectedAndHasGenericResponseEvenWithRevokedCookie() throws Exception {
+        String path = "/api/v1/auth/staff/forgot-password";
+        mockMvc.perform(post(path).contentType(MediaType.APPLICATION_JSON).content("{\"email\":\"unknown@example.test\"}"))
+                .andExpect(status().isForbidden());
+        for (String email : List.of("known@example.test", "unknown@example.test")) {
+            mockMvc.perform(post(path).cookie(new Cookie("session", "revoked")).with(csrf()).contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"email\":\"" + email + "\"}"))
+                    .andExpect(status().isAccepted()).andExpect(jsonPath("$.code").value("STAFF_RESET_REQUESTED"));
+        }
+        org.mockito.Mockito.verifyNoInteractions(firebaseSessionService);
+    }
+
+    @Test
+    void passwordChangeRequiresInternalRoleAndCsrfAndResendIsAdminOnly() throws Exception {
+        String path = "/api/console/account/password", body = "{\"oldPassword\":\"old\",\"newPassword\":\"NewPassword123!\"}";
+        mockMvc.perform(post(path).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isUnauthorized());
+        org.mockito.Mockito.doThrow(new com.toeic.controller.ApiCodeException(HttpStatus.FORBIDDEN, "ACCESS_DENIED", "Not a staff password owner"))
+                .when(staffCredentialService).change("user-1", "old", "NewPassword123!");
+        mockMvc.perform(post(path).with(csrf()).with(authentication(authenticationFor(UserRole.USER))).contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isForbidden());
+        mockMvc.perform(post(path).with(authentication(authenticationFor(UserRole.EMPLOYEE))).contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isForbidden());
+        for (var role : List.of(UserRole.ADMIN, UserRole.EMPLOYEE)) {
+            mockMvc.perform(post(path).with(csrf()).with(authentication(authenticationFor(role))).contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isNoContent());
+        }
+        mockMvc.perform(post("/api/admin/staff/members/target/credentials/resend").with(csrf()).with(authentication(authenticationFor(UserRole.EMPLOYEE)))).andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/admin/staff/members/target/credentials/resend").with(csrf()).with(authentication(authenticationFor(UserRole.ADMIN)))).andExpect(status().isOk());
     }
 
     private ToeicAuthenticationToken authenticationFor(UserRole role) {

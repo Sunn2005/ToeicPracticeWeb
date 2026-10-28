@@ -1308,11 +1308,12 @@ Tất cả endpoint dưới đây dùng Firebase session cookie và CSRF cho mut
 | POST `/api/admin/staff/groups` | `{name,code,description,permissions}` | `201 StaffGroup` |
 | PUT `/api/admin/staff/groups/{id}` | `{name,code,description,permissions,version}` | `200 StaffGroup` |
 | DELETE `/api/admin/staff/groups/{id}` | query `version` | `204` |
-| POST `/api/admin/staff/members` | `{uid,groupId,active,notes,version}` | `201 Member`; account phải chưa là staff |
+| POST `/api/admin/staff/members` | `{displayName,phoneNumber,email,groupId,active,notes}` | `201 {uid,emailStatus,lastSentAt}`; tạo tài khoản mới, email trùng bị từ chối |
+| POST `/api/admin/staff/members/{uid}/credentials/resend` | Không | `200 {uid,emailStatus,lastSentAt}`; chỉ tài khoản do admin tạo |
 | PUT `/api/admin/staff/members/{uid}` | `{groupId,active,notes,version}` | `200 Member` |
 | DELETE `/api/admin/staff/members/{uid}` | query `version` | `204` |
 
-`Member` chỉ gồm `uid,email,displayName,groupId,active,notes,version`. `catalog` là mảng `{id,actions}`. Lookup lấy version tài khoản hiện tại; không tìm/tạo Firebase account từ frontend. Tên và email không được sửa qua API này. UID, role, ownership của dữ liệu học không xuất hiện trong payload quản trị ngoài UID target.
+`Member` gồm `uid,email,displayName,phoneNumber,groupId,active,notes,version,provisioned,emailStatus,lastSentAt,passwordChangeRequired`. `catalog` là mảng `{id,actions}`. Frontend không trực tiếp tạo Firebase account. Admin nhập tên/email/điện thoại khi tạo mới; API cập nhật thành viên chỉ sửa nhóm, active và notes kèm version. Không gửi role hoặc ownership.
 
 `name`: 1–80 ký tự; `code`: 2–40 ký tự theo `[A-Z][A-Z0-9_]{1,39}`, duy nhất và tự chuẩn hóa chữ hoa; `description`: tối đa 500; `notes`: tối đa 1000. Version legacy mặc định 0, tăng sau mutation. `active` bắt buộc. Tìm/lọc/phân trang danh sách nhân viên thực hiện ở UI (5 dòng/trang). Directory và lookup hiện đọc users trong Firestore phía server; dùng cho quy mô đội ngũ nội bộ, cần chuyển sang truy vấn/index chuyên biệt khi mở rộng số lượng tài khoản lớn.
 
@@ -1326,3 +1327,31 @@ Cả `POST /api/admin/test-submissions/{testId}/approve` và `/reject` trả `40
 ### Gỡ quản trị gói Pro (2026-10-27)
 
 Catalog không còn feature `subscriptions` hoặc action `grant`/`revoke`; bảng quyền không còn hàng quản lý Pro và cột Cấp/Thu hồi. Khi đọc nhóm đã lưu, backend chỉ lọc ba permission cũ `subscriptions.view`, `subscriptions.grant`, `subscriptions.revoke`, giữ nguyên quyền còn lại. Payload ghi mới chứa các quyền đã gỡ bị từ chối bằng `400 STAFF_INVALID`. Việc lọc không yêu cầu chạy migration hoặc xóa subscription; lần ghi nhóm tiếp theo lưu danh sách quyền hiện hành.
+
+## Tài khoản nhân viên do Admin tạo và mật khẩu (2026-10-27)
+
+Thay thế flow tự đăng ký rồi gán nhóm: Admin nhập tên (1–80), số điện thoại liên hệ (8–15 chữ số, có thể bắt đầu `+`), email (tối đa 254), nhóm, active và ghi chú (tối đa 1000). Email được trim/lowercase và kiểm tra trên cả Firebase Authentication lẫn Firestore users. Email đã có tài khoản bất kỳ trả `409 STAFF_EMAIL_EXISTS`; không chuyển đổi tài khoản sẵn có. Endpoint lookup được giữ để tương thích tra cứu nhưng không còn là bước của form tạo mới. Payload tạo cũ bằng UID không còn được chấp nhận.
+
+Firebase tạo identity bị disabled trước; transaction kiểm tra lại admin/nhóm/email rồi tạo profile. Chỉ enable sau khi profile có role và cờ bắt buộc đổi mật khẩu. Nếu transaction chưa commit, chỉ xóa identity vừa tạo; không xóa tài khoản cũ. Trường hợp mất xác nhận commit, backend đọc lại trước khi cleanup. Gửi mail thất bại vẫn trả `201`, tài khoản được giữ và `emailStatus=FAILED`. Response không có mật khẩu. `SENT` nghĩa là SMTP chấp nhận gửi, không bảo đảm inbox đã nhận. Admin chọn nhân viên trong danh sách để gửi lại; thao tác có xác nhận, đổi mật khẩu tạm, thu hồi phiên và cooldown 60 giây phía server. Các tài khoản cũ không có `provisioned=true` không dùng tính năng cấp lại mật khẩu tạm; dùng Quên mật khẩu.
+
+Mật khẩu tạm là ngẫu nhiên, không lưu plaintext, không log và không trả về trang quản trị. Hạn 24 giờ tính từ lúc cấp. Sau xác thực chỉ cho đọc GET `/api/me` và POST đổi mật khẩu; các API khác trả `403 STAFF_PASSWORD_CHANGE_REQUIRED`. Mật khẩu tạm hết hạn không thể đổi bằng phiên tạm (`403 STAFF_TEMP_EXPIRED`); cần link recovery hoặc admin gửi lại. Cơ chế hạn chế áp dụng trên backend, kể cả truy cập thẳng API hoặc chuyển sang giao diện người học.
+
+| Method/path | Body | Quyền / response |
+| --- | --- | --- |
+| POST `/api/v1/auth/staff/forgot-password` | `{email}` | Public + CSRF; luôn `202 {code: STAFF_RESET_REQUESTED}` |
+| POST `/api/v1/auth/staff/reset-password` | `{email,token,newPassword}` | Public + CSRF; token hợp lệ, `204` |
+| POST `/api/console/account/password` | `{oldPassword,newPassword}` | Session + CSRF, Admin/Employee hoạt động, `204` |
+
+Quên mật khẩu chỉ gửi cho Admin/Employee đang hoạt động. Cùng response cho email không tồn tại, tài khoản người học, bị khóa, cooldown, hàng đợi đầy hoặc lỗi gửi mail. Công việc tra cứu/gửi chạy trong executor giới hạn 2 worker/50 hàng đợi để response không tiết lộ kết quả tra cứu. Giới hạn 5 request/phút/địa chỉ kết nối cho recovery và 60 giây/email; không tin `X-Forwarded-For` do client gửi. Các replica dùng chung collection `staffRecoveryLimits` (`since`,`count`); reverse proxy cần thiết lập địa chỉ kết nối tin cậy ở tầng hạ tầng để tránh nhiều người dùng chia sẻ một hạn mức.
+
+Link reset có hiệu lực 1 giờ, dùng một lần; chỉ lưu SHA-256 của token ngẫu nhiên 256 bit. Token/email nằm trong fragment của URL để không xuất hiện trong access log hoặc Referer; UI bỏ fragment sau khi đọc, không chạy analytics trên trang reset. Yêu cầu link mới vô hiệu link cũ, gửi lại mật khẩu tạm cũng vô hiệu link reset cũ. Backend consume token trong transaction trước khi gọi Firebase. Nếu provider thất bại sau thay đổi một phần, giữ hạn chế và cho yêu cầu link mới; không khôi phục token đã dùng.
+
+Mật khẩu mới 12–128 ký tự, có chữ hoa/thường và chữ số. Đổi trong Hồ sơ yêu cầu Firebase xác thực lại mật khẩu cũ, kiểm tra UID và version credential để tránh race với gửi lại/reset. Thành công gọi Firebase revokeRefreshTokens và ghi `credentialsChangedAt`; session cũ, kể cả cùng giây thay đổi, bị từ chối. Đăng nhập mới có thể cần đợi sang giây tiếp theo. UI đăng xuất và yêu cầu đăng nhập lại. Profile của cả Admin và Employee ở `/console/profile`; không phụ thuộc các quyền nghiệp vụ của nhóm.
+
+Firestore users bổ sung các field server-managed: `staffProvisioned`, `passwordChangeRequired`, `temporaryPasswordExpiresAt`, `credentialEmailStatus`, `credentialLastSentAt`, `credentialOperation`, `credentialVersion`, `credentialsChangedAt`, `staffResetTokenHash`, `staffResetExpiresAt`, `staffResetRequestedAt`. Client không được ghi các field này hay role/group; không expose hash hoặc operation trong API. Profile/session chỉ thêm `passwordChangeRequired` và `temporaryPasswordExpiresAt`; directory thêm metadata gửi mail cần thiết. Lưu profile người học không ghi đè các field quyền/credential. Không có migration bắt buộc cho account cũ (field thiếu có nghĩa không bắt buộc đổi).
+
+Operation được giữ trong Firestore để tuần tự hóa thao tác credential qua nhiều instance. Khi process bị dừng giữa bước Firebase/SMTP và commit, trạng thái có thể còn PENDING/operation. Không tự đánh cắp lock có thể còn tác vụ đang chạy; xem hướng dẫn phục hồi vận hành trong `docs/STAFF_ACCOUNT_SETUP.md`. Không lưu mật khẩu tạm để retry: gửi lại luôn sinh mới.
+
+Lỗi bổ sung: `400 STAFF_PASSWORD_INVALID`, `400 STAFF_PASSWORD_INCORRECT`, `400 STAFF_RESET_INVALID`; `409 STAFF_EMAIL_EXISTS`, `409 STAFF_CREDENTIAL_BUSY`; `429 STAFF_RATE_LIMITED`; `403 STAFF_TEMP_EXPIRED`, `403 STAFF_PASSWORD_CHANGE_REQUIRED`; `503 STAFF_AUTH_UNAVAILABLE`. Error body không chứa mật khẩu, token hoặc response nhạy cảm từ provider.
+
+Ngoại lệ bảo toàn tài khoản khi gỡ nhân viên: tài khoản do admin tạo nhưng chưa hoàn tất mật khẩu tạm vẫn được chủ tài khoản hoàn tất đổi mật khẩu sau khi bị chuyển về USER; endpoint change xác thực session và kiểm tra quyền sở hữu/trạng thái ở service. Former staff có thể dùng recovery email để giữ khả năng truy cập tài khoản người học. Điều này không cấp quyền Console hoặc quyền nhóm cho USER; USER thông thường vẫn bị từ chối ở staff password service.

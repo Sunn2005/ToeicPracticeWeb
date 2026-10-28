@@ -76,6 +76,8 @@ public class CurrentUserService {
         response.put("role", user.getRole() == null ? UserRole.USER.name() : user.getRole().name());
         response.put("createdAt", user.getCreatedAt());
         response.put("lastLoginAt", user.getLastLoginAt());
+        response.put("passwordChangeRequired", Boolean.TRUE.equals(user.getPasswordChangeRequired()));
+        response.put("temporaryPasswordExpiresAt", user.getTemporaryPasswordExpiresAt());
         response.put("consoleAccess", staffAccessService.forUser(user));
         response.put("subscription", subscriptionService.getSummary(user.getUid()));
         return response;

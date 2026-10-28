@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "../../auth/useAuth";
 import { useLanguage } from "../../i18n/LanguageContext";
 import { togglePermission } from "../../auth/consolePermissions";
-import { deleteStaffGroup, deleteStaffMember, getStaffDirectory, lookupStaffAccount, saveStaffGroup, saveStaffMember, staffErrorKey } from "../../api/adminStaff";
+import { deleteStaffGroup, deleteStaffMember, getStaffDirectory, resendStaffCredentials, saveStaffGroup, saveStaffMember, staffErrorKey } from "../../api/adminStaff";
 import StaffDialog from "../../components/admin/StaffDialog";
 
 const panel = "rounded-2xl border border-slate-200 bg-white shadow-sm";
@@ -45,38 +45,22 @@ function PermissionEditor({ group, catalog, busy, onSave, onDirty, t }) {
 
 function MemberForm({ member, groups, defaultGroup, selfUid, busy, error, onSave, onClose, t }) {
   const create = !member;
-  const [email, setEmail] = useState("");
-  const [account, setAccount] = useState(member);
-  const [draft, setDraft] = useState({ groupId: member?.groupId || defaultGroup || groups.find((group) => group.id !== "admin")?.id || "admin", active: member?.active ?? true, notes: member?.notes || "" });
-  const [lookup, setLookup] = useState({ busy: false, error: "" });
-  const lookupRequest = useRef(null);
-  useEffect(() => () => lookupRequest.current?.abort(), []);
-  async function findAccount(event) {
-    event.preventDefault();
-    lookupRequest.current?.abort();
-    const controller = new AbortController(); lookupRequest.current = controller;
-    setAccount(null); setLookup({ busy: true, error: "" });
-    try {
-      const found = await lookupStaffAccount(email, { signal: controller.signal });
-      if (!controller.signal.aborted) { setAccount(found); setLookup({ busy: false, error: found.groupId ? "staffAlreadyMember" : "" }); }
-    } catch (failure) { if (!controller.signal.aborted) setLookup({ busy: false, error: staffErrorKey(failure) }); }
-  }
-  const lockedSelf = account?.uid === selfUid;
-  const canSave = account && !(create && account.groupId) && !busy && !lookup.busy;
+  const [draft, setDraft] = useState({ displayName: "", phoneNumber: "", email: "", groupId: member?.groupId || defaultGroup || groups.find((group) => group.id !== "admin")?.id || "admin", active: member?.active ?? true, notes: member?.notes || "" });
+  const lockedSelf = member?.uid === selfUid;
   return <StaffDialog title={t(create ? "staffAddMember" : "staffEditMember")} onClose={onClose} busy={busy}>
-    <div className="space-y-5 p-6">
-      {create ? <form onSubmit={findAccount} className="space-y-3"><p className="text-sm text-slate-500">{t("staffAddHint")}</p><label htmlFor="staff-lookup" className="block text-sm font-semibold">{t("staffLookupEmail")} *</label><div className="flex gap-2"><input id="staff-lookup" type="email" autoFocus required maxLength={254} value={email} disabled={busy} onChange={(event) => { lookupRequest.current?.abort(); setEmail(event.target.value); setAccount(null); setLookup({ busy: false, error: "" }); }} className={`${input} mt-0`} /><button type="submit" disabled={busy || lookup.busy} className={primary}>{t(lookup.busy ? "staffLoading" : "staffLookup")}</button></div></form> : null}
-      {lookup.error && <p role="alert" className="text-sm text-red-700">{t(lookup.error)}</p>}
-      {account && <div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-4"><p className="text-xs font-semibold uppercase text-slate-500">{t(create ? "staffFound" : "staffName")}</p><p className="font-semibold">{account.displayName || "—"}</p><p className="break-all text-sm text-slate-500">{account.email}</p><p className="text-xs text-slate-500">{t("staffSynced")}</p></div>}
-      <form onSubmit={(event) => { event.preventDefault(); if (canSave) onSave({ ...draft, uid: account.uid, version: account.version }, create); }} className="space-y-4">
-        <label className="block text-sm font-semibold">{t("staffGroup")} *<select required value={draft.groupId} disabled={busy || lockedSelf} className={input} onChange={(event) => setDraft({ ...draft, groupId: event.target.value })}>{groups.map((group) => <option key={group.id} value={group.id}>{group.name}</option>)}</select></label>
-        <label className="block text-sm font-semibold">{t("staffNotes")}<textarea maxLength={1000} rows={3} disabled={busy} value={draft.notes} onChange={(event) => setDraft({ ...draft, notes: event.target.value })} className={input} /></label>
-        <label className="flex min-h-11 items-center gap-3 text-sm"><input type="checkbox" checked={draft.active} disabled={busy || lockedSelf} onChange={(event) => setDraft({ ...draft, active: event.target.checked })} className="h-5 w-5 accent-blue-600" />{t("staffActive")}</label>
-        {lockedSelf && <p className="text-xs text-slate-500">{t("staffSelfProtected")}</p>}
-        {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{t(error)}</p>}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-5"><p className="text-xs text-slate-500">{t("staffRequired")}</p><div className="flex gap-2"><button type="button" disabled={busy} className={button} onClick={onClose}>{t("staffCancel")}</button><button type="submit" disabled={!canSave} className={primary}>{t(busy ? "staffWorking" : create ? "staffAddMember" : "staffSave")}</button></div></div>
-      </form>
-    </div>
+    <form className="space-y-4 p-6" onSubmit={(event) => { event.preventDefault(); if (!busy) onSave({ ...draft, ...(member ? { uid: member.uid, version: member.version } : {}) }, create); }}>
+      {create ? <>
+        <p className="text-sm leading-6 text-slate-600">{t("staffCreateHint")}</p>
+        {[["displayName", "staffName", "text", 80], ["phoneNumber", "staffPhone", "tel", 16], ["email", "staffEmail", "email", 254]].map(([key, label, type, maxLength]) => <label key={key} className="block text-sm font-semibold">{t(label)} *<input autoFocus={key === "displayName"} required type={type} maxLength={maxLength} pattern={key === "phoneNumber" ? "[+]?[0-9]{8,15}" : key === "displayName" ? ".*\\S.*" : undefined} autoComplete={key === "displayName" ? "name" : key === "phoneNumber" ? "tel" : "email"} value={draft[key]} disabled={busy} onChange={(event) => setDraft({ ...draft, [key]: event.target.value })} className={input} /></label>)}
+        <p className="text-xs leading-5 text-slate-500">{t("staffPhoneHint")}</p>
+      </> : <div className="rounded-xl bg-slate-50 p-4"><p className="font-semibold">{member.displayName || "—"}</p><p className="break-all text-sm text-slate-600">{member.email}</p><p className="text-sm text-slate-600">{member.phoneNumber || "—"}</p></div>}
+      <label className="block text-sm font-semibold">{t("staffGroup")} *<select required value={draft.groupId} disabled={busy || lockedSelf} className={input} onChange={(event) => setDraft({ ...draft, groupId: event.target.value })}>{groups.map((group) => <option key={group.id} value={group.id}>{group.name}</option>)}</select></label>
+      <label className="block text-sm font-semibold">{t("staffNotes")}<textarea maxLength={1000} rows={3} disabled={busy} value={draft.notes} onChange={(event) => setDraft({ ...draft, notes: event.target.value })} className={input} /></label>
+      <label className="flex min-h-11 items-center gap-3 text-sm"><input type="checkbox" checked={draft.active} disabled={busy || lockedSelf} onChange={(event) => setDraft({ ...draft, active: event.target.checked })} className="h-5 w-5 accent-blue-600" />{t("staffActive")}</label>
+      {lockedSelf && <p className="text-xs text-slate-500">{t("staffSelfProtected")}</p>}
+      {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{t(error)}</p>}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-5"><p className="text-xs text-slate-500">{t("staffRequired")}</p><div className="flex gap-2"><button type="button" disabled={busy} className={button} onClick={onClose}>{t("staffCancel")}</button><button type="submit" disabled={busy || !draft.groupId} className={primary}>{t(busy ? "staffWorking" : create ? "staffAddMember" : "staffSave")}</button></div></div>
+    </form>
   </StaffDialog>;
 }
 
@@ -88,6 +72,8 @@ export default function StaffManagementPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [now, setNow] = useState(Date.now);
+  useEffect(() => { const timer = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(timer); }, []);
   const [groupId, setGroupId] = useState("");
   const [selectedUid, setSelectedUid] = useState("");
   const [tab, setTab] = useState("members");
@@ -115,12 +101,13 @@ export default function StaffManagementPage() {
   async function mutate(operation, done) {
     if (request.current.busy) return;
     request.current.busy = true; setBusy(true); setError(""); setSuccess("");
-    try { const result = await operation(); done?.(result); setDirty(false); await load(); setSuccess("staffSaved"); await refreshProfile().catch(() => {}); }
+    try { const result = await operation(); done?.(result); setDirty(false); await load(); setSuccess(result?.emailStatus === "FAILED" ? "staffCreatedMailFailed" : result?.emailStatus === "SENT" ? "staffMailSent" : "staffSaved"); await refreshProfile().catch(() => {}); }
     catch (failure) { setError(staffErrorKey(failure)); }
     finally { request.current.busy = false; setBusy(false); }
   }
   const group = data.groups.find((item) => item.id === groupId);
   const selected = data.members.find((member) => member.uid === selectedUid);
+  const resendWait = Math.max(0, Math.ceil(((selected?.lastSentAt || 0) + 60000 - now) / 1000));
   const filtered = data.members.filter((member) => (!groupId || member.groupId === groupId) && (!status || (status === "active") === member.active) && `${member.displayName || ""} ${member.email || ""}`.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase()));
   const pageCount = Math.max(1, Math.ceil(filtered.length / 5));
   const currentPage = Math.min(page, pageCount);
@@ -144,14 +131,18 @@ export default function StaffManagementPage() {
         <div id="staff-tab-content" role="tabpanel" aria-labelledby={`staff-tab-${tab}`}>
           {tab === "permissions" ? group ? <PermissionEditor key={`${group.id}:${group.version}`} group={group} catalog={data.catalog} busy={blocked} t={t} onDirty={setDirty} onSave={(draft) => mutate(() => saveStaffGroup(draft))} /> : <p className="py-12 text-center text-sm text-slate-500">{t("staffChooseGroup")}</p> : <>
             <div className="flex flex-wrap justify-between gap-3"><div className="flex flex-wrap gap-2"><button type="button" className={primary} disabled={blocked} onClick={() => { setError(""); setMemberForm({ create: true }); }}>+ {t("staffAddMember")}</button><button type="button" className={button} disabled={blocked || !selected} onClick={() => { setError(""); setMemberForm({ member: selected }); }}>{t("staffEdit")}</button><button type="button" className={button} disabled={blocked || !selected || selected.uid === profile.uid} onClick={() => { setError(""); setConfirmation({ type: "member", item: selected }); }}>{t("staffDelete")}</button></div><button type="button" className={button} disabled={blocked} onClick={() => { if (discard()) { setError(""); setSuccess(""); load(); } }}>{t("staffRefresh")}</button></div>
+            {selected?.provisioned && <div className="mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <p className="min-w-0 flex-1 break-words text-sm text-slate-600">{selected.email} · {t(`staffMail_${selected.emailStatus || "PENDING"}`)}</p>
+              <button type="button" className={button} disabled={blocked || resendWait > 0 || !selected.active || selected.emailStatus === "PENDING"} onClick={() => { setError(""); setConfirmation({ type: "resend", item: selected }); }}>{t("staffResend")}{resendWait > 0 ? ` (${resendWait}s)` : ""}</button>
+            </div>}
             <div className="mt-5 flex flex-wrap items-center gap-3"><input type="search" aria-label={t("staffSearch")} placeholder={t("staffSearch")} value={search} className={`${input} mt-0 sm:max-w-xs`} onChange={(event) => { setSearch(event.target.value); setPage(1); setSelectedUid(""); }} /><select aria-label={t("staffStatus")} value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); setSelectedUid(""); }} className={`${input} mt-0 sm:max-w-48`}><option value="">{t("staffAllStatuses")}</option><option value="active">{t("staffActive")}</option><option value="locked">{t("staffLocked")}</option></select><span className="ml-auto text-sm text-slate-500">{filtered.length} {t("staffCount")}</span></div>
-            <div className="mt-5 overflow-x-auto rounded-xl border border-slate-200" tabIndex={0} role="region" aria-label={t("staffMembers")}><table className="w-full min-w-[680px] text-left text-sm"><thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr><th scope="col" className="w-12 px-3 py-4"><span className="sr-only">{t("staffMembers")}</span></th>{["staffEmail", "staffName", "staffGroup", "staffStatus"].map((key) => <th scope="col" key={key} className="px-4 py-4">{t(key)}</th>)}</tr></thead><tbody className="divide-y divide-slate-100">{rows.map((member) => <tr key={member.uid} className={member.uid === selectedUid ? "bg-blue-50/70" : "hover:bg-slate-50"}><td className="px-3"><label className="grid min-h-14 min-w-8 place-items-center"><input type="radio" name="staff-selection" checked={member.uid === selectedUid} onChange={() => setSelectedUid(member.uid)} aria-label={`${t("staffMembers")}: ${member.email}`} className="h-4 w-4 accent-blue-600" /></label></td><td className="px-4 py-5">{member.email}</td><td className="px-4 py-5">{member.displayName || "—"}</td><td className="px-4 py-5 font-medium">{data.groups.find((item) => item.id === member.groupId)?.name || "—"}</td><td className="px-4 py-5"><span className={`whitespace-nowrap rounded-md px-2 py-1 text-xs font-semibold ${member.active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>{t(member.active ? "staffActive" : "staffLocked")}</span></td></tr>)}</tbody></table>{!loading && !rows.length && <p className="p-12 text-center text-sm text-slate-500">{t("staffEmpty")}</p>}</div>
+            <div className="mt-5 overflow-x-auto rounded-xl border border-slate-200" tabIndex={0} role="region" aria-label={t("staffMembers")}><table className="w-full min-w-[680px] text-left text-sm"><thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr><th scope="col" className="w-12 px-3 py-4"><span className="sr-only">{t("staffMembers")}</span></th>{["staffEmail", "staffName", "staffGroup", "staffStatus", "staffMailStatus"].map((key) => <th scope="col" key={key} className="px-4 py-4">{t(key)}</th>)}</tr></thead><tbody className="divide-y divide-slate-100">{rows.map((member) => <tr key={member.uid} className={member.uid === selectedUid ? "bg-blue-50/70" : "hover:bg-slate-50"}><td className="px-3"><label className="grid min-h-14 min-w-8 place-items-center"><input type="radio" name="staff-selection" checked={member.uid === selectedUid} onChange={() => setSelectedUid(member.uid)} aria-label={`${t("staffMembers")}: ${member.email}`} className="h-4 w-4 accent-blue-600" /></label></td><td className="px-4 py-5">{member.email}</td><td className="px-4 py-5">{member.displayName || "—"}<span className="mt-1 block text-xs text-slate-500">{member.phoneNumber || "—"}</span></td><td className="px-4 py-5 font-medium">{data.groups.find((item) => item.id === member.groupId)?.name || "—"}</td><td className="px-4 py-5"><span className={`whitespace-nowrap rounded-md px-2 py-1 text-xs font-semibold ${member.active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>{t(member.active ? "staffActive" : "staffLocked")}</span></td><td className="px-4 py-5 text-xs">{member.provisioned ? t(`staffMail_${member.emailStatus || "PENDING"}`) : "—"}{member.passwordChangeRequired && <p className="mt-1 text-slate-500">{t("staffFirstChange")}</p>}</td></tr>)}</tbody></table>{!loading && !rows.length && <p className="p-12 text-center text-sm text-slate-500">{t("staffEmpty")}</p>}</div>
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3 text-sm text-slate-500"><p>{filtered.length ? `${(currentPage - 1) * 5 + 1}–${Math.min(currentPage * 5, filtered.length)} / ${filtered.length}` : "0"} {t("staffCount")}</p><div className="flex items-center gap-3"><button type="button" disabled={currentPage === 1 || blocked} className={button} onClick={() => { setPage(currentPage - 1); setSelectedUid(""); }}>{t("staffPrevious")}</button><span>{t("staffPage")} {currentPage} / {pageCount}</span><button type="button" disabled={currentPage === pageCount || blocked} className={button} onClick={() => { setPage(currentPage + 1); setSelectedUid(""); }}>{t("staffNext")}</button></div></div>
           </>}
         </div>
       </div>
     </div>
     {memberForm && <MemberForm member={memberForm.member} groups={data.groups} defaultGroup={groupId} selfUid={profile.uid} busy={busy} error={error} t={t} onClose={closeMember} onSave={(draft, create) => mutate(() => saveStaffMember(draft, create), () => setMemberForm(null))} />}
-    {confirmation && <StaffDialog title={t("staffDeleteTitle")} busy={busy} onClose={() => { setConfirmation(null); setError(""); }}><div className="space-y-4 p-6"><p className="text-sm leading-6 text-slate-600">{t(confirmation.type === "group" ? "staffGroupDeleteConfirm" : "staffMemberDeleteConfirm")}</p><p className="break-all font-semibold">{confirmation.item.name || confirmation.item.email}</p>{error && <p role="alert" className="text-sm text-red-700">{t(error)}</p>}<div className="flex justify-end gap-3"><button type="button" disabled={busy} className={button} onClick={() => { setConfirmation(null); setError(""); }}>{t("staffCancel")}</button><button type="button" disabled={busy} className={`${button} border-red-200 text-red-700 hover:bg-red-50`} onClick={() => mutate(() => confirmation.type === "group" ? deleteStaffGroup(confirmation.item) : deleteStaffMember(confirmation.item), () => { if (confirmation.type === "group") setGroupId(""); setConfirmation(null); })}>{t("staffDelete")}</button></div></div></StaffDialog>}
+    {confirmation && <StaffDialog title={t(confirmation.type === "resend" ? "staffResend" : "staffDeleteTitle")} busy={busy} onClose={() => { setConfirmation(null); setError(""); }}><div className="space-y-4 p-6"><p className="text-sm leading-6 text-slate-600">{t(confirmation.type === "resend" ? "staffResendConfirm" : confirmation.type === "group" ? "staffGroupDeleteConfirm" : "staffMemberDeleteConfirm")}</p><p className="break-all font-semibold">{confirmation.item.name || confirmation.item.email}</p>{error && <p role="alert" className="text-sm text-red-700">{t(error)}</p>}<div className="flex justify-end gap-3"><button type="button" disabled={busy} className={button} onClick={() => { setConfirmation(null); setError(""); }}>{t("staffCancel")}</button><button type="button" disabled={busy} className={`${button} border-red-200 text-red-700 hover:bg-red-50`} onClick={() => mutate(() => confirmation.type === "resend" ? resendStaffCredentials(confirmation.item.uid) : confirmation.type === "group" ? deleteStaffGroup(confirmation.item) : deleteStaffMember(confirmation.item), () => { if (confirmation.type === "group") setGroupId(""); setConfirmation(null); })}>{t(confirmation.type === "resend" ? "staffResend" : "staffDelete")}</button></div></div></StaffDialog>}
   </section>;
 }

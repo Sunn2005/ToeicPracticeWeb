@@ -1,8 +1,9 @@
 import { canUseConsole, consoleHome, consoleRoutePermission } from "../../auth/consolePermissions";
 import { useEffect, useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/useAuth";
+import { useLanguage } from "../../i18n/LanguageContext";
 import BrandLogo from "../../components/BrandLogo";
 import { auth } from "../../firebase";
 
@@ -33,6 +34,7 @@ function authErrorMessage(error) {
 }
 
 function LoginPage() {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const { user, role, profile: currentProfile, profileLoading, establishSession, logout } = useAuth();
@@ -71,7 +73,7 @@ function LoginPage() {
       }
 
       const destination = location.state?.from;
-      navigate(destination?.startsWith("/console/") && canUseConsole(profile, consoleRoutePermission(destination)) ? destination : consoleHome(profile), {
+      navigate(profile?.passwordChangeRequired ? "/console/change-password" : destination?.startsWith("/console/") && canUseConsole(profile, consoleRoutePermission(destination)) ? destination : consoleHome(profile), {
         replace: true,
       });
     } catch (error) {
@@ -122,6 +124,7 @@ function LoginPage() {
                 </p>
               </div>
 
+              {location.state?.passwordChanged && <p role="status" className="mt-4 text-sm text-green-700">{t("staffPasswordChanged")}</p>}
               <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
                 <div>
                   <label htmlFor="console-username" className="mb-2 block text-sm font-semibold text-slate-700">Tên đăng nhập</label>
@@ -154,6 +157,7 @@ function LoginPage() {
                 </button>
               </form>
 
+              <Link to="/console/forgot-password" className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-blue-700 underline">{t("staffForgotPassword")}</Link>
               <a href="/" className="mt-7 block text-center text-sm font-medium text-slate-500 transition hover:text-blue-600">← Quay lại trang luyện thi</a>
             </div>
           </div>

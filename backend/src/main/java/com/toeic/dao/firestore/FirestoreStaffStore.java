@@ -53,7 +53,8 @@ public class FirestoreStaffStore implements StaffStore {
                 T result = mutation.apply(data);
                 for (var entry : data.users().entrySet()) {
                     Map<String, Object> fields = staffFields(entry.getValue());
-                    if (!fields.equals(before.get(entry.getKey()))) tx.update(db.collection("users").document(entry.getKey()), fields);
+                    if (!before.containsKey(entry.getKey())) tx.create(db.collection("users").document(entry.getKey()), entry.getValue());
+                    else if (!fields.equals(before.get(entry.getKey()))) tx.update(db.collection("users").document(entry.getKey()), fields);
                 }
                 for (var group : data.groups().values()) tx.set(db.collection("staffGroups").document(group.getId()), group);
                 for (String id : oldGroups.keySet()) if (!data.groups().containsKey(id)) tx.delete(db.collection("staffGroups").document(id));
@@ -74,6 +75,17 @@ public class FirestoreStaffStore implements StaffStore {
         fields.put("role", user.getRole() == null ? "USER" : user.getRole().name());
         fields.put("staffGroupId", user.getStaffGroupId()); fields.put("staffActive", user.getStaffActive());
         fields.put("staffNotes", user.getStaffNotes()); fields.put("staffVersion", user.getStaffVersion());
+        fields.put("credentialsChangedAt", user.getCredentialsChangedAt());
+        fields.put("credentialVersion", user.getCredentialVersion());
+        fields.put("staffProvisioned", user.getStaffProvisioned());
+        fields.put("passwordChangeRequired", user.getPasswordChangeRequired());
+        fields.put("temporaryPasswordExpiresAt", user.getTemporaryPasswordExpiresAt());
+        fields.put("credentialEmailStatus", user.getCredentialEmailStatus());
+        fields.put("credentialLastSentAt", user.getCredentialLastSentAt());
+        fields.put("credentialOperation", user.getCredentialOperation());
+        fields.put("staffResetTokenHash", user.getStaffResetTokenHash());
+        fields.put("staffResetExpiresAt", user.getStaffResetExpiresAt());
+        fields.put("staffResetRequestedAt", user.getStaffResetRequestedAt());
         return fields;
     }
 }

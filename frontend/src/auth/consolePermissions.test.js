@@ -18,7 +18,7 @@ test("legacy employees retain authoring and protected admins retain all function
   assert.equal(canUseConsole({ role: "EMPLOYEE" }, "reviews.edit"), false);
   assert.equal(canUseConsole({ role: "ADMIN" }, "staff.view"), true);
   assert.equal(canUseConsole({ role: "ADMIN", consoleAccess: { active: false } }, "staff.view"), false);
-  assert.equal(consoleHome({ role: "EMPLOYEE", consoleAccess: { active: true, permissions: [] } }), "/console/forbidden");
+  assert.equal(consoleHome({ role: "EMPLOYEE", consoleAccess: { active: true, permissions: [] } }), "/console/profile");
   assert.equal(consoleRoutePermission("/console/tests/new"), "tests.add");
   assert.equal(consoleRoutePermission("/console/tests/abc/edit"), "tests.edit");
   assert.equal(consoleRoutePermission("/console/review-history"), "history.view");
@@ -45,5 +45,15 @@ test("retired Pro management permissions never restore access or become a consol
     const profile = { role, consoleAccess: { active: true, permissions: oldPermissions } };
     for (const permission of oldPermissions) assert.equal(canUseConsole(profile, permission), false);
   }
-  assert.equal(consoleHome({ role: "EMPLOYEE", consoleAccess: { active: true, permissions: oldPermissions } }), "/console/forbidden");
+  assert.equal(consoleHome({ role: "EMPLOYEE", consoleAccess: { active: true, permissions: oldPermissions } }), "/console/profile");
+});
+
+
+test("mandatory password changes block console features and profile is available to active staff", () => {
+  assert.equal(consoleHome({ role: "EMPLOYEE", passwordChangeRequired: true }), "/console/change-password");
+  assert.equal(canUseConsole({ role: "ADMIN", passwordChangeRequired: true }, "staff.view"), false);
+  assert.equal(consoleRoutePermission("/console/profile"), "account.view");
+  assert.equal(canUseConsole({ role: "EMPLOYEE", consoleAccess: { active: true, permissions: [] } }, "account.view"), true);
+  assert.equal(canUseConsole({ role: "USER" }, "account.view"), false);
+  assert.equal(canUseConsole({ role: "EMPLOYEE", consoleAccess: { active: false, permissions: [] } }, "account.view"), false);
 });

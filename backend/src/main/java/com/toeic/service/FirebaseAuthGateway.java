@@ -63,7 +63,8 @@ public interface FirebaseAuthGateway {
                     token.getEmail(),
                     token.getName(),
                     token.getPicture(),
-                    role == null ? null : String.valueOf(role)
+                    role == null ? null : String.valueOf(role),
+                    token.getClaims().get("auth_time") instanceof Number value ? value.longValue() : null
             );
         }
     }

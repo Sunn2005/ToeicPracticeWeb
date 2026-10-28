@@ -48,6 +48,7 @@ function ManagementLayout() {
     { label: "Lịch sử phê duyệt", icon: "history", to: "/console/review-history" },
     { label: t("adminRevenueNav"), icon: "dashboard", to: "/console/revenue" },
     { label: t("adminOrdersNav"), icon: "tests", to: "/console/orders" },
+    { label: t("staffProfile"), icon: "staff", to: "/console/profile" },
   ].filter((item) => canUseConsole(profile, consoleRoutePermission(item.to)));
 
   useEffect(() => {
@@ -66,8 +67,8 @@ function ManagementLayout() {
     <div className="flex h-full flex-col bg-white">
       <div className="flex h-20 items-center justify-between border-b border-slate-100 px-6">
         <NavLink to="/console/dashboard" className="flex items-center gap-3 text-lg font-bold text-[#2188ee]">
-          <span className="grid h-11 w-11 place-items-center rounded-xl bg-[#2188ee] text-xl font-bold text-white">T</span>
-          <span className="whitespace-nowrap">TOEIC Master</span>
+          <span className="grid h-11 w-11 place-items-center rounded-xl bg-[#2188ee] text-xl font-bold text-white">C</span>
+          <span className="whitespace-nowrap">CapyTOEIC Master</span>
         </NavLink>
         <button type="button" onClick={() => setSidebarOpen(false)} className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 lg:hidden" aria-label="Đóng menu">
           <Icon name="close" />

@@ -9,6 +9,12 @@ const module = await import(`data:text/javascript,${encodeURIComponent(source.re
 test("staff API encodes identifiers, preserves versions and excludes client roles", async () => {
   globalThis.__staffApiTest = (...args) => { calls.push(args); return Promise.resolve({}); };
   try {
+    await module.saveStaffMember({ displayName: "Staff", phoneNumber: "+84912345678", email: "staff@example.test", groupId: "business", active: true, notes: "", uid: "spoof", role: "ADMIN", version: 99 }, true);
+    assert.equal(calls.at(-1)[0], "/api/admin/staff/members");
+    assert.deepEqual(JSON.parse(calls.at(-1)[1].body), { displayName: "Staff", phoneNumber: "+84912345678", email: "staff@example.test", groupId: "business", active: true, notes: "" });
+    await module.resendStaffCredentials("staff/unsafe");
+    assert.equal(calls.at(-1)[0], "/api/admin/staff/members/staff%2Funsafe/credentials/resend");
+    assert.equal(calls.at(-1)[1].method, "POST");
     await module.lookupStaffAccount(" person+test@example.test ");
     assert.match(calls.at(-1)[0], /email=person%2Btest%40example.test/);
     await module.saveStaffMember({ uid: "uid/unsafe", groupId: "accountants", active: true, notes: "", version: 3, role: "ADMIN", createdBy: "spoof" }, false);

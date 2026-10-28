@@ -110,6 +110,7 @@ public class SecurityConfig {
 
                         // Các endpoint còn lại cần đăng nhập
                         .requestMatchers(
+                                "/api/console/account/password",
                                 "/api/me",
                                 "/api/users/me/**",
                                 "/api/attempts/**",

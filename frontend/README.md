@@ -536,7 +536,7 @@ người mua tải lại dashboard. Không yêu cầu thanh toán thêm.
 
 ## Quản lý nhân viên và nhóm quyền
 
-Admin truy cập `/console/staff` để tạo/sửa/xóa nhóm, cấu hình quyền theo các chức năng hiện có và gán tài khoản đã đăng ký bằng email. Các nhóm thường không thể được cấp quyền quản lý nhân viên. Nhóm Quản trị có đầy đủ quyền cố định và không được xóa.
+Admin truy cập `/console/staff` để tạo/sửa/xóa nhóm, cấu hình quyền và tạo tài khoản mới bằng họ tên, số điện thoại liên hệ, email. Không cần nhân viên tự đăng ký; email đã có trong Firebase Auth hoặc Firestore bị từ chối. Thông tin đăng nhập gửi bằng Gmail SMTP; trạng thái tạo tài khoản và gửi mail riêng biệt, có gửi lại sau 60 giây. Xem `docs/STAFF_ACCOUNT_SETUP.md`. Các nhóm thường không thể được cấp quyền quản lý nhân viên. Nhóm Quản trị có đầy đủ quyền cố định và không được xóa.
 
 Menu, route và thao tác lấy quyền từ `profile.consoleAccess` do backend trả; gọi API qua `src/api/adminStaff.js` và client chung (session cookie + CSRF). Không tự lấy token hoặc giả lập role. Backend luôn kiểm tra lại quyền và ownership; nhân viên không được tự approve/reject đề do mình tạo.
 
@@ -548,3 +548,7 @@ Các key bản dịch mới thuộc `src/i18n/staffTranslations.js` (prefix `sta
 ### Gỡ quản trị gói Pro (2026-10-27)
 
 Console không còn menu/trang `/console/subscriptions`, API wrapper hoặc quyền cấp/thu hồi Pro thủ công. Ma trận quyền nhân viên chỉ giữ các chức năng hiện có: tổng quan, quản lý nhân viên/đề thi, xét duyệt, lịch sử duyệt, đơn hàng và doanh thu. Người học vẫn mua Pro qua PayOS và sử dụng AI theo entitlement từ backend; subscription hiện có không bị xóa.
+
+## Mật khẩu Console (2026-10-27)
+
+`/console/forgot-password` yêu cầu link qua email; `/console/reset-password` nhận token qua fragment, xóa fragment sau khi đọc. Link có hạn 1 giờ, dùng một lần. `/console/change-password` bắt buộc đổi mật khẩu tạm (hạn 24 giờ); backend cũng chặn các API khác. Cả Admin và Employee có `/console/profile` với dialog mật khẩu cũ/mới/xác nhận. Đổi thành công thu hồi tất cả phiên và yêu cầu đăng nhập lại. Gọi qua `src/api/staffPasswords.js`, giữ session + CSRF từ client chung. Mọi key mới có EN/VI trong staffTranslations.

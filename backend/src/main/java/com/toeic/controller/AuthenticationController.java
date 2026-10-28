@@ -49,6 +49,10 @@ public class AuthenticationController {
                 request.idToken()
         );
         User user = currentUserService.requireUser(session.identity());
+        if (user.getCredentialsChangedAt() != null && (session.identity().authenticatedAtEpochSeconds() == null
+                || session.identity().authenticatedAtEpochSeconds() <= user.getCredentialsChangedAt() / 1000)) {
+            throw new ApiCodeException(org.springframework.http.HttpStatus.UNAUTHORIZED, "AUTHENTICATION_REQUIRED", "Vui lòng đăng nhập lại bằng mật khẩu mới");
+        }
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, sessionCookie(session.cookie()).toString())
                 .body(currentUserService.toResponse(user));
