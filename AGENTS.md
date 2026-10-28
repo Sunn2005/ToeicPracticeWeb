@@ -5,7 +5,7 @@
 - `frontend/`: React 19, React Router, Vite, Tailwind CSS, and Firebase Authentication.
 - `backend/`: Spring Boot REST API, Spring Security, Firebase Admin, and Firestore.
 - `ai-service/`: asynchronous AI processing through RabbitMQ, Firestore, and Gemini.
-- Treat `docs/API_ROLE_WORKFLOWS.md`, `docs/AI_REVIEW.md`, `frontend/README.md`, and `docs/TEAM_FRONTEND_ASSIGNMENTS.md` as the current project contracts.
+- Treat `docs/archive/API_ROLE_WORKFLOWS.md`, `docs/archive/AI_REVIEW.md`, `frontend/README.md`, and `docs/archive/TEAM_FRONTEND_ASSIGNMENTS.md` as the current project contracts.
 
 ## Workflow
 
@@ -61,7 +61,7 @@ Do not require explicit user approval for every small change. Stop and ask when 
 
 ## API Rules
 
-- Follow `docs/API_ROLE_WORKFLOWS.md`; do not silently change paths, methods, authorization, schemas, status codes, or workflow semantics.
+- Follow `docs/archive/API_ROLE_WORKFLOWS.md`; do not silently change paths, methods, authorization, schemas, status codes, or workflow semantics.
 - Public frontend requests use `publicApiFetch`.
 - Authenticated frontend requests use `apiFetch`; do not duplicate Firebase token logic in pages or components.
 - Add domain-specific API wrappers under `frontend/src/api/`.
@@ -76,7 +76,7 @@ Do not require explicit user approval for every small change. Stop and ask when 
 - Prefer Tailwind classes within components; avoid global CSS changes for localized styling.
 - Add every translation key in both English and Vietnamese. Do not rename or remove existing keys casually.
 - Provide appropriate loading, empty, and error states and support desktop and mobile layouts.
-- Respect the ownership and locked-file boundaries documented in `docs/TEAM_FRONTEND_ASSIGNMENTS.md`.
+- Respect the ownership and locked-file boundaries documented in `docs/archive/TEAM_FRONTEND_ASSIGNMENTS.md`.
 - Do not add or upgrade dependencies without the required team approval.
 
 ## Testing and Review

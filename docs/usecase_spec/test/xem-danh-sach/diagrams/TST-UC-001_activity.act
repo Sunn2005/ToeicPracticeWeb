@@ -1,0 +1,15 @@
+title: TST-UC-001 Xem danh sách đề thi
+
+lane U "Người học"
+lane S "Hệ thống"
+
+start st U
+action a1 U "Mở trang danh sách đề thi"
+action a2 S "Lấy danh sách đề được công bố"
+action a3 S "Hiển thị thông tin tổng quan"
+end e1 S
+
+st -> a1
+a1 -> a2
+a2 -> a3
+a3 -> e1

@@ -379,7 +379,7 @@ Các mutation Capy AI Chat yêu cầu entitlement Pro hiệu lực. Các endpoin
 
 Quy định ownership, file bị khóa, cách đặt branch, commit và pull request được mô tả đầy đủ tại:
 
-➡️ **[Quy định làm việc nhóm Frontend](TEAM_FRONTEND_ASSIGNMENTS.md)**
+➡️ **[Quy định làm việc nhóm Frontend](../docs/archive/TEAM_FRONTEND_ASSIGNMENTS.md)**
 
 Mọi thành viên phải đọc tài liệu này trước khi tạo branch đầu tiên.
 
@@ -536,11 +536,11 @@ người mua tải lại dashboard. Không yêu cầu thanh toán thêm.
 
 ## Quản lý nhân viên và nhóm quyền
 
-Admin truy cập `/console/staff` để tạo/sửa/xóa nhóm, cấu hình quyền và tạo tài khoản mới bằng họ tên, số điện thoại liên hệ, email. Không cần nhân viên tự đăng ký; email đã có trong Firebase Auth hoặc Firestore bị từ chối. Thông tin đăng nhập gửi bằng Gmail SMTP; trạng thái tạo tài khoản và gửi mail riêng biệt, có gửi lại sau 60 giây. Xem `docs/STAFF_ACCOUNT_SETUP.md`. Các nhóm thường không thể được cấp quyền quản lý nhân viên. Nhóm Quản trị có đầy đủ quyền cố định và không được xóa.
+Admin truy cập `/console/staff` để tạo/sửa/xóa nhóm, cấu hình quyền và tạo tài khoản mới bằng họ tên, số điện thoại liên hệ, email. Không cần nhân viên tự đăng ký; email đã có trong Firebase Auth hoặc Firestore bị từ chối. Thông tin đăng nhập gửi bằng Gmail SMTP; trạng thái tạo tài khoản và gửi mail riêng biệt, có gửi lại sau 60 giây. Xem `docs/archive/STAFF_ACCOUNT_SETUP.md`. Các nhóm thường không thể được cấp quyền quản lý nhân viên. Nhóm Quản trị có đầy đủ quyền cố định và không được xóa.
 
 Menu, route và thao tác lấy quyền từ `profile.consoleAccess` do backend trả; gọi API qua `src/api/adminStaff.js` và client chung (session cookie + CSRF). Không tự lấy token hoặc giả lập role. Backend luôn kiểm tra lại quyền và ownership; nhân viên không được tự approve/reject đề do mình tạo.
 
-Khóa chỉ thu hồi quyền Console; xóa thành viên chỉ gỡ quyền nội bộ, giữ tài khoản/dữ liệu học. Employee legacy tự ánh xạ vào nhóm tạo đề. UI có tìm tên/email, lọc nhóm/trạng thái, phân trang, dialog thêm/sửa và xác nhận xóa; dữ liệu stale trả `STAFF_CONFLICT` cần làm mới. Xem contract chi tiết trong `docs/API_ROLE_WORKFLOWS.md`.
+Khóa chỉ thu hồi quyền Console; xóa thành viên chỉ gỡ quyền nội bộ, giữ tài khoản/dữ liệu học. Employee legacy tự ánh xạ vào nhóm tạo đề. UI có tìm tên/email, lọc nhóm/trạng thái, phân trang, dialog thêm/sửa và xác nhận xóa; dữ liệu stale trả `STAFF_CONFLICT` cần làm mới. Xem contract chi tiết trong `docs/archive/API_ROLE_WORKFLOWS.md`.
 
 Các key bản dịch mới thuộc `src/i18n/staffTranslations.js` (prefix `staff`, đầy đủ EN/VI), được ghép vào `translations.js`. Kiểm tra trong `npm test`: `consolePermissions.test.js`, `adminStaff.test.js`.
 

@@ -16,7 +16,7 @@ const STATUS_BADGES = {
 
 // Chuẩn hóa fieldErrors của backend thành mảng [{field, message}] để vẽ hộp đỏ.
 // Backend trả fieldErrors dạng object { "parts[0].questions[5].correctAnswer": "không được trống" }
-// (xem mục 9.3/9.4 và bảng mã lỗi trong docs/API_ROLE_WORKFLOWS.md).
+// (xem mục 9.3/9.4 và bảng mã lỗi trong docs/archive/API_ROLE_WORKFLOWS.md).
 function normalizeFieldErrors(fieldErrors) {
   if (!fieldErrors) return [];
   if (Array.isArray(fieldErrors)) {
