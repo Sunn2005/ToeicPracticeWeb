@@ -2,6 +2,11 @@
 
 Tài liệu này là quy ước bắt buộc dành cho tất cả thành viên làm frontend. Mục tiêu là để nhiều người có thể làm song song mà không làm hỏng luồng thi, nhận xét bằng AI, xác thực hoặc code của thành viên khác.
 
+Đường dẫn đã được cập nhật theo cấu trúc module ngày 2026-11-04. Ownership và
+trạng thái khóa đi theo từng file; gom chung module không cấp quyền sửa toàn bộ
+module. Các ngoại lệ ở mục 4 và 5 luôn được ưu tiên. Xem
+[bản đồ đường dẫn cũ → mới](../plans/2026-11-04-module-folder-structure.md).
+
 ## 1. Nguyên tắc bắt buộc
 
 1. Không commit hoặc push trực tiếp vào `main`.
@@ -48,9 +53,9 @@ Không commit `.env.local`. Giá trị `VITE_API_BASE_URL` do trưởng nhóm cu
 - `src/auth/**`
 - `src/layouts/**`
 - `src/components/ui/**`
-- `src/pages/public/**`
-- `src/pages/auth/**`
-- `src/pages/errors/**`
+- `src/modules/public/pages/**`
+- `src/modules/authentication/pages/**`
+- `src/modules/errors/pages/**`
 - `src/App.jsx`
 
 Nhiệm vụ chính:
@@ -71,10 +76,15 @@ Không được sửa:
 
 Được sửa:
 
-- `src/pages/user/**`
-- `src/components/user/**`
-- `src/components/tests/**`
-- `src/api/userLearning.js`
+- `src/modules/dashboard/pages/user/**`
+- `src/modules/profile/pages/ProfilePage.jsx`
+- `src/modules/profile/pages/EditProfilePage.jsx`
+- `src/modules/test-catalog/pages/**`
+- `src/modules/learning-history/pages/**`
+- `src/modules/billing/pages/user/**`
+- `src/modules/billing/components/ProAvatarBadge.jsx`
+- `src/modules/test-catalog/components/**`
+- `src/api/users/userLearning.js`
 
 Nhiệm vụ chính:
 
@@ -94,9 +104,9 @@ Không được sửa:
 
 Được sửa:
 
-- `src/pages/employee/**`
-- `src/components/test-editor/**`
-- `src/api/employeeTests.js`
+- `src/modules/test-management/pages/employee/**`
+- `src/modules/test-management/components/test-editor/**`
+- `src/api/tests/employeeTests.js`
 
 Nhiệm vụ chính:
 
@@ -123,9 +133,16 @@ Không được sửa:
 
 Được sửa:
 
-- `src/pages/admin/**`
-- `src/components/admin/**`
-- `src/api/adminReviews.js`
+- `src/modules/test-management/pages/admin/**`
+- `src/modules/dashboard/pages/admin/**`
+- `src/modules/profile/pages/ConsoleProfilePage.jsx`
+- `src/modules/billing/pages/admin/**`
+- `src/modules/billing/utils/**`
+- `src/modules/staff-management/pages/**`
+- `src/modules/test-management/components/review/**`
+- `src/modules/staff-management/components/**`
+- `src/modules/authentication/components/StaffPasswordForm.jsx`
+- `src/api/tests/adminReviews.js`
 
 Nhiệm vụ chính:
 
@@ -148,38 +165,38 @@ Các file sau thuộc trưởng nhóm/người phụ trách backend và exam flo
 
 ### Luồng thi chính
 
-- `src/pages/FullTestExam.jsx`
-- `src/pages/FullTestIntro.jsx`
-- `src/pages/FullTestResult.jsx`
-- `src/pages/FullTestReview.jsx`
-- `src/components/ExamHeader.jsx`
-- `src/components/ExamModeCard.jsx`
-- `src/components/ExamNavigationBar.jsx`
-- `src/components/LockedExamAudio.jsx`
-- `src/components/PassagePanel.jsx`
-- `src/components/QuestionCard.jsx`
-- `src/components/QuestionNavigatorDrawer.jsx`
-- `src/components/ResizableExamLayout.jsx`
-- `src/components/ReviewTogglePanel.jsx`
-- `src/config/examTiming.js`
-- `src/utils/reviewContent.js`
-- `src/utils/testData.js`
+- `src/modules/exam/pages/FullTestExam.jsx`
+- `src/modules/exam/pages/FullTestIntro.jsx`
+- `src/modules/exam/pages/FullTestResult.jsx`
+- `src/modules/exam/pages/FullTestReview.jsx`
+- `src/modules/exam/components/ExamHeader.jsx`
+- `src/modules/exam/components/ExamModeCard.jsx`
+- `src/modules/exam/components/ExamNavigationBar.jsx`
+- `src/modules/exam/components/LockedExamAudio.jsx`
+- `src/modules/exam/components/PassagePanel.jsx`
+- `src/modules/exam/components/QuestionCard.jsx`
+- `src/modules/exam/components/QuestionNavigatorDrawer.jsx`
+- `src/modules/exam/components/ResizableExamLayout.jsx`
+- `src/modules/exam/components/ReviewTogglePanel.jsx`
+- `src/modules/exam/config/examTiming.js`
+- `src/modules/exam/utils/reviewContent.js`
+- `src/modules/exam/utils/testData.js`
 
 ### Nhận xét bằng AI
 
-- `src/api/aiJobs.js`
-- `src/hooks/useAIExplanationJobs.js`
-- `src/components/AIExplanationPanel.jsx`
+- `src/api/ai/aiJobs.js`
+- `src/modules/ai-analysis/hooks/useAIExplanationJobs.js`
+- `src/modules/ai-analysis/components/AIExplanationPanel.jsx`
 
 ### Capy AI Chat dành cho Pro
 
 Các file sau thuộc owner tính năng AI/Pro và được xem là một cụm contract. Thành viên khác chỉ sửa khi đã phối hợp với owner:
 
-- `src/api/aiChat.js` và `src/api/aiChat.test.js`
-- `src/hooks/aiChatState.js`, `src/hooks/aiChatState.test.js` và `src/hooks/useAIChat.js`
-- `src/components/ai-chat/**`
-- `src/components/FloatingPet.jsx`
-- `src/components/floatingPetInteraction.js` và `src/components/floatingPetInteraction.test.js`
+- `src/api/ai/aiChat.js` và `src/api/ai/aiChat.test.js`
+- `src/modules/ai-chat/hooks/aiChatState.js`, `src/modules/ai-chat/hooks/aiChatState.test.js` và `src/modules/ai-chat/hooks/useAIChat.js`
+- `src/modules/ai-chat/components/**`
+- `src/modules/ai-chat/components/FloatingPet.jsx`
+- `src/modules/ai-chat/utils/floatingPetInteraction.js` và `src/modules/ai-chat/utils/floatingPetInteraction.test.js`
 
 Owner tính năng chịu trách nhiệm giữ nguyên quy tắc Pro-only, job polling, trạng thái pending/failed, retry idempotent, stable error code, read-only khi mất quyền và giới hạn context an toàn. Không đổi response shape, timeout hoặc semantics đóng/mở chat chỉ để xử lý UI cục bộ.
 
@@ -202,13 +219,13 @@ Nếu phát hiện lỗi trong các file này, tạo issue hoặc mô tả trong
 
 Chức năng quản lý gói Pro thủ công (page/helper/API/test và route Console) đã được gỡ theo yêu cầu chủ dự án ngày 2026-10-27. Member 1 tiếp tục sở hữu summary `GET /api/me.subscription` trong `src/auth/**`; summary này phục vụ quyền Pro của người học và không thuộc phần bị gỡ. Giữ mọi route `/full-test/**`.
 
-Các file review/AI trong mục 4 vẫn bị khóa, gồm `src/pages/FullTestReview.jsx`; việc hiển thị `PRO_REQUIRED` và giữ khả năng đọc kết quả sau expiry thuộc trưởng nhóm/người phụ trách AI. API client, auth infrastructure, backend và AI service không thuộc quyền sửa của Member 4.
+Các file review/AI trong mục 4 vẫn bị khóa, gồm `src/modules/exam/pages/FullTestReview.jsx`; việc hiển thị `PRO_REQUIRED` và giữ khả năng đọc kết quả sau expiry thuộc trưởng nhóm/người phụ trách AI. API client, auth infrastructure, backend và AI service không thuộc quyền sửa của Member 4.
 
 Capy AI Chat đã được triển khai cho `USER` Pro có entitlement `AI_CHAT`; checkout PayOS chỉ tạo link và backend vẫn là nơi kích hoạt entitlement sau khi xác minh webhook. Các điểm tích hợp chia owner như sau:
 
 - Member 1 sở hữu việc mount/unmount chat theo route, role và entitlement trong `src/App.jsx`; phải giữ Capy ngoài route `/full-test/:attemptId/exam` và đóng chat khi logout/role/entitlement đã biết thay đổi.
-- Member 2 sở hữu helper lấy attempt/câu hỏi đủ điều kiện trong `src/api/userLearning.js`; không gửi review content hoặc dữ liệu đáp án vào API tạo chat.
-- Owner AI/Pro sở hữu `src/api/payments.js`, `src/components/ProUpgradeCard.jsx` và `src/pages/user/PaymentResultPage.jsx`; frontend chỉ gửi `planCode` và không suy luận thanh toán thành công từ return URL.
+- Member 2 sở hữu helper lấy attempt/câu hỏi đủ điều kiện trong `src/api/users/userLearning.js`; không gửi review content hoặc dữ liệu đáp án vào API tạo chat.
+- Owner AI/Pro sở hữu `src/api/billing/payments.js`, `src/modules/billing/components/ProUpgradeCard.jsx` và `src/modules/billing/pages/user/PaymentResultPage.jsx`; frontend chỉ gửi `planCode` và không suy luận thanh toán thành công từ return URL.
 - Owner AI/Pro sở hữu cụm file Capy AI Chat tại mục 4, gồm launcher, dialog, state machine, polling và API wrapper.
 - `src/i18n/translations.js` cần đủ key tiếng Anh và tiếng Việt trong cùng thay đổi. CSS launcher được giới hạn trong selector riêng tại `src/index.css`; không sửa selector global.
 
@@ -398,7 +415,7 @@ Trước khi commit:
 ```bash
 git status
 git diff
-git add frontend/src/pages/user frontend/src/components/user
+git add frontend/src/modules/dashboard/pages/user frontend/src/api/users/userLearning.js
 git diff --cached
 git commit -m "feat(user): add attempt history page"
 ```
@@ -527,7 +544,7 @@ Một đầu việc chỉ được xem là hoàn thành khi:
 
 Chủ dự án đã cho phép triển khai xuyên backend/auth/route/menu và các trang Console liên quan, trực tiếp trên main cho công việc này. Ngoại lệ này không thay đổi quy tắc branch/owner cho công việc khác.
 
-- Page/components/API quản trị nhân viên: `src/pages/admin/StaffManagementPage.jsx`, `src/components/admin/StaffDialog.jsx`, `src/api/adminStaff.js` và test.
+- Page/components/API quản trị nhân viên: `src/modules/staff-management/pages/StaffManagementPage.jsx`, `src/modules/staff-management/components/StaffDialog.jsx`, `src/api/staff/adminStaff.js` và test.
 - Member 1 giữ phần tích hợp `src/auth/consolePermissions.js`, guard, LoginPage, App routes, ManagementLayout và summary `profile.consoleAccess`.
 - Các owner Employee/Admin giữ điều kiện hiển thị action và quyền từng API đồng bộ với permission catalog backend. Không mở role ADMIN cho employee để tránh lỗi 403.
 - Translation key mới prefix `staff` nằm trong `src/i18n/staffTranslations.js`, ghép qua `translations.js`; thêm cả EN và VI.

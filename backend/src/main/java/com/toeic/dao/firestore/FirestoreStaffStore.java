@@ -1,10 +1,10 @@
 package com.toeic.dao.firestore;
 
 import com.google.cloud.firestore.*;
-import com.toeic.dao.StaffStore;
-import com.toeic.model.StaffGroup;
-import com.toeic.model.User;
-import com.toeic.service.StaffPermissions;
+import com.toeic.dao.staff.StaffStore;
+import com.toeic.model.staff.StaffGroup;
+import com.toeic.model.user.User;
+import com.toeic.service.staff.StaffPermissions;
 import org.springframework.stereotype.Repository;
 import java.util.*;
 import java.util.function.Function;
@@ -65,7 +65,7 @@ public class FirestoreStaffStore implements StaffStore {
             Throwable cause = exception;
             while (cause.getCause() != null) {
                 cause = cause.getCause();
-                if (cause instanceof com.toeic.controller.ApiCodeException business) throw business;
+                if (cause instanceof com.toeic.exception.ApiCodeException business) throw business;
             }
             throw exception;
         }

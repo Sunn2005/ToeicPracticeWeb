@@ -9,6 +9,11 @@ Các thành viên phát triển giao diện bắt đầu tại tài liệu:
 
 ➡️ **[Frontend setup và hướng dẫn làm việc nhóm](frontend/README.md)**
 
+Cấu trúc code: frontend chia theo module chức năng trong `src/modules/`;
+backend giữ các tầng MVC và chia package nghiệp vụ bên trong mỗi tầng.
+Xem [cấu trúc backend](backend/README.md) và
+[bản đồ di chuyển FE/BE](docs/plans/2026-11-04-module-folder-structure.md).
+
 Tài liệu frontend bao gồm yêu cầu Node.js, cài dependency, `.env.local`, chạy local, đăng nhập Google, role `USER`/`EMPLOYEE`/`ADMIN`, quy ước gọi API, phân chia Member 1–4, Git workflow và xử lý lỗi thường gặp.
 
 ## Bảo mật

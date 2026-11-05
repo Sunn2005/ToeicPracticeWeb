@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { signOut } from "firebase/auth";
-import { createSession, destroySession } from "../api/auth";
+import { createSession, destroySession } from "../api/auth/auth";
 import { apiFetch } from "../api/client";
 import { auth } from "../firebase";
 import {

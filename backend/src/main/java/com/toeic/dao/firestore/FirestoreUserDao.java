@@ -2,8 +2,8 @@ package com.toeic.dao.firestore;
 
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
-import com.toeic.dao.UserDao;
-import com.toeic.model.User;
+import com.toeic.dao.user.UserDao;
+import com.toeic.model.user.User;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;

@@ -12,7 +12,7 @@ public class AIExplanationResultDto {
     private String grammarPoint;
     private String correctAnswer;
 
-    public static AIExplanationResultDto from(com.toeic.model.AIExplanationResult result) {
+    public static AIExplanationResultDto from(com.toeic.model.ai.job.AIExplanationResult result) {
         if (result == null) {
             return null;
         }

@@ -1,7 +1,7 @@
 package com.toeic.security;
 
-import com.toeic.model.User;
-import com.toeic.model.enums.UserRole;
+import com.toeic.model.user.User;
+import com.toeic.model.user.enums.UserRole;
 
 public record ToeicUserPrincipal(
         String uid,

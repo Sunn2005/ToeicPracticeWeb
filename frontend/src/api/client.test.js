@@ -8,7 +8,7 @@ import {
   getCsrfToken,
   publicApiFetch,
 } from "./client.js";
-import { createSession, destroySession } from "./auth.js";
+import { createSession, destroySession } from "./auth/auth.js";
 
 const originalFetch = globalThis.fetch;
 

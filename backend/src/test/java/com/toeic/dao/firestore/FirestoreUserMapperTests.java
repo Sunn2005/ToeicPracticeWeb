@@ -3,7 +3,7 @@ package com.toeic.dao.firestore;
 import com.google.api.core.ApiFutures;
 import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.*;
-import com.toeic.model.enums.UserRole;
+import com.toeic.model.user.enums.UserRole;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;

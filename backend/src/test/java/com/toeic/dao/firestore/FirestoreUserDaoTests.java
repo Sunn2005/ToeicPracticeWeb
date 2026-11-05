@@ -2,8 +2,8 @@ package com.toeic.dao.firestore;
 
 import com.google.api.core.ApiFutures;
 import com.google.cloud.firestore.*;
-import com.toeic.model.User;
-import com.toeic.model.enums.UserRole;
+import com.toeic.model.user.User;
+import com.toeic.model.user.enums.UserRole;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import java.util.Map;

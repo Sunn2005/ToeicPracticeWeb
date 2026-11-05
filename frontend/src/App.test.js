@@ -14,11 +14,11 @@ test("mounts the Pro-gated Capy chat shell outside console routes", async () => 
 
 test("in-progress attempts show a warning without disabling general Capy chat", async () => {
   const chatSource = await readFile(
-    new URL("./components/ai-chat/AIChatBox.jsx", import.meta.url),
+    new URL("./modules/ai-chat/components/AIChatBox.jsx", import.meta.url),
     "utf8",
   );
   const pickerSource = await readFile(
-    new URL("./components/ai-chat/AttemptQuestionContextPicker.jsx", import.meta.url),
+    new URL("./modules/ai-chat/components/AttemptQuestionContextPicker.jsx", import.meta.url),
     "utf8",
   );
 

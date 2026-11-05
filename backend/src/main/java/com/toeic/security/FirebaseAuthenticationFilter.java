@@ -1,9 +1,9 @@
 package com.toeic.security;
 
 import com.toeic.config.AuthProperties;
-import com.toeic.model.User;
-import com.toeic.service.CurrentUserService;
-import com.toeic.service.FirebaseSessionService;
+import com.toeic.model.user.User;
+import com.toeic.service.user.CurrentUserService;
+import com.toeic.service.auth.FirebaseSessionService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,8 +19,8 @@ import org.springframework.web.util.WebUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import com.toeic.service.StaffAccessService;
-import com.toeic.model.enums.UserRole;
+import com.toeic.service.staff.StaffAccessService;
+import com.toeic.model.user.enums.UserRole;
 
 @Component
 public class FirebaseAuthenticationFilter extends OncePerRequestFilter {

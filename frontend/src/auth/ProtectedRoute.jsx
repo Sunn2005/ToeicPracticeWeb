@@ -1,6 +1,6 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { canUseConsole, consoleRoutePermission } from "./consolePermissions";
-import LoadingScreen from "../components/LoadingScreen";
+import LoadingScreen from "../components/ui/LoadingScreen";
 import { useAuth } from "./useAuth";
 
 function ProtectedRoute({ allowedRoles }) {

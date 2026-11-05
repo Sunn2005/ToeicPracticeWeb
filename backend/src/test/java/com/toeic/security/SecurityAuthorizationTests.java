@@ -1,18 +1,18 @@
 package com.toeic.security;
 
 import com.toeic.config.SecurityConfig;
-import com.toeic.controller.ApiExceptionHandler;
-import com.toeic.controller.PaymentController;
-import com.toeic.controller.AdminPaymentController;
-import com.toeic.service.AdminPaymentService;
-import com.toeic.service.AdminRevenueService;
+import com.toeic.exception.ApiExceptionHandler;
+import com.toeic.controller.billing.PaymentController;
+import com.toeic.controller.billing.AdminPaymentController;
+import com.toeic.service.billing.AdminPaymentService;
+import com.toeic.service.billing.AdminRevenueService;
 import com.toeic.config.AuthProperties;
-import com.toeic.model.FirebaseIdentity;
-import com.toeic.model.User;
-import com.toeic.model.enums.UserRole;
-import com.toeic.service.CurrentUserService;
-import com.toeic.service.FirebaseSessionService;
-import com.toeic.service.PaymentService;
+import com.toeic.model.auth.FirebaseIdentity;
+import com.toeic.model.user.User;
+import com.toeic.model.user.enums.UserRole;
+import com.toeic.service.user.CurrentUserService;
+import com.toeic.service.auth.FirebaseSessionService;
+import com.toeic.service.billing.PaymentService;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,10 +50,10 @@ import static org.mockito.Mockito.when;
 
 @WebMvcTest({
         SecurityAuthorizationTests.SecurityProbeController.class,
-        com.toeic.controller.StaffManagementController.class,
-        com.toeic.controller.StaffPasswordController.class,
-        com.toeic.controller.EmployeeTestController.class,
-        com.toeic.controller.AdminReviewController.class,
+        com.toeic.controller.staff.StaffManagementController.class,
+        com.toeic.controller.staff.StaffPasswordController.class,
+        com.toeic.controller.test.EmployeeTestController.class,
+        com.toeic.controller.test.AdminReviewController.class,
         PaymentController.class,
         AdminPaymentController.class
 })
@@ -64,10 +64,10 @@ import static org.mockito.Mockito.when;
 })
 @Import({
         SecurityAuthorizationTests.SecurityProbeController.class,
-        com.toeic.controller.StaffManagementController.class,
-        com.toeic.controller.StaffPasswordController.class,
-        com.toeic.controller.EmployeeTestController.class,
-        com.toeic.controller.AdminReviewController.class,
+        com.toeic.controller.staff.StaffManagementController.class,
+        com.toeic.controller.staff.StaffPasswordController.class,
+        com.toeic.controller.test.EmployeeTestController.class,
+        com.toeic.controller.test.AdminReviewController.class,
         PaymentController.class,
         AdminPaymentController.class,
         ApiExceptionHandler.class,
@@ -83,7 +83,7 @@ class SecurityAuthorizationTests {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private com.toeic.service.StaffAccessService staffAccessService;
+    private com.toeic.service.staff.StaffAccessService staffAccessService;
 
     @MockitoBean
     private CurrentUserService currentUserService;
@@ -94,13 +94,13 @@ class SecurityAuthorizationTests {
     @MockitoBean
     private PaymentService paymentService;
 
-    @MockitoBean private com.toeic.service.StaffRecoveryLimiter staffRecoveryLimiter;
+    @MockitoBean private com.toeic.service.staff.StaffRecoveryLimiter staffRecoveryLimiter;
     @MockitoBean(name = "staffRecoveryExecutor") private org.springframework.core.task.TaskExecutor staffRecoveryExecutor;
-    @MockitoBean private com.toeic.service.StaffCredentialService staffCredentialService;
-    @MockitoBean private com.toeic.service.StaffManagementService staffManagementService;
-    @MockitoBean private com.toeic.service.EmployeeTestService employeeTestService;
-    @MockitoBean private com.toeic.service.MediaStorageService mediaStorageService;
-    @MockitoBean private com.toeic.service.AdminReviewService adminReviewService;
+    @MockitoBean private com.toeic.service.staff.StaffCredentialService staffCredentialService;
+    @MockitoBean private com.toeic.service.staff.StaffManagementService staffManagementService;
+    @MockitoBean private com.toeic.service.test.EmployeeTestService employeeTestService;
+    @MockitoBean private com.toeic.service.media.MediaStorageService mediaStorageService;
+    @MockitoBean private com.toeic.service.test.AdminReviewService adminReviewService;
     @MockitoBean private AdminPaymentService adminPaymentService;
     @MockitoBean private AdminRevenueService adminRevenueService;
 
@@ -340,9 +340,9 @@ class SecurityAuthorizationTests {
         var user = new User(); user.setUid("employee-1"); user.setRole(UserRole.EMPLOYEE);
         when(firebaseSessionService.verifySession("staff-session")).thenReturn(identity);
         when(currentUserService.requireUser(identity)).thenReturn(user);
-        when(staffAccessService.forUser(user)).thenReturn(new com.toeic.service.StaffAccessService.Access(true, "accountants", List.of("revenue.view")));
+        when(staffAccessService.forUser(user)).thenReturn(new com.toeic.service.staff.StaffAccessService.Access(true, "accountants", List.of("revenue.view")));
         mockMvc.perform(get("/api/admin/payments/revenue").cookie(new Cookie("session", "staff-session"))).andExpect(status().isOk());
-        when(staffAccessService.forUser(user)).thenReturn(new com.toeic.service.StaffAccessService.Access(false, "accountants", List.of()));
+        when(staffAccessService.forUser(user)).thenReturn(new com.toeic.service.staff.StaffAccessService.Access(false, "accountants", List.of()));
         mockMvc.perform(get("/api/admin/payments/revenue").cookie(new Cookie("session", "staff-session"))).andExpect(status().isForbidden());
         mockMvc.perform(get("/api/employee/tests").cookie(new Cookie("session", "staff-session"))).andExpect(status().isForbidden());
         mockMvc.perform(get("/api/users/me/statistics").cookie(new Cookie("session", "staff-session"))).andExpect(status().isOk());
@@ -395,7 +395,7 @@ class SecurityAuthorizationTests {
         var user = new User(); user.setUid("employee-1"); user.setRole(UserRole.EMPLOYEE); user.setPasswordChangeRequired(true);
         when(firebaseSessionService.verifySession("temporary")).thenReturn(identity);
         when(currentUserService.requireUser(identity)).thenReturn(user);
-        when(staffAccessService.forUser(user)).thenReturn(new com.toeic.service.StaffAccessService.Access(true, "creators", List.of("tests.view")));
+        when(staffAccessService.forUser(user)).thenReturn(new com.toeic.service.staff.StaffAccessService.Access(true, "creators", List.of("tests.view")));
         mockMvc.perform(get("/api/employee/tests").cookie(new Cookie("session", "temporary")))
                 .andExpect(status().isForbidden()).andExpect(jsonPath("$.code").value("STAFF_PASSWORD_CHANGE_REQUIRED"));
         mockMvc.perform(get("/api/users/me/statistics").cookie(new Cookie("session", "temporary"))).andExpect(status().isForbidden());
@@ -413,7 +413,7 @@ class SecurityAuthorizationTests {
         mockMvc.perform(get("/api/users/me/statistics").cookie(new Cookie("session", "old-epoch"))).andExpect(status().isUnauthorized());
         var fresh = new FirebaseIdentity("employee-1", "staff@example.test", "Staff", null, null, 1_800_000_001L);
         when(firebaseSessionService.verifySession("fresh-epoch")).thenReturn(fresh); when(currentUserService.requireUser(fresh)).thenReturn(user);
-        when(staffAccessService.forUser(user)).thenReturn(new com.toeic.service.StaffAccessService.Access(true, "creators", List.of()));
+        when(staffAccessService.forUser(user)).thenReturn(new com.toeic.service.staff.StaffAccessService.Access(true, "creators", List.of()));
         mockMvc.perform(get("/api/users/me/statistics").cookie(new Cookie("session", "fresh-epoch"))).andExpect(status().isOk());
     }
 
@@ -434,7 +434,7 @@ class SecurityAuthorizationTests {
     void passwordChangeRequiresInternalRoleAndCsrfAndResendIsAdminOnly() throws Exception {
         String path = "/api/console/account/password", body = "{\"oldPassword\":\"old\",\"newPassword\":\"NewPassword123!\"}";
         mockMvc.perform(post(path).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isUnauthorized());
-        org.mockito.Mockito.doThrow(new com.toeic.controller.ApiCodeException(HttpStatus.FORBIDDEN, "ACCESS_DENIED", "Not a staff password owner"))
+        org.mockito.Mockito.doThrow(new com.toeic.exception.ApiCodeException(HttpStatus.FORBIDDEN, "ACCESS_DENIED", "Not a staff password owner"))
                 .when(staffCredentialService).change("user-1", "old", "NewPassword123!");
         mockMvc.perform(post(path).with(csrf()).with(authentication(authenticationFor(UserRole.USER))).contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isForbidden());
         mockMvc.perform(post(path).with(authentication(authenticationFor(UserRole.EMPLOYEE))).contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isForbidden());

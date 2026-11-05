@@ -203,20 +203,34 @@ npm run build
 ```text
 frontend/
 ├── src/
-│   ├── api/                 # API client và wrapper theo nghiệp vụ
+│   ├── api/                 # client.js dùng chung; wrapper theo nghiệp vụ
+│   │   ├── ai/
+│   │   ├── attempts/
+│   │   ├── auth/
+│   │   ├── billing/
+│   │   ├── staff/
+│   │   ├── tests/
+│   │   └── users/
 │   ├── auth/                # Firebase session và route guard
-│   ├── components/          # Component dùng chung
-│   │   ├── admin/           # Component dành cho Admin
-│   │   ├── ai-chat/         # Khung chat Capy AI dành cho người dùng Pro
-│   │   ├── test-editor/     # Component tạo/sửa đề TOEIC
-│   │   ├── tests/           # Component danh sách và bộ lọc đề
-│   │   ├── ui/              # Button, Input, Modal, Badge...
-│   │   └── user/            # Component dashboard/lịch sử người dùng
-│   ├── config/              # Cấu hình thời gian và chế độ thi
-│   ├── data/                # Dữ liệu catalog tĩnh
-│   ├── layouts/             # Layout Public, User, Employee/Admin
-│   ├── pages/               # Các trang theo route
-│   ├── utils/               # Hàm xử lý dữ liệu và format
+│   ├── components/ui/       # Logo, chuyển ngôn ngữ, loading dùng chung
+│   ├── modules/             # Page, component, hook, util theo chức năng
+│   │   ├── authentication/
+│   │   ├── public/
+│   │   ├── errors/
+│   │   ├── profile/
+│   │   ├── dashboard/       # pages/user và pages/admin
+│   │   ├── test-catalog/
+│   │   ├── test-management/ # pages/employee, pages/admin, editor, review
+│   │   ├── exam/            # Intro, exam, result, review, timing, util
+│   │   ├── learning-history/
+│   │   ├── ai-analysis/
+│   │   ├── ai-chat/
+│   │   ├── billing/         # pages/user, pages/admin và component Pro
+│   │   ├── staff-management/
+│   │   └── legacy-practice/ # Luồng cũ, không phát triển thêm
+│   ├── layouts/             # PublicLayout, UserLayout, ManagementLayout
+│   ├── assets/
+│   ├── i18n/
 │   ├── App.jsx              # Khai báo route hiện tại
 │   ├── firebase.js          # Firebase Web client config
 │   └── main.jsx             # Entry point React
@@ -225,6 +239,17 @@ frontend/
 ├── package-lock.json
 └── vite.config.js
 ```
+
+Mỗi module chỉ tạo thư mục con khi có file thực tế. Test đặt cạnh file được kiểm
+thử. API wrapper vẫn nằm dưới `src/api/`, dùng `apiFetch` hoặc `publicApiFetch`
+từ `src/api/client.js`. `src/auth/` chứa hạ tầng xác thực; module
+`authentication/` chứa màn hình và form đăng nhập/mật khẩu.
+
+Role chỉ phân nhóm màn hình bên trong module khi cần. Đường dẫn thư mục không
+quyết định quyền truy cập; giữ nguyên route guard và kiểm tra phía backend.
+Việc gom module không thay đổi ownership: xem tài liệu phân công và danh sách
+file bị khóa trước khi sửa. Bản đồ di chuyển chi tiết nằm trong
+[kế hoạch tái cấu trúc](../docs/plans/2026-11-04-module-folder-structure.md).
 
 ## 8. Trạng thái các luồng hiện tại
 
@@ -249,7 +274,7 @@ frontend/
 
 ### Route legacy không nên dùng
 
-`/practice/part5` và `src/pages/PracticePart.jsx` là code thử nghiệm cũ, vẫn tham chiếu `test_001`. Không phát triển tính năng mới dựa trên file này.
+`/practice/part5` và `src/modules/legacy-practice/pages/PracticePart.jsx` là code thử nghiệm cũ, vẫn tham chiếu `test_001`. Không phát triển tính năng mới dựa trên file này.
 
 Luồng thi hiện tại sử dụng:
 
@@ -270,7 +295,7 @@ Capy AI Chat hỗ trợ giải đáp thắc mắc liên quan đến luyện thi 
 - Người dùng thường, `EMPLOYEE`, `ADMIN` và các route quản trị không hiển thị Capy.
 - Capy và khung chat không xuất hiện tại route làm bài `/full-test/:attemptId/exam`.
 - Frontend chỉ dùng subscription summary để quyết định cách hiển thị. Backend vẫn kiểm tra entitlement trên mọi API chat; không được tin role hoặc trạng thái Pro từ local storage/request body.
-- Dashboard người dùng thường tải danh sách gói từ backend và tạo checkout PayOS bằng `src/api/payments.js`; frontend chỉ gửi `planCode`, không gửi giá hoặc thời hạn.
+- Dashboard người dùng thường tải danh sách gói từ backend và tạo checkout PayOS bằng `src/api/billing/payments.js`; frontend chỉ gửi `planCode`, không gửi giá hoặc thời hạn.
 - Route `/payment/success` chỉ báo PayOS đã redirect về và refresh profile; quyền Pro chỉ được kích hoạt sau khi backend xác minh webhook. `/payment/cancel` không thay đổi subscription.
 
 ### Tương tác và khả năng truy cập
@@ -283,7 +308,7 @@ Capy AI Chat hỗ trợ giải đáp thắc mắc liên quan đến luyện thi 
 
 ### Cách chat hoạt động
 
-- API wrapper nằm tại `src/api/aiChat.js`; component không tự lấy Firebase token hoặc gọi `fetch` trực tiếp.
+- API wrapper nằm tại `src/api/ai/aiChat.js`; component không tự lấy Firebase token hoặc gọi `fetch` trực tiếp.
 - Phiên bản đầu dùng job bất đồng bộ và polling, không dùng token streaming. Tin nhắn người dùng xuất hiện ngay; câu trả lời Capy được cập nhật khi job hoàn thành.
 - Đóng khung chat chỉ hủy polling phía trình duyệt, không hủy job backend. Khi mở lại hội thoại có job đang chờ, frontend tiếp tục polling.
 - Người dùng có thể gắn context bằng attempt đã hoàn thành và số câu hỏi. Frontend chỉ gửi ID/số câu; backend tự tải và kiểm tra ownership cùng trạng thái attempt.
@@ -388,27 +413,29 @@ Mọi thành viên phải đọc tài liệu này trước khi tạo branch đ�
 - `src/auth/`
 - `src/layouts/`
 - `src/components/ui/`
-- `src/pages/auth/`, `src/pages/public/`, `src/pages/errors/`
+- `src/modules/authentication/`, `src/modules/public/`, `src/modules/errors/`
 - Tích hợp route cuối cùng trong `App.jsx`
 
 ### Member 2 — chức năng người học
 
-- `src/api/userLearning.js`
-- `src/pages/user/`
-- `src/components/user/`
-- `src/components/tests/`
+- `src/api/users/userLearning.js`
+- Dashboard người học, Profile/EditProfile, catalog và lịch sử trong `src/modules/`
+- Trang billing người học và `ProAvatarBadge` (trừ các file thuộc owner AI/Pro)
 
 ### Member 3 — chức năng Employee
 
-- `src/api/employeeTests.js`
-- `src/pages/employee/`
-- `src/components/test-editor/`
+- `src/api/tests/employeeTests.js`
+- `src/modules/test-management/pages/employee/`
+- `src/modules/test-management/components/test-editor/`
 
 ### Member 4 — chức năng Admin
 
-- `src/api/adminReviews.js`
-- `src/pages/admin/`
-- `src/components/admin/`
+- `src/api/tests/adminReviews.js`
+- Trang admin của test-management, dashboard, billing, staff-management và ConsoleProfile
+- Component review và staff; xem phạm vi chính xác trong tài liệu phân công
+
+Một module có thể chứa file thuộc nhiều owner. Danh sách file bị khóa và các
+ngoại lệ AI/Pro trong tài liệu phân công luôn được ưu tiên hơn phạm vi thư mục.
 
 Để giảm conflict, chỉ Member 1 nên thực hiện đợt tích hợp route lớn trong `App.jsx`. Các thành viên khác tập trung vào page, component và API wrapper thuộc phạm vi của mình.
 
@@ -431,7 +458,7 @@ npm test
 npm run build
 cd ..
 git status
-git add frontend/src/pages/user frontend/src/components/user frontend/src/components/tests frontend/src/api/userLearning.js
+git add frontend/src/modules/dashboard/pages/user frontend/src/api/users/userLearning.js
 git diff --cached
 git commit -m "feat(user): implement user dashboard"
 git push -u origin feature/m2-user-dashboard
@@ -538,7 +565,7 @@ người mua tải lại dashboard. Không yêu cầu thanh toán thêm.
 
 Admin truy cập `/console/staff` để tạo/sửa/xóa nhóm, cấu hình quyền và tạo tài khoản mới bằng họ tên, số điện thoại liên hệ, email. Không cần nhân viên tự đăng ký; email đã có trong Firebase Auth hoặc Firestore bị từ chối. Thông tin đăng nhập gửi bằng Gmail SMTP; trạng thái tạo tài khoản và gửi mail riêng biệt, có gửi lại sau 60 giây. Xem `docs/archive/STAFF_ACCOUNT_SETUP.md`. Các nhóm thường không thể được cấp quyền quản lý nhân viên. Nhóm Quản trị có đầy đủ quyền cố định và không được xóa.
 
-Menu, route và thao tác lấy quyền từ `profile.consoleAccess` do backend trả; gọi API qua `src/api/adminStaff.js` và client chung (session cookie + CSRF). Không tự lấy token hoặc giả lập role. Backend luôn kiểm tra lại quyền và ownership; nhân viên không được tự approve/reject đề do mình tạo.
+Menu, route và thao tác lấy quyền từ `profile.consoleAccess` do backend trả; gọi API qua `src/api/staff/adminStaff.js` và client chung (session cookie + CSRF). Không tự lấy token hoặc giả lập role. Backend luôn kiểm tra lại quyền và ownership; nhân viên không được tự approve/reject đề do mình tạo.
 
 Khóa chỉ thu hồi quyền Console; xóa thành viên chỉ gỡ quyền nội bộ, giữ tài khoản/dữ liệu học. Employee legacy tự ánh xạ vào nhóm tạo đề. UI có tìm tên/email, lọc nhóm/trạng thái, phân trang, dialog thêm/sửa và xác nhận xóa; dữ liệu stale trả `STAFF_CONFLICT` cần làm mới. Xem contract chi tiết trong `docs/archive/API_ROLE_WORKFLOWS.md`.
 
@@ -551,4 +578,4 @@ Console không còn menu/trang `/console/subscriptions`, API wrapper hoặc quy�
 
 ## Mật khẩu Console (2026-10-27)
 
-`/console/forgot-password` yêu cầu link qua email; `/console/reset-password` nhận token qua fragment, xóa fragment sau khi đọc. Link có hạn 1 giờ, dùng một lần. `/console/change-password` bắt buộc đổi mật khẩu tạm (hạn 24 giờ); backend cũng chặn các API khác. Cả Admin và Employee có `/console/profile` với dialog mật khẩu cũ/mới/xác nhận. Đổi thành công thu hồi tất cả phiên và yêu cầu đăng nhập lại. Gọi qua `src/api/staffPasswords.js`, giữ session + CSRF từ client chung. Mọi key mới có EN/VI trong staffTranslations.
+`/console/forgot-password` yêu cầu link qua email; `/console/reset-password` nhận token qua fragment, xóa fragment sau khi đọc. Link có hạn 1 giờ, dùng một lần. `/console/change-password` bắt buộc đổi mật khẩu tạm (hạn 24 giờ); backend cũng chặn các API khác. Cả Admin và Employee có `/console/profile` với dialog mật khẩu cũ/mới/xác nhận. Đổi thành công thu hồi tất cả phiên và yêu cầu đăng nhập lại. Gọi qua `src/api/staff/staffPasswords.js`, giữ session + CSRF từ client chung. Mọi key mới có EN/VI trong staffTranslations.

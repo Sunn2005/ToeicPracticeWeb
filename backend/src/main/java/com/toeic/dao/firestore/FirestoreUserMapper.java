@@ -1,8 +1,8 @@
 package com.toeic.dao.firestore;
 
 import com.google.cloud.Timestamp;
-import com.toeic.model.User;
-import com.toeic.model.enums.UserRole;
+import com.toeic.model.user.User;
+import com.toeic.model.user.enums.UserRole;
 
 import java.util.Date;
 import java.util.Map;

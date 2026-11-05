@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/useAuth";
-import BrandLogo from "../components/BrandLogo";
-import LanguageSwitcher from "../components/LanguageSwitcher";
+import BrandLogo from "../components/ui/BrandLogo";
+import LanguageSwitcher from "../components/ui/LanguageSwitcher";
 import { useLanguage } from "../i18n/LanguageContext";
 
 const NAV_ITEMS = [

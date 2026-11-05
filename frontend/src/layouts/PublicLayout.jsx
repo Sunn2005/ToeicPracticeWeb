@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
-import LanguageSwitcher from "../components/LanguageSwitcher";
+import LanguageSwitcher from "../components/ui/LanguageSwitcher";
 import { useLanguage } from "../i18n/LanguageContext";
-import BrandLogo from "../components/BrandLogo.jsx";
+import BrandLogo from "../components/ui/BrandLogo.jsx";
 
 const NAV_ITEMS = [
     { to: "/#features", labelKey: "publicNavFeatures" },

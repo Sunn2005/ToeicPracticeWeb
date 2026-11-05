@@ -1,0 +1,342 @@
+package com.toeic.dao.attempt.firestore;
+
+import com.google.cloud.Timestamp;
+import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.QueryDocumentSnapshot;
+import com.google.cloud.firestore.WriteBatch;
+import com.toeic.dao.attempt.AttemptDao;
+import com.toeic.model.attempt.Attempt;
+import com.toeic.model.attempt.AttemptAnswer;
+import com.toeic.model.attempt.AttemptResult;
+import org.springframework.stereotype.Repository;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+@Repository
+public class FirestoreAttemptDao implements AttemptDao {
+
+    private final Firestore firestore;
+
+    public FirestoreAttemptDao(Firestore firestore) {
+        this.firestore = firestore;
+    }
+
+    @Override
+    public String nextId() {
+        return firestore.collection("attempts").document().getId();
+    }
+
+    @Override
+    public void save(Attempt attempt) throws Exception {
+        firestore.collection("attempts").document(attempt.getId()).set(attempt).get();
+    }
+
+    @Override
+    public void updateTimestamp(String attemptId, long updatedAt) throws Exception {
+        firestore.collection("attempts")
+                .document(attemptId)
+                .update("updatedAt", updatedAt)
+                .get();
+    }
+
+    @Override
+    public Optional<Attempt> findById(String attemptId) throws Exception {
+        DocumentSnapshot snapshot = firestore.collection("attempts").document(attemptId).get().get();
+        if (!snapshot.exists()) {
+            return Optional.empty();
+        }
+
+        Map<String, Object> data = snapshot.getData();
+        if (data == null) {
+            return Optional.empty();
+        }
+        return Optional.of(attemptFrom(snapshot.getId(), data));
+    }
+
+    @Override
+    public List<Attempt> findByUserId(String userId) throws Exception {
+        List<Attempt> attempts = new ArrayList<>();
+        for (QueryDocumentSnapshot snapshot : firestore.collection("attempts")
+                .whereEqualTo("userId", userId)
+                .get()
+                .get()
+                .getDocuments()) {
+            Map<String, Object> data = snapshot.getData();
+            if (data != null) {
+                attempts.add(attemptFrom(snapshot.getId(), data));
+            }
+        }
+        return attempts;
+    }
+
+    @Override
+    public List<Attempt> findHistoryByUserId(String userId) throws Exception {
+        List<Attempt> attempts = new ArrayList<>();
+        for (QueryDocumentSnapshot snapshot : firestore.collection("attempts")
+                .whereEqualTo("userId", userId)
+                .select(
+                        "id",
+                        "userId",
+                        "testId",
+                        "type",
+                        "mode",
+                        "selectedPart",
+                        "selectedParts",
+                        "timeLimitSeconds",
+                        "timed",
+                        "status",
+                        "currentSection",
+                        "currentQuestionNumber",
+                        "totalQuestions",
+                        "score",
+                        "startedAt",
+                        "updatedAt",
+                        "submittedAt",
+                        "result"
+                )
+                .get()
+                .get()
+                .getDocuments()) {
+            Map<String, Object> data = snapshot.getData();
+            if (data != null) {
+                attempts.add(attemptFrom(snapshot.getId(), data));
+            }
+        }
+        return attempts;
+    }
+
+    @Override
+    public void delete(String attemptId) throws Exception {
+        var attemptReference = firestore.collection("attempts").document(attemptId);
+        WriteBatch batch = firestore.batch();
+        for (QueryDocumentSnapshot answer : attemptReference
+                .collection("answers")
+                .get()
+                .get()
+                .getDocuments()) {
+            batch.delete(answer.getReference());
+        }
+        batch.delete(attemptReference);
+        batch.commit().get();
+    }
+
+    @Override
+    public void saveAnswer(String attemptId, AttemptAnswer answer) throws Exception {
+        firestore.collection("attempts")
+                .document(attemptId)
+                .collection("answers")
+                .document(String.valueOf(answer.getQuestionNumber()))
+                .set(answer)
+                .get();
+    }
+
+    @Override
+    public Map<Integer, String> findAnswers(String attemptId) throws Exception {
+        Map<Integer, String> answers = new LinkedHashMap<>();
+        for (QueryDocumentSnapshot snapshot : firestore.collection("attempts")
+                .document(attemptId)
+                .collection("answers")
+                .get()
+                .get()
+                .getDocuments()) {
+            AttemptAnswer answer = snapshot.toObject(AttemptAnswer.class);
+            if (answer.getQuestionNumber() != null) {
+                answers.put(answer.getQuestionNumber(), answer.getSelectedAnswer());
+            }
+        }
+        return answers;
+    }
+
+    /**
+     * Legacy Firestore documents can contain native Timestamp values while the
+     * current API exposes epoch milliseconds. Mapping explicitly keeps old
+     * attempts resumable and prevents one legacy document from breaking the
+     * creation of every new attempt for that user.
+     */
+    static Attempt attemptFrom(String documentId, Map<String, Object> data) {
+        Attempt attempt = new Attempt();
+        String storedId = stringValue(data.get("id"));
+        attempt.setId(storedId == null || storedId.isBlank() ? documentId : storedId);
+        attempt.setUserId(stringValue(data.get("userId")));
+        attempt.setTestId(stringValue(data.get("testId")));
+        attempt.setType(stringValue(data.get("type")));
+        attempt.setMode(stringValue(data.get("mode")));
+        attempt.setSelectedPart(integerValue(data.get("selectedPart"), "selectedPart"));
+        attempt.setSelectedParts(integerListValue(data.get("selectedParts"), "selectedParts"));
+        attempt.setTimeLimitSeconds(integerValue(data.get("timeLimitSeconds"), "timeLimitSeconds"));
+        attempt.setTimed(booleanValue(data.get("timed"), "timed"));
+        attempt.setStatus(stringValue(data.get("status")));
+        attempt.setCurrentSection(stringValue(data.get("currentSection")));
+        attempt.setCurrentQuestionNumber(integerValue(
+                data.get("currentQuestionNumber"),
+                "currentQuestionNumber"
+        ));
+        attempt.setFirstQuestionNumber(integerValue(
+                data.get("firstQuestionNumber"),
+                "firstQuestionNumber"
+        ));
+        attempt.setLastQuestionNumber(integerValue(
+                data.get("lastQuestionNumber"),
+                "lastQuestionNumber"
+        ));
+        attempt.setTotalQuestions(integerValue(data.get("totalQuestions"), "totalQuestions"));
+        attempt.setStartedAt(epochMillis(data.get("startedAt"), "startedAt"));
+        attempt.setUpdatedAt(epochMillis(data.get("updatedAt"), "updatedAt"));
+        attempt.setSubmittedAt(epochMillis(data.get("submittedAt"), "submittedAt"));
+        attempt.setSectionStartedAt(epochMillis(data.get("sectionStartedAt"), "sectionStartedAt"));
+        attempt.setSectionEndAt(epochMillis(data.get("sectionEndAt"), "sectionEndAt"));
+        attempt.setOverallEndAt(epochMillis(data.get("overallEndAt"), "overallEndAt"));
+        attempt.setListeningStartedAt(epochMillis(
+                data.get("listeningStartedAt"),
+                "listeningStartedAt"
+        ));
+        attempt.setListeningEndAt(epochMillis(data.get("listeningEndAt"), "listeningEndAt"));
+        attempt.setReadingStartedAt(epochMillis(data.get("readingStartedAt"), "readingStartedAt"));
+        attempt.setReadingEndAt(epochMillis(data.get("readingEndAt"), "readingEndAt"));
+        attempt.setScore(integerValue(data.get("score"), "score"));
+        attempt.setResult(attemptResultValue(data.get("result"), "result"));
+        attempt.setAiAnalysisStatus(stringValue(data.get("aiAnalysisStatus")));
+        attempt.setAiAnalysisId(stringValue(data.get("aiAnalysisId")));
+        attempt.setAiAnalysisRequestedAt(epochMillis(
+                data.get("aiAnalysisRequestedAt"),
+                "aiAnalysisRequestedAt"
+        ));
+        attempt.setAnswers(stringMapValue(data.get("answers"), "answers"));
+        return attempt;
+    }
+
+    private static String stringValue(Object value) {
+        return value == null ? null : String.valueOf(value);
+    }
+
+    private static Integer integerValue(Object value, String fieldName) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Number number) {
+            return number.intValue();
+        }
+        throw unsupportedFieldType(fieldName, value);
+    }
+
+    private static List<Integer> integerListValue(Object value, String fieldName) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof List<?> values) {
+            List<Integer> result = new ArrayList<>();
+            for (Object item : values) {
+                result.add(integerValue(item, fieldName));
+            }
+            return result;
+        }
+        throw unsupportedFieldType(fieldName, value);
+    }
+
+    private static Long epochMillis(Object value, String fieldName) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Number number) {
+            return number.longValue();
+        }
+        if (value instanceof Timestamp timestamp) {
+            return timestamp.getSeconds() * 1_000L + timestamp.getNanos() / 1_000_000L;
+        }
+        if (value instanceof Date date) {
+            return date.getTime();
+        }
+        throw unsupportedFieldType(fieldName, value);
+    }
+
+    private static AttemptResult attemptResultValue(Object value, String fieldName) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Map<?, ?> source) {
+            return AttemptResult.builder()
+                    .attemptId(stringValue(source.get("attemptId")))
+                    .testId(stringValue(source.get("testId")))
+                    .type(stringValue(source.get("type")))
+                    .mode(stringValue(source.get("mode")))
+                    .selectedPart(integerValue(source.get("selectedPart"), "result.selectedPart"))
+                    .selectedParts(integerListValue(source.get("selectedParts"), "result.selectedParts"))
+                    .timeLimitSeconds(integerValue(source.get("timeLimitSeconds"), "result.timeLimitSeconds"))
+                    .timed(booleanValue(source.get("timed"), "result.timed"))
+                    .firstQuestionNumber(integerValue(source.get("firstQuestionNumber"), "result.firstQuestionNumber"))
+                    .lastQuestionNumber(integerValue(source.get("lastQuestionNumber"), "result.lastQuestionNumber"))
+                    .listeningTotalQuestions(integerValue(source.get("listeningTotalQuestions"), "result.listeningTotalQuestions"))
+                    .readingTotalQuestions(integerValue(source.get("readingTotalQuestions"), "result.readingTotalQuestions"))
+                    .listeningCorrect(integerValue(source.get("listeningCorrect"), "result.listeningCorrect"))
+                    .listeningWrong(integerValue(source.get("listeningWrong"), "result.listeningWrong"))
+                    .listeningUnanswered(integerValue(source.get("listeningUnanswered"), "result.listeningUnanswered"))
+                    .readingCorrect(integerValue(source.get("readingCorrect"), "result.readingCorrect"))
+                    .readingWrong(integerValue(source.get("readingWrong"), "result.readingWrong"))
+                    .readingUnanswered(integerValue(source.get("readingUnanswered"), "result.readingUnanswered"))
+                    .totalCorrect(integerValue(source.get("totalCorrect"), "result.totalCorrect"))
+                    .totalWrong(integerValue(source.get("totalWrong"), "result.totalWrong"))
+                    .totalUnanswered(integerValue(source.get("totalUnanswered"), "result.totalUnanswered"))
+                    .totalQuestions(integerValue(source.get("totalQuestions"), "result.totalQuestions"))
+                    .correctCount(integerValue(source.get("correctCount"), "result.correctCount"))
+                    .incorrectCount(integerValue(source.get("incorrectCount"), "result.incorrectCount"))
+                    .unansweredCount(integerValue(source.get("unansweredCount"), "result.unansweredCount"))
+                    .listeningScore(integerValue(source.get("listeningScore"), "result.listeningScore"))
+                    .readingScore(integerValue(source.get("readingScore"), "result.readingScore"))
+                    .totalScore(integerValue(source.get("totalScore"), "result.totalScore"))
+                    .estimatedTotalScore(integerValue(source.get("estimatedTotalScore"), "result.estimatedTotalScore"))
+                    .durationSeconds(longValue(source.get("durationSeconds"), "result.durationSeconds"))
+                    .submittedAt(epochMillis(source.get("submittedAt"), "result.submittedAt"))
+                    .autoSubmitted(booleanValue(source.get("autoSubmitted"), "result.autoSubmitted"))
+                    .build();
+        }
+        throw unsupportedFieldType(fieldName, value);
+    }
+
+    private static Long longValue(Object value, String fieldName) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Number number) {
+            return number.longValue();
+        }
+        throw unsupportedFieldType(fieldName, value);
+    }
+
+    private static Boolean booleanValue(Object value, String fieldName) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Boolean booleanValue) {
+            return booleanValue;
+        }
+        throw unsupportedFieldType(fieldName, value);
+    }
+
+    private static Map<String, String> stringMapValue(Object value, String fieldName) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Map<?, ?> source) {
+            Map<String, String> result = new LinkedHashMap<>();
+            source.forEach((key, item) -> result.put(
+                    String.valueOf(key),
+                    item == null ? null : String.valueOf(item)
+            ));
+            return result;
+        }
+        throw unsupportedFieldType(fieldName, value);
+    }
+
+    private static IllegalArgumentException unsupportedFieldType(String fieldName, Object value) {
+        return new IllegalArgumentException(
+                "Kiểu dữ liệu Firestore không hợp lệ cho " + fieldName + ": "
+                        + value.getClass().getName()
+        );
+    }
+}
