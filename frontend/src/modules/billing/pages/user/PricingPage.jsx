@@ -75,7 +75,11 @@ export default function PricingPage() {
       setError(
         err?.body?.code === "PAYMENT_TRIAL_ALREADY_USED"
           ? t("proPaymentTrialUsed")
-          : t("proPaymentError"),
+          : err?.body?.code === "PAYMENT_ALREADY_PAID"
+            ? t("proPaymentSuccessDescription")
+            : err?.body?.code === "PAYMENT_PROCESSING"
+              ? t("proPaymentProcessing")
+              : t("proPaymentError"),
       );
       setPayingPlan("");
     }

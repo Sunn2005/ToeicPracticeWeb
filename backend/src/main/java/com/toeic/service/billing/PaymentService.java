@@ -26,7 +26,6 @@ import java.util.concurrent.ThreadLocalRandom;
 @Service
 public class PaymentService {
     private static final Logger log = LoggerFactory.getLogger(PaymentService.class);
-    private static final long PENDING_REUSE_MILLIS = 15 * 60 * 1000;
     private static final long MILLIS_PER_DAY = 24L * 60 * 60 * 1000;
     // JSON consumers using JavaScript Number must preserve the exact signed order code.
     private static final long MAX_SAFE_ORDER_CODE = 9_007_199_254_740_991L;
@@ -77,11 +76,24 @@ public class PaymentService {
         }
         long now = clock.millis();
 
-        // Reuse a fresh pending order instead of spamming PayOS with duplicate links.
+        // Local age does not establish whether a provider link is still payable.
         var pending = paymentOrderDao.findLatestPending(userId, plan.code());
-        if (pending.isPresent() && now - pending.get().getCreatedAt() < PENDING_REUSE_MILLIS
-                && pending.get().getCheckoutUrl() != null) {
-            return new CreatePaymentResult(pending.get().getCheckoutUrl(), pending.get().getOrderCode());
+        if (pending.isPresent()) {
+            PaymentOrder existing = pending.get();
+            String status = verifiedStatus(existing);
+            if ("PAID".equals(status)) {
+                applyPaidOrder(existing, now, null);
+                throw new ApiCodeException(HttpStatus.CONFLICT, "PAYMENT_ALREADY_PAID", "Order already paid");
+            }
+            if ("PROCESSING".equals(status)) {
+                throw new ApiCodeException(HttpStatus.CONFLICT, "PAYMENT_PROCESSING", "Payment is processing");
+            }
+            if ("PENDING".equals(status) && existing.getCheckoutUrl() != null) {
+                return new CreatePaymentResult(existing.getCheckoutUrl(), existing.getOrderCode());
+            }
+            if (!"CANCELLED".equals(status) && !"EXPIRED".equals(status))
+                throw new ApiCodeException(HttpStatus.BAD_GATEWAY, "PAYOS_UNAVAILABLE", "Checkout unavailable");
+            closeCancelledOrder(existing);
         }
 
         PaymentOrder order = new PaymentOrder();
@@ -108,6 +120,60 @@ public class PaymentService {
             throw new ApiCodeException(HttpStatus.BAD_GATEWAY, "PAYOS_UNAVAILABLE",
                     "PayOS could not create a payment link");
         }
+    }
+
+    public record OrderState(long orderCode, String planCode, String status) { }
+
+    private PaymentOrder ownedOrder(String userId, long orderCode) throws Exception {
+        return paymentOrderDao.findByOrderCode(orderCode)
+                .filter(order -> userId.equals(order.getUserId()))
+                .orElseThrow(() -> new ApiCodeException(HttpStatus.NOT_FOUND,
+                        "PAYMENT_ORDER_NOT_FOUND", "Payment order not found"));
+    }
+
+    public OrderState orderState(String userId, long orderCode) throws Exception {
+        PaymentOrder order = ownedOrder(userId, orderCode);
+        return new OrderState(orderCode, order.getPlanCode(), verifiedStatus(order));
+    }
+
+    public CreatePaymentResult retryPayment(String userId, long orderCode) throws Exception {
+        PaymentOrder order = ownedOrder(userId, orderCode);
+        String status = verifiedStatus(order);
+        if ("PAID".equals(status)) {
+            applyPaidOrder(order, clock.millis(), null);
+            throw new ApiCodeException(HttpStatus.CONFLICT, "PAYMENT_ALREADY_PAID", "Order already paid");
+        }
+        if ("PROCESSING".equals(status)) {
+            throw new ApiCodeException(HttpStatus.CONFLICT, "PAYMENT_PROCESSING", "Payment is processing");
+        }
+        if ("CANCELLED".equals(status) || "EXPIRED".equals(status)) closeCancelledOrder(order);
+        return createProPayment(userId, order.getPlanCode());
+    }
+
+    private String verifiedStatus(PaymentOrder order) {
+        if (order.getStatus() != PaymentOrderStatus.PENDING) return order.getStatus().name();
+        PayOSClient.PaymentInfo info = payosClient.getPaymentInfo(order.getOrderCode());
+        if (info.orderCode() != order.getOrderCode() || order.getPaymentLinkId() == null
+                || !order.getPaymentLinkId().equals(info.paymentLinkId()) || info.amount() != order.getAmount()) {
+            throw new ApiCodeException(HttpStatus.CONFLICT, "PAYMENT_ORDER_MISMATCH", "Payment information mismatch");
+        }
+        if (!List.of("PENDING", "PROCESSING", "PAID", "CANCELLED", "EXPIRED").contains(info.status())
+                || ("PAID".equals(info.status()) && (info.amountPaid() < order.getAmount() || info.amountRemaining() != 0))) {
+            throw new ApiCodeException(HttpStatus.BAD_GATEWAY, "PAYOS_UNAVAILABLE", "Invalid payment state");
+        }
+        return info.status();
+    }
+
+    private void closeCancelledOrder(PaymentOrder order) throws Exception {
+        PaymentOrder updated = paymentOrderDao.updateAtomically(order.getOrderCode(), current -> {
+            if (current == null || current.getStatus() != PaymentOrderStatus.PENDING)
+                return new PaymentOrderDao.Mutation(current, false);
+            current.setStatus(PaymentOrderStatus.CANCELLED);
+            current.setUpdatedAt(clock.millis());
+            return new PaymentOrderDao.Mutation(current, true);
+        });
+        if (updated == null || updated.getStatus() != PaymentOrderStatus.CANCELLED)
+            throw new ApiCodeException(HttpStatus.CONFLICT, "PAYMENT_ALREADY_PAID", "Order state changed");
     }
 
     public record WebhookResult(boolean handled, String reason) { }

@@ -296,7 +296,7 @@ Capy AI Chat hỗ trợ giải đáp thắc mắc liên quan đến luyện thi 
 - Capy và khung chat không xuất hiện tại route làm bài `/full-test/:attemptId/exam`.
 - Frontend chỉ dùng subscription summary để quyết định cách hiển thị. Backend vẫn kiểm tra entitlement trên mọi API chat; không được tin role hoặc trạng thái Pro từ local storage/request body.
 - Dashboard người dùng thường tải danh sách gói từ backend và tạo checkout PayOS bằng `src/api/billing/payments.js`; frontend chỉ gửi `planCode`, không gửi giá hoặc thời hạn.
-- Route `/payment/success` chỉ báo PayOS đã redirect về và refresh profile; quyền Pro chỉ được kích hoạt sau khi backend xác minh webhook. `/payment/cancel` không thay đổi subscription.
+- Route `/payment/success` chỉ báo PayOS đã redirect về và refresh profile; quyền Pro chỉ được kích hoạt sau khi backend xác minh webhook. `/payment/cancel` không thay đổi subscription. Trang kết quả tra `GET /api/payments/orders/{orderCode}` để hiển thị trạng thái đã xác minh và gọi `POST /api/payments/orders/{orderCode}/retry` khi bấm thanh toán lại. Backend kiểm tra chủ đơn, dùng lại link còn PENDING hoặc tạo link mới nếu PayOS xác nhận đã huỷ/hết hạn; PAID/PROCESSING chặn mua lại. Thiếu mã đơn thì cho chọn lại gói.
 
 ### Tương tác và khả năng truy cập
 

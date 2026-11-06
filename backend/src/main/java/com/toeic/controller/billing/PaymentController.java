@@ -4,6 +4,7 @@ import com.toeic.security.ToeicUserPrincipal;
 import com.toeic.service.billing.PaymentService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,6 +33,18 @@ public class PaymentController {
             @RequestBody CreatePaymentRequest request
     ) throws Exception {
         return paymentService.createProPayment(principal.uid(), request.planCode());
+    }
+
+    @GetMapping("/orders/{orderCode}")
+    public PaymentService.OrderState state(@AuthenticationPrincipal ToeicUserPrincipal principal,
+            @PathVariable long orderCode) throws Exception {
+        return paymentService.orderState(principal.uid(), orderCode);
+    }
+
+    @PostMapping("/orders/{orderCode}/retry")
+    public PaymentService.CreatePaymentResult retry(@AuthenticationPrincipal ToeicUserPrincipal principal,
+            @PathVariable long orderCode) throws Exception {
+        return paymentService.retryPayment(principal.uid(), orderCode);
     }
 
     /**

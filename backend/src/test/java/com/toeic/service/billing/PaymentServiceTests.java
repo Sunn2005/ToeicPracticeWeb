@@ -38,6 +38,68 @@ class PaymentServiceTests {
             Clock.fixed(Instant.ofEpochMilli(NOW), ZoneOffset.UTC));
 
     @Test
+    void cancelledCheckoutCreatesNewOrderAndRetryReusesReplacement() throws Exception {
+        var first = service.createProPayment("learner", "PRO_30");
+        var old = orderDao.records.get(first.orderCode());
+        payosClient.pendingInfos.put(first.orderCode(), new PayOSClient.PaymentInfo(
+                first.orderCode(), old.getPaymentLinkId(), old.getAmount(), 0, old.getAmount(), "CANCELLED"));
+        var next = service.retryPayment("learner", first.orderCode());
+        assertNotEquals(first.orderCode(), next.orderCode());
+        assertEquals(PaymentOrderStatus.CANCELLED, old.getStatus());
+        assertEquals(next.orderCode(), service.retryPayment("learner", first.orderCode()).orderCode());
+        assertEquals(2, payosClient.createdLinks);
+    }
+
+    @Test
+    void expiredCheckoutIsReplaced() throws Exception {
+        var first = service.createProPayment("learner", "PRO_30");
+        var old = orderDao.records.get(first.orderCode());
+        payosClient.info = new PayOSClient.PaymentInfo(first.orderCode(), old.getPaymentLinkId(),
+                old.getAmount(), 0, old.getAmount(), "EXPIRED");
+        assertNotEquals(first.orderCode(), service.createProPayment("learner", "PRO_30").orderCode());
+    }
+
+    @Test
+    void retryAndStatusDoNotExposeOtherUsersOrders() throws Exception {
+        var first = service.createProPayment("learner", "PRO_30");
+        assertEquals("PAYMENT_ORDER_NOT_FOUND", assertThrows(ApiCodeException.class,
+                () -> service.retryPayment("other", first.orderCode())).getCode());
+        assertEquals("PAYMENT_ORDER_NOT_FOUND", assertThrows(ApiCodeException.class,
+                () -> service.orderState("other", first.orderCode())).getCode());
+        assertEquals(0, payosClient.lookups);
+    }
+
+    @Test
+    void retryBlocksProcessingPaidMismatchAndProviderFailure() throws Exception {
+        var first = service.createProPayment("learner", "PRO_30");
+        var old = orderDao.records.get(first.orderCode());
+        payosClient.info = new PayOSClient.PaymentInfo(first.orderCode(), old.getPaymentLinkId(),
+                old.getAmount(), 0, old.getAmount(), "PROCESSING");
+        assertEquals("PAYMENT_PROCESSING", assertThrows(ApiCodeException.class,
+                () -> service.retryPayment("learner", first.orderCode())).getCode());
+        payosClient.unavailable = true;
+        assertEquals("PAYOS_UNAVAILABLE", assertThrows(ApiCodeException.class,
+                () -> service.retryPayment("learner", first.orderCode())).getCode());
+        payosClient.unavailable = false;
+        payosClient.info = new PayOSClient.PaymentInfo(first.orderCode(), "wrong", old.getAmount(), 0, 0, "PAID");
+        assertEquals("PAYMENT_ORDER_MISMATCH", assertThrows(ApiCodeException.class,
+                () -> service.retryPayment("learner", first.orderCode())).getCode());
+        payosClient.info = new PayOSClient.PaymentInfo(first.orderCode(), old.getPaymentLinkId(),
+                old.getAmount(), old.getAmount(), 0, "PAID");
+        assertEquals("PAYMENT_ALREADY_PAID", assertThrows(ApiCodeException.class,
+                () -> service.retryPayment("learner", first.orderCode())).getCode());
+        assertEquals(PaymentOrderStatus.PAID, old.getStatus());
+        assertEquals(1, payosClient.createdLinks);
+    }
+
+    @Test
+    void oldButPayableLinkIsStillReused() throws Exception {
+        var first = service.createProPayment("learner", "PRO_30");
+        orderDao.records.get(first.orderCode()).setCreatedAt(NOW - DAY);
+        assertEquals(first.orderCode(), service.createProPayment("learner", "PRO_30").orderCode());
+    }
+
+    @Test
     void unknownPlanIsRejected() {
         var error = assertThrows(ApiCodeException.class, () -> service.createProPayment("learner", "NOPE"));
         assertEquals(HttpStatus.BAD_REQUEST, error.getStatus());
@@ -409,13 +471,14 @@ class PaymentServiceTests {
         int createdLinks = 0;
         int lookups = 0;
         PaymentInfo info;
+        final Map<Long, PaymentInfo> pendingInfos = new HashMap<>();
         boolean unavailable;
 
         @Override
         public PaymentInfo getPaymentInfo(long code) {
             lookups++;
             if (unavailable) throw new ApiCodeException(HttpStatus.BAD_GATEWAY, "PAYOS_UNAVAILABLE", "Unavailable");
-            return info;
+            return info != null ? info : pendingInfos.get(code);
         }
 
 
@@ -426,6 +489,7 @@ class PaymentServiceTests {
         @Override
         public PaymentLink createPaymentLink(long orderCode, long amount, String description) {
             createdLinks++;
+            pendingInfos.put(orderCode, new PaymentInfo(orderCode, "link-" + orderCode, amount, 0, amount, "PENDING"));
             return new PaymentLink("https://payos.test/checkout/" + orderCode, "link-" + orderCode);
         }
 

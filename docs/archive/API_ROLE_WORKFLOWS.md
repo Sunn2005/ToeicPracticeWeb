@@ -301,7 +301,7 @@ Server tính `effective` bằng `status=ACTIVE && startsAt <= serverNow && serve
 
 ### 3.3 Thanh toán Pro qua PayOS
 
-`GET /api/payments/pro/plans` yêu cầu đăng nhập và trả danh sách `{ planCode, amount, durationDays, sandboxOnly }` do server quản lý. `POST /api/payments/pro` yêu cầu session và CSRF hợp lệ, body chỉ nhận `{ "planCode": "PRO_30" }`; client không gửi giá hoặc thời hạn. Response thành công gồm `checkoutUrl` và `orderCode`. Pending order cùng user/gói trong 15 phút được tái sử dụng để tránh tạo link trùng.
+`GET /api/payments/pro/plans` yêu cầu đăng nhập và trả danh sách `{ planCode, amount, durationDays, sandboxOnly }` do server quản lý. `POST /api/payments/pro` yêu cầu session và CSRF hợp lệ, body chỉ nhận `{ "planCode": "PRO_30" }`; client không gửi giá hoặc thời hạn. Response thành công gồm `checkoutUrl` và `orderCode`. Pending order cùng user/gói chỉ được tái sử dụng sau khi backend tra PayOS và xác minh orderCode, paymentLinkId, amount và trạng thái PENDING; không suy ra hạn link từ tuổi đơn. PROCESSING trả 409 PAYMENT_PROCESSING. PAID được áp dụng idempotent và trả 409 PAYMENT_ALREADY_PAID để tránh mua trùng. CANCELLED/EXPIRED từ provider được đóng thành CANCELLED ở local trước khi tạo đơn mới; lỗi tra cứu không tạo link mới.
 
 `POST /api/payments/webhook` là endpoint public duy nhất trong nhóm này và được miễn CSRF vì PayOS không có browser session. Backend bắt buộc xác minh HMAC-SHA256 bằng `PAYOS_CHECKSUM_KEY`, đối chiếu `orderCode`, số tiền và trạng thái order trước khi kích hoạt Pro. Browser redirect tới `/payment/success` chỉ dùng để hiển thị trạng thái chờ xác nhận; không bao giờ tự kích hoạt subscription.
 
@@ -1355,3 +1355,10 @@ Operation được giữ trong Firestore để tuần tự hóa thao tác creden
 Lỗi bổ sung: `400 STAFF_PASSWORD_INVALID`, `400 STAFF_PASSWORD_INCORRECT`, `400 STAFF_RESET_INVALID`; `409 STAFF_EMAIL_EXISTS`, `409 STAFF_CREDENTIAL_BUSY`; `429 STAFF_RATE_LIMITED`; `403 STAFF_TEMP_EXPIRED`, `403 STAFF_PASSWORD_CHANGE_REQUIRED`; `503 STAFF_AUTH_UNAVAILABLE`. Error body không chứa mật khẩu, token hoặc response nhạy cảm từ provider.
 
 Ngoại lệ bảo toàn tài khoản khi gỡ nhân viên: tài khoản do admin tạo nhưng chưa hoàn tất mật khẩu tạm vẫn được chủ tài khoản hoàn tất đổi mật khẩu sau khi bị chuyển về USER; endpoint change xác thực session và kiểm tra quyền sở hữu/trạng thái ở service. Former staff có thể dùng recovery email để giữ khả năng truy cập tài khoản người học. Điều này không cấp quyền Console hoặc quyền nhóm cho USER; USER thông thường vẫn bị từ chối ở staff password service.
+
+### Huỷ và thanh toán lại (2026-11-06)
+
+- `GET /api/payments/orders/{orderCode}`: yêu cầu đăng nhập, chỉ chủ đơn; trả `{ orderCode, planCode, status }`. Đơn PENDING được xác minh bằng PayOS, status có thể là PENDING/PROCESSING/PAID/CANCELLED/EXPIRED. GET không ghi trạng thái hay kích hoạt Pro.
+- `POST /api/payments/orders/{orderCode}/retry`: yêu cầu session và CSRF hợp lệ, chỉ chủ đơn, không nhận body; gói lấy từ đơn đã lưu. Xác minh lại PayOS, dùng lại đơn PENDING hoặc đóng đơn CANCELLED/EXPIRED và tạo/dùng lại link thay thế cùng gói. Trả `{ checkoutUrl, orderCode }`. PROCESSING trả `409 PAYMENT_PROCESSING`; PAID áp dụng quyền theo cơ chế idempotent hiện có rồi trả `409 PAYMENT_ALREADY_PAID`. Không tạo đơn mới trong hai trường hợp này.
+- Đơn không tồn tại hoặc thuộc người khác: `404 PAYMENT_ORDER_NOT_FOUND`; dữ liệu provider không khớp: `409 PAYMENT_ORDER_MISMATCH`; provider không khả dụng: `502 PAYOS_UNAVAILABLE`.
+- Redirect huỷ chỉ xác định mã đơn cần tra cứu, không được dùng làm bằng chứng huỷ. Trang kết quả có loading/error, thanh toán lại và kiểm tra lại cho trạng thái đang xử lý/đã thanh toán. Không có mã đơn hợp lệ thì về chọn gói.

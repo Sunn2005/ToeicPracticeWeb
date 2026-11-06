@@ -10,3 +10,11 @@ export function createProPayment(planCode) {
     body: JSON.stringify({ planCode }),
   });
 }
+
+export function getPaymentState(orderCode) {
+  return apiFetch(`/api/payments/orders/${encodeURIComponent(orderCode)}`);
+}
+
+export function retryPayment(orderCode) {
+  return apiFetch(`/api/payments/orders/${encodeURIComponent(orderCode)}/retry`, { method: "POST" });
+}
