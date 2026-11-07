@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { afterEach, test } from "node:test";
 import { API_BASE_URL, clearCsrfToken } from "../client.js";
-import { createProPayment, getProPlans, getPaymentState, retryPayment } from "./payments.js";
+import { createProPayment, getProPlans, getPaymentState, retryPayment, confirmPayment } from "./payments.js";
 
 const originalFetch = globalThis.fetch;
 
@@ -54,4 +54,14 @@ test("payment status and retry use authenticated owner endpoints", async () => {
   assert.equal(calls[0].options.credentials, "include");
   assert.equal(calls[2].url, `${API_BASE_URL}/api/payments/orders/1/retry`);
   assert.equal(calls[2].options.method, "POST");
+});
+
+test("confirmation posts with session and CSRF without trusting redirect fields", async () => {
+  const calls = installResponses(json({ token: "csrf" }), json({ orderCode: 1, status: "PAID" }));
+  assert.equal((await confirmPayment(1)).status, "PAID");
+  assert.equal(calls[1].url, `${API_BASE_URL}/api/payments/orders/1/confirm`);
+  assert.equal(calls[1].options.method, "POST");
+  assert.equal(calls[1].options.credentials, "include");
+  assert.equal(calls[1].options.headers.get("X-XSRF-TOKEN"), "csrf");
+  assert.equal(calls[1].options.body, undefined);
 });

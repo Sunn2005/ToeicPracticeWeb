@@ -15,6 +15,10 @@ export function getPaymentState(orderCode) {
   return apiFetch(`/api/payments/orders/${encodeURIComponent(orderCode)}`);
 }
 
+export function confirmPayment(orderCode) {
+  return apiFetch(`/api/payments/orders/${encodeURIComponent(orderCode)}/confirm`, { method: "POST" });
+}
+
 export function retryPayment(orderCode) {
   return apiFetch(`/api/payments/orders/${encodeURIComponent(orderCode)}/retry`, { method: "POST" });
 }

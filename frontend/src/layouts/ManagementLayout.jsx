@@ -42,8 +42,8 @@ function ManagementLayout() {
   const navigation = [
     { label: "Trang tổng quan", icon: "dashboard", to: "/console/dashboard" },
     { label: t("staffTitle"), icon: "staff", to: "/console/staff" },
-    { label: "Quản lý đề thi", icon: "tests", to: "/console/tests", badge: "EMP" },
-    { label: "Tạo đề mới", icon: "create", to: "/console/tests/new", badge: "EMP" },
+    { label: "Quản lý đề thi", icon: "tests", to: "/console/tests", badge: "NV" },
+    { label: "Tạo đề mới", icon: "create", to: "/console/tests/new", badge: "NV" },
     { label: "Xét duyệt", icon: "review", to: "/console/reviews" },
     { label: "Lịch sử phê duyệt", icon: "history", to: "/console/review-history" },
     { label: t("adminRevenueNav"), icon: "dashboard", to: "/console/revenue" },
@@ -75,7 +75,7 @@ function ManagementLayout() {
         </button>
       </div>
 
-      <nav className="flex-1 space-y-1.5 px-4 py-6" aria-label="Điều hướng Console">
+      <nav className="flex-1 space-y-1.5 px-4 py-6" aria-label="Điều hướng quản trị">
         {navigation.map((item) => item.locked ? (
           <div key={item.label} aria-disabled="true" title="Chỉ quản trị viên được truy cập" className="flex h-12 cursor-not-allowed items-center gap-3 rounded-xl px-4 text-sm font-medium text-slate-400">
             <Icon name={item.icon} />

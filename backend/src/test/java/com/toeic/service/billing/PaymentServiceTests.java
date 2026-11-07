@@ -66,7 +66,69 @@ class PaymentServiceTests {
                 () -> service.retryPayment("other", first.orderCode())).getCode());
         assertEquals("PAYMENT_ORDER_NOT_FOUND", assertThrows(ApiCodeException.class,
                 () -> service.orderState("other", first.orderCode())).getCode());
+        assertEquals("PAYMENT_ORDER_NOT_FOUND", assertThrows(ApiCodeException.class,
+                () -> service.confirmPayment("other", first.orderCode())).getCode());
+        assertEquals("PAYMENT_ORDER_NOT_FOUND", assertThrows(ApiCodeException.class,
+                () -> service.confirmPayment("learner", 0)).getCode());
         assertEquals(0, payosClient.lookups);
+    }
+
+    @Test
+    void confirmationActivatesWithoutWebhookAndRepeatedDeliveryCannotAddDays() throws Exception {
+        var created = service.createProPayment("learner", "PRO_30");
+        providerPaid(created.orderCode(), 99_000);
+        assertEquals("PAID", service.orderState("learner", created.orderCode()).status());
+        assertFalse(subscriptionService.getSummary("learner").effective());
+        assertEquals("PAID", service.confirmPayment("learner", created.orderCode()).status());
+        assertTrue(subscriptionService.getSummary("learner").effective());
+        assertEquals(NOW + 30 * DAY, subscriptionService.getSummary("learner").expiresAt());
+        assertNull(orderDao.records.get(created.orderCode()).getPaidAt());
+        service.confirmPayment("learner", created.orderCode());
+        service.handleWebhook(signedPayload(created.orderCode(), 99_000, "00"));
+        assertEquals(NOW + 30 * DAY, subscriptionService.getSummary("learner").expiresAt());
+        subscriptionDao.records.get("learner").setStatus(SubscriptionStatus.REVOKED);
+        service.confirmPayment("learner", created.orderCode());
+        assertFalse(subscriptionService.getSummary("learner").effective());
+    }
+
+    @Test
+    void confirmationRepairsInterruptedActivationUsingReservedExpiry() throws Exception {
+        var created = service.createProPayment("learner", "PRO_30");
+        var order = orderDao.records.get(created.orderCode());
+        order.setStatus(PaymentOrderStatus.PAID);
+        order.setProExpiresAt(NOW + DAY);
+        service.confirmPayment("learner", created.orderCode());
+        assertEquals(NOW + DAY, subscriptionService.getSummary("learner").expiresAt());
+    }
+
+    @Test
+    void confirmationNeverActivatesUnpaidOrInvalidProviderStates() throws Exception {
+        var created = service.createProPayment("learner", "PRO_30");
+        long code = created.orderCode();
+        var order = orderDao.records.get(code);
+        for (String status : List.of("PENDING", "PROCESSING", "CANCELLED", "EXPIRED")) {
+            payosClient.info = new PayOSClient.PaymentInfo(code, order.getPaymentLinkId(), 99_000, 0, 99_000, status);
+            assertEquals(status, service.confirmPayment("learner", code).status());
+            assertFalse(subscriptionService.getSummary("learner").effective());
+        }
+        for (var info : List.of(
+                new PayOSClient.PaymentInfo(code + 1, order.getPaymentLinkId(), 99_000, 99_000, 0, "PAID"),
+                new PayOSClient.PaymentInfo(code, "wrong-link", 99_000, 99_000, 0, "PAID"),
+                new PayOSClient.PaymentInfo(code, order.getPaymentLinkId(), 10_000, 10_000, 0, "PAID"),
+                new PayOSClient.PaymentInfo(code, order.getPaymentLinkId(), 99_000, 1, 98_999, "PAID"),
+                new PayOSClient.PaymentInfo(code, order.getPaymentLinkId(), 99_000, 99_000, 1, "PAID"))) {
+            payosClient.info = info;
+            assertThrows(ApiCodeException.class, () -> service.confirmPayment("learner", code));
+            assertEquals(PaymentOrderStatus.PENDING, order.getStatus());
+            assertFalse(subscriptionService.getSummary("learner").effective());
+        }
+        payosClient.unavailable = true;
+        assertEquals("PAYOS_UNAVAILABLE", assertThrows(ApiCodeException.class,
+                () -> service.confirmPayment("learner", code)).getCode());
+        assertFalse(subscriptionService.getSummary("learner").effective());
+        order.setStatus(PaymentOrderStatus.CANCELLED);
+        assertEquals("CANCELLED", service.confirmPayment("learner", code).status());
+        assertFalse(subscriptionService.getSummary("learner").effective());
     }
 
     @Test

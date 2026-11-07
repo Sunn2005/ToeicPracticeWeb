@@ -86,7 +86,7 @@ function AdminDashboardContent() {
   }, [isAdmin]);
 
   useEffect(() => {
-    document.title = "Dashboard Console | CapyTOEIC";
+    document.title = "Tổng quan quản trị | CapyTOEIC";
     // The loader is async; state updates after the request completes.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadDashboard();

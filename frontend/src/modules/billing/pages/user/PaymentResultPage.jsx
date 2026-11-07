@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../../../auth/useAuth";
 import { useLanguage } from "../../../../i18n/LanguageContext";
 
-import { getPaymentState, retryPayment } from "../../../../api/billing/payments.js";
+import { confirmPayment, retryPayment } from "../../../../api/billing/payments.js";
 
 export default function PaymentResultPage() {
   const { t } = useLanguage();
@@ -14,6 +14,7 @@ export default function PaymentResultPage() {
   const validCode = /^\d+$/.test(orderCode || "") && Number.isSafeInteger(Number(orderCode)) && Number(orderCode) > 0;
   const [state, setState] = useState({ code: null, status: "", error: false });
   const [busy, setBusy] = useState(false);
+  const [checkVersion, setCheckVersion] = useState(0);
   const status = state.code === orderCode ? state.status : "";
   const loading = validCode && state.code !== orderCode;
   const success = status === "PAID";
@@ -21,13 +22,33 @@ export default function PaymentResultPage() {
   useEffect(() => {
     if (!validCode) return;
     let active = true;
-    getPaymentState(orderCode).then((result) => {
-      if (active) setState({ code: orderCode, status: result.status, error: false });
-    }).catch(() => {
-      if (active) setState({ code: orderCode, status: "", error: true });
-    });
-    return () => { active = false; };
-  }, [orderCode, validCode]);
+    let timer;
+    let checks = 0;
+    async function check() {
+      try {
+        const result = await confirmPayment(orderCode);
+        if (!active) return;
+        // Confirmation must persist Pro before /api/me is reloaded. Never
+        // announce success from the redirect query or a read-only status check.
+        if (result.status === "PAID") await refreshProfile();
+        if (!active) return;
+        setState({ code: orderCode, status: result.status, error: false });
+        checks += 1;
+        if (["PENDING", "PROCESSING"].includes(result.status) && checks < 10) {
+          timer = window.setTimeout(check, 3000);
+        }
+      } catch {
+        if (active) setState({ code: orderCode, status: "", error: true });
+      }
+    }
+    check();
+    return () => { active = false; window.clearTimeout(timer); };
+  }, [orderCode, validCode, refreshProfile, checkVersion]);
+
+  function checkAgain() {
+    setState({ code: null, status: "", error: false });
+    setCheckVersion((version) => version + 1);
+  }
 
   async function retry() {
     if (busy) return;
@@ -38,8 +59,7 @@ export default function PaymentResultPage() {
     } catch (error) {
       const code = error?.body?.code;
       if (code === "PAYMENT_ALREADY_PAID") {
-        setState({ code: orderCode, status: "PAID", error: false });
-        refreshProfile();
+        checkAgain();
       } else if (code === "PAYMENT_PROCESSING") {
         setState({ code: orderCode, status: "PROCESSING", error: false });
       } else {
@@ -56,12 +76,6 @@ export default function PaymentResultPage() {
     : status === "PENDING" ? "proPaymentPending"
     : status === "CANCELLED" || status === "EXPIRED" ? "proPaymentCancelDescription"
     : "proPaymentUnknown";
-
-  useEffect(() => {
-    // The Pro badge reads from the profile: refresh it so the newly paid
-    // subscription shows up without the user reloading the page.
-    if (success) refreshProfile();
-  }, [success, refreshProfile]);
 
   return (
     <main className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center px-5 py-10 text-center">
@@ -80,8 +94,8 @@ export default function PaymentResultPage() {
           {t(busy ? "proPaymentChecking" : "proPaymentRetry")}
         </button>
       )}
-      {validCode && !loading && (success || status === "PROCESSING") && (
-        <button type="button" onClick={() => window.location.reload()} className="mt-6 min-h-11 px-6 text-sky-700 focus-visible:ring-2 focus-visible:ring-sky-500">{t("proPaymentCheckAgain")}</button>
+      {validCode && !loading && (
+        <button type="button" onClick={checkAgain} disabled={busy} className="mt-6 min-h-11 px-6 text-sky-700 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-sky-500">{t("proPaymentCheckAgain")}</button>
       )}
       {!validCode && <button type="button" onClick={() => navigate("/pricing")} className="mt-6 min-h-11 px-6 text-sky-700">{t("proPaymentChoosePlan")}</button>}
       <p className="sr-only" role="status">{t(messageKey)}</p>

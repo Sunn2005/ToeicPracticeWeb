@@ -47,10 +47,16 @@ public class PaymentController {
         return paymentService.retryPayment(principal.uid(), orderCode);
     }
 
+    @PostMapping("/orders/{orderCode}/confirm")
+    public PaymentService.OrderState confirm(@AuthenticationPrincipal ToeicUserPrincipal principal,
+            @PathVariable long orderCode) throws Exception {
+        return paymentService.confirmPayment(principal.uid(), orderCode);
+    }
+
     /**
      * PayOS webhook. Public (no session auth) — authenticity comes from the
-     * PayOS signature, verified inside {@link PaymentService}. Only the webhook
-     * activates Pro; the browser redirect to returnUrl is display-only.
+     * PayOS signature, verified inside {@link PaymentService}. The browser
+     * redirect to returnUrl is display-only; confirmation uses server-side PayOS data.
      */
     @PostMapping("/webhook")
     public PaymentService.WebhookResult webhook(@RequestBody Map<String, Object> payload) throws Exception {

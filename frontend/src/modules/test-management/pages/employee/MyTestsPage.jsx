@@ -93,7 +93,7 @@ function MyTestsPage() {
           to="/console/tests/new"
           className="inline-flex items-center justify-center rounded-xl bg-[#2188ee] px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-200 hover:bg-blue-600 transition"
         >
-          + Tạo đề mới (Wizard)
+          + Tạo đề mới
         </Link>}
       </div>
 

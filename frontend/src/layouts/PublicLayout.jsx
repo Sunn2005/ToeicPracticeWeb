@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 import LanguageSwitcher from "../components/ui/LanguageSwitcher";
 import { useLanguage } from "../i18n/LanguageContext";
 import BrandLogo from "../components/ui/BrandLogo.jsx";
+import { useAuth } from "../auth/useAuth";
 
 const NAV_ITEMS = [
     { to: "/#features", labelKey: "publicNavFeatures" },
@@ -51,8 +52,19 @@ function SocialIcon({ name }) {
     );
 }
 
+function AccountPlaceholder({ className = "" }) {
+    const { t } = useLanguage();
+    return (
+        <span role="status" className={`inline-flex h-10 items-center rounded-xl bg-slate-100 px-4 ${className}`}>
+            <span className="sr-only">{t("checkingSession")}</span>
+            <span aria-hidden="true" className="h-4 w-16 rounded bg-slate-200 motion-safe:animate-pulse" />
+        </span>
+    );
+}
+
 export default function PublicLayout() {
     const { t } = useLanguage();
+    const { authLoading } = useAuth();
     const [menuOpen, setMenuOpen] = useState(false);
     const { pathname, hash } = useLocation();
 
@@ -85,12 +97,12 @@ export default function PublicLayout() {
                             </Link>
                         ))}
                         <LanguageSwitcher className="mx-1" />
-                        <Link
+                        {authLoading ? <AccountPlaceholder /> : <Link
                             to="/login"
                             className="rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-200"
                         >
                             {t("publicNavLogin")}
-                        </Link>
+                        </Link>}
                     </nav>
 
                     <button
@@ -121,13 +133,13 @@ export default function PublicLayout() {
                             ))}
                             <div className="mt-2 flex items-center gap-2.5 border-t border-slate-100 pt-3">
                                 <LanguageSwitcher />
-                                <Link
+                                {authLoading ? <AccountPlaceholder className="flex-1 justify-center" /> : <Link
                                     to="/login"
                                     onClick={() => setMenuOpen(false)}
                                     className="flex-1 rounded-xl bg-sky-600 px-4 py-2.5 text-center text-sm font-semibold text-white shadow-sm"
                                 >
                                     {t("publicNavLogin")}
-                                </Link>
+                                </Link>}
                             </div>
                         </div>
                     </nav>

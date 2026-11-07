@@ -105,6 +105,20 @@ class SecurityAuthorizationTests {
     @MockitoBean private AdminRevenueService adminRevenueService;
 
     @Test
+    void ownerConfirmationRequiresAuthenticationAndCsrf() throws Exception {
+        String path = "/api/payments/orders/123/confirm";
+        mockMvc.perform(post(path).with(csrf())).andExpect(status().isUnauthorized());
+        mockMvc.perform(post(path).with(authentication(authenticationFor(UserRole.USER))))
+                .andExpect(status().isForbidden());
+        org.mockito.Mockito.verifyNoInteractions(paymentService);
+        when(paymentService.confirmPayment("user-1", 123))
+                .thenReturn(new PaymentService.OrderState(123, "PRO_30", "PAID"));
+        mockMvc.perform(post(path).with(csrf()).with(authentication(authenticationFor(UserRole.USER))))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("PAID"));
+        org.mockito.Mockito.verify(paymentService).confirmPayment("user-1", 123);
+    }
+
+    @Test
     void reconciliationRequiresAdminAuthenticationAndCsrf() throws Exception {
         String path = "/api/admin/payments/orders/123/reconcile";
         mockMvc.perform(post(path).with(csrf())).andExpect(status().isUnauthorized());

@@ -29,7 +29,7 @@ function authErrorMessage(error) {
     case "auth/operation-not-allowed":
       return "Đăng nhập bằng mật khẩu chưa được bật trong Firebase Authentication.";
     default:
-      return error?.message || "Không thể đăng nhập vào Console.";
+      return error?.message || "Không thể đăng nhập vào trang quản trị.";
   }
 }
 
@@ -45,7 +45,7 @@ function LoginPage() {
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    document.title = "Đăng nhập Console | CapyTOEIC";
+    document.title = "Đăng nhập quản trị | CapyTOEIC";
   }, []);
 
   if (user && STAFF_ROLES.has(role)) {
@@ -96,7 +96,7 @@ function LoginPage() {
             <div className="mb-8 grid h-24 w-24 place-items-center rounded-[2rem] bg-white/15 ring-1 ring-white/20 backdrop-blur">
               <BrandLogo decorative className="h-20 w-20" />
             </div>
-            <p className="text-sm font-bold uppercase tracking-[0.22em] text-blue-100">Management Console</p>
+            <p className="text-sm font-bold uppercase tracking-[0.22em] text-blue-100">Hệ thống quản trị</p>
             <h1 className="mt-4 text-4xl font-bold leading-tight xl:text-5xl">
               Quản lý nội dung TOEIC trên một không gian thống nhất.
             </h1>
@@ -117,8 +117,8 @@ function LoginPage() {
 
             <div className="rounded-[1.75rem] border border-slate-200/80 bg-white p-7 shadow-xl shadow-slate-200/70 sm:p-10">
               <div>
-                <p className="text-sm font-semibold text-[#2188ee]">ADMIN & EMPLOYEE</p>
-                <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">Đăng nhập Console</h2>
+                <p className="text-sm font-semibold text-[#2188ee]">QUẢN TRỊ VIÊN & NHÂN VIÊN</p>
+                <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">Đăng nhập quản trị</h2>
                 <p className="mt-3 text-sm leading-6 text-slate-500">
                   Sử dụng tài khoản nội bộ do quản trị viên cấp.
                 </p>

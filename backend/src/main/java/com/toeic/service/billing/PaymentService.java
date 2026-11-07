@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Sells Pro through PayOS. Verified webhook or admin reconciliation activates Pro: the browser redirect
+ * Sells Pro through PayOS. Verified webhook or server-side confirmation activates Pro: the browser redirect
  * (returnUrl) is display-only and never trusted. Webhook handling is idempotent:
  * PayOS may deliver the same event more than once, and a retry after a crash
  * must neither double-charge days nor lose the activation.
@@ -134,6 +134,15 @@ public class PaymentService {
     public OrderState orderState(String userId, long orderCode) throws Exception {
         PaymentOrder order = ownedOrder(userId, orderCode);
         return new OrderState(orderCode, order.getPlanCode(), verifiedStatus(order));
+    }
+
+    public OrderState confirmPayment(String userId, long orderCode) throws Exception {
+        PaymentOrder order = ownedOrder(userId, orderCode);
+        String status = verifiedStatus(order);
+        if ("PAID".equals(status) && !applyPaidOrder(order, clock.millis(), null).handled()) {
+            throw new ApiCodeException(HttpStatus.CONFLICT, "PAYMENT_ORDER_CANCELLED", "Order is not payable");
+        }
+        return new OrderState(orderCode, order.getPlanCode(), status);
     }
 
     public CreatePaymentResult retryPayment(String userId, long orderCode) throws Exception {

@@ -1,7 +1,8 @@
 import { useLanguage } from "../../i18n/LanguageContext";
 
 function LanguageSwitcher({ className = "" }) {
-  const { language, setLanguage, toggleLanguage, t } = useLanguage();
+  const { language, canSwitchLanguage, setLanguage, toggleLanguage, t } = useLanguage();
+  if (!canSwitchLanguage) return null;
   const targetLanguage = language === "en" ? t("vietnamese") : t("english");
 
   return (

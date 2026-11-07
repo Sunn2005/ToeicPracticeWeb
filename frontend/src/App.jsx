@@ -13,7 +13,8 @@ import FullTestExam from "./modules/exam/pages/FullTestExam";
 import FullTestIntro from "./modules/exam/pages/FullTestIntro";
 import FullTestResult from "./modules/exam/pages/FullTestResult";
 import FullTestReview from "./modules/exam/pages/FullTestReview";
-import { LanguageProvider, useLanguage } from "./i18n/LanguageContext";
+import { useLanguage } from "./i18n/LanguageContext";
+import AppLanguageProvider from "./i18n/AppLanguageProvider";
 import LoadingScreen from "./components/ui/LoadingScreen";
 import FloatingPet from "./modules/ai-chat/components/FloatingPet";
 import AIChatBox from "./modules/ai-chat/components/AIChatBox";
@@ -93,11 +94,13 @@ function LearnerChatShell({ user, role, profile, pathname }) {
   );
 }
 
-function AppRoutes() {
+export function AppRoutes() {
   const { user, role, profile, authLoading } = useAuth();
   const location = useLocation();
 
-  if (authLoading) {
+  // Public home content does not depend on the restored session.
+  // All other routes keep waiting before rendering or redirecting.
+  if (authLoading && location.pathname !== "/") {
     return <LoadingScreen />;
   }
 
@@ -206,14 +209,14 @@ function SafeAnalytics() {
 
 function App() {
   return (
-    <LanguageProvider>
-      <AuthProvider>
-        <BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <AppLanguageProvider>
           <AppRoutes />
           <SafeAnalytics />
-        </BrowserRouter>
-      </AuthProvider>
-    </LanguageProvider>
+        </AppLanguageProvider>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 
