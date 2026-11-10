@@ -1,3 +1,4 @@
+import SessionRecovery from "../../../auth/SessionRecovery";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -18,7 +19,7 @@ const GOOGLE_SIGN_IN_ERROR_KEYS = {
 function Login() {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const { establishSession, profileError } = useAuth();
+  const { establishSession, profileError, sessionUnavailable } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -119,7 +120,8 @@ function Login() {
                 {t("googleLoginAutoCreateSupport")}
               </p>
 
-              {(errorMessage || profileError) && (
+              {sessionUnavailable && <div className="mt-4"><SessionRecovery /></div>}
+              {(errorMessage || (profileError && !sessionUnavailable)) && (
                 <p
                   role="alert"
                   className="mt-4 [overflow-wrap:anywhere] rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700"

@@ -1,3 +1,4 @@
+import SessionRecovery from "./auth/SessionRecovery";
 import { Analytics } from "@vercel/analytics/react";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -95,18 +96,24 @@ function LearnerChatShell({ user, role, profile, pathname }) {
 }
 
 export function AppRoutes() {
-  const { user, role, profile, authLoading } = useAuth();
+  const { user, role, profile, authLoading, sessionUnavailable } = useAuth();
   const location = useLocation();
 
-  // Public home content does not depend on the restored session.
-  // All other routes keep waiting before rendering or redirecting.
-  if (authLoading && location.pathname !== "/") {
-    return <LoadingScreen />;
+  // Login and recovery remain reachable while the backend restores a cookie.
+  const isPublicEntry = ["/", "/login", "/console", "/console/forgot-password", "/console/reset-password"].includes(location.pathname);
+  if (!isPublicEntry) {
+    if (authLoading) return <LoadingScreen />;
+    if (sessionUnavailable) {
+      return <main className="flex min-h-screen items-center justify-center bg-sky-50 px-4"><div className="w-full max-w-md"><SessionRecovery /></div></main>;
+    }
   }
 
   if (profile?.passwordChangeRequired && !["/console/change-password", "/console/forgot-password", "/console/reset-password"].includes(location.pathname)) return <Navigate to="/console/change-password" replace />;
   return (
     <>
+      {sessionUnavailable && location.pathname.startsWith("/console") && isPublicEntry && (
+        <div className="mx-auto max-w-xl px-4 pt-4"><SessionRecovery /></div>
+      )}
       <Routes>
         <Route
           path="/"

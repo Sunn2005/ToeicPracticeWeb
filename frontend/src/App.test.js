@@ -27,10 +27,10 @@ test("session routing preserves private guards and applies the role and route la
     const { default: AppLanguageProvider } = await server.ssrLoadModule("/src/i18n/AppLanguageProvider.jsx");
     const { default: LanguageSwitcher } = await server.ssrLoadModule("/src/components/ui/LanguageSwitcher.jsx");
     const { useLanguage } = await server.ssrLoadModule("/src/i18n/LanguageContext.jsx");
-    const render = (pathname, authLoading) => renderToStaticMarkup(
+    const render = (pathname, authLoading, sessionUnavailable = false) => renderToStaticMarkup(
       createElement(LanguageProvider, null,
         createElement(AuthStateContext.Provider, {
-          value: { user: null, profile: null, role: "", authLoading },
+          value: { user: null, profile: null, role: "", authLoading, sessionUnavailable },
         }, createElement(MemoryRouter, { initialEntries: [pathname] }, createElement(AppRoutes))),
       ),
     );
@@ -38,10 +38,8 @@ test("session routing preserves private guards and applies the role and route la
     const pendingHome = render("/", true);
     assert.match(pendingHome, /id="public-main"/);
     assert.match(pendingHome, /id="features"/);
-    assert.match(pendingHome, /motion-safe:animate-pulse/);
-    assert.ok(pendingHome.includes(translations.en.checkingSession));
     const pendingHeader = pendingHome.slice(pendingHome.indexOf("<header"), pendingHome.indexOf("</header>"));
-    assert.doesNotMatch(pendingHeader, /href="\/login"/);
+    assert.match(pendingHeader, /href="\/login"/);
 
     const anonymousHome = render("/", false);
     assert.match(anonymousHome, /id="public-main"/);
@@ -50,11 +48,23 @@ test("session routing preserves private guards and applies the role and route la
     assert.match(anonymousHeader, /href="\/login"/);
     assert.doesNotMatch(anonymousHeader, /motion-safe:animate-pulse/);
 
-    for (const pathname of ["/login", "/dashboard", "/profile", "/payment/success", "/full-test/test-1", "/full-test/attempt-1/exam", "/full-test/attempt-1/result", "/full-test/attempt-1/review", "/console/dashboard"]) {
+    for (const pathname of ["/dashboard", "/profile", "/payment/success", "/full-test/test-1", "/full-test/attempt-1/exam", "/full-test/attempt-1/result", "/full-test/attempt-1/review", "/console/dashboard"]) {
       const pendingPage = render(pathname, true);
       assert.ok(pendingPage.includes(translations.en.checkingSession), pathname);
       assert.doesNotMatch(pendingPage, /id="public-main"/);
       assert.match(pendingPage, /brand-loader-frame/);
+      const failedPage = render(pathname, false, true);
+      assert.ok(failedPage.includes(translations.en.authSessionUnavailable), pathname);
+      assert.ok(failedPage.includes(translations.en.retry), pathname);
+      assert.doesNotMatch(failedPage, /brand-loader-frame/);
+    }
+
+    assert.ok(render("/login", true).includes(translations.en.continueWithGoogle));
+    assert.match(render("/console", true), /id="console-username"/);
+    for (const pathname of ["/", "/login"]) {
+      const failedPage = render(pathname, false, true);
+      assert.ok(failedPage.includes(translations.en.authSessionUnavailable));
+      assert.ok(failedPage.includes(translations.en.retry));
     }
 
     const renderWithPolicy = (pathname, role, content) => renderToStaticMarkup(

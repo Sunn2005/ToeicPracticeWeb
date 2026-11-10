@@ -111,8 +111,8 @@ function LoginPage() {
         <section className="flex min-h-screen items-center justify-center px-5 py-10 sm:px-10">
           <div className="w-full max-w-md">
             <div className="mb-9 flex items-center gap-3 lg:hidden">
-              <span className="grid h-11 w-11 place-items-center rounded-xl bg-[#2188ee] font-bold text-white">T</span>
-              <span className="text-xl font-bold text-[#2188ee]">TOEIC Master</span>
+              <BrandLogo decorative className="h-11 w-11 shrink-0" />
+              <span className="text-xl font-bold text-[#2188ee]">CapyTOEIC</span>
             </div>
 
             <div className="rounded-[1.75rem] border border-slate-200/80 bg-white p-7 shadow-xl shadow-slate-200/70 sm:p-10">

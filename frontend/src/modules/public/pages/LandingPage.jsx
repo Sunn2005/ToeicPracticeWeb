@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getPublicTests } from "../../../api/tests/publicTests.js";
+import BrandLogo from "../../../components/ui/BrandLogo";
 import { useLanguage } from "../../../i18n/LanguageContext";
 
 const FEATURED_TEST_LIMIT = 6;
@@ -74,12 +75,7 @@ function HeroPreview() {
     return (
         <div className="relative mx-auto w-full max-w-lg" aria-hidden="true">
             <div className="overflow-hidden rounded-3xl bg-linear-to-br from-sky-100 via-sky-50 to-white p-8 shadow-xl shadow-sky-100 sm:p-10">
-                <img
-                    src="/brand/toeic-mascot.png"
-                    alt=""
-                    className="mx-auto w-full max-w-xs object-contain"
-                    draggable="false"
-                />
+                <BrandLogo decorative className="mx-auto w-full max-w-xs" />
             </div>
             <div className="absolute -left-3 bottom-8 rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-lg shadow-slate-200/70 sm:-left-6">
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{t("landingPreviewScoreLabel")}</p>

@@ -74,6 +74,49 @@ test("session bootstrap preserves network failures as retryable errors", async (
   });
 });
 
+test("a stalled bootstrap times out, aborts HTTP, and ignores a late profile", async () => {
+  let requestSignal;
+  let complete;
+  const pending = loadBackendSession((signal) => {
+    requestSignal = signal;
+    return new Promise((resolve) => { complete = resolve; });
+  }, { timeoutMs: 5 });
+  const result = await pending;
+  assert.equal(result.status, "unavailable");
+  assert.equal(result.profile, null);
+  assert.equal(requestSignal.aborted, true);
+  complete({ uid: "late-user", role: "ADMIN" });
+  assert.equal((await pending).status, "unavailable");
+
+  // Retry can restore the actual cookie session after the API recovers.
+  const retried = await loadBackendSession(async () => ({ uid: "current-user", role: "USER" }));
+  assert.equal(retried.status, "authenticated");
+  assert.equal(retried.profile.uid, "current-user");
+});
+
+test("superseding login/unmount cancels a pending session request", async () => {
+  const controller = new AbortController();
+  let requestSignal;
+  const pending = loadBackendSession((signal) => {
+    requestSignal = signal;
+    return new Promise(() => {});
+  }, { signal: controller.signal });
+  await Promise.resolve();
+  controller.abort();
+  const result = await pending;
+  assert.equal(requestSignal.aborted, true);
+  assert.notEqual(result.status, "authenticated");
+  assert.equal(controller.signal.aborted, true);
+});
+
+test("an already cancelled check never starts an HTTP request", async () => {
+  const controller = new AbortController();
+  controller.abort();
+  let called = false;
+  await loadBackendSession(() => { called = true; }, { signal: controller.signal });
+  assert.equal(called, false);
+});
+
 test("interactive Firebase login exchanges a fresh ID token and clears the temporary user", async () => {
   const calls = [];
   const firebaseUser = {

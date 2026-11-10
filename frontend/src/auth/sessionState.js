@@ -1,6 +1,27 @@
-export async function loadBackendSession(loadProfile) {
+export async function loadBackendSession(loadProfile, { signal, timeoutMs = 10_000 } = {}) {
+  const controller = new AbortController();
+  let timer;
+  let cancel;
   try {
-    const profile = await loadProfile();
+    const interrupted = new Promise((_, reject) => {
+      cancel = () => {
+        reject(new DOMException("Session check cancelled", "AbortError"));
+        controller.abort();
+      };
+      if (signal?.aborted) return cancel();
+      signal?.addEventListener("abort", cancel, { once: true });
+      timer = setTimeout(() => {
+        reject(new Error("Session check timed out"));
+        controller.abort();
+      }, timeoutMs);
+    });
+    const profile = await Promise.race([
+      interrupted,
+      Promise.resolve().then(() => {
+        controller.signal.throwIfAborted();
+        return loadProfile(controller.signal);
+      }),
+    ]);
     return { status: "authenticated", profile, error: "" };
   } catch (error) {
     if (error?.status === 401) {
@@ -11,6 +32,9 @@ export async function loadBackendSession(loadProfile) {
       profile: null,
       error: error?.message || "Không thể kiểm tra phiên đăng nhập.",
     };
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener("abort", cancel);
   }
 }
 
