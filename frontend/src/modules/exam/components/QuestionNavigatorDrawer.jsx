@@ -21,6 +21,7 @@ function QuestionNavigatorDrawer({
   navigationLocked = false,
   questionStatuses,
   reviewMode = false,
+  practiceMode = false,
   title = "Question Navigator",
 }) {
   const { t } = useLanguage();
@@ -81,7 +82,13 @@ function QuestionNavigatorDrawer({
             <div className="flex flex-wrap gap-x-5 gap-y-3 border-b border-slate-200 pb-5">
               <LegendItem className="border-sky-500 bg-sky-500" label={t("current")} />
               <LegendItem className="border-slate-300 bg-white" label={t("unanswered")} />
-              <LegendItem className="border-emerald-400 bg-emerald-50" label={t("answered")} />
+              {practiceMode ? (
+                <>
+                  <LegendItem className="border-emerald-400 bg-emerald-50" label={t("correct")} />
+                  <LegendItem className="border-red-400 bg-red-50" label={t("incorrect")} />
+                  <LegendItem className="border-amber-400 bg-amber-50" label={t("practiceAwaitingFeedback")} />
+                </>
+              ) : <LegendItem className="border-emerald-400 bg-emerald-50" label={t("answered")} />}
             </div>
           )}
 
@@ -106,16 +113,25 @@ function QuestionNavigatorDrawer({
                     const selectionDisabled = navigationLocked
                       || !onSelect
                       || Boolean(isQuestionDisabled?.(number));
-                    const reviewStatus = questionStatuses?.[String(number)];
-                    const statusClass = reviewMode
-                      ? reviewStatus === "CORRECT"
-                        ? "border-emerald-400 bg-emerald-50 text-emerald-700"
-                        : reviewStatus === "INCORRECT"
-                          ? "border-red-400 bg-red-50 text-red-700"
-                          : "border-slate-300 bg-slate-100 text-slate-600"
-                      : isAnswered
-                        ? "border-emerald-400 bg-emerald-50 text-emerald-700"
-                        : "border-slate-300 bg-white text-slate-600";
+                    const feedbackStatus = (reviewMode || practiceMode) ? questionStatuses?.[String(number)] : undefined;
+                    let statusClass = reviewMode ? "border-slate-300 bg-slate-100 text-slate-600" : "border-slate-300 bg-white text-slate-600";
+                    let statusLabel = t("unanswered");
+                    let statusIcon = "";
+                    if (feedbackStatus === "CORRECT") {
+                      statusClass = "border-emerald-400 bg-emerald-50 text-emerald-700";
+                      statusLabel = t("correct");
+                      statusIcon = "✓";
+                    } else if (feedbackStatus === "INCORRECT") {
+                      statusClass = "border-red-400 bg-red-50 text-red-700";
+                      statusLabel = t("incorrect");
+                      statusIcon = "×";
+                    } else if (!reviewMode && isAnswered) {
+                      statusClass = practiceMode
+                        ? "border-amber-400 bg-amber-50 text-amber-800"
+                        : "border-emerald-400 bg-emerald-50 text-emerald-700";
+                      statusLabel = t(practiceMode ? "practiceAwaitingFeedback" : "answered");
+                      if (practiceMode) statusIcon = "…";
+                    }
                     return (
                       <button
                         key={number}
@@ -126,14 +142,15 @@ function QuestionNavigatorDrawer({
                           onClose();
                         }}
                         aria-current={isCurrent ? "step" : undefined}
-                        aria-label={`${t("goToQuestion")} ${number}`}
+                        aria-label={practiceMode ? `${t("goToQuestion")} ${number} · ${statusLabel}` : `${t("goToQuestion")} ${number}`}
                         className={`aspect-square rounded-xl border-2 text-sm font-bold transition sm:text-base ${
-                          isCurrent
+                          isCurrent && !practiceMode
                             ? "border-sky-500 bg-sky-500 text-white ring-2 ring-sky-200"
                             : statusClass
+                        } ${isCurrent && practiceMode ? "ring-2 ring-sky-400 ring-offset-1" : ""
                         } ${selectionDisabled ? "cursor-default" : "hover:border-sky-400 hover:bg-sky-50"}`}
                       >
-                        {number}
+                        {number}{practiceMode && statusIcon && <span aria-hidden="true" className="ml-0.5 text-xs">{statusIcon}</span>}
                       </button>
                     );
                   })}

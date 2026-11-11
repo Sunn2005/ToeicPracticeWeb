@@ -43,7 +43,7 @@ function Metric({ label, value, tone = "slate", compact = false }) {
   );
 }
 
-function ScoreRing({ label, value, max, tone = "sky", large = false }) {
+function ScoreRing({ label, value, max, tone = "sky", large = false, suffix = "" }) {
   const colors = {
     sky: ["#0ea5e9", "#e0f2fe"],
     emerald: ["#10b981", "#d1fae5"],
@@ -59,7 +59,7 @@ function ScoreRing({ label, value, max, tone = "sky", large = false }) {
       <div className={`grid place-items-center rounded-full bg-white text-center ${large ? "h-28 w-28" : "h-[88px] w-[88px]"}`}>
         <span>
           <span className="block text-[11px] font-bold uppercase tracking-wide text-slate-500">{label}</span>
-          <strong className={`block text-slate-950 ${large ? "text-3xl" : "text-2xl"}`}>{value}</strong>
+          <strong className={`block text-slate-950 ${large ? "text-3xl" : "text-2xl"}`}>{value}{suffix}</strong>
         </span>
       </div>
     </div>
@@ -512,6 +512,7 @@ function FullTestResult() {
                         label={isPractice ? t("accuracy") : t("totalScore")}
                         value={isPractice ? accuracy : Number(result.totalScore) || 0}
                         max={isPractice ? 100 : maxScore}
+                        suffix={isPractice ? "%" : ""}
                         large
                       />
                       {showTarget && (
@@ -529,6 +530,7 @@ function FullTestResult() {
                           label={t("listening")}
                           value={isPractice ? Math.round(((Number(result.listeningCorrect) || 0) / listeningTotal) * 100) : Number(result.listeningScore) || 0}
                           max={isPractice ? 100 : 495}
+                          suffix={isPractice ? "%" : ""}
                           tone="sky"
                         />
                       )}
@@ -537,6 +539,7 @@ function FullTestResult() {
                           label={t("reading")}
                           value={isPractice ? Math.round(((Number(result.readingCorrect) || 0) / readingTotal) * 100) : Number(result.readingScore) || 0}
                           max={isPractice ? 100 : 495}
+                          suffix={isPractice ? "%" : ""}
                           tone="emerald"
                         />
                       )}
@@ -548,7 +551,9 @@ function FullTestResult() {
                     <Metric label={t("correctCountLabel")} value={`${result.totalCorrect}/${totalQuestions}`} tone="emerald" />
                     <Metric label={t("wrongCountLabel")} value={`${result.totalWrong}/${totalQuestions}`} />
                     <Metric label={t("blankCountLabel")} value={`${result.totalUnanswered}/${totalQuestions}`} tone="violet" />
-                    <Metric label={t("timeTaken")} value={formatDuration(result.durationSeconds, language)} tone="sky" compact />
+                    <Metric label={t("timeTaken")} value={Number.isFinite(result.durationSeconds) && result.durationSeconds >= 0 && result.durationSeconds <= 86_400
+                      ? formatDuration(result.durationSeconds, language)
+                      : t("durationUnavailable")} tone="sky" compact />
                   </div>
                   {!isPractice && <p className="mt-5 text-xs leading-5 text-slate-400">{t("estimatedScoreNote")}</p>}
                 </section>
@@ -572,7 +577,6 @@ function FullTestResult() {
                   <div className="mt-5 space-y-3">
                     <button type="button" onClick={() => navigate(`/full-test/${attemptId}/review`)} className="w-full rounded-xl bg-sky-500 px-5 py-3 font-semibold text-white transition hover:bg-sky-600">{t("viewDetailedAnswers")}</button>
                     <button type="button" onClick={retakeTest} disabled={retaking} className="w-full rounded-xl border border-sky-500 px-5 py-3 font-semibold text-sky-600 transition hover:bg-sky-50 disabled:opacity-60">{retaking ? t("retaking") : t("retakeThisTest")}</button>
-                    <button type="button" onClick={() => navigate("/tests")} className="w-full px-5 py-3 text-sm font-semibold text-slate-600 transition hover:text-sky-600">{t("backToTestList")}</button>
                   </div>
                   {retakeError && <p className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{retakeError}</p>}
                 </section>

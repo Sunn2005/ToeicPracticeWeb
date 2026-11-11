@@ -172,7 +172,6 @@ function TestModeModal({ test, initialTab = "exam", onClose, onStart }) {
           </div>
 
           <div className={`mt-5 rounded-lg border px-4 py-3 text-sm ${activeTab === "practice" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-sky-200 bg-sky-50 text-sky-800"}`}>
-            <strong>{activeTab === "practice" ? "Học theo nhịp của bạn." : "Mô phỏng điều kiện thi thật."}</strong>{" "}
             {activeTab === "practice" ? t("practiceFeedbackTiming") : t("examModeRules")}
           </div>
 

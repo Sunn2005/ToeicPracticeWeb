@@ -3,9 +3,9 @@ import ReviewTogglePanel from "./ReviewTogglePanel";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import AIExplanationPanel from "../../ai-analysis/components/AIExplanationPanel";
 
-function ReviewContent({ children }) {
+function ReviewContent({ children, splitExplanation = false }) {
   if (typeof children !== "string") return null;
-  return getReviewParagraphs(children).map((paragraph, index) => (
+  return getReviewParagraphs(children, { splitExplanation }).map((paragraph, index) => (
     <p key={`${index}-${paragraph.slice(0, 24)}`} className="whitespace-pre-line">
       {paragraph}
     </p>
@@ -183,7 +183,7 @@ function QuestionCard({
           {!hideDetailedExplanation && (
             <ReviewTogglePanel title={t("detailedExplanation")} icon="✦" tone="violet">
               <div className="space-y-3 text-slate-700">
-                <ReviewContent>
+                <ReviewContent splitExplanation>
                   {detailedExplanation || t("noExplanation")}
                 </ReviewContent>
               </div>

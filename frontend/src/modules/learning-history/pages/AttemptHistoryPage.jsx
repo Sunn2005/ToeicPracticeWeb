@@ -1,6 +1,6 @@
 import { formatClock } from "../../exam/utils/testData";
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useUserAttempts } from "../hooks/useUserAttempts";
 import { canContinuePractice, getAttemptParts, getAttemptScoreMaximum, getFullMockScoreSummary } from "../utils/attemptHistory";
 import { getTestName } from "../../test-catalog/data/testCatalog";
@@ -47,24 +47,30 @@ function SummaryCard({ icon, value, label, tone = "sky" }) {
 export default function AttemptHistoryPage() {
   const { language, t } = useLanguage();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const testId = searchParams.get("testId");
   const { attempts, loading, error, remove } = useUserAttempts();
   const [query, setQuery] = useState("");
   const [period, setPeriod] = useState("ALL");
   const [type, setType] = useState("ALL");
   const [status, setStatus] = useState("ALL");
-  const [page, setPage] = useState(1);
+  const [requestedPage, setPage] = useState(1);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
-  const { best, average } = getFullMockScoreSummary(attempts);
-  const latest = attempts.reduce(
+  const scopedAttempts = useMemo(
+    () => testId ? attempts.filter((attempt) => attempt.testId === testId) : attempts,
+    [attempts, testId],
+  );
+  const { best, average } = getFullMockScoreSummary(scopedAttempts);
+  const latest = scopedAttempts.reduce(
     (max, attempt) => Math.max(max, attempt.updatedAt || attempt.submittedAt || attempt.startedAt || 0),
     0,
   );
 
   const filtered = useMemo(() => {
     const days = period === "7" ? 7 : period === "30" ? 30 : null;
-    return attempts.filter((attempt) => {
+    return scopedAttempts.filter((attempt) => {
       if (attempt.status !== "COMPLETED" && !canContinuePractice(attempt)) return false;
       const text = `${getTestName(attempt.testId)} ${attemptLabel(attempt, t)}`.toLowerCase();
       const timestamp = Number(attempt.submittedAt || attempt.updatedAt || attempt.startedAt) || 0;
@@ -73,9 +79,10 @@ export default function AttemptHistoryPage() {
         && (type === "ALL" || attempt.type === type)
         && (status === "ALL" || attempt.status === status);
     });
-  }, [attempts, period, query, status, t, type]);
+  }, [scopedAttempts, period, query, status, t, type]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const page = Math.min(requestedPage, totalPages);
   const visible = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const confirmDelete = async () => {
@@ -92,8 +99,26 @@ export default function AttemptHistoryPage() {
     <div className="mx-auto max-w-[1380px] space-y-6">
       {error && <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
 
+      {testId && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm">
+          <span className="font-semibold text-sky-900">{getTestName(testId)}</span>
+          <button
+            type="button"
+            onClick={() => {
+              const nextParams = new URLSearchParams(searchParams);
+              nextParams.delete("testId");
+              setSearchParams(nextParams);
+              setPage(1);
+            }}
+            className="font-semibold text-sky-700 hover:underline"
+          >
+            {t("historyShowAllTests")}
+          </button>
+        </div>
+      )}
+
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <SummaryCard icon="▦" value={attempts.length} label={t("totalAttempts")} />
+        <SummaryCard icon="▦" value={scopedAttempts.length} label={t("totalAttempts")} />
         <SummaryCard icon="✓" value={best === null ? "—" : `${best}/990`} label={t("historyBestFullScore")} tone="emerald" />
         <SummaryCard icon="◉" value={average === null ? "—" : `${average}/990`} label={t("historyAverageFullScore")} tone="violet" />
         <SummaryCard icon="◷" value={formatDate(latest, language)} label={t("latestActivity")} tone="amber" />
@@ -156,7 +181,7 @@ export default function AttemptHistoryPage() {
 
       <footer className="flex flex-col justify-between gap-3 text-sm text-slate-500 sm:flex-row sm:items-center">
         <span>{t("showingResultsPrefix")} {filtered.length ? (page - 1) * PAGE_SIZE + 1 : 0}–{Math.min(page * PAGE_SIZE, filtered.length)} {t("showingResultsMiddle")} {filtered.length} {t("showingResultsSuffix")}</span>
-        <div className="flex gap-2"><button type="button" disabled={page === 1} onClick={() => setPage((value) => value - 1)} className="rounded-lg border border-slate-200 bg-white px-3 py-2 disabled:opacity-40">‹</button>{Array.from({ length: totalPages }, (_, index) => index + 1).slice(0, 5).map((number) => <button key={number} type="button" onClick={() => setPage(number)} className={`h-9 w-9 rounded-lg border ${page === number ? "border-sky-500 bg-sky-500 text-white" : "border-slate-200 bg-white"}`}>{number}</button>)}<button type="button" disabled={page === totalPages} onClick={() => setPage((value) => value + 1)} className="rounded-lg border border-slate-200 bg-white px-3 py-2 disabled:opacity-40">›</button></div>
+        <div className="flex gap-2"><button type="button" disabled={page === 1} onClick={() => setPage(page - 1)} className="rounded-lg border border-slate-200 bg-white px-3 py-2 disabled:opacity-40">‹</button>{Array.from({ length: totalPages }, (_, index) => index + 1).slice(0, 5).map((number) => <button key={number} type="button" onClick={() => setPage(number)} className={`h-9 w-9 rounded-lg border ${page === number ? "border-sky-500 bg-sky-500 text-white" : "border-slate-200 bg-white"}`}>{number}</button>)}<button type="button" disabled={page === totalPages} onClick={() => setPage(page + 1)} className="rounded-lg border border-slate-200 bg-white px-3 py-2 disabled:opacity-40">›</button></div>
       </footer>
 
       {deleteTarget && <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/50 p-4"><section className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"><h2 className="text-xl font-bold">{t("deleteAttemptTitle")}</h2><p className="mt-2 text-sm leading-6 text-slate-600">{t("deleteAttemptDescription")}</p><div className="mt-6 flex gap-3"><button type="button" onClick={() => setDeleteTarget(null)} disabled={deleting} className="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 font-semibold">{t("cancel")}</button><button type="button" onClick={confirmDelete} disabled={deleting} className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 font-semibold text-white disabled:bg-red-300">{deleting ? t("deleting") : t("delete")}</button></div></section></div>}

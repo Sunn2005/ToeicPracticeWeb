@@ -16,12 +16,16 @@ function addReadableBreaks(value) {
     .trim();
 }
 
-export function getReviewParagraphs(value) {
+export function getReviewParagraphs(value, { splitExplanation = false } = {}) {
   if (!value || !value.trim()) {
     return [];
   }
 
-  return addReadableBreaks(value)
+  const text = splitExplanation
+    ? value.replace(/("[^"]*"|“[^”]*”|‘[^’]*’|(?<![\p{L}\p{N}])'[^'\n]*;[^'\n]*'(?![\p{L}\p{N}]))|;/gu, (_, quoted) => quoted ?? "\n\n")
+    : value;
+
+  return addReadableBreaks(text)
     .split(/\n{2,}/)
     .map((paragraph) => paragraph.trim())
     .filter(Boolean);

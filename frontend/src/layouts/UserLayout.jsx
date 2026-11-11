@@ -131,9 +131,6 @@ export default function UserLayout() {
 
           <div className="flex items-center gap-3 sm:gap-5">
             <LanguageSwitcher />
-            <button type="button" aria-label={t("notifications")} className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:bg-slate-50">
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
-            </button>
             <span className="hidden h-8 w-px bg-slate-200 sm:block" />
             <button
               type="button"
@@ -147,7 +144,6 @@ export default function UserLayout() {
               <span className="hidden sm:block">
                 <strong className="block max-w-44 truncate text-sm">{name}</strong>
                 <span className="mt-1 flex items-center gap-1.5">
-                  <span className="rounded-full bg-blue-200 px-2 py-0.5 text-[10px] font-medium leading-4 text-blue-800">{t("learner")}</span>
                   {isPro && (
                     <span className="inline-flex items-center gap-1 rounded-full bg-amber-300 px-2 py-0.5 text-[10px] font-semibold leading-4 text-amber-900">
                       <svg aria-hidden="true" viewBox="0 0 24 24" className="h-3 w-3" fill="currentColor">

@@ -71,13 +71,22 @@ export default function UserDashboard() {
 
   const resume = data.active[0];
   const recent = attempts.slice(0, 4);
-  const chartPoints = data.exams.filter((attempt) => attempt.mode === "FULL").slice(0, 6).reverse();
-  const pointString = chartPoints.map((attempt, index) => {
-    const x = chartPoints.length === 1 ? 50 : 8 + (index * 84) / (chartPoints.length - 1);
-    const score = Number(attempt.result?.totalScore) || 0;
-    const y = 88 - (score / 990) * 70;
-    return `${x},${y}`;
-  }).join(" ");
+  const chartPoints = data.exams
+    .filter((attempt) => attempt.mode === "FULL" && Number.isFinite(attempt.result?.totalScore))
+    .map((attempt) => ({
+      id: attempt.id,
+      score: attempt.result.totalScore,
+      date: attempt.submittedAt || attempt.updatedAt || 0,
+    }))
+    .sort((left, right) => right.date - left.date)
+    .slice(0, 6)
+    .reverse()
+    .map((point, index, points) => ({
+      ...point,
+      x: ((index + 0.5) / points.length) * 100,
+      y: 88 - (point.score / 990) * 70,
+    }));
+  const pointString = chartPoints.map(({ x, y }) => `${x},${y}`).join(" ");
 
   return (
     <div className="mx-auto max-w-[1380px] space-y-7">
@@ -159,16 +168,32 @@ export default function UserDashboard() {
         <article className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-lg font-bold">{t("yourProgress")}</h2>
           <p className="mt-1 text-sm text-slate-400">{t("latestFullTestScores")}</p>
-          <div className="mt-6 h-72 rounded-xl bg-slate-50 p-4">
-            {chartPoints.length ? (
-              <svg viewBox="0 0 100 100" className="h-full w-full" preserveAspectRatio="none" aria-label={t("progressChart")}>
-                {[20, 40, 60, 80].map((y) => <line key={y} x1="6" x2="96" y1={y} y2={y} stroke="#e2e8f0" strokeWidth="0.6" strokeDasharray="2 2" />)}
-                <polyline points={pointString} fill="none" stroke="#0ea5e9" strokeWidth="2" vectorEffect="non-scaling-stroke" />
-                {pointString.split(" ").map((point) => { const [cx, cy] = point.split(","); return <circle key={point} cx={cx} cy={cy} r="1.5" fill="#0ea5e9" />; })}
-              </svg>
-            ) : <div className="flex h-full items-center justify-center text-sm text-slate-400">{t("completeFullTestForProgress")}</div>}
-          </div>
-          <div className="mt-5 rounded-lg bg-sky-50 px-4 py-3 text-sm leading-6 text-sky-600">{t("practiceScoresExcluded")}</div>
+          {loading && !chartPoints.length ? (
+            <p className="mt-6 text-sm text-slate-500">{t("loadingAttemptHistory")}</p>
+          ) : chartPoints.length ? (
+            <div className="mt-6 overflow-x-auto rounded-xl bg-slate-50 p-3">
+              <div style={{ minWidth: chartPoints.length * 76 }}>
+                <svg viewBox="0 0 100 100" className="block h-44 w-full sm:h-56" preserveAspectRatio="none" aria-hidden="true">
+                  {[20, 40, 60, 80].map((y) => <line key={y} x1="0" x2="100" y1={y} y2={y} stroke="#e2e8f0" strokeWidth="0.6" strokeDasharray="2 2" />)}
+                  <polyline points={pointString} fill="none" stroke="#0ea5e9" strokeWidth="2" vectorEffect="non-scaling-stroke" />
+                  {chartPoints.map(({ id, x, y }) => <circle key={id} cx={x} cy={y} r="1.5" fill="#0ea5e9" />)}
+                </svg>
+                <ol className="grid gap-1 text-center text-xs" style={{ gridTemplateColumns: `repeat(${chartPoints.length}, minmax(0, 1fr))` }}>
+                  {chartPoints.map(({ id, score, date }) => (
+                    <li key={id} className="rounded-lg bg-white px-1 py-2">
+                      <strong className="block text-sky-700">{score}/990</strong>
+                      <span className="whitespace-nowrap text-slate-600">{formatDate(date, language)}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </div>
+          ) : !error && (
+            <div className="mt-6 flex min-h-48 flex-col items-center justify-center gap-4 rounded-xl bg-slate-50 p-6 text-center">
+              <p className="text-sm text-slate-600">{t("completeFullTestForProgress")}</p>
+              <button type="button" onClick={() => navigate("/tests")} className="rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-sky-700">{t("chooseMockTest")}</button>
+            </div>
+          )}
         </article>
       </section>
     </div>

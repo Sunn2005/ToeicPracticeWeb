@@ -79,3 +79,17 @@ test("Part 1 translated transcript can contain answer lines only", () => {
     "A. Người phụ nữ đang bê một khay thức ăn.",
   );
 });
+
+test("splits detailed explanation ideas while preserving quoted examples and translations", () => {
+  const explanation = 'First idea; “Try this; then continue.”; Final idea.';
+  assert.deepEqual(getReviewParagraphs(explanation, { splitExplanation: true }), [
+    "First idea",
+    "“Try this; then continue.”",
+    "Final idea.",
+  ]);
+  assert.deepEqual(getReviewParagraphs(explanation), [explanation]);
+  assert.deepEqual(getReviewParagraphs("It's a verb; here's an example.", { splitExplanation: true }), [
+    "It's a verb",
+    "here's an example.",
+  ]);
+});

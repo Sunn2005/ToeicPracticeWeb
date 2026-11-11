@@ -97,7 +97,7 @@ function SubmitDialog({ unansweredCount, submitting, practice, onCancel, onConfi
 function ListeningCompleteScreen({ attempt, answeredCount, unansweredCount, remainingSeconds, submitting, error, onSubmit, onExit }) {
   const { t } = useLanguage();
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
+    <div translate="no" className="notranslate min-h-screen bg-slate-50 text-slate-900">
       <ExamHeader
         testId={attempt.testId}
         section="AWAITING_SUBMISSION"
@@ -281,6 +281,16 @@ function FullTestExam() {
     : readingUnits;
   const currentUnit = findUnit(currentUnits, currentQuestion);
   const isPractice = attempt?.type === "PRACTICE";
+  const practiceQuestionStatuses = useMemo(() => {
+    if (!isPractice) return undefined;
+    return Object.fromEntries(Object.values(practiceFeedbackByUnit)
+      .flatMap((feedback) => feedback.questions || [])
+      .filter((question) => question.selectedAnswer
+        && question.selectedAnswer === answers[question.questionNumber]
+        && ["CORRECT", "INCORRECT"].includes(question.answerStatus))
+      .map((question) => [question.questionNumber, question.answerStatus]));
+  }, [answers, isPractice, practiceFeedbackByUnit]);
+
   const currentPracticeFeedback = currentUnit
     ? practiceFeedbackByUnit[currentUnit.key]
     : null;
@@ -683,6 +693,10 @@ function FullTestExam() {
     try {
       if (isPractice) {
         await waitForPendingSaves();
+        if (timerType === TIMER_TYPES.UNTIMED) {
+          navigate("/history", { replace: true });
+          return;
+        }
       } else {
         await saveQueue.drain();
       }
@@ -846,7 +860,7 @@ function FullTestExam() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
+    <div translate="no" className="notranslate min-h-screen bg-slate-50 text-slate-900">
       <ExamHeader
         testId={payload.test?.testId || attempt.testId}
         section={attempt.currentSection}
@@ -854,13 +868,24 @@ function FullTestExam() {
         mode={attempt.mode}
         selectedPart={attempt.selectedPart}
         selectedParts={attempt.selectedParts}
-        firstQuestion={scopeFirst}
-        lastQuestion={scopeLast}
+        currentPart={{ number: currentUnit.partNumber, name: currentUnit.partName }}
         remainingSeconds={remainingSeconds ?? 0}
         timerType={timerType}
         onExit={exitExam}
         exitDisabled={busy || deadlineReached}
-      />
+      >
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium text-slate-500">
+          <span role="status" className="inline-flex items-center gap-2">
+            <span aria-hidden="true" className={`h-2 w-2 shrink-0 rounded-full ${saveState === "Save failed" ? "bg-red-500" : saveState === "Saving..." ? "animate-pulse bg-amber-400" : "bg-emerald-500"}`} />
+            {saveState === "Save failed" ? t("saveFailed") : saveState === "Saving..." ? t("saving") : saveState === "Synced" ? t("synced") : t("autosaved")}
+          </span>
+          {saveError && !autosave.pending && !deadlineReached && (
+            <button type="button" disabled={busy} onClick={() => saveQueue.retryFailed()} className="font-semibold text-sky-700 underline disabled:opacity-50">
+              {t("retrySavingAnswers")}
+            </button>
+          )}
+        </div>
+      </ExamHeader>
 
       {sectionNotice && attempt.currentSection === "READING" && (
         <div className="fixed left-1/2 top-24 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-2xl border border-emerald-200 bg-white p-5 text-center shadow-2xl">
@@ -896,28 +921,6 @@ function FullTestExam() {
 
         <div className="w-full">
           <section className="min-w-0 space-y-3">
-            <div className="flex items-center justify-between gap-4 border-b border-slate-200 pb-3">
-              <div>
-                <h1 className="text-base font-bold text-slate-950 sm:text-lg">
-                  {isListening
-                    ? `${t("questions")} ${currentUnit.start}${currentUnit.end !== currentUnit.start ? `–${currentUnit.end}` : ""}`
-                    : `${t("question")} ${currentQuestion} · ${t("range")} ${scopeFirst}–${scopeLast}`}
-                </h1>
-                <p className="mt-0.5 text-xs font-semibold text-sky-700">
-                  {t("part")} {currentUnit.partNumber} · {currentUnit.partName}
-                </p>
-              </div>
-              <div className="flex shrink-0 items-center gap-2 text-xs font-medium text-slate-500">
-                <span className={`h-2.5 w-2.5 rounded-full ${saveState === "Save failed" ? "bg-red-500" : saveState === "Saving..." ? "animate-pulse bg-amber-400" : "bg-emerald-500"}`} />
-                {saveState === "Save failed" ? t("saveFailed") : saveState === "Saving..." ? t("saving") : saveState === "Synced" ? t("synced") : t("autosaved")}
-                {saveError && !autosave.pending && !deadlineReached && (
-                  <button type="button" disabled={busy} onClick={() => saveQueue.retryFailed()} className="font-semibold text-sky-700 underline disabled:opacity-50">
-                    {t("retrySavingAnswers")}
-                  </button>
-                )}
-              </div>
-            </div>
-
             <ResizableExamLayout
               leftLabel={isListening ? t("listeningContent") : t("readingContent")}
               rightLabel={t("questionsAnswers")}
@@ -1152,6 +1155,8 @@ function FullTestExam() {
         currentQuestion={currentQuestion}
         answers={answers}
         navigationLocked={isListening}
+        questionStatuses={practiceQuestionStatuses}
+        practiceMode={isPractice}
         isQuestionDisabled={(number) => number < 101}
         onSelect={isListening ? null : moveReading}
       />

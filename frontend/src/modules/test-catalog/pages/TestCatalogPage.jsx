@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { apiFetch, publicApiFetch } from "../../../api/client";
 import TestModeModal from "../components/TestModeModal";
 import { TOEIC_TESTS } from "../data/testCatalog";
@@ -14,10 +14,14 @@ function practiceScope(attempt, t) {
   return t("historyFullScope");
 }
 
-function TestCatalogCard({ test, attempts, onMode, onResult, onReview, t }) {
+function isSubmittedMock(attempt) {
+  return attempt.status === "COMPLETED" && attempt.type !== "PRACTICE";
+}
+
+function TestCatalogCard({ test, attempts, onMode, t }) {
   const active = attempts.find(canContinuePractice);
-  const latest = attempts.find((attempt) => attempt.status === "COMPLETED" && attempt.type !== "PRACTICE");
-  const completed = Boolean(latest);
+  const completed = attempts.some(isSubmittedMock);
+  const hasHistory = Boolean(active || attempts.some((attempt) => attempt.status === "COMPLETED"));
   const { best } = getFullMockScoreSummary(attempts);
   return (
     <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-sky-200 hover:shadow-md">
@@ -30,9 +34,10 @@ function TestCatalogCard({ test, attempts, onMode, onResult, onReview, t }) {
           <h3 className="mt-2 font-bold text-slate-950">{test.title}</h3>
         </div>
         <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${active ? "bg-amber-50 text-amber-700" : completed ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"}`}>
-          {active ? t("catalogPracticeInProgress") : completed ? t("completed") : t("notStarted")}
+          {active ? t("catalogPracticeInProgress") : completed ? t("catalogMockSubmitted") : t("catalogMockNotSubmitted")}
         </span>
       </div>
+      {active && completed && <p className="mt-2 text-xs font-medium text-emerald-700">{t("catalogMockSubmitted")}</p>}
 
       <div className="mt-4 border-t border-slate-100 pt-4">
         {best !== null ? (
@@ -45,11 +50,13 @@ function TestCatalogCard({ test, attempts, onMode, onResult, onReview, t }) {
       <div className="mt-4 flex flex-wrap gap-2">
         <button type="button" onClick={() => onMode(test, "exam")} className="flex-1 rounded-lg bg-sky-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-sky-600">◉ {t("takeExam")}</button>
         <button type="button" onClick={() => onMode(test, "practice", active)} className="flex-1 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-100">▤ {t("practice")}</button>
-        {latest && (
-          <>
-            <button type="button" onClick={() => onResult(latest)} className="rounded-lg bg-slate-50 px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100">{t("viewResults")}</button>
-            <button type="button" onClick={() => onReview(latest)} className="rounded-lg px-3 py-2.5 text-sm font-semibold text-sky-600 hover:bg-sky-50">{t("reviewAnswers")}</button>
-          </>
+        {hasHistory && (
+          <Link
+            to={{ pathname: "/history", search: new URLSearchParams({ testId: test.id }).toString() }}
+            className="rounded-lg bg-slate-50 px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+          >
+            {t("catalogHistory")}
+          </Link>
         )}
       </div>
     </article>
@@ -68,7 +75,6 @@ export default function TestCatalogPage() {
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("ALL");
   const [status, setStatus] = useState("ALL");
 
   useEffect(() => {
@@ -141,26 +147,22 @@ export default function TestCatalogPage() {
   const filtered = useMemo(() => tests.filter((test) => {
     const testAttempts = attempts.filter((attempt) => attempt.testId === test.id);
     const matchesQuery = `${test.name} ${test.title}`.toLowerCase().includes(query.trim().toLowerCase());
-    const matchesCategory = ["ALL", "FULL", "LISTENING", "READING"].includes(category);
     const hasActive = testAttempts.some(canContinuePractice);
-    const hasCompleted = testAttempts.some((attempt) => attempt.status === "COMPLETED");
+    const hasCompleted = testAttempts.some(isSubmittedMock);
     const matchesStatus = status === "ALL"
       || (status === "IN_PROGRESS" && hasActive)
       || (status === "COMPLETED" && hasCompleted)
-      || (status === "NOT_STARTED" && !hasActive && !hasCompleted);
-    return matchesQuery && matchesCategory && matchesStatus;
-  }), [attempts, category, query, status, tests]);
+      || (status === "NOT_STARTED" && !hasCompleted);
+    return matchesQuery && matchesStatus;
+  }), [attempts, query, status, tests]);
 
   return (
     <div className="mx-auto max-w-[1380px] space-y-5">
-      <section>
-        <h2 className="text-2xl font-bold">{t("testSets")}</h2>
-        <p className="mt-1 text-sm text-slate-500">{t("catalogDescription")}</p>
-      </section>
+      <p className="text-sm text-slate-600">{t("catalogDescription")}</p>
 
       <aside className="rounded-xl border border-sky-200 bg-sky-50 px-5 py-4 text-sm text-sky-800">
         <strong>{t("twoStudyModes")}</strong>
-        <div className="mt-2 grid gap-2 sm:grid-cols-2">
+        <div className="mt-2 grid gap-2">
           <span>● <strong>{t("takeExam")}:</strong> {t("mockExamSummary")}</span>
           <span className="text-emerald-700">● <strong>{t("practice")}:</strong> {t("practiceSummary")}</span>
         </div>
@@ -171,11 +173,8 @@ export default function TestCatalogPage() {
           <span className="text-slate-400">⌕</span>
           <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("searchTests")} className="w-full bg-transparent py-2.5 text-sm outline-none" />
         </label>
-        <div className="flex overflow-x-auto rounded-lg bg-slate-100 p-1 text-sm font-medium">
-          {[["ALL",t("all")],["FULL",t("fullTest")],["LISTENING",t("listening")],["READING",t("reading")]].map(([value, label]) => <button key={value} type="button" onClick={() => setCategory(value)} className={`whitespace-nowrap rounded-md px-4 py-2 ${category === value ? "bg-white text-sky-600 shadow-sm" : "text-slate-600"}`}>{label}</button>)}
-        </div>
         <select value={status} onChange={(event) => setStatus(event.target.value)} className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-sky-400">
-          <option value="ALL">{t("statusAll")}</option><option value="NOT_STARTED">{t("notStarted")}</option><option value="IN_PROGRESS">{t("catalogPracticeInProgress")}</option><option value="COMPLETED">{t("completed")}</option>
+          <option value="ALL">{t("statusAll")}</option><option value="NOT_STARTED">{t("catalogMockNotSubmitted")}</option><option value="IN_PROGRESS">{t("catalogPracticeInProgress")}</option><option value="COMPLETED">{t("catalogMockSubmitted")}</option>
         </select>
       </section>
 
@@ -188,8 +187,6 @@ export default function TestCatalogPage() {
             test={test}
             attempts={attempts.filter((attempt) => attempt.testId === test.id)}
             onMode={openMode}
-            onResult={(attempt) => navigate(`/full-test/${attempt.id}/result`)}
-            onReview={(attempt) => navigate(`/full-test/${attempt.id}/review`)}
             t={t}
           />
         ))}
