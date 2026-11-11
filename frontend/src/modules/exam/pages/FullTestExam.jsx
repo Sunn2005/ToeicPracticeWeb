@@ -26,12 +26,15 @@ import {
   formatClock,
 } from "../utils/testData";
 import { recallExamTest, rememberExamTest } from "../utils/examTestCache";
+import { AnswerSaveError, createAnswerSaveQueue } from "../utils/answerSaveQueue";
 import {
   formatListeningTranscript,
   formatPartTwoTranscript,
   formatTranslatedTranscript,
 } from "../utils/reviewContent";
 import { useLanguage } from "../../../i18n/LanguageContext";
+
+const examErrorMessage = (error) => error instanceof AnswerSaveError ? "" : error.message;
 
 const PRACTICE_FEEDBACK_SOUNDS = {
   correct: "/audio/correct.mp3",
@@ -154,13 +157,25 @@ function FullTestExam() {
   const [remainingSeconds, setRemainingSeconds] = useState(null);
   const [clockSkew, setClockSkew] = useState(0);
   const [error, setError] = useState("");
-  const [saveState, setSaveState] = useState("Synced");
+  const [batchSaveState, setSaveState] = useState("Synced");
   const [busy, setBusy] = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
   const [showNavigator, setShowNavigator] = useState(false);
   const [sectionNotice, setSectionNotice] = useState(false);
   const [audioAdvanceError, setAudioAdvanceError] = useState("");
-  const pendingSaves = useRef(new Map());
+  const [autosave, setAutosave] = useState({ pending: false, failed: [], saved: false });
+  const [dismissedSaveError, setDismissedSaveError] = useState(null);
+  const saveQueue = useMemo(() => createAnswerSaveQueue({
+    write: (questionNumber, selectedAnswer) => apiFetch(`/api/attempts/${attemptId}/answers`, {
+      method: "PUT",
+      body: JSON.stringify({ questionNumber, selectedAnswer }),
+    }),
+    onChange: setAutosave,
+  }), [attemptId]);
+  const saveError = autosave.failed.at(-1)?.error;
+  const saveState = saveError ? "Save failed"
+    : autosave.pending ? "Saving..."
+    : autosave.saved && batchSaveState === "Synced" ? "Autosaved" : batchSaveState;
   const answersRef = useRef({});
   const audioAdvanceInFlight = useRef(false);
   const submitInFlight = useRef(false);
@@ -178,11 +193,12 @@ function FullTestExam() {
 
   useEffect(() => {
     let active = true;
-    const applyExam = (data) => {
+    const applyExam = (data, localEdits = {}) => {
       const serverNow = data.attempt.serverTime || Date.now();
+      const nextAnswers = { ...data.attempt.answers, ...localEdits };
       setPayload(data);
-      setAnswers(data.attempt.answers || {});
-      answersRef.current = data.attempt.answers || {};
+      setAnswers(nextAnswers);
+      answersRef.current = nextAnswers;
       setClockSkew(serverNow - Date.now());
       setRemainingSeconds(getTimerSeconds(data.attempt, serverNow));
     };
@@ -195,6 +211,7 @@ function FullTestExam() {
       applyExam({ attempt: seeded, test: cachedTest });
     }
 
+    const answersAtLoad = answersRef.current;
     const loadExam = async () => {
       if (seeded?.id === attemptId && seeded.type === "PRACTICE" && seeded.status === "PAUSED") {
         startupResume.current ??= resumePracticeAttempt(attemptId);
@@ -211,7 +228,10 @@ function FullTestExam() {
       .then((data) => {
         if (!active) return;
         rememberExamTest(data.test);
-        applyExam(data);
+        const localEdits = cachedTest ? Object.fromEntries(
+          Object.entries(answersRef.current).filter(([question, answer]) => answersAtLoad[question] !== answer),
+        ) : {};
+        applyExam(data, localEdits);
       })
       .catch((requestError) => {
         if (!active) return;
@@ -219,7 +239,7 @@ function FullTestExam() {
           navigate(`/full-test/${attemptId}/result`, { replace: true });
           return;
         }
-        setError(requestError.message);
+        setError(examErrorMessage(requestError));
       });
     return () => {
       active = false;
@@ -373,55 +393,15 @@ function FullTestExam() {
     return () => window.clearInterval(interval);
   }, [attempt, clockSkew]);
 
+  useEffect(() => () => saveQueue.discard({ notify: false }), [saveQueue]);
+
   const saveAnswer = (questionNumber, selectedAnswer) => {
-    const previousAnswer = answers[String(questionNumber)] ?? null;
-    answersRef.current = {
-      ...answersRef.current,
-      [questionNumber]: selectedAnswer,
-    };
+    answersRef.current = { ...answersRef.current, [questionNumber]: selectedAnswer };
     setAnswers((current) => ({ ...current, [questionNumber]: selectedAnswer }));
-    setSaveState("Saving...");
-
-    const previousSave = pendingSaves.current.get(questionNumber) || Promise.resolve();
-    const savePromise = previousSave
-      .catch(() => undefined)
-      .then(() => apiFetch(`/api/attempts/${attemptId}/answers`, {
-        method: "PUT",
-        body: JSON.stringify({ questionNumber, selectedAnswer }),
-      }))
-      .then(() => {
-        setSaveState("Autosaved");
-      })
-      .catch((requestError) => {
-        setAnswers((current) =>
-          current[String(questionNumber)] === selectedAnswer
-            ? { ...current, [questionNumber]: previousAnswer }
-            : current,
-        );
-        if (answersRef.current[String(questionNumber)] === selectedAnswer) {
-          answersRef.current = {
-            ...answersRef.current,
-            [questionNumber]: previousAnswer,
-          };
-        }
-        setSaveState("Save failed");
-        setError(requestError.message);
-        throw requestError;
-      })
-      .finally(() => {
-        if (pendingSaves.current.get(questionNumber) === savePromise) {
-          pendingSaves.current.delete(questionNumber);
-        }
-      });
-
-    pendingSaves.current.set(questionNumber, savePromise);
-    return savePromise;
+    return saveQueue.enqueue(questionNumber, selectedAnswer);
   };
 
-  const waitForPendingSaves = useCallback(async () => {
-    const saves = [...pendingSaves.current.values()];
-    if (saves.length) await Promise.all(saves);
-  }, []);
+  const { waitForPendingSaves } = saveQueue;
 
   const unlockPracticeFeedbackAudio = useCallback(() => {
     let player = practiceFeedbackAudioContextRef.current;
@@ -507,7 +487,7 @@ function FullTestExam() {
           playPracticeFeedbackSound(feedback, currentUnit.key);
         }
       } catch (requestError) {
-        if (active) setError(requestError.message);
+        if (active) setError(examErrorMessage(requestError));
       }
     };
 
@@ -517,6 +497,7 @@ function FullTestExam() {
     };
   }, [
     answers,
+    autosave.pending,
     attempt?.status,
     attemptId,
     currentPracticeFeedback?.ready,
@@ -564,7 +545,7 @@ function FullTestExam() {
       return true;
     } catch (requestError) {
       submitInFlight.current = false;
-      setError(requestError.message);
+      setError(examErrorMessage(requestError));
       setBusy(false);
       setShowSubmit(false);
       return false;
@@ -600,6 +581,7 @@ function FullTestExam() {
         setError("");
         const sectionChanged = nextAttempt.currentSection !== attempt.currentSection;
         if (sectionChanged || nextAttempt.status !== attempt.status) {
+          saveQueue.discard();
           setPayload((previous) => ({ ...previous, attempt: nextAttempt }));
           setAnswers(nextAttempt.answers || {});
           answersRef.current = nextAttempt.answers || {};
@@ -610,7 +592,7 @@ function FullTestExam() {
         }
       } catch (requestError) {
         if (!active) return;
-        setError(requestError.message);
+        setError(examErrorMessage(requestError));
         if (!(requestError instanceof ApiError) || requestError.status >= 500 || requestError.status === 429) {
           retryId = window.setTimeout(syncExpiredAttempt, 3000);
         }
@@ -623,7 +605,7 @@ function FullTestExam() {
       controller.abort();
       window.clearTimeout(retryId);
     };
-  }, [attempt, attemptId, busy, deadlineReached, navigate]);
+  }, [attempt, attemptId, busy, deadlineReached, navigate, saveQueue]);
 
   const advanceListeningAfterAudio = async () => {
     if (!currentUnit || busy || deadlineReached || audioAdvanceInFlight.current) return;
@@ -660,7 +642,7 @@ function FullTestExam() {
       setSaveState("Autosaved");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (requestError) {
-      setError(requestError.message);
+      setError(examErrorMessage(requestError));
       setAudioAdvanceError(t("autoAdvanceFailed"));
       audioAdvanceInFlight.current = false;
     } finally {
@@ -683,7 +665,7 @@ function FullTestExam() {
       setAnswers(nextAttempt.answers || answers);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (requestError) {
-      setError(requestError.message);
+      setError(examErrorMessage(requestError));
     } finally {
       setBusy(false);
     }
@@ -695,13 +677,14 @@ function FullTestExam() {
       : attempt.timed ? "pauseTimedPracticeConfirm" : "practiceExitConfirm";
     if (!window.confirm(t(message))) return;
 
+    saveQueue.cancelRetries();
     setBusy(true);
     setError("");
     try {
       if (isPractice) {
         await waitForPendingSaves();
       } else {
-        await Promise.allSettled([...pendingSaves.current.values()]);
+        await saveQueue.drain();
       }
       const exited = await exitAttempt(attemptId);
       if (exited.status === "COMPLETED") {
@@ -713,7 +696,7 @@ function FullTestExam() {
       if (!isPractice && requestError instanceof ApiError && requestError.status === 404) {
         navigate("/history", { replace: true });
       } else {
-        setError(requestError.message);
+        setError(examErrorMessage(requestError));
       }
     } finally {
       setBusy(false);
@@ -724,6 +707,8 @@ function FullTestExam() {
     setBusy(true);
     setError("");
     try {
+      saveQueue.discard();
+      await saveQueue.drain();
       const resumed = await resumePracticeAttempt(attemptId);
       if (resumed.status === "COMPLETED") {
         navigate(`/full-test/${attemptId}/result`, { replace: true });
@@ -736,7 +721,7 @@ function FullTestExam() {
       answersRef.current = resumed.answers || {};
       setPayload((previous) => ({ ...previous, attempt: resumed }));
     } catch (requestError) {
-      setError(requestError.message);
+      setError(examErrorMessage(requestError));
     } finally {
       setBusy(false);
     }
@@ -896,6 +881,12 @@ function FullTestExam() {
       )}
 
       <main className="w-full px-3 py-3 pb-28 sm:px-5 lg:px-6 xl:pb-5">
+        {saveError && dismissedSaveError !== saveError && (
+          <div role="alert" className="mb-4 flex items-center justify-between gap-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            <span>{t("answerSaveError")}</span>
+            <button type="button" onClick={() => setDismissedSaveError(saveError)} aria-label={t("dismiss")} className="font-bold">×</button>
+          </div>
+        )}
         {error && (
           <div className="mb-4 flex items-center justify-between gap-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             <span>{error}</span>
@@ -919,6 +910,11 @@ function FullTestExam() {
               <div className="flex shrink-0 items-center gap-2 text-xs font-medium text-slate-500">
                 <span className={`h-2.5 w-2.5 rounded-full ${saveState === "Save failed" ? "bg-red-500" : saveState === "Saving..." ? "animate-pulse bg-amber-400" : "bg-emerald-500"}`} />
                 {saveState === "Save failed" ? t("saveFailed") : saveState === "Saving..." ? t("saving") : saveState === "Synced" ? t("synced") : t("autosaved")}
+                {saveError && !autosave.pending && !deadlineReached && (
+                  <button type="button" disabled={busy} onClick={() => saveQueue.retryFailed()} className="font-semibold text-sky-700 underline disabled:opacity-50">
+                    {t("retrySavingAnswers")}
+                  </button>
+                )}
               </div>
             </div>
 
@@ -1057,33 +1053,37 @@ function FullTestExam() {
                         );
                         const feedbackVisible = Boolean(feedbackQuestion);
                         return (
-                          <QuestionCard
-                            key={question.questionNumber}
-                            question={feedbackQuestion || question}
-                            selectedAnswer={answers[String(question.questionNumber)] || null}
-                            onSelect={(answer) => {
-                              if (isPractice) {
-                                unlockPracticeFeedbackAudio();
-                                practiceSoundPendingUnitsRef.current.add(currentUnit.key);
-                              }
-                              saveAnswer(question.questionNumber, answer).catch(() => undefined);
-                            }}
-                            disabled={feedbackVisible || busy || deadlineReached}
-                            hideOptionContent={isListening
-                              && currentUnit.partNumber <= 2
-                              && !feedbackVisible}
-                            isFocused={question.questionNumber === currentQuestion}
-                            compact
-                            review={feedbackVisible}
-                            hideReviewTranslations={[1, 2].includes(currentUnit.partNumber)}
-                            translatedTranscript={currentUnit.partNumber === 1 && feedbackVisible
-                              ? formatTranslatedTranscript(
-                                feedbackQuestion.questionTranslation,
-                                feedbackQuestion.answerTranslation,
-                              )
-                              : null}
-                            hideDetailedExplanation={[1, 2].includes(currentUnit.partNumber)}
-                          />
+                          <div key={question.questionNumber}>
+                            {autosave.failed.some((entry) => entry.questionNumber === question.questionNumber) && (
+                              <p className="mb-1 text-xs font-semibold text-red-700">{t("answerNotSaved")}</p>
+                            )}
+                            <QuestionCard
+                              question={feedbackQuestion || question}
+                              selectedAnswer={answers[String(question.questionNumber)] || null}
+                              onSelect={(answer) => {
+                                if (isPractice) {
+                                  unlockPracticeFeedbackAudio();
+                                  practiceSoundPendingUnitsRef.current.add(currentUnit.key);
+                                }
+                                saveAnswer(question.questionNumber, answer).catch(() => undefined);
+                              }}
+                              disabled={feedbackVisible || busy || deadlineReached}
+                              hideOptionContent={isListening
+                                && currentUnit.partNumber <= 2
+                                && !feedbackVisible}
+                              isFocused={question.questionNumber === currentQuestion}
+                              compact
+                              review={feedbackVisible}
+                              hideReviewTranslations={[1, 2].includes(currentUnit.partNumber)}
+                              translatedTranscript={currentUnit.partNumber === 1 && feedbackVisible
+                                ? formatTranslatedTranscript(
+                                  feedbackQuestion.questionTranslation,
+                                  feedbackQuestion.answerTranslation,
+                                )
+                                : null}
+                              hideDetailedExplanation={[1, 2].includes(currentUnit.partNumber)}
+                            />
+                          </div>
                         );
                       })}
                     </div>

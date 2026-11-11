@@ -88,6 +88,36 @@ test("unsafe request refreshes CSRF and retries once after CSRF_TOKEN_INVALID", 
   assert.equal(calls[3].options.body, calls[1].options.body);
 });
 
+test("concurrent CSRF failures share one refresh, including a late response", async () => {
+  let csrfLoads = 0;
+  let staleRequests = 0;
+  let releaseLateResponse;
+  const lateResponse = new Promise((resolve) => { releaseLateResponse = resolve; });
+  const tokens = [];
+  globalThis.fetch = async (url, options) => {
+    if (String(url).endsWith("/api/v1/auth/csrf")) {
+      csrfLoads++;
+      return jsonResponse({ token: csrfLoads === 1 ? "stale" : "fresh" });
+    }
+    const token = new Headers(options.headers).get("X-XSRF-TOKEN");
+    tokens.push(token);
+    if (token === "stale") {
+      if (++staleRequests === 3) await lateResponse;
+      return jsonResponse({ code: "CSRF_TOKEN_INVALID" }, 403);
+    }
+    releaseLateResponse();
+    return jsonResponse({ saved: true });
+  };
+
+  await Promise.all([101, 102, 103].map((questionNumber) => apiFetch("/api/attempts/test/answers", {
+    method: "PUT",
+    body: JSON.stringify({ questionNumber, selectedAnswer: "A" }),
+  })));
+
+  assert.equal(csrfLoads, 2);
+  assert.deepEqual(tokens, ["stale", "stale", "stale", "fresh", "fresh", "fresh"]);
+});
+
 test("a repeated CSRF_TOKEN_INVALID response is propagated after one retry", async () => {
   const calls = installFetchQueue(
     jsonResponse({ token: "stale-token" }),
