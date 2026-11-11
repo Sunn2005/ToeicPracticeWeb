@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../../auth/useAuth";
 import { useUserAttempts } from "../../../learning-history/hooks/useUserAttempts";
-import { getAttemptParts } from "../../../learning-history/utils/attemptHistory";
+import { canContinuePractice, getAttemptParts } from "../../../learning-history/utils/attemptHistory";
 import { getTestName } from "../../../test-catalog/data/testCatalog";
 import { useLanguage } from "../../../../i18n/LanguageContext";
 import { hasEffectiveAIChat } from "../../../ai-chat/utils/floatingPetInteraction";
@@ -52,7 +52,7 @@ export default function UserDashboard() {
   const data = useMemo(() => {
     const completed = attempts.filter((attempt) => attempt.status === "COMPLETED");
     const exams = completed.filter((attempt) => attempt.type !== "PRACTICE");
-    const active = attempts.filter((attempt) => attempt.status === "IN_PROGRESS");
+    const active = attempts.filter(canContinuePractice);
     const listening = exams.filter((attempt) => Number(attempt.result?.listeningTotalQuestions) > 0);
     const reading = exams.filter((attempt) => Number(attempt.result?.readingTotalQuestions) > 0);
     const average = (items, key) => items.length
@@ -71,7 +71,7 @@ export default function UserDashboard() {
 
   const resume = data.active[0];
   const recent = attempts.slice(0, 4);
-  const chartPoints = data.exams.slice(0, 6).reverse();
+  const chartPoints = data.exams.filter((attempt) => attempt.mode === "FULL").slice(0, 6).reverse();
   const pointString = chartPoints.map((attempt, index) => {
     const x = chartPoints.length === 1 ? 50 : 8 + (index * 84) / (chartPoints.length - 1);
     const score = Number(attempt.result?.totalScore) || 0;
@@ -146,7 +146,7 @@ export default function UserDashboard() {
                       <td className="py-3 text-slate-500">{attempt.type === "PRACTICE" ? t("practice") : modeName(attempt, t)}</td>
                       <td className="py-3 font-semibold text-sky-600">{attempt.status === "COMPLETED" ? attempt.type === "PRACTICE" ? `${attempt.result?.totalCorrect || 0}/${attempt.result?.totalQuestions || 0}` : `${attempt.result?.totalScore || 0}` : "—"}</td>
                       <td className="py-3 text-slate-400">{formatDate(attempt.submittedAt || attempt.updatedAt, language)}</td>
-                      <td className="py-3"><span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${attempt.status === "COMPLETED" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>{attempt.status === "COMPLETED" ? t("completed") : t("inProgress")}</span></td>
+                      <td className="py-3"><span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${attempt.status === "COMPLETED" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>{attempt.status === "COMPLETED" ? t("completed") : t(attempt.status === "PAUSED" ? "practicePaused" : "inProgress")}</span></td>
                     </tr>
                   ))}
                 </tbody>
@@ -158,7 +158,7 @@ export default function UserDashboard() {
 
         <article className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-lg font-bold">{t("yourProgress")}</h2>
-          <p className="mt-1 text-sm text-slate-400">{t("latestExamScores")}</p>
+          <p className="mt-1 text-sm text-slate-400">{t("latestFullTestScores")}</p>
           <div className="mt-6 h-72 rounded-xl bg-slate-50 p-4">
             {chartPoints.length ? (
               <svg viewBox="0 0 100 100" className="h-full w-full" preserveAspectRatio="none" aria-label={t("progressChart")}>
@@ -166,7 +166,7 @@ export default function UserDashboard() {
                 <polyline points={pointString} fill="none" stroke="#0ea5e9" strokeWidth="2" vectorEffect="non-scaling-stroke" />
                 {pointString.split(" ").map((point) => { const [cx, cy] = point.split(","); return <circle key={point} cx={cx} cy={cy} r="1.5" fill="#0ea5e9" />; })}
               </svg>
-            ) : <div className="flex h-full items-center justify-center text-sm text-slate-400">{t("completeExamForProgress")}</div>}
+            ) : <div className="flex h-full items-center justify-center text-sm text-slate-400">{t("completeFullTestForProgress")}</div>}
           </div>
           <div className="mt-5 rounded-lg bg-sky-50 px-4 py-3 text-sm leading-6 text-sky-600">{t("practiceScoresExcluded")}</div>
         </article>

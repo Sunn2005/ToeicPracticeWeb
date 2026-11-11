@@ -1,7 +1,8 @@
+import { formatClock } from "../../exam/utils/testData";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUserAttempts } from "../hooks/useUserAttempts";
-import { getAttemptDurationSeconds, getAttemptParts } from "../utils/attemptHistory";
+import { canContinuePractice, getAttemptParts, getAttemptScoreMaximum, getFullMockScoreSummary } from "../utils/attemptHistory";
 import { getTestName } from "../../test-catalog/data/testCatalog";
 import { useLanguage } from "../../../i18n/LanguageContext";
 
@@ -14,10 +15,28 @@ function formatDate(timestamp, language) {
 }
 
 function attemptLabel(attempt, t) {
-  if (attempt.mode === "FULL") return t("fullTest");
+  if (attempt.mode === "FULL") return t("historyFullScope");
   if (attempt.mode === "LISTENING") return t("listening");
   if (attempt.mode === "READING") return t("reading");
   return `${t("part")} ${getAttemptParts(attempt).join(", ")}`;
+}
+
+function attemptResultLabel(attempt, t) {
+  if (attempt.status !== "COMPLETED" || !attempt.result) return "—";
+  const { totalCorrect, totalQuestions, totalScore } = attempt.result;
+  if (attempt.type === "PRACTICE" || attempt.mode === "PART") {
+    if (!Number.isFinite(totalCorrect) || !(totalQuestions > 0)) return "—";
+    return t("historyCorrectAnswers").replace("{count}", `${totalCorrect}/${totalQuestions}`);
+  }
+  if (!Number.isFinite(totalScore)) return "—";
+  return t("historyEstimatedPoints").replace("{score}", `${totalScore}/${getAttemptScoreMaximum(attempt)}`);
+}
+
+function attemptTimeLimitLabel(attempt, t) {
+  if (attempt.timed === false) return t("unlimited");
+  const seconds = attempt.timeLimitSeconds ?? attempt.result?.timeLimitSeconds;
+  if (!Number.isFinite(seconds) || seconds <= 0) return "—";
+  return `${Math.ceil(seconds / 60)} ${t("minutes")}`;
 }
 
 function SummaryCard({ icon, value, label, tone = "sky" }) {
@@ -37,15 +56,16 @@ export default function AttemptHistoryPage() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
-  const exams = attempts.filter((attempt) => attempt.status === "COMPLETED" && attempt.type !== "PRACTICE");
-  const scores = exams.map((attempt) => Number(attempt.result?.totalScore) || 0).filter(Boolean);
-  const best = scores.length ? Math.max(...scores) : 0;
-  const average = scores.length ? Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length) : 0;
-  const latest = attempts[0]?.updatedAt || attempts[0]?.submittedAt;
+  const { best, average } = getFullMockScoreSummary(attempts);
+  const latest = attempts.reduce(
+    (max, attempt) => Math.max(max, attempt.updatedAt || attempt.submittedAt || attempt.startedAt || 0),
+    0,
+  );
 
   const filtered = useMemo(() => {
     const days = period === "7" ? 7 : period === "30" ? 30 : null;
     return attempts.filter((attempt) => {
+      if (attempt.status !== "COMPLETED" && !canContinuePractice(attempt)) return false;
       const text = `${getTestName(attempt.testId)} ${attemptLabel(attempt, t)}`.toLowerCase();
       const timestamp = Number(attempt.submittedAt || attempt.updatedAt || attempt.startedAt) || 0;
       return text.includes(query.trim().toLowerCase())
@@ -74,8 +94,8 @@ export default function AttemptHistoryPage() {
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <SummaryCard icon="▦" value={attempts.length} label={t("totalAttempts")} />
-        <SummaryCard icon="✓" value={best || "—"} label={t("bestExamScore")} tone="emerald" />
-        <SummaryCard icon="◉" value={average || "—"} label={t("averageExamScore")} tone="violet" />
+        <SummaryCard icon="✓" value={best === null ? "—" : `${best}/990`} label={t("historyBestFullScore")} tone="emerald" />
+        <SummaryCard icon="◉" value={average === null ? "—" : `${average}/990`} label={t("historyAverageFullScore")} tone="violet" />
         <SummaryCard icon="◷" value={formatDate(latest, language)} label={t("latestActivity")} tone="amber" />
       </section>
 
@@ -86,28 +106,41 @@ export default function AttemptHistoryPage() {
         <div className="flex rounded-lg border border-slate-200 bg-white p-1 text-sm font-semibold">
           {[["ALL",t("allTime")],["7",t("last7Days")],["30",t("last30Days")]].map(([value,label]) => <button key={value} type="button" onClick={() => { setPeriod(value); setPage(1); }} className={`rounded-md px-4 py-2 ${period === value ? "bg-sky-50 text-sky-600" : "text-slate-600"}`}>{label}</button>)}
         </div>
-        <select value={type} onChange={(event) => { setType(event.target.value); setPage(1); }} className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm"><option value="ALL">{t("modeAll")}</option><option value="FULL_TEST">{t("mockExamMode")}</option><option value="PRACTICE">{t("practice")}</option></select>
-        <select value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); }} className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm"><option value="ALL">{t("statusFilterAll")}</option><option value="IN_PROGRESS">{t("inProgress")}</option><option value="COMPLETED">{t("completed")}</option></select>
+        <select value={type} onChange={(event) => { setType(event.target.value); setPage(1); }} className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm"><option value="ALL">{t("modeAll")}</option><option value="FULL_TEST">{t("historyMockExam")}</option><option value="PRACTICE">{t("practice")}</option></select>
+        <select value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); }} className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm"><option value="ALL">{t("statusFilterAll")}</option><option value="IN_PROGRESS">{t("inProgress")}</option><option value="PAUSED">{t("practicePaused")}</option><option value="COMPLETED">{t("completed")}</option></select>
       </section>
 
       <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[950px] text-left text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-xs text-slate-400"><tr><th className="px-6 py-4 font-medium">{t("testNameLabel")}</th><th className="px-4 py-4 font-medium">{t("typeLabel")}</th><th className="px-4 py-4 font-medium">{t("testTypeLabel")}</th><th className="px-4 py-4 font-medium">{t("resultLabel")}</th><th className="px-4 py-4 font-medium">{t("durationLabel")}</th><th className="px-4 py-4 font-medium">{t("dateLabel")}</th><th className="px-4 py-4 font-medium">{t("statusLabel")}</th><th className="px-6 py-4 text-right font-medium">{t("actionLabel")}</th></tr></thead>
+            <thead className="border-b border-slate-200 bg-slate-50 text-xs text-slate-400"><tr><th className="px-6 py-4 font-medium">{t("testNameLabel")}</th><th className="px-4 py-4 font-medium">{t("historyModeLabel")}</th><th className="px-4 py-4 font-medium">{t("historyScopeLabel")}</th><th className="px-4 py-4 font-medium">{t("resultLabel")}</th><th className="px-4 py-4 font-medium">{t("historyTimeLimit")}</th><th className="px-4 py-4 font-medium">{t("dateLabel")}</th><th className="px-4 py-4 font-medium">{t("statusLabel")}</th><th className="px-6 py-4 text-right font-medium">{t("actionLabel")}</th></tr></thead>
             <tbody className="divide-y divide-slate-100">
               {visible.map((attempt) => {
                 const completed = attempt.status === "COMPLETED";
                 const practice = attempt.type === "PRACTICE";
-                const duration = Math.max(1, Math.round(getAttemptDurationSeconds(attempt) / 60));
+                const paused = attempt.status === "PAUSED";
+                const submitted = completed && Boolean(attempt.submittedAt);
+                const date = submitted ? attempt.submittedAt : attempt.updatedAt || attempt.startedAt;
+                const dateLabel = submitted ? "historyDateSubmitted"
+                  : attempt.updatedAt ? "historyDateUpdated" : "historyDateStarted";
                 return (
                   <tr key={attempt.id} className="hover:bg-slate-50/70">
                     <td className="px-6 py-4 font-semibold">{getTestName(attempt.testId)}</td>
-                    <td className="px-4 py-4"><span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${practice ? "bg-emerald-50 text-emerald-700" : "bg-sky-50 text-sky-700"}`}>{practice ? t("practice") : t("mockExamMode")}</span></td>
+                    <td className="px-4 py-4"><span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${practice ? "bg-emerald-50 text-emerald-700" : "bg-sky-50 text-sky-700"}`}>{practice ? t("practice") : t("historyMockExam")}</span></td>
                     <td className="px-4 py-4 text-slate-500">{attemptLabel(attempt, t)}</td>
-                    <td className="px-4 py-4 font-semibold text-sky-600">{completed ? practice ? `${attempt.result?.totalCorrect || 0}/${attempt.result?.totalQuestions || 0}` : `${attempt.result?.totalScore || 0}/990` : "—"}</td>
-                    <td className="px-4 py-4 text-slate-500">{attempt.timed === false ? t("unlimited") : `${duration} ${t("minutes")}`}</td>
-                    <td className="px-4 py-4 text-slate-400">{formatDate(attempt.submittedAt || attempt.updatedAt, language)}</td>
-                    <td className="px-4 py-4"><span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${completed ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>{completed ? t("completed") : t("inProgress")}</span></td>
+                    <td className="px-4 py-4 font-semibold text-sky-700">{attemptResultLabel(attempt, t)}</td>
+                    <td className="px-4 py-4 text-slate-600">{attemptTimeLimitLabel(attempt, t)}</td>
+                    <td className="px-4 py-4 text-slate-600">
+                      <div className="whitespace-nowrap">{formatDate(date, language)}</div>
+                      {date && <div className="text-xs text-slate-500">{t(dateLabel)}</div>}
+                    </td>
+                    <td className="px-4 py-4"><span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${completed ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>{completed ? t("completed") : t(paused ? "practicePaused" : "inProgress")}</span>
+                      {paused && Number.isFinite(attempt.pausedRemainingSeconds) && (
+                        <div className="mt-1 text-xs text-slate-600">
+                          {t("practiceTimeLeft").replace("{time}", formatClock(attempt.pausedRemainingSeconds))}
+                        </div>
+                      )}
+                    </td>
                     <td className="px-6 py-4"><div className="flex justify-end gap-3 whitespace-nowrap">
                       {completed ? <><button type="button" onClick={() => navigate(`/full-test/${attempt.id}/result`)} className="font-semibold text-sky-600 hover:text-sky-700">{t("viewResults")}</button><button type="button" onClick={() => navigate(`/full-test/${attempt.id}/review`)} className="font-semibold text-slate-500 hover:text-slate-800">{t("reviewAnswers")}</button></> : <button type="button" onClick={() => navigate(`/full-test/${attempt.id}/exam`, { state: { attempt } })} className="font-semibold text-sky-600">{t("continue")}</button>}
                       <button type="button" onClick={() => setDeleteTarget(attempt)} className="font-semibold text-red-500 hover:text-red-700">{t("delete")}</button>

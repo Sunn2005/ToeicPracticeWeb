@@ -72,6 +72,10 @@ export function getTimerSeconds(attempt, serverNow) {
     return elapsed;
   }
 
+  if (Number.isFinite(attempt.sectionEndAt)) {
+    return Math.max(0, Math.ceil((attempt.sectionEndAt - serverNow) / 1000));
+  }
+
   const duration = getExamDuration(
     attempt.mode,
     attempt.selectedPart,

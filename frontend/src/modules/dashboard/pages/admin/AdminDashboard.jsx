@@ -18,16 +18,13 @@ function formatDate(timestamp) {
   return new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(timestamp));
 }
 
-function formatRelative(timestamp) {
-  if (!timestamp) return "Gần đây";
-  const elapsed = Math.max(0, Date.now() - timestamp);
-  const minutes = Math.floor(elapsed / 60000);
-  if (minutes < 1) return "Vừa xong";
-  if (minutes < 60) return `${minutes} phút trước`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours} giờ trước`;
-  const days = Math.floor(hours / 24);
-  return days === 1 ? "Hôm qua" : `${days} ngày trước`;
+function formatRelative(timestamp, language) {
+  if (!timestamp) return "—";
+  const minutes = Math.floor(Math.max(0, Date.now() - timestamp) / 60_000);
+  const formatter = new Intl.RelativeTimeFormat(language, { numeric: "auto" });
+  if (minutes < 60) return formatter.format(-minutes, "minute");
+  if (minutes < 1440) return formatter.format(-Math.floor(minutes / 60), "hour");
+  return formatter.format(-Math.floor(minutes / 1440), "day");
 }
 
 function creatorName(test, ownProfile) {
@@ -52,6 +49,7 @@ function StatIcon({ type }) {
 }
 
 function AdminDashboardContent() {
+  const { t, language } = useLanguage();
   const { role, profile } = useAuth();
   const isAdmin = role === "ADMIN";
   const [pending, setPending] = useState([]);
@@ -96,6 +94,19 @@ function AdminDashboardContent() {
     () => (isAdmin ? [...pending, ...history] : ownTests),
     [isAdmin, pending, history, ownTests],
   );
+  const testCount = new Set(allTests.map(({ testId }) => testId).filter(Boolean)).size;
+  const summary = [
+    {
+      key: "consoleTotalTests",
+      value: loading || error ? "—" : new Intl.NumberFormat(language).format(testCount),
+      scope: t(isAdmin ? "consoleReviewTestScope" : "consoleOwnTestScope"),
+    },
+    ...(isAdmin ? [
+      { key: "consoleTotalLearners" },
+      { key: "consoleMonthlyRevenue" },
+      { key: "consoleActivePro" },
+    ] : []),
+  ];
   const stats = [
     { title: "Yêu cầu chờ duyệt", value: isAdmin ? pending.length : ownTests.filter((test) => test.status === "PENDING_REVIEW").length, status: "PENDING_REVIEW", icon: "pending" },
     { title: "Yêu cầu đã duyệt", value: (isAdmin ? history : ownTests).filter((test) => test.status === "APPROVED").length, status: "APPROVED", icon: "approved" },
@@ -117,9 +128,19 @@ function AdminDashboardContent() {
     return [...counts.values()].sort((a, b) => b.count - a.count).slice(0, 5);
   }, [allTests, profile]);
 
-  const activities = useMemo(() => [...allTests]
-    .sort((a, b) => (b.reviewedAt || b.submittedAt || b.updatedAt || 0) - (a.reviewedAt || a.submittedAt || a.updatedAt || 0))
-    .slice(0, 5), [allTests]);
+  const activities = allTests.map((test) => {
+    const reviewed = Boolean(test.reviewedAt);
+    const actor = reviewed
+      ? test.reviewedBy === profile?.uid
+        ? profile?.displayName || profile?.email || test.reviewedBy
+        : test.reviewedBy
+      : creatorName(test, profile);
+    return {
+      test,
+      actor: actor || t("consoleUnknownActor"),
+      timestamp: test.reviewedAt || test.submittedAt || test.updatedAt || test.createdAt,
+    };
+  }).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 5);
 
   return (
     <section className="mx-auto max-w-[1500px]">
@@ -141,6 +162,18 @@ function AdminDashboardContent() {
           <button type="button" onClick={loadDashboard} className="font-bold underline underline-offset-4">Thử lại</button>
         </div>
       )}
+
+      <dl className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {summary.map(({ key, value, scope }) => (
+          <div key={key} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <dt className="text-sm font-medium text-slate-600">{t(key)}</dt>
+            <dd className={value === undefined ? "mt-3 text-sm text-slate-500" : "mt-2 text-3xl font-bold text-slate-950"}>
+              {value ?? t("noDataYet")}
+            </dd>
+            {scope && <dd className="mt-2 text-xs text-slate-500">{scope}</dd>}
+          </div>
+        ))}
+      </dl>
 
       <div className="mt-8 grid gap-5 md:grid-cols-3">
         {stats.map((stat) => (
@@ -197,7 +230,11 @@ function AdminDashboardContent() {
                 </tbody>
               </table>
             </div>
-            {!loading && tableItems.length === 0 && <div className="px-6 py-14 text-center text-sm text-slate-500">Chưa có dữ liệu để hiển thị.</div>}
+            {!loading && !error && tableItems.length === 0 && (
+              <p role="status" className="px-6 py-14 text-center text-sm text-slate-500">
+                {t(isAdmin ? "consoleNoPendingTests" : "consoleNoOwnTests")}
+              </p>
+            )}
             {loading && <div className="px-6 py-14 text-center text-sm text-slate-500">Đang tải dữ liệu...</div>}
           </div>
         </div>
@@ -219,10 +256,12 @@ function AdminDashboardContent() {
           <div>
             <h2 className="mb-4 text-xl font-bold text-slate-950">Hoạt động gần đây</h2>
             <div className="space-y-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-              {activities.length > 0 ? activities.map((test) => (
+              {activities.length > 0 ? activities.map(({ test, actor, timestamp }) => (
                 <div key={`${test.testId}-${test.status}`}>
                   <p className="line-clamp-2 text-sm font-medium text-slate-900">{test.title} — {statusConfig[test.status]?.label || test.status}</p>
-                  <p className="mt-1 text-xs text-slate-500">{creatorName(test, profile)} <span className="px-1.5">•</span> {formatRelative(test.reviewedAt || test.submittedAt || test.updatedAt)}</p>
+                  <p className="mt-1 break-words text-xs text-slate-500">
+                    {actor} <span aria-hidden="true" className="px-1.5">•</span> {formatRelative(timestamp, language)}
+                  </p>
                 </div>
               )) : <p className="py-5 text-center text-sm text-slate-500">Chưa có hoạt động mới.</p>}
             </div>

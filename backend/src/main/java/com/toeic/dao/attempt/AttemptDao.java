@@ -23,6 +23,8 @@ public interface AttemptDao {
 
     void delete(String attemptId) throws Exception;
 
+    void replace(String oldAttemptId, Attempt replacement) throws Exception;
+
     void saveAnswer(String attemptId, AttemptAnswer answer) throws Exception;
 
     Map<Integer, String> findAnswers(String attemptId) throws Exception;

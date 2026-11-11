@@ -107,12 +107,12 @@ function TestModeModal({ test, initialTab = "exam", onClose, onStart }) {
     });
   };
 
-  const startSelectedParts = (experience = activeTab) => startMode({
+  const startSelectedParts = () => startMode({
     mode: "PART",
     part: selectedParts.length === 1 ? selectedParts[0] : null,
     parts: selectedParts,
     durationMinutes: customTimeEnabled ? parsedCustomMinutes : null,
-    experience,
+    experience: activeTab,
   });
 
   return (
@@ -173,7 +173,7 @@ function TestModeModal({ test, initialTab = "exam", onClose, onStart }) {
 
           <div className={`mt-5 rounded-lg border px-4 py-3 text-sm ${activeTab === "practice" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-sky-200 bg-sky-50 text-sky-800"}`}>
             <strong>{activeTab === "practice" ? "Học theo nhịp của bạn." : "Mô phỏng điều kiện thi thật."}</strong>{" "}
-            {activeTab === "practice" ? "Xem đáp án và giải thích ngay, không giới hạn thời gian mặc định." : "Bài làm có tính giờ; Listening chỉ phát một lần và đáp án chỉ hiển thị sau khi nộp."}
+            {activeTab === "practice" ? t("practiceFeedbackTiming") : t("examModeRules")}
           </div>
 
           {error && (

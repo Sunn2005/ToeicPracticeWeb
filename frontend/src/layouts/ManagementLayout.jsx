@@ -1,6 +1,6 @@
 import { canUseConsole, consoleRoutePermission } from "../auth/consolePermissions";
 import { useEffect, useState } from "react";
-import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
+import { Link, matchPath, NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/useAuth";
 import BrandLogo from "../components/ui/BrandLogo";
 import { useLanguage } from "../i18n/LanguageContext";
@@ -13,10 +13,11 @@ const iconPaths = {
   review: ["M7 4h10v17H7zM9 4V2h6v2", "m9 13 2 2 4-5"],
   history: ["M3 12a9 9 0 1 0 3-6.7L3 8", "M3 3v5h5M12 7v6l4 2"],
   logout: ["M10 17l5-5-5-5M15 12H3", "M14 4h5a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-5"],
-  lock: ["M7 10h10v10H7zM9 10V7a3 3 0 0 1 6 0v3"],
+  revenue: ["M3 3v18h18", "m6 15 5-5 4 3 5-6"],
+  orders: ["M5 8h14l1 13H4L5 8Z", "M9 8V6a3 3 0 0 1 6 0v2"],
+  profile: ["M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z", "M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"],
   menu: ["M4 7h16M4 12h16M4 17h16"],
   close: ["m6 6 12 12M18 6 6 18"],
-  bell: ["M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"],
 };
 
 function Icon({ name, className = "h-5 w-5" }) {
@@ -43,14 +44,20 @@ function ManagementLayout() {
   const navigation = [
     { label: "Trang tổng quan", icon: "dashboard", to: "/console/dashboard" },
     { label: t("staffTitle"), icon: "staff", to: "/console/staff" },
-    { label: "Quản lý đề thi", icon: "tests", to: "/console/tests", badge: "NV" },
-    { label: "Tạo đề mới", icon: "create", to: "/console/tests/new", badge: "NV" },
+    { label: "Quản lý đề thi", icon: "tests", to: "/console/tests" },
+    { label: "Tạo đề mới", icon: "create", to: "/console/tests/new" },
     { label: "Xét duyệt", icon: "review", to: "/console/reviews" },
     { label: "Lịch sử phê duyệt", icon: "history", to: "/console/review-history" },
-    { label: t("adminRevenueNav"), icon: "dashboard", to: "/console/revenue" },
-    { label: t("adminOrdersNav"), icon: "tests", to: "/console/orders" },
-    { label: t("staffProfile"), icon: "staff", to: "/console/profile" },
+    { label: t("adminRevenueNav"), icon: "revenue", to: "/console/revenue" },
+    { label: t("adminOrdersNav"), icon: "orders", to: "/console/orders" },
+    { label: t("staffProfile"), icon: "profile", to: "/console/profile" },
   ].filter((item) => canUseConsole(profile, consoleRoutePermission(item.to)));
+  const breadcrumb = navigation.filter(({ to }) => matchPath({ path: to, end: false }, pathname));
+  const detailLabel = [
+    ["/console/tests/:testId/edit", "consoleEditTest"],
+    ["/console/tests/:testId/preview", "consolePreviewTest"],
+    ["/console/reviews/:testId", "consoleReviewDetails"],
+  ].find(([path]) => matchPath(path, pathname))?.[1];
 
   useEffect(() => {
     const refresh = () => { refreshProfile().catch(() => {}); };
@@ -77,17 +84,10 @@ function ManagementLayout() {
       </div>
 
       <nav className="flex-1 space-y-1.5 px-4 py-6" aria-label="Điều hướng quản trị">
-        {navigation.map((item) => item.locked ? (
-          <div key={item.label} aria-disabled="true" title="Chỉ quản trị viên được truy cập" className="flex h-12 cursor-not-allowed items-center gap-3 rounded-xl px-4 text-sm font-medium text-slate-400">
+        {navigation.map((item) => (
+          <NavLink key={item.to} to={item.to} onClick={() => setSidebarOpen(false)} className={({ isActive }) => `flex h-12 items-center gap-3 rounded-xl px-4 text-sm font-semibold transition ${isActive ? "bg-blue-50 text-[#2188ee]" : "text-slate-600 hover:bg-slate-50 hover:text-slate-950"}`}>
             <Icon name={item.icon} />
             <span className="flex-1">{item.label}</span>
-            <Icon name="lock" className="h-4 w-4" />
-          </div>
-        ) : (
-          <NavLink key={item.label} to={item.to} onClick={() => setSidebarOpen(false)} className={({ isActive }) => `flex h-12 items-center gap-3 rounded-xl px-4 text-sm font-semibold transition ${isActive ? "bg-blue-50 text-[#2188ee]" : "text-slate-600 hover:bg-slate-50 hover:text-slate-950"}`}>
-            <Icon name={item.icon} />
-            <span className="flex-1">{item.label}</span>
-            {item.badge && <span className="text-[10px] font-bold tracking-wider text-slate-500">{item.badge}</span>}
           </NavLink>
         ))}
       </nav>
@@ -113,16 +113,32 @@ function ManagementLayout() {
       )}
 
       <div className="lg:pl-70">
-        <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-7 lg:px-10">
+        <header className="sticky top-0 z-30 flex h-20 items-center gap-3 border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-7 lg:px-10">
           <button type="button" onClick={() => setSidebarOpen(true)} className="rounded-xl border border-slate-200 p-2.5 text-slate-600 lg:hidden" aria-label="Mở menu">
             <Icon name="menu" />
           </button>
-          <div className="hidden lg:block" />
-          <div className="flex items-center gap-3 sm:gap-5">
-            <button type="button" className="relative grid h-10 w-10 place-items-center rounded-full bg-slate-50 text-slate-500 transition hover:bg-blue-50 hover:text-blue-600" aria-label="Thông báo">
-              <Icon name="bell" />
-              {isAdmin && <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />}
-            </button>
+          <nav aria-label={t("consoleBreadcrumb")} className="min-w-0 text-sm">
+            <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              {breadcrumb.map((item, index) => {
+                const current = index === breadcrumb.length - 1 && !detailLabel;
+                return (
+                  <li key={item.to} className="flex items-center gap-2">
+                    {index > 0 && <span aria-hidden="true" className="text-slate-400">/</span>}
+                    {current
+                      ? <span aria-current="page" className="font-semibold text-slate-900">{item.label}</span>
+                      : <Link to={item.to} className="text-slate-600 hover:underline">{item.label}</Link>}
+                  </li>
+                );
+              })}
+              {detailLabel && (
+                <li aria-current="page" className="flex items-center gap-2 font-semibold text-slate-900">
+                  {breadcrumb.length > 0 && <span aria-hidden="true" className="text-slate-400">/</span>}
+                  {t(detailLabel)}
+                </li>
+              )}
+            </ol>
+          </nav>
+          <div className="ml-auto flex shrink-0 items-center gap-3 sm:gap-5">
             <div className="hidden text-right sm:block">
               <p className="max-w-52 truncate text-sm font-bold text-slate-900">{profile?.displayName || profile?.email || "Tài khoản nội bộ"}</p>
               <p className="mt-0.5 text-xs text-slate-500">{isAdmin ? "Quản trị viên" : "Nhân viên"}</p>

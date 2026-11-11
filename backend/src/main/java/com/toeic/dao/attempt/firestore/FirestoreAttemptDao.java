@@ -98,6 +98,8 @@ public class FirestoreAttemptDao implements AttemptDao {
                         "startedAt",
                         "updatedAt",
                         "submittedAt",
+                        "sectionEndAt",
+                        "pausedAt",
                         "result"
                 )
                 .get()
@@ -113,8 +115,21 @@ public class FirestoreAttemptDao implements AttemptDao {
 
     @Override
     public void delete(String attemptId) throws Exception {
-        var attemptReference = firestore.collection("attempts").document(attemptId);
         WriteBatch batch = firestore.batch();
+        addAttemptDeletion(batch, attemptId);
+        batch.commit().get();
+    }
+
+    @Override
+    public void replace(String oldAttemptId, Attempt replacement) throws Exception {
+        WriteBatch batch = firestore.batch();
+        addAttemptDeletion(batch, oldAttemptId);
+        batch.create(firestore.collection("attempts").document(replacement.getId()), replacement);
+        batch.commit().get();
+    }
+
+    private void addAttemptDeletion(WriteBatch batch, String attemptId) throws Exception {
+        var attemptReference = firestore.collection("attempts").document(attemptId);
         for (QueryDocumentSnapshot answer : attemptReference
                 .collection("answers")
                 .get()
@@ -123,7 +138,6 @@ public class FirestoreAttemptDao implements AttemptDao {
             batch.delete(answer.getReference());
         }
         batch.delete(attemptReference);
-        batch.commit().get();
     }
 
     @Override
@@ -189,6 +203,8 @@ public class FirestoreAttemptDao implements AttemptDao {
         attempt.setStartedAt(epochMillis(data.get("startedAt"), "startedAt"));
         attempt.setUpdatedAt(epochMillis(data.get("updatedAt"), "updatedAt"));
         attempt.setSubmittedAt(epochMillis(data.get("submittedAt"), "submittedAt"));
+        attempt.setPausedAt(epochMillis(data.get("pausedAt"), "pausedAt"));
+        attempt.setPausedDurationMillis(epochMillis(data.get("pausedDurationMillis"), "pausedDurationMillis"));
         attempt.setSectionStartedAt(epochMillis(data.get("sectionStartedAt"), "sectionStartedAt"));
         attempt.setSectionEndAt(epochMillis(data.get("sectionEndAt"), "sectionEndAt"));
         attempt.setOverallEndAt(epochMillis(data.get("overallEndAt"), "overallEndAt"));

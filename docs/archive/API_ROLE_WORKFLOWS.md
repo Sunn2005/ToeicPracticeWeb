@@ -190,7 +190,8 @@ Response trong lúc thi luôn loại bỏ đệ quy các field bí mật: `corre
 - `type`: `FULL_TEST` hoặc `PRACTICE`; mặc định `FULL_TEST`.
 - `mode`: `FULL`, `LISTENING`, `READING` hoặc `PART`.
 - `status`: `IN_PROGRESS` hoặc `COMPLETED`.
-- `currentSection`: `LISTENING`, `READING` hoặc `FINISHED`.
+- `currentSection`: `LISTENING`, `READING`, `AWAITING_SUBMISSION` hoặc `FINISHED`.
+- Lượt luyện có giờ đã tạm dừng có `status=PAUSED` và `pausedRemainingSeconds` tính từ deadline phía server.
 - `selectedPart` chỉ có giá trị khi chế độ `PART` chọn đúng một Part.
 - `answers` là object có key là số câu ở dạng chuỗi. Một số response nội bộ sau khi lưu đáp án không kèm `answers`/`answeredCount`; từng endpoint sẽ ghi rõ.
 - Server tự đối chiếu deadline khi đọc hoặc cập nhật attempt; attempt hết giờ có thể được chuyển section hoặc tự nộp trước khi response được trả về.
@@ -346,14 +347,14 @@ Chỉ đề `APPROVED` được trả về. Đề legacy không có `status` đ�
 
 ## 5. API lịch sử học tập
 
-### 5.1 Lấy lịch sử attempt đã hoàn thành
+### 5.1 Lấy lịch sử làm bài
 
 - **Mục đích:** hiển thị lịch sử làm bài của chính user hiện tại.
 - **Method/type:** `GET`, response `application/json`.
 - **Path:** `/api/users/me/attempts`.
 - **Quyền:** đã đăng nhập.
 - **Params/body:** không có.
-- **Response thành công:** `200 OK`, mảng attempt đã `COMPLETED`, sắp xếp `startedAt` mới nhất trước.
+- **Response thành công:** `200 OK`, mảng attempt `COMPLETED` và lượt `PRACTICE` còn `IN_PROGRESS` hoặc `PAUSED`, sắp xếp theo `startedAt` mới nhất trước. Lượt thi thử chưa nộp không xuất hiện trong lịch sử.
 
 Mỗi phần tử gồm: `id`, `testId`, `type`, `mode`, `selectedPart`, `selectedParts`, `status`, `currentSection`, `currentQuestionNumber`, `totalQuestions`, `score`, `startedAt`, `updatedAt`, `submittedAt`, `result`.
 
@@ -397,7 +398,7 @@ Tất cả endpoint trong mục này yêu cầu đăng nhập. Ngoài endpoint t
 
 ### 6.1 Tạo hoặc tiếp tục attempt theo đề
 
-- **Mục đích:** tạo attempt mới, hoặc trả lại attempt `IN_PROGRESS` có cùng `testId`, `type`, `mode` và `selectedParts`.
+- **Mục đích:** Luôn tạo lượt mới với `FULL_TEST`. Với `PRACTICE`, trả lại lượt `IN_PROGRESS` hoặc `PAUSED` nếu trùng đề, mode và Part đã chọn. Tìm lượt `PAUSED` chưa khởi động lại đồng hồ.
 - **Method/type:** `POST`, request/response `application/json`.
 - **Path:** `/api/tests/{testId}/attempts`.
 - **Quyền:** đã đăng nhập.
@@ -422,7 +423,7 @@ Tất cả endpoint trong mục này yêu cầu đăng nhập. Ngoài endpoint t
 | `part` | `integer` | Khi `mode=PART` nếu không có `parts` | Từ 1 đến 7. |
 | `parts` | `integer[]` | Khi `mode=PART` nếu không có `part` | Ít nhất một Part từ 1 đến 7; server loại trùng và sắp xếp. |
 | `durationMinutes` | `integer` | Không | Chỉ dùng cho `PART`, từ 1 đến 180 phút. |
-| `restartExisting` | `boolean` | Không | Mặc định `false`. Nếu `true`, xóa attempt `IN_PROGRESS` trùng scope cùng các đáp án đã lưu rồi tạo attempt mới từ đầu. Chỉ gửi sau khi người dùng xác nhận “Bắt đầu lại”. |
+| `restartExisting` | `boolean` | Không | Mặc định `false`. Chỉ có tác dụng với `PRACTICE`. Nếu `true`, thay lượt `IN_PROGRESS` hoặc `PAUSED` trùng phạm vi bằng lượt mới. Chỉ gửi sau khi người dùng xác nhận “Bắt đầu lại”. |
 
 Nếu `PART` không truyền `durationMinutes`, thời lượng gợi ý lần lượt cho Part 1–7 là `5, 10, 15, 15, 20, 10, 45` phút và được cộng theo các Part đã chọn.
 
@@ -443,7 +444,7 @@ Frontend mới nên dùng `POST /api/tests/{testId}/attempts`.
 
 ### 6.3 Lấy Full Test đang làm
 
-- **Mục đích:** tìm Full Test attempt hiện tại để hỗ trợ nút “Tiếp tục làm bài”.
+- **Mục đích:** Endpoint tương thích để tìm Full Test attempt hiện tại. Giao diện không dùng endpoint này để hiện nút tiếp tục thi thử.
 - **Method/type:** `GET`, response `application/json`.
 - **Path:** `/api/attempts/current?testId={testId}`.
 - **Quyền:** đã đăng nhập.
@@ -451,6 +452,12 @@ Frontend mới nên dùng `POST /api/tests/{testId}/attempts`.
 - **Response thành công:** `200 OK`, `AttemptResponse` có đáp án đã lưu.
 - **Lưu ý:** endpoint chỉ tìm `type=FULL_TEST`, `mode=FULL`, đủ Part 1–7; không tìm attempt luyện riêng Part/section.
 - **Lỗi chính:** `404 NOT_FOUND` nếu không có attempt phù hợp đang làm.
+
+### Thoát bài và tiếp tục luyện tập
+
+- `POST /api/attempts/{attemptId}/exit` yêu cầu đăng nhập và quyền sở hữu. Với lượt thi thử đang làm, xóa lượt và các đáp án tạm, trả `200 OK` với `status=DISCARDED`. Với lượt luyện tập có giờ, đóng băng deadline và trả trạng thái `PAUSED` cùng `pausedRemainingSeconds`. Lượt luyện không tính giờ giữ nguyên tiến độ. Lượt đã hoàn thành được giữ lại và trả `COMPLETED`.
+- `POST /api/attempts/{attemptId}/resume` dành cho lượt luyện tập thuộc owner. Nếu đang `PAUSED`, server đặt lại deadline từ thời gian còn lại, giữ section và câu hiện tại, rồi trả `AttemptResponse`. Gọi lại khi đang làm không cộng thêm thời gian. Lượt thi thử không hỗ trợ thao tác này.
+- `GET /api/attempts/{attemptId}/exam` có thể tải lượt luyện `PAUSED` để hiển thị màn hình tiếp tục. Lượt tạm dừng không chấm theo deadline cũ và không nhận lưu đáp án hoặc nộp bài. Lượt thi thử bị gián đoạn có thể tải lại bằng đường dẫn attempt gốc khi còn thời gian. Deadline thi thử tiếp tục chạy.
 
 ### 6.4 Lấy trạng thái một attempt
 

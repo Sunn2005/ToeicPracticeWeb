@@ -70,7 +70,7 @@ class UserLearningServiceTests {
     }
 
     @Test
-    void includesSubmittedAndInProgressAttemptsInHistory() throws Exception {
+    void includesSubmittedAndResumablePracticeButHidesUnfinishedMocks() throws Exception {
         AttemptDao attemptDao = mock(AttemptDao.class);
         UserLearningService service = new UserLearningService(attemptDao);
 
@@ -84,12 +84,21 @@ class UserLearningServiceTests {
         unfinished.setStatus("IN_PROGRESS");
         unfinished.setStartedAt(200L);
 
-        when(attemptDao.findHistoryByUserId("user-1")).thenReturn(List.of(unfinished, submitted));
+        Attempt paused = new Attempt();
+        paused.setId("practice-1");
+        paused.setType("PRACTICE");
+        paused.setStatus("PAUSED");
+        paused.setStartedAt(300L);
+        paused.setPausedAt(1_000L);
+        paused.setSectionEndAt(13_000L);
+
+        when(attemptDao.findHistoryByUserId("user-1")).thenReturn(List.of(paused, unfinished, submitted));
 
         List<Map<String, Object>> history = service.getAttempts("user-1");
 
         assertEquals(2, history.size());
-        assertEquals("unfinished-1", history.getFirst().get("id"));
+        assertEquals("practice-1", history.getFirst().get("id"));
+        assertEquals(12L, history.getFirst().get("pausedRemainingSeconds"));
         assertEquals("submitted-1", history.get(1).get("id"));
     }
 

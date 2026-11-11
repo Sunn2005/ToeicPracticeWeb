@@ -6,7 +6,7 @@ import { buildOrdersQuery, formatOrderAmount, formatOrderDate, orderDateEpoch, o
 
 const inputClass = "mt-2 min-h-11 w-full min-w-0 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-blue-600";
 const buttonClass = "min-h-11 rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-50";
-const statusClasses = { PENDING: "bg-amber-50 text-amber-800", PAID: "bg-green-50 text-green-800", CANCELLED: "bg-slate-100 text-slate-700" };
+const statusClasses = { PENDING: "bg-amber-50 text-amber-800", PAID: "bg-blue-100 text-blue-800", CANCELLED: "bg-slate-100 text-slate-700" };
 const columns = ["orderCode", "buyer", "planCode", "amount", "status", "createdAt", "paidAt"];
 const detailFields = ["orderCode", "userId", "buyerName", "buyerEmail", "planCode", "amount", "durationDays", "status", "paymentLinkId", "createdAt", "paidAt", "proExpiresAt"];
 
@@ -73,7 +73,7 @@ function RequestState({ request, t, onRetry }) {
 
 export default function AdminOrdersPage() {
   const { t, language } = useLanguage();
-  const [filters, setFilters] = useState({ status: "", planCode: "", userId: "", from: "", to: "" });
+  const [filters, setFilters] = useState({ status: "", planCode: "", from: "", to: "" });
   const [page, setPage] = useState(0);
   const [retry, setRetry] = useState(0);
   const [result, setResult] = useState(null);
@@ -107,20 +107,32 @@ export default function AdminOrdersPage() {
   return <section className="mx-auto max-w-7xl space-y-6" aria-labelledby="orders-title">
     <header><h1 id="orders-title" className="text-2xl font-bold text-slate-950 sm:text-3xl">{t("adminOrdersTitle")}</h1><p className="mt-2 text-sm text-slate-600">{t("adminOrdersDescription")}</p></header>
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {["status", "planCode"].map((field) => <label key={field} className="text-sm font-semibold">{t(`adminOrders_${field}`)}
           <select className={inputClass} value={filters[field]} onChange={(event) => changeFilter(field, event.target.value)}>
             <option value="">{t("adminOrdersAll")}</option>
             {(field === "status" ? ["PENDING", "PAID", "CANCELLED"] : ["PRO_1DAY", "PRO_30"]).map((value) => <option key={value} value={value}>{field === "status" ? t(orderStatusKey({ status: value })) : value}</option>)}
           </select>
         </label>)}
-        {["from", "to", "userId"].map((field) => <label key={field} className="min-w-0 text-sm font-semibold">{t(`adminOrders_${field}`)}<input type={field === "userId" ? "text" : "date"} className={inputClass} value={filters[field]} onChange={(event) => changeFilter(field, event.target.value)} aria-invalid={field !== "userId" && invalidRange} aria-describedby={field !== "userId" ? "orders-date-help" : undefined} /></label>)}
+        {["from", "to"].map((field) => (
+          <label key={field} className="min-w-0 text-sm font-semibold">
+            {t(`adminOrders_${field}`)}
+            <input
+              type="date"
+              className={inputClass}
+              value={filters[field]}
+              onChange={(event) => changeFilter(field, event.target.value)}
+              aria-invalid={invalidRange}
+              aria-describedby="orders-date-help"
+            />
+          </label>
+        ))}
       </div>
       <p id="orders-date-help" className="mt-3 text-sm text-slate-600">{t("adminOrdersDateHelp")}</p>
     </div>
     <div aria-busy={Boolean(request.loading)} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <RequestState request={request} t={t} onRetry={() => setRetry((value) => value + 1)} />
-      {data && (data.items.length === 0 ? <p role="status" className="p-6 text-sm text-slate-600">{t("adminOrdersEmpty")}</p> : <div className="overflow-x-auto"><table className="w-full text-left text-sm">
+      {data && (data.items.length === 0 ? <p role="status" className="p-12 text-center text-sm text-slate-500">{t("adminOrdersEmpty")}</p> : <div className="overflow-x-auto"><table className="w-full text-left text-sm">
         <caption className="sr-only">{t("adminOrdersTitle")}</caption>
         <thead className="bg-slate-50 text-slate-600"><tr>{columns.map((column) => <th key={column} scope="col" className="whitespace-nowrap px-4 py-3 font-semibold">{t(`adminOrders_${column}`)}</th>)}</tr></thead>
         <tbody className="divide-y divide-slate-100">{data.items.map((order) => <tr key={order.orderCode} onClick={() => openOrder(order.orderCode)} className="cursor-pointer hover:bg-blue-50/50">

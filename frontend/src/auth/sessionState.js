@@ -55,6 +55,9 @@ export async function terminateBackendSession(
   destroySession,
   clearFirebaseUser,
 ) {
-  await destroySession();
-  await clearFirebaseUser();
+  try {
+    await destroySession();
+  } finally {
+    await clearFirebaseUser();
+  }
 }

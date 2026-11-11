@@ -95,3 +95,14 @@ test("untimed practice has no countdown", () => {
   assert.equal(getTimerType(attempt), TIMER_TYPES.UNTIMED);
   assert.equal(getTimerSeconds(attempt, 61_000), 0);
 });
+
+test("a Full Test uses the current section deadline when Listening ends early", () => {
+  const startedAt = 1_000;
+  const readingStartedAt = startedAt + 40 * 60_000;
+  const sectionEndAt = readingStartedAt + 75 * 60_000;
+  const attempt = { mode: "FULL", startedAt, timeLimitSeconds: 7_200, sectionEndAt };
+
+  assert.equal(getTimerSeconds(attempt, readingStartedAt), 75 * 60);
+  assert.equal(getTimerSeconds(attempt, sectionEndAt - 1), 1);
+  assert.equal(getTimerSeconds(attempt, sectionEndAt), 0);
+});

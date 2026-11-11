@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { useLanguage } from "../../../../i18n/LanguageContext";
 
 const PAGE_SIZE = 8;
 
@@ -7,6 +8,12 @@ const STATUS_LABELS = {
   PENDING_REVIEW: "Chờ duyệt",
   APPROVED: "Đã duyệt",
   REJECTED: "Từ chối",
+};
+
+const STATUS_CLASSES = {
+  PENDING_REVIEW: "bg-amber-100 text-amber-800",
+  APPROVED: "bg-emerald-100 text-emerald-800",
+  REJECTED: "bg-red-100 text-red-800",
 };
 
 const TYPE_LABELS = {
@@ -58,6 +65,7 @@ function toLocalDateInputValue(timestamp) {
 // - items: mảng TestMetadata từ getPendingSubmissions().
 // - loading: true khi đang tải — bảng hiện skeleton, không hiện nhầm empty.
 function SubmissionTable({ items, loading = false }) {
+  const { t } = useLanguage();
   const [search, setSearch] = useState("");
   const [creator, setCreator] = useState("");
   const [status, setStatus] = useState("");
@@ -201,7 +209,7 @@ function SubmissionTable({ items, loading = false }) {
                     {formatWaitingTime(item.submittedAt)}
                   </td>
                   <td className="px-4 py-4">
-                    <span className="inline-flex rounded-md bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700">
+                    <span className={`inline-flex whitespace-nowrap rounded-md px-2.5 py-1 text-xs font-bold ${STATUS_CLASSES[item.status] || "bg-slate-100 text-slate-600"}`}>
                       {STATUS_LABELS[item.status] || item.status || "—"}
                     </span>
                   </td>
@@ -231,7 +239,7 @@ function SubmissionTable({ items, loading = false }) {
                 <path d="m5 13 4 4L19 7" />
               </svg>
             </span>
-            <p className="mt-4 font-bold text-slate-900">Không có yêu cầu chờ duyệt</p>
+            <p className="mt-4 font-bold text-slate-900">{t("consoleNoPendingTests")}</p>
             <p className="mt-1 text-sm text-slate-500">Tất cả đề thi đã được xử lý xong.</p>
           </div>
         )}

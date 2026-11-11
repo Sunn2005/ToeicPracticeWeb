@@ -4,6 +4,7 @@ import { useLanguage } from "../../../i18n/LanguageContext";
 function LockedExamAudio({
   src,
   onEnded,
+  onSkip,
   advancing,
   paused = false,
   ready = true,
@@ -12,6 +13,7 @@ function LockedExamAudio({
   const { t } = useLanguage();
   const audioRef = useRef(null);
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+  const [mediaFailed, setMediaFailed] = useState(false);
   const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
@@ -19,6 +21,7 @@ function LockedExamAudio({
     if (!audio) return undefined;
 
     setAutoplayBlocked(false);
+    setMediaFailed(false);
     setPlaying(false);
     return () => {
       audio.pause();
@@ -40,7 +43,10 @@ function LockedExamAudio({
     if (playPromise) {
       playPromise
         .then(() => setAutoplayBlocked(false))
-        .catch(() => setAutoplayBlocked(true));
+        .catch(() => {
+          if (audio.error) setMediaFailed(true);
+          else setAutoplayBlocked(true);
+        });
     }
   }, [paused, ready, replayable, src]);
 
@@ -53,9 +59,11 @@ function LockedExamAudio({
       }
       await audio.play();
       setAutoplayBlocked(false);
+      setMediaFailed(false);
       setPlaying(true);
     } catch {
-      setAutoplayBlocked(true);
+      if (audioRef.current?.error) setMediaFailed(true);
+      else setAutoplayBlocked(true);
     }
   };
 
@@ -95,7 +103,7 @@ function LockedExamAudio({
         onPause={() => setPlaying(false)}
         onError={() => {
           setPlaying(false);
-          setAutoplayBlocked(true);
+          setMediaFailed(true);
         }}
         onEnded={() => {
           setPlaying(false);
@@ -115,29 +123,42 @@ function LockedExamAudio({
                 ? t("audioSavingAdvance")
                 : paused
                   ? t("audioPaused")
-                  : !ready
-                    ? t("waitingForImage")
-                    : playing
-                      ? t("audioPlaying")
-                      : t("audioPreparing")}
+                  : mediaFailed
+                    ? t("listeningAudioLoadFailed")
+                    : !ready
+                      ? t("waitingForImage")
+                      : playing
+                        ? t("audioPlaying")
+                        : t("audioPreparing")}
             </p>
             <p className="mt-0.5 text-xs leading-5 text-sky-700">
               {paused
                 ? t("audioResumeNote")
-                : !ready
-                  ? t("audioStartsAfterImage")
-                  : t("audioOnceNote")}
+                : mediaFailed
+                  ? t("listeningAudioRecovery")
+                  : !ready
+                    ? t("audioStartsAfterImage")
+                    : t("audioOnceNote")}
             </p>
           </div>
         </div>
 
-        {autoplayBlocked && !paused && ready && (
+        {(autoplayBlocked || mediaFailed) && !paused && ready && !advancing && (
           <button
             type="button"
             onClick={startAfterBrowserBlock}
             className="shrink-0 rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-sky-700"
           >
-            {t("startAudio")}
+            {mediaFailed ? t("retryListeningAudio") : t("startAudio")}
+          </button>
+        )}
+        {mediaFailed && !paused && ready && !advancing && (
+          <button
+            type="button"
+            onClick={onSkip}
+            className="shrink-0 rounded-xl border border-sky-300 px-4 py-2.5 text-sm font-bold text-sky-800"
+          >
+            {t("skipUnavailableListeningUnit")}
           </button>
         )}
       </div>

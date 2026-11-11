@@ -28,6 +28,7 @@ public class AttemptService {
 
     public static final String FULL_TEST = TestType.FULL_TEST.name();
     public static final String PRACTICE = TestType.PRACTICE.name();
+    public static final String PAUSED = AttemptStatus.PAUSED.name();
     public static final String IN_PROGRESS = AttemptStatus.IN_PROGRESS.name();
     public static final String COMPLETED = AttemptStatus.COMPLETED.name();
     public static final String LISTENING = AttemptSection.LISTENING.name();
@@ -126,18 +127,15 @@ public class AttemptService {
         String attemptType = normalizeAttemptType(requestedType);
         boolean timed = !PRACTICE.equals(attemptType) || durationMinutes != null;
 
-        Attempt active = findCurrentAttempt(
-                userId,
-                testId,
-                scope.mode(),
-                scope.selectedParts(),
-                attemptType
-        );
+        Attempt active = PRACTICE.equals(attemptType)
+                ? findCurrentAttempt(userId, testId, scope.mode(), scope.selectedParts(), attemptType)
+                : null;
+        String replacedAttemptId = null;
         if (active != null) {
             active = reconcileTimeout(active);
-            if (IN_PROGRESS.equals(active.getStatus())) {
+            if (IN_PROGRESS.equals(active.getStatus()) || PAUSED.equals(active.getStatus())) {
                 if (Boolean.TRUE.equals(restartExisting)) {
-                    attemptDao.delete(active.getId());
+                    replacedAttemptId = active.getId();
                 } else {
                     Map<String, Object> response = toResponse(active, true);
                     response.put("resumed", true);
@@ -189,7 +187,11 @@ public class AttemptService {
         attempt.setAiAnalysisRequestedAt(null);
         attempt.setAnswers(null);
 
-        attemptDao.save(attempt);
+        if (replacedAttemptId == null) {
+            attemptDao.save(attempt);
+        } else {
+            attemptDao.replace(replacedAttemptId, attempt);
+        }
         Map<String, Object> response = toResponse(attempt, true);
         response.put("resumed", false);
         return response;
@@ -219,6 +221,64 @@ public class AttemptService {
         return toResponse(attempt, true);
     }
 
+    public Map<String, Object> exit(String userId, String attemptId) throws Exception {
+        Attempt attempt = getOwnedAttempt(userId, attemptId);
+        if (COMPLETED.equals(attempt.getStatus())) {
+            return toResponse(attempt, false);
+        }
+        if (FULL_TEST.equals(attemptType(attempt))) {
+            requireInProgress(attempt);
+            attemptDao.delete(attemptId);
+            return Map.of("status", "DISCARDED");
+        }
+        if (PAUSED.equals(attempt.getStatus())) {
+            return toResponse(attempt, false);
+        }
+
+        attempt = reconcileTimeout(attempt);
+        if (IN_PROGRESS.equals(attempt.getStatus()) && isTimed(attempt)) {
+            long now = System.currentTimeMillis();
+            if (attempt.getSectionEndAt() == null || now >= attempt.getSectionEndAt()) {
+                return toResponse(reconcileTimeout(attempt), false);
+            }
+            attempt.setStatus(PAUSED);
+            attempt.setPausedAt(now);
+            attempt.setUpdatedAt(now);
+            saveAttempt(attempt);
+        }
+        return toResponse(attempt, false);
+    }
+
+    public Map<String, Object> resumePractice(String userId, String attemptId) throws Exception {
+        Attempt attempt = getOwnedAttempt(userId, attemptId);
+        if (!PRACTICE.equals(attemptType(attempt))) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Chỉ lượt luyện tập mới có thể tiếp tục");
+        }
+        if (PAUSED.equals(attempt.getStatus())) {
+            long now = System.currentTimeMillis();
+            long pausedDuration = Math.max(0L, now - attempt.getPausedAt());
+            attempt.setSectionEndAt(attempt.getSectionEndAt() + pausedDuration);
+            if (attempt.getOverallEndAt() != null) {
+                attempt.setOverallEndAt(attempt.getOverallEndAt() + pausedDuration);
+            }
+            if (LISTENING.equals(attempt.getCurrentSection())) {
+                attempt.setListeningEndAt(attempt.getSectionEndAt());
+            } else if (READING.equals(attempt.getCurrentSection())) {
+                attempt.setReadingEndAt(attempt.getSectionEndAt());
+            }
+            attempt.setPausedDurationMillis(pausedDuration + pausedDurationMillis(attempt));
+            attempt.setPausedAt(null);
+            attempt.setStatus(IN_PROGRESS);
+            attempt.setUpdatedAt(now);
+            saveAttempt(attempt);
+        }
+        return toResponse(reconcileTimeout(attempt), true);
+    }
+
+    private long pausedDurationMillis(Attempt attempt) {
+        return attempt.getPausedDurationMillis() == null ? 0L : attempt.getPausedDurationMillis();
+    }
+
     public void requireNoInProgressAttempt(String userId) throws Exception {
         for (Attempt attempt : attemptDao.findByUserId(userId)) {
             if (!IN_PROGRESS.equals(attempt.getStatus())) {
@@ -237,7 +297,7 @@ public class AttemptService {
 
     public Map<String, Object> getExam(String userId, String attemptId) throws Exception {
         Attempt attempt = reconcileTimeout(getOwnedAttempt(userId, attemptId));
-        if (!IN_PROGRESS.equals(attempt.getStatus())) {
+        if (!IN_PROGRESS.equals(attempt.getStatus()) && !PAUSED.equals(attempt.getStatus())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Bài thi đã kết thúc");
         }
 
@@ -480,7 +540,8 @@ public class AttemptService {
                     && requestedType.equals(attemptType(attempt))
                     && requestedMode.equals(mode(attempt))
                     && Objects.equals(requestedParts, selectedParts(attempt))
-                    && IN_PROGRESS.equals(attempt.getStatus())) {
+                    && (IN_PROGRESS.equals(attempt.getStatus())
+                            || (PRACTICE.equals(requestedType) && PAUSED.equals(attempt.getStatus())))) {
                 candidates.add(attempt);
             }
         }
@@ -642,7 +703,7 @@ public class AttemptService {
                 .readingScore(readingScore)
                 .totalScore(listeningScore + readingScore)
                 .estimatedTotalScore(listeningScore + readingScore)
-                .durationSeconds(Math.max(0, (submittedAt - attempt.getStartedAt()) / 1000))
+                .durationSeconds(Math.max(0, (submittedAt - attempt.getStartedAt() - pausedDurationMillis(attempt)) / 1000))
                 .submittedAt(submittedAt)
                 .autoSubmitted(autoSubmitted)
                 .build();
@@ -672,6 +733,7 @@ public class AttemptService {
         response.put("timeLimitSeconds", attempt.getTimeLimitSeconds());
         response.put("timed", isTimed(attempt));
         response.put("status", attempt.getStatus());
+        response.put("pausedRemainingSeconds", attempt.pausedRemainingSeconds());
         response.put("currentSection", attempt.getCurrentSection());
         response.put("currentQuestionNumber", attempt.getCurrentQuestionNumber());
         response.put("firstQuestionNumber", firstQuestion(attempt));

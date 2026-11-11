@@ -89,8 +89,11 @@ export function AuthProvider({ children }) {
   }, [applyProfile, handleUnauthorized, cancelSessionCheck]);
 
   const logout = useCallback(async () => {
-    await terminateBackendSession(destroySession, () => signOut(auth));
-    handleUnauthorized();
+    try {
+      await terminateBackendSession(destroySession, () => signOut(auth));
+    } finally {
+      handleUnauthorized();
+    }
   }, [handleUnauthorized]);
 
   const restoreSession = useCallback(() => {

@@ -16,6 +16,7 @@ function ExamHeader({
   remainingSeconds,
   timerType,
   onExit,
+  exitDisabled = false,
 }) {
   const { t } = useLanguage();
   const isElapsed = timerType === TIMER_TYPES.ELAPSED;
@@ -62,7 +63,8 @@ function ExamHeader({
           <button
             type="button"
             onClick={onExit}
-            className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 sm:px-4 sm:text-sm"
+            disabled={exitDisabled}
+            className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-50 sm:px-4 sm:text-sm"
           >
             {t("exit")}
           </button>

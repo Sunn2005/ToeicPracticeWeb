@@ -30,6 +30,9 @@ public class Attempt {
     private Long startedAt;
     private Long updatedAt;
     private Long submittedAt;
+    private Long pausedAt;
+    private Long pausedDurationMillis;
+
     private Long sectionStartedAt;
     private Long sectionEndAt;
     private Long overallEndAt;
@@ -48,4 +51,9 @@ public class Attempt {
     // trong attempts/{attemptId}/answers/{questionNumber}.
     private Map<String, String> answers;
 
+
+    public Long pausedRemainingSeconds() {
+        if (pausedAt == null || sectionEndAt == null) return null;
+        return Math.max(0L, (sectionEndAt - pausedAt + 999L) / 1000L);
+    }
 }

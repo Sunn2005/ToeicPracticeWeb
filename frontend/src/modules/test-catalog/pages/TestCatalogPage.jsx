@@ -1,15 +1,24 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiFetch, publicApiFetch } from "../../../api/client";
 import TestModeModal from "../components/TestModeModal";
 import { TOEIC_TESTS } from "../data/testCatalog";
+import { canContinuePractice, getAttemptParts, getFullMockScoreSummary } from "../../learning-history/utils/attemptHistory";
 import { useUserAttempts } from "../../learning-history/hooks/useUserAttempts";
 import { useLanguage } from "../../../i18n/LanguageContext";
 
-function TestCatalogCard({ test, attempts, onMode, onContinue, onResult, onReview, t }) {
-  const active = attempts.find((attempt) => attempt.status === "IN_PROGRESS");
+function practiceScope(attempt, t) {
+  if (attempt.mode === "PART") return `${t("part")} ${getAttemptParts(attempt).join(" + ")}`;
+  if (attempt.mode === "LISTENING") return t("listening");
+  if (attempt.mode === "READING") return t("reading");
+  return t("historyFullScope");
+}
+
+function TestCatalogCard({ test, attempts, onMode, onResult, onReview, t }) {
+  const active = attempts.find(canContinuePractice);
   const latest = attempts.find((attempt) => attempt.status === "COMPLETED" && attempt.type !== "PRACTICE");
   const completed = Boolean(latest);
+  const { best } = getFullMockScoreSummary(attempts);
   return (
     <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-sky-200 hover:shadow-md">
       <div className="flex items-start justify-between gap-3">
@@ -21,30 +30,21 @@ function TestCatalogCard({ test, attempts, onMode, onContinue, onResult, onRevie
           <h3 className="mt-2 font-bold text-slate-950">{test.title}</h3>
         </div>
         <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${active ? "bg-amber-50 text-amber-700" : completed ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"}`}>
-          {active ? t("inProgress") : completed ? t("completed") : t("notStarted")}
+          {active ? t("catalogPracticeInProgress") : completed ? t("completed") : t("notStarted")}
         </span>
       </div>
 
       <div className="mt-4 border-t border-slate-100 pt-4">
-        {latest ? (
-          <p className="text-sm text-slate-500">{t("latestScore")}: <strong className="text-emerald-600">{latest.result?.totalScore || 0}/990</strong></p>
+        {best !== null ? (
+          <p className="text-sm text-slate-500">{t("catalogBestScore")}: <strong className="text-emerald-600">{best}/990</strong></p>
         ) : active ? (
-          <div>
-            <div className="flex items-center justify-between text-xs text-slate-500"><span>{t("progressLabel")}</span><strong className="text-sky-600">{t("questionNumber")} {active.currentQuestionNumber || 1}</strong></div>
-            <div className="mt-2 h-1.5 rounded-full bg-slate-100"><div className="h-full rounded-full bg-sky-500" style={{ width: `${Math.min(100, ((active.currentQuestionNumber || 1) / 200) * 100)}%` }} /></div>
-          </div>
+          <p className="text-sm text-slate-500">{practiceScope(active, t)} · {t("questionNumber")} {active.currentQuestionNumber || 1}</p>
         ) : <p className="text-sm text-slate-400">{t("chooseModeToStart")}</p>}
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        {active ? (
-          <button type="button" onClick={() => onContinue(active)} className="flex-1 rounded-lg bg-sky-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-sky-600">▶ {t("continue")}</button>
-        ) : (
-          <>
-            <button type="button" onClick={() => onMode(test, "exam")} className="flex-1 rounded-lg bg-sky-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-sky-600">◉ {t("takeExam")}</button>
-            <button type="button" onClick={() => onMode(test, "practice")} className="flex-1 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-100">▤ {t("practice")}</button>
-          </>
-        )}
+        <button type="button" onClick={() => onMode(test, "exam")} className="flex-1 rounded-lg bg-sky-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-sky-600">◉ {t("takeExam")}</button>
+        <button type="button" onClick={() => onMode(test, "practice", active)} className="flex-1 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-100">▤ {t("practice")}</button>
         {latest && (
           <>
             <button type="button" onClick={() => onResult(latest)} className="rounded-lg bg-slate-50 px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100">{t("viewResults")}</button>
@@ -64,6 +64,7 @@ export default function TestCatalogPage() {
   const [selectedTest, setSelectedTest] = useState(null);
   const [initialTab, setInitialTab] = useState("exam");
   const [resumePrompt, setResumePrompt] = useState(null);
+  const resumeDialogRef = useRef(null);
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
@@ -82,10 +83,23 @@ export default function TestCatalogPage() {
     return () => { active = false; };
   }, []);
 
-  const openMode = (test, tab) => {
+  useEffect(() => {
+    const dialog = resumeDialogRef.current;
+    if (resumePrompt && dialog && !dialog.open) dialog.showModal();
+  }, [resumePrompt]);
+
+  const openMode = (test, tab, unfinishedPractice) => {
     setSelectedTest(test);
     setInitialTab(tab);
     setError("");
+    setResumePrompt(unfinishedPractice ? { attempt: unfinishedPractice } : null);
+  };
+
+  const closeResumePrompt = () => {
+    if (starting) return;
+    setError("");
+    if (!resumePrompt.requestBody) setSelectedTest(null);
+    setResumePrompt(null);
   };
 
   const startAttempt = async ({ mode, part, parts, durationMinutes, experience }) => {
@@ -100,7 +114,8 @@ export default function TestCatalogPage() {
       method: "POST",
       body: JSON.stringify(requestBody),
     });
-    if (attempt.resumed) {
+    if (requestBody.type === "PRACTICE" && attempt.resumed) {
+      setInitialTab(experience);
       setResumePrompt({ attempt, requestBody });
       return;
     }
@@ -108,6 +123,7 @@ export default function TestCatalogPage() {
   };
 
   const restart = async () => {
+    if (!window.confirm(t("restartAttemptWarning"))) return;
     setStarting(true);
     setError("");
     try {
@@ -126,7 +142,7 @@ export default function TestCatalogPage() {
     const testAttempts = attempts.filter((attempt) => attempt.testId === test.id);
     const matchesQuery = `${test.name} ${test.title}`.toLowerCase().includes(query.trim().toLowerCase());
     const matchesCategory = ["ALL", "FULL", "LISTENING", "READING"].includes(category);
-    const hasActive = testAttempts.some((attempt) => attempt.status === "IN_PROGRESS");
+    const hasActive = testAttempts.some(canContinuePractice);
     const hasCompleted = testAttempts.some((attempt) => attempt.status === "COMPLETED");
     const matchesStatus = status === "ALL"
       || (status === "IN_PROGRESS" && hasActive)
@@ -159,7 +175,7 @@ export default function TestCatalogPage() {
           {[["ALL",t("all")],["FULL",t("fullTest")],["LISTENING",t("listening")],["READING",t("reading")]].map(([value, label]) => <button key={value} type="button" onClick={() => setCategory(value)} className={`whitespace-nowrap rounded-md px-4 py-2 ${category === value ? "bg-white text-sky-600 shadow-sm" : "text-slate-600"}`}>{label}</button>)}
         </div>
         <select value={status} onChange={(event) => setStatus(event.target.value)} className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-sky-400">
-          <option value="ALL">{t("statusAll")}</option><option value="NOT_STARTED">{t("notStarted")}</option><option value="IN_PROGRESS">{t("inProgress")}</option><option value="COMPLETED">{t("completed")}</option>
+          <option value="ALL">{t("statusAll")}</option><option value="NOT_STARTED">{t("notStarted")}</option><option value="IN_PROGRESS">{t("catalogPracticeInProgress")}</option><option value="COMPLETED">{t("completed")}</option>
         </select>
       </section>
 
@@ -172,7 +188,6 @@ export default function TestCatalogPage() {
             test={test}
             attempts={attempts.filter((attempt) => attempt.testId === test.id)}
             onMode={openMode}
-            onContinue={(attempt) => navigate(`/full-test/${attempt.id}/exam`, { state: { attempt } })}
             onResult={(attempt) => navigate(`/full-test/${attempt.id}/result`)}
             onReview={(attempt) => navigate(`/full-test/${attempt.id}/review`)}
             t={t}
@@ -185,18 +200,24 @@ export default function TestCatalogPage() {
       {selectedTest && !resumePrompt && <TestModeModal test={selectedTest} initialTab={initialTab} onClose={() => setSelectedTest(null)} onStart={startAttempt} />}
 
       {resumePrompt && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/50 p-4">
-          <section className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
-            <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">{t("unfinishedAttemptFound")}</span>
-            <h2 className="mt-4 text-xl font-bold">{t("resumeOrRestartSimple")}</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-600">{t("savedAnswersRemain")}</p>
-            {error && <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
-            <div className="mt-6 flex gap-3">
-              <button type="button" onClick={restart} disabled={starting} className="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold">{starting ? t("preparing") : t("restart")}</button>
-              <button type="button" onClick={() => navigate(`/full-test/${resumePrompt.attempt.id}/exam`, { state: { attempt: resumePrompt.attempt } })} disabled={starting} className="flex-1 rounded-lg bg-sky-500 px-4 py-2.5 text-sm font-semibold text-white">{t("continue")}</button>
-            </div>
-          </section>
-        </div>
+        <dialog
+          ref={resumeDialogRef}
+          aria-labelledby="resume-attempt-title"
+          onCancel={(event) => { event.preventDefault(); closeResumePrompt(); }}
+          className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl bg-white p-6 text-slate-900 shadow-2xl backdrop:bg-slate-950/50"
+        >
+          <h2 id="resume-attempt-title" className="text-xl font-bold">{t("catalogPracticeInProgress")}</h2>
+          <p className="mt-2 text-sm text-slate-600">
+            {selectedTest.title || selectedTest.name} · {practiceScope(resumePrompt.attempt, t)} · {t("questionNumber")} {resumePrompt.attempt.currentQuestionNumber || 1}
+          </p>
+          {resumePrompt.requestBody && <p className="mt-2 text-sm text-slate-600">{t("restartAttemptWarning")}</p>}
+          {error && <p role="alert" className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+          <div className="mt-6 grid gap-2">
+            <button type="button" onClick={() => navigate(`/full-test/${resumePrompt.attempt.id}/exam`, { state: { attempt: resumePrompt.attempt } })} disabled={starting} className="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50">{t("catalogContinuePractice")}</button>
+            <button type="button" onClick={resumePrompt.requestBody ? restart : () => setResumePrompt(null)} disabled={starting} className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold hover:bg-slate-50 disabled:opacity-50">{starting ? t("preparing") : t(resumePrompt.requestBody ? "restart" : "catalogNewPractice")}</button>
+            <button type="button" onClick={closeResumePrompt} disabled={starting} className="rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50">{t("cancel")}</button>
+          </div>
+        </dialog>
       )}
     </div>
   );

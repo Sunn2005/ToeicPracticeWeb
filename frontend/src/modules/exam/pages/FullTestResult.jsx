@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { getAttemptScoreMaximum } from "../../learning-history/utils/attemptHistory";
 import { useNavigate, useParams } from "react-router-dom";
 import { apiFetch } from "../../../api/client";
 import { formatDuration } from "../utils/testData";
@@ -78,7 +79,7 @@ function PartPerformancePanel({ parts, loading, t }) {
             <div key={part.partNumber}>
               <div className="mb-1.5 flex items-center justify-between gap-3 text-sm">
                 <span className="min-w-0 truncate font-semibold text-slate-800">Part {part.partNumber}: {part.name}</span>
-                <strong className={part.accuracy >= 80 ? "text-emerald-600" : part.accuracy >= 70 ? "text-sky-600" : "text-amber-600"}>{part.accuracy}%</strong>
+                <strong className={part.accuracy >= 80 ? "text-emerald-600" : part.accuracy >= 70 ? "text-sky-600" : "text-amber-600"}>{part.correct}/{part.total}</strong>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-slate-100"><div className={`h-full rounded-full ${color}`} style={{ width: `${part.accuracy}%` }} /></div>
             </div>
@@ -411,20 +412,26 @@ function FullTestResult() {
       const durationMinutes = result?.timed && result?.mode === "PART" && result?.timeLimitSeconds
         ? Math.max(1, Math.round(result.timeLimitSeconds / 60))
         : undefined;
-      const attempt = await apiFetch(`/api/tests/${result.testId}/attempts`, {
+      const requestBody = {
+        type: result.type,
+        mode: result.mode,
+        part: result.selectedPart,
+        parts: result.selectedParts,
+        durationMinutes,
+      };
+      const start = (body) => apiFetch(`/api/tests/${result.testId}/attempts`, {
         method: "POST",
-        body: JSON.stringify({
-          type: result.type,
-          mode: result.mode,
-          part: result.selectedPart,
-          parts: result.selectedParts,
-          durationMinutes,
-          restartExisting: true,
-        }),
+        body: JSON.stringify(body),
       });
+      let attempt = await start(requestBody);
+      if (attempt.resumed) {
+        if (!window.confirm(t("restartAttemptWarning"))) return;
+        attempt = await start({ ...requestBody, restartExisting: true });
+      }
       navigate(`/full-test/${attempt.id}/exam`, { state: { attempt } });
     } catch (requestError) {
       setRetakeError(requestError.message || t("unableStartTest"));
+    } finally {
       setRetaking(false);
     }
   };
@@ -459,9 +466,10 @@ function FullTestResult() {
   const accuracy = totalQuestions
     ? Math.round(((Number(result?.totalCorrect) || 0) / totalQuestions) * 100)
     : 0;
-  const maxScore = resultMode === "FULL" || (listeningTotal > 0 && readingTotal > 0) ? 990 : 495;
+  const maxScore = getAttemptScoreMaximum(result);
   const learnerName = profile?.displayName || user?.displayName || t("learner");
   const targetScore = Number(profile?.targetScore) || 800;
+  const showTarget = !isPractice && resultMode === "FULL";
   const pointsToTarget = Math.max(0, targetScore - (Number(result?.totalScore) || 0));
   const completedAt = result?.submittedAt
     ? new Intl.DateTimeFormat(language === "vi" ? "vi-VN" : "en-US", {
@@ -506,11 +514,13 @@ function FullTestResult() {
                         max={isPractice ? 100 : maxScore}
                         large
                       />
-                      <div className="text-center sm:text-left">
-                        <p className="text-sm text-slate-500">{t("yourTarget")}:</p>
-                        <strong className="mt-1 block text-2xl text-sky-600">{isPractice ? "100%" : `${targetScore} / 990`}</strong>
-                        {!isPractice && <p className="mt-1 text-sm text-slate-400">{pointsToTarget} {t("pointsToTarget")}</p>}
-                      </div>
+                      {showTarget && (
+                        <div className="text-center sm:text-left">
+                          <p className="text-sm text-slate-500">{t("yourTarget")}:</p>
+                          <strong className="mt-1 block text-2xl text-sky-600">{targetScore} / 990</strong>
+                          <p className="mt-1 text-sm text-slate-400">{pointsToTarget} {t("pointsToTarget")}</p>
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex flex-wrap justify-center gap-7 lg:justify-end">

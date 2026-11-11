@@ -73,6 +73,22 @@ public class AttemptController {
         return attemptService.getAttempt(principal.uid(), attemptId);
     }
 
+    @PostMapping("/{attemptId}/exit")
+    public Map<String, Object> exitAttempt(
+            @PathVariable String attemptId,
+            @AuthenticationPrincipal ToeicUserPrincipal principal
+    ) throws Exception {
+        return attemptService.exit(principal.uid(), attemptId);
+    }
+
+    @PostMapping("/{attemptId}/resume")
+    public Map<String, Object> resumePractice(
+            @PathVariable String attemptId,
+            @AuthenticationPrincipal ToeicUserPrincipal principal
+    ) throws Exception {
+        return attemptService.resumePractice(principal.uid(), attemptId);
+    }
+
     @GetMapping("/{attemptId}/exam")
     public Map<String, Object> getExam(
             @PathVariable String attemptId,

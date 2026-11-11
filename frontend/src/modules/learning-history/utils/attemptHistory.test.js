@@ -4,6 +4,7 @@ import {
   getAttemptDurationSeconds,
   getAttemptParts,
   getHistoryStats,
+  getFullMockScoreSummary,
   getSubmittedAttempts,
 } from "./attemptHistory.js";
 
@@ -53,4 +54,23 @@ test("keeps only submitted attempts in history", () => {
 
   assert.deepEqual(getSubmittedAttempts(attempts), [completed]);
   assert.deepEqual(getSubmittedAttempts(null), []);
+});
+
+test("summarizes only scored, completed full mock exams", () => {
+  const completed = (mode, totalScore, type = "FULL_TEST") => ({
+    mode, type, status: "COMPLETED", result: { totalScore },
+  });
+  const excluded = [
+    completed("LISTENING", 495),
+    completed("PART", 980),
+    completed("FULL", 990, "PRACTICE"),
+    { ...completed("FULL", 900), status: "IN_PROGRESS" },
+    completed("FULL", undefined),
+  ];
+
+  assert.deepEqual(getFullMockScoreSummary(excluded), { best: null, average: null });
+  assert.deepEqual(
+    getFullMockScoreSummary([...excluded, completed("FULL", 600), completed("FULL", 800)]),
+    { best: 800, average: 700 },
+  );
 });

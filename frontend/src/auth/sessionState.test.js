@@ -171,3 +171,21 @@ test("logout clears the backend cookie before the temporary Firebase user", asyn
 
   assert.deepEqual(calls, ["backend", "firebase"]);
 });
+
+test("logout signs out of Firebase when the backend logout fails", async () => {
+  const calls = [];
+  const backendError = new Error("Logout failed");
+
+  await assert.rejects(
+    () => terminateBackendSession(
+      async () => {
+        calls.push("backend");
+        throw backendError;
+      },
+      async () => calls.push("firebase"),
+    ),
+    (error) => error === backendError,
+  );
+
+  assert.deepEqual(calls, ["backend", "firebase"]);
+});

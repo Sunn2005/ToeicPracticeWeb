@@ -1,3 +1,11 @@
+export function getAttemptScoreMaximum(attempt) {
+  const result = attempt?.result ?? attempt;
+  const mode = result?.mode ?? attempt?.mode ?? "FULL";
+  if (mode === "FULL") return 990;
+  if (mode === "LISTENING" || mode === "READING") return 495;
+  return result?.listeningTotalQuestions > 0 && result?.readingTotalQuestions > 0 ? 990 : 495;
+}
+
 export function getAttemptParts(attempt) {
   if (attempt?.selectedParts?.length) return attempt.selectedParts;
   if (attempt?.selectedPart) return [attempt.selectedPart];
@@ -53,4 +61,23 @@ export function getHistoryStats(attempts) {
     accuracy,
     streak,
   };
+}
+
+export function getFullMockScoreSummary(attempts) {
+  const scores = attempts
+    .filter((attempt) => attempt.status === "COMPLETED"
+      && attempt.type !== "PRACTICE"
+      && (attempt.mode ?? attempt.result?.mode) === "FULL")
+    .map((attempt) => attempt.result?.totalScore ?? attempt.score)
+    .filter(Number.isFinite);
+
+  if (!scores.length) return { best: null, average: null };
+  return {
+    best: Math.max(...scores),
+    average: Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length),
+  };
+}
+
+export function canContinuePractice(attempt) {
+  return attempt.type === "PRACTICE" && ["IN_PROGRESS", "PAUSED"].includes(attempt.status);
 }

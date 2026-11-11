@@ -1,19 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ApiError, apiFetch, publicApiFetch } from "../../../api/client";
+import { apiFetch, publicApiFetch } from "../../../api/client";
 import LanguageSwitcher from "../../../components/ui/LanguageSwitcher";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getTestName, getTestTitle } from "../../test-catalog/data/testCatalog";
 import BrandLogo from "../../../components/ui/BrandLogo";
 import LoadingScreen from "../../../components/ui/LoadingScreen";
-import { buildListeningUnits, findUnit } from "../utils/testData";
+import { buildListeningUnits } from "../utils/testData";
 
 function FullTestIntro() {
   const { t } = useLanguage();
   const { testId } = useParams();
   const navigate = useNavigate();
   const [test, setTest] = useState(null);
-  const [currentAttempt, setCurrentAttempt] = useState(null);
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState("");
@@ -22,21 +21,9 @@ function FullTestIntro() {
   useEffect(() => {
     let active = true;
 
-    Promise.all([
-      publicApiFetch(`/api/tests/${testId}`),
-      apiFetch(
-        `/api/attempts/current?testId=${encodeURIComponent(testId)}`,
-      ).catch((requestError) => {
-        if (requestError instanceof ApiError && requestError.status === 404) {
-          return null;
-        }
-        throw requestError;
-      }),
-    ])
-      .then(([testData, attemptData]) => {
-        if (!active) return;
-        setTest(testData);
-        setCurrentAttempt(attemptData);
+    publicApiFetch(`/api/tests/${testId}`)
+      .then((testData) => {
+        if (active) setTest(testData);
       })
       .catch((requestError) => {
         if (active) setError(requestError.message);
@@ -51,12 +38,9 @@ function FullTestIntro() {
   }, [testId]);
 
   useEffect(() => {
-    if (!test || (currentAttempt && currentAttempt.currentSection !== "LISTENING")) return;
+    if (!test) return;
 
-    const listeningUnits = buildListeningUnits(test);
-    const unit = currentAttempt
-      ? findUnit(listeningUnits, currentAttempt.currentQuestionNumber)
-      : listeningUnits[0];
+    const [unit] = buildListeningUnits(test);
     if (!unit || mediaPreloadRef.current?.key === unit.key) return;
 
     const image = unit.imageUrl ? new Image() : null;
@@ -74,7 +58,7 @@ function FullTestIntro() {
     }
 
     mediaPreloadRef.current = { key: unit.key, image, audio };
-  }, [currentAttempt, test]);
+  }, [test]);
 
   const startTest = async () => {
     setStarting(true);
@@ -206,16 +190,6 @@ function FullTestIntro() {
                 ))}
               </dl>
 
-              {currentAttempt && (
-                <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
-                  {t("activeAttemptPrefix")}{" "}
-                  {currentAttempt.currentSection === "LISTENING"
-                    ? t("listening")
-                    : t("reading")}
-                  {t("activeAttemptSuffix")}
-                </div>
-              )}
-
               <button
                 type="button"
                 onClick={startTest}
@@ -224,9 +198,7 @@ function FullTestIntro() {
               >
                 {starting
                   ? t("preparingYourTest")
-                  : currentAttempt
-                    ? t("resumeTest")
-                    : t("startTest")}
+                  : t("startTest")}
               </button>
             </aside>
           </div>

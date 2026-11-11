@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { exitAttempt, resumePracticeAttempt } from "../../../api/attempts/lifecycle";
 import { ApiError, apiFetch } from "../../../api/client";
 import ExamHeader from "../components/ExamHeader";
 import ExamNavigationBar from "../components/ExamNavigationBar";
@@ -22,6 +23,7 @@ import {
   buildReadingUnits,
   findUnit,
   formatQuestionProgress,
+  formatClock,
 } from "../utils/testData";
 import { recallExamTest, rememberExamTest } from "../utils/examTestCache";
 import {
@@ -35,10 +37,6 @@ const PRACTICE_FEEDBACK_SOUNDS = {
   correct: "/audio/correct.mp3",
   incorrect: "/audio/incorrect.mp3",
 };
-
-function secondsUntil(endAt, serverNow) {
-  return Math.max(0, Math.ceil((endAt - serverNow) / 1000));
-}
 
 function SubmitDialog({ unansweredCount, submitting, practice, onCancel, onConfirm }) {
   const { t } = useLanguage();
@@ -93,7 +91,7 @@ function SubmitDialog({ unansweredCount, submitting, practice, onCancel, onConfi
   );
 }
 
-function ListeningCompleteScreen({ attempt, answeredCount, unansweredCount, remainingSeconds, submitting, onSubmit, onExit }) {
+function ListeningCompleteScreen({ attempt, answeredCount, unansweredCount, remainingSeconds, submitting, error, onSubmit, onExit }) {
   const { t } = useLanguage();
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -109,6 +107,7 @@ function ListeningCompleteScreen({ attempt, answeredCount, unansweredCount, rema
         remainingSeconds={remainingSeconds ?? 0}
         timerType={attempt.timed === false ? TIMER_TYPES.UNTIMED : TIMER_TYPES.COUNTDOWN}
         onExit={onExit}
+        exitDisabled={submitting}
       />
       <main className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-3xl items-center px-5 py-10">
         <section className="w-full rounded-3xl border border-emerald-200 bg-white p-7 text-center shadow-xl shadow-emerald-100/70 sm:p-10">
@@ -124,6 +123,7 @@ function ListeningCompleteScreen({ attempt, answeredCount, unansweredCount, rema
               {t("unansweredWarningPrefix")} <strong>{unansweredCount} {t("unanswered").toLowerCase()}</strong>. {t("listeningAnswersLocked")}
             </p>
           )}
+          {error && <p className="mt-3 text-sm text-red-700" role="alert">{error}</p>}
           <button
             type="button"
             onClick={onSubmit}
@@ -148,10 +148,10 @@ function FullTestExam() {
   const navigate = useNavigate();
   const location = useLocation();
   const seededAttempt = useRef(location.state?.attempt);
+  const startupResume = useRef(null);
   const [payload, setPayload] = useState(null);
   const [answers, setAnswers] = useState({});
   const [remainingSeconds, setRemainingSeconds] = useState(null);
-  const [sectionRemainingSeconds, setSectionRemainingSeconds] = useState(null);
   const [clockSkew, setClockSkew] = useState(0);
   const [error, setError] = useState("");
   const [saveState, setSaveState] = useState("Synced");
@@ -165,7 +165,6 @@ function FullTestExam() {
   const audioAdvanceInFlight = useRef(false);
   const submitInFlight = useRef(false);
   const hasSubmitted = useRef(false);
-  const timeoutHandled = useRef(false);
   const readingContentRef = useRef(null);
   const readingQuestionsRef = useRef(null);
   const nextMediaPreloadRef = useRef(null);
@@ -186,18 +185,29 @@ function FullTestExam() {
       answersRef.current = data.attempt.answers || {};
       setClockSkew(serverNow - Date.now());
       setRemainingSeconds(getTimerSeconds(data.attempt, serverNow));
-      setSectionRemainingSeconds(secondsUntil(data.attempt.sectionEndAt, serverNow));
     };
 
     const seeded = seededAttempt.current;
-    const cachedTest = seeded?.id === attemptId
+    const cachedTest = seeded?.id === attemptId && seeded.serverTime && seeded.status === "IN_PROGRESS"
       ? recallExamTest(seeded.testId, seeded.selectedParts)
       : null;
     if (cachedTest && seeded) {
       applyExam({ attempt: seeded, test: cachedTest });
     }
 
-    apiFetch(`/api/attempts/${attemptId}/exam`)
+    const loadExam = async () => {
+      if (seeded?.id === attemptId && seeded.type === "PRACTICE" && seeded.status === "PAUSED") {
+        startupResume.current ??= resumePracticeAttempt(attemptId);
+        try {
+          await startupResume.current;
+        } catch {
+          // The paused screen provides an explicit retry if automatic resume fails.
+        }
+      }
+      return apiFetch(`/api/attempts/${attemptId}/exam`);
+    };
+
+    loadExam()
       .then((data) => {
         if (!active) return;
         rememberExamTest(data.test);
@@ -352,12 +362,11 @@ function FullTestExam() {
   }, [attempt?.currentSection, currentQuestion]);
 
   useEffect(() => {
-    if (!attempt?.sectionEndAt) return undefined;
+    if (!attempt?.sectionEndAt || attempt.status !== "IN_PROGRESS") return undefined;
 
     const updateClock = () => {
       const serverNow = Date.now() + clockSkew;
       setRemainingSeconds(getTimerSeconds(attempt, serverNow));
-      setSectionRemainingSeconds(secondsUntil(attempt.sectionEndAt, serverNow));
     };
     updateClock();
     const interval = window.setInterval(updateClock, 1000);
@@ -475,7 +484,7 @@ function FullTestExam() {
   }, [unlockPracticeFeedbackAudio]);
 
   useEffect(() => {
-    if (!isPractice || !currentUnit || currentPracticeFeedback?.ready) return undefined;
+    if (!isPractice || attempt?.status !== "IN_PROGRESS" || !currentUnit || currentPracticeFeedback?.ready) return undefined;
     const unitIsAnswered = currentUnit.questions.every(
       (question) => answers[String(question.questionNumber)],
     );
@@ -508,6 +517,7 @@ function FullTestExam() {
     };
   }, [
     answers,
+    attempt?.status,
     attemptId,
     currentPracticeFeedback?.ready,
     currentUnit,
@@ -561,98 +571,97 @@ function FullTestExam() {
     }
   }, [attemptId, navigate, saveCurrentAnswers, waitForPendingSaves]);
 
-  const timeoutRemainingSeconds = timerType !== TIMER_TYPES.COUNTDOWN
-    ? null
-    : attempt?.mode === "PART"
-      ? remainingSeconds
-      : sectionRemainingSeconds;
+  const deadlineReached = attempt?.status === "IN_PROGRESS"
+    && timerType === TIMER_TYPES.COUNTDOWN && remainingSeconds === 0;
 
   useEffect(() => {
-    if (
-      !attempt
-      || timeoutRemainingSeconds === null
-      || timeoutRemainingSeconds > 0
-      || audioAdvanceInFlight.current
-      || timeoutHandled.current
-    ) return;
-    timeoutHandled.current = true;
+    if (!attempt || !deadlineReached || busy || hasSubmitted.current) return undefined;
 
-    const handleTimeout = async () => {
-      if (attempt.currentSection !== "LISTENING" || attempt.mode !== "FULL") {
-        const submitted = await submitExamOnce({ saveCurrent: attempt.mode === "PART" });
-        if (!submitted && !submitInFlight.current && !hasSubmitted.current) {
-          timeoutHandled.current = false;
-        }
-        return;
-      }
+    let active = true;
+    let retryId;
+    const controller = new AbortController();
 
+    const syncExpiredAttempt = async () => {
       try {
-        const nextAttempt = await apiFetch(
-          `/api/attempts/${attemptId}/finish-listening`,
-          { method: "POST" },
-        );
-        const serverNow = nextAttempt.serverTime || Date.now();
+        const nextAttempt = await apiFetch(`/api/attempts/${attemptId}`, {
+          signal: controller.signal,
+        });
+        if (!active || hasSubmitted.current) return;
+
         if (nextAttempt.status === "COMPLETED") {
           hasSubmitted.current = true;
           navigate(`/full-test/${attemptId}/result`, { replace: true });
           return;
         }
-        setPayload((previous) => ({ ...previous, attempt: nextAttempt }));
-        setAnswers(nextAttempt.answers || {});
-        answersRef.current = nextAttempt.answers || {};
+
+        const serverNow = nextAttempt.serverTime ?? Date.now();
         setClockSkew(serverNow - Date.now());
         setRemainingSeconds(getTimerSeconds(nextAttempt, serverNow));
-        setSectionRemainingSeconds(secondsUntil(nextAttempt.sectionEndAt, serverNow));
-        setSectionNotice(true);
-        timeoutHandled.current = false;
+        setError("");
+        const sectionChanged = nextAttempt.currentSection !== attempt.currentSection;
+        if (sectionChanged || nextAttempt.status !== attempt.status) {
+          setPayload((previous) => ({ ...previous, attempt: nextAttempt }));
+          setAnswers(nextAttempt.answers || {});
+          answersRef.current = nextAttempt.answers || {};
+          setShowSubmit(false);
+          setSectionNotice(sectionChanged && nextAttempt.currentSection === "READING");
+        } else if (getTimerSeconds(nextAttempt, serverNow) === 0) {
+          retryId = window.setTimeout(syncExpiredAttempt, 1000);
+        }
       } catch (requestError) {
+        if (!active) return;
         setError(requestError.message);
-        timeoutHandled.current = false;
+        if (!(requestError instanceof ApiError) || requestError.status >= 500 || requestError.status === 429) {
+          retryId = window.setTimeout(syncExpiredAttempt, 3000);
+        }
       }
     };
 
-    handleTimeout();
-  }, [
-    attempt,
-    attemptId,
-    navigate,
-    submitExamOnce,
-    timeoutRemainingSeconds,
-  ]);
+    syncExpiredAttempt();
+    return () => {
+      active = false;
+      controller.abort();
+      window.clearTimeout(retryId);
+    };
+  }, [attempt, attemptId, busy, deadlineReached, navigate]);
 
   const advanceListeningAfterAudio = async () => {
-    if (!currentUnit || audioAdvanceInFlight.current) return;
+    if (!currentUnit || busy || deadlineReached || audioAdvanceInFlight.current) return;
     audioAdvanceInFlight.current = true;
     setBusy(true);
     setError("");
     setAudioAdvanceError("");
     try {
-      await saveCurrentAnswers();
-      const nextAttempt = await apiFetch(
-        `/api/attempts/${attemptId}/listening/next`,
-        { method: "POST" },
-      );
+      let nextAttempt = audioAdvanceError ? await apiFetch(`/api/attempts/${attemptId}`) : null;
+      const stillOnCurrentUnit = nextAttempt?.status === "IN_PROGRESS"
+        && nextAttempt.currentSection === "LISTENING"
+        && nextAttempt.currentQuestionNumber === attempt.currentQuestionNumber;
+      if (!nextAttempt || stillOnCurrentUnit) {
+        await saveCurrentAnswers();
+        nextAttempt = await apiFetch(`/api/attempts/${attemptId}/listening/next`, {
+          method: "POST",
+        });
+      }
       if (nextAttempt.status === "COMPLETED") {
         hasSubmitted.current = true;
         navigate(`/full-test/${attemptId}/result`, { replace: true });
         return;
       }
       setAudioAdvanceError("");
+      const serverNow = nextAttempt.serverTime ?? Date.now();
+      setClockSkew(serverNow - Date.now());
+      setRemainingSeconds(getTimerSeconds(nextAttempt, serverNow));
       setPayload((previous) => ({ ...previous, attempt: nextAttempt }));
       setAnswers(nextAttempt.answers || answersRef.current);
       answersRef.current = nextAttempt.answers || answersRef.current;
-      if (nextAttempt.currentSection === "AWAITING_SUBMISSION") {
-        setSaveState("Autosaved");
-      } else if (attempt.currentSection === "LISTENING" && nextAttempt.currentSection === "READING") {
+      if (nextAttempt.currentSection === "READING") {
         setSectionNotice(true);
       }
       setSaveState("Autosaved");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (requestError) {
       setError(requestError.message);
-      setAudioAdvanceError(
-        t("autoAdvanceFailed"),
-      );
+      setAudioAdvanceError(t("autoAdvanceFailed"));
       audioAdvanceInFlight.current = false;
     } finally {
       setBusy(false);
@@ -661,7 +670,7 @@ function FullTestExam() {
 
   const moveReading = async (questionNumber) => {
     const readingStart = Math.max(101, scopeFirst);
-    if (questionNumber < readingStart || questionNumber > scopeLast || busy) return;
+    if (questionNumber < readingStart || questionNumber > scopeLast || busy || deadlineReached) return;
     setBusy(true);
     setError("");
     try {
@@ -680,11 +689,57 @@ function FullTestExam() {
     }
   };
 
-  const exitExam = () => {
-    const shouldExit = window.confirm(
-      isPractice ? t("practiceExitConfirm") : t("exitConfirm"),
-    );
-    if (shouldExit) navigate("/dashboard");
+  const exitExam = async () => {
+    if (busy || deadlineReached) return;
+    const message = !isPractice ? "discardMockConfirm"
+      : attempt.timed ? "pauseTimedPracticeConfirm" : "practiceExitConfirm";
+    if (!window.confirm(t(message))) return;
+
+    setBusy(true);
+    setError("");
+    try {
+      if (isPractice) {
+        await waitForPendingSaves();
+      } else {
+        await Promise.allSettled([...pendingSaves.current.values()]);
+      }
+      const exited = await exitAttempt(attemptId);
+      if (exited.status === "COMPLETED") {
+        navigate(`/full-test/${attemptId}/result`, { replace: true });
+      } else {
+        navigate("/history", { replace: true });
+      }
+    } catch (requestError) {
+      if (!isPractice && requestError instanceof ApiError && requestError.status === 404) {
+        navigate("/history", { replace: true });
+      } else {
+        setError(requestError.message);
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const resumePausedPractice = async () => {
+    setBusy(true);
+    setError("");
+    try {
+      const resumed = await resumePracticeAttempt(attemptId);
+      if (resumed.status === "COMPLETED") {
+        navigate(`/full-test/${attemptId}/result`, { replace: true });
+        return;
+      }
+      const serverNow = resumed.serverTime ?? Date.now();
+      setClockSkew(serverNow - Date.now());
+      setRemainingSeconds(getTimerSeconds(resumed, serverNow));
+      setAnswers(resumed.answers || {});
+      answersRef.current = resumed.answers || {};
+      setPayload((previous) => ({ ...previous, attempt: resumed }));
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setBusy(false);
+    }
   };
 
   const markListeningImageReady = async (event) => {
@@ -722,14 +777,31 @@ function FullTestExam() {
     );
   }
 
+  if (attempt?.status === "PAUSED") {
+    return (
+      <main className="grid min-h-screen place-items-center bg-slate-50 p-6">
+        <section className="w-full max-w-md rounded-2xl border bg-white p-6">
+          <h1 className="text-xl font-bold">{t("practicePaused")}</h1>
+          <p className="mt-2">{t("practiceTimeLeft").replace("{time}", formatClock(attempt.pausedRemainingSeconds ?? 0))}</p>
+          {error && <p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
+          <div className="mt-5 flex flex-wrap gap-3">
+            <button type="button" disabled={busy} onClick={resumePausedPractice} className="rounded-xl bg-sky-600 px-4 py-2 font-semibold text-white disabled:opacity-50">{t("continue")}</button>
+            <button type="button" disabled={busy} onClick={() => navigate("/history", { replace: true })} className="rounded-xl border px-4 py-2 font-semibold">{t("cancel")}</button>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
   if (payload && awaitingListeningSubmission) {
     return (
       <ListeningCompleteScreen
         attempt={attempt}
         answeredCount={answeredCount}
         unansweredCount={unansweredCount}
-        remainingSeconds={timerType === TIMER_TYPES.COUNTDOWN ? sectionRemainingSeconds : remainingSeconds}
-        submitting={busy}
+        remainingSeconds={remainingSeconds}
+        error={error}
+        submitting={busy || deadlineReached}
         onSubmit={() => submitExamOnce({ saveCurrent: false })}
         onExit={exitExam}
       />
@@ -802,6 +874,7 @@ function FullTestExam() {
         remainingSeconds={remainingSeconds ?? 0}
         timerType={timerType}
         onExit={exitExam}
+        exitDisabled={busy || deadlineReached}
       />
 
       {sectionNotice && attempt.currentSection === "READING" && (
@@ -865,10 +938,11 @@ function FullTestExam() {
                           key={currentUnit.key}
                           src={mediaAudio}
                           advancing={busy}
-                          paused={showSubmit}
+                          paused={showSubmit || deadlineReached || busy}
                           ready={listeningImageReady}
                           replayable={isPractice}
                           onEnded={advanceListeningAfterAudio}
+                          onSkip={advanceListeningAfterAudio}
                         />
                       ) : (
                         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
@@ -899,6 +973,16 @@ function FullTestExam() {
                               >
                                 {t("retryImage")}
                               </button>
+                              {!isPractice && mediaAudio && (
+                                <button
+                                  type="button"
+                                  onClick={advanceListeningAfterAudio}
+                                  disabled={busy || deadlineReached}
+                                  className="rounded-xl bg-white px-4 py-2 font-bold text-red-700 ring-1 ring-red-100 disabled:opacity-50"
+                                >
+                                  {t("skipUnavailableListeningUnit")}
+                                </button>
+                              )}
                             </div>
                           )}
 
@@ -984,7 +1068,7 @@ function FullTestExam() {
                               }
                               saveAnswer(question.questionNumber, answer).catch(() => undefined);
                             }}
-                            disabled={feedbackVisible || (isListening && busy)}
+                            disabled={feedbackVisible || busy || deadlineReached}
                             hideOptionContent={isListening
                               && currentUnit.partNumber <= 2
                               && !feedbackVisible}
@@ -1016,13 +1100,13 @@ function FullTestExam() {
                       : () => moveReading(nextReadingQuestion)}
                     onSubmit={() => setShowSubmit(true)}
                     submitLabel={isPractice ? t("finishPractice") : t("submitTest")}
-                    previousDisabled={isListening || previousReadingQuestion === null || busy}
-                    nextDisabled={isListening
+                    previousDisabled={deadlineReached || isListening || previousReadingQuestion === null || busy}
+                    nextDisabled={deadlineReached || (isListening
                       ? isPractice
                         ? busy
                         : busy || (Boolean(mediaAudio) && !audioAdvanceError)
-                      : nextReadingQuestion === null || busy}
-                    submitDisabled={shouldDisableSubmit(attempt, busy)}
+                      : nextReadingQuestion === null || busy)}
+                    submitDisabled={shouldDisableSubmit(attempt, busy || deadlineReached)}
                     previousTitle={isListening
                       ? t("listeningLocked")
                       : undefined}
@@ -1051,7 +1135,7 @@ function FullTestExam() {
         </div>
       </main>
 
-      {showSubmit && (
+      {showSubmit && !deadlineReached && (
         <SubmitDialog
           unansweredCount={unansweredCount}
           submitting={busy}

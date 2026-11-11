@@ -32,11 +32,11 @@ public class UserLearningService {
                 Attempt::getStartedAt,
                 Comparator.nullsLast(Comparator.reverseOrder())
         ));
-        return attempts.stream().map(this::toAttemptSummary).toList();
+        return attempts.stream().filter(this::isVisibleInHistory).map(this::toAttemptSummary).toList();
     }
 
     public Map<String, Object> getStatistics(String userId) throws Exception {
-        List<Attempt> attempts = attemptDao.findByUserId(userId);
+        List<Attempt> attempts = attemptDao.findByUserId(userId).stream().filter(this::isVisibleInHistory).toList();
         List<Attempt> completedExams = attempts.stream()
                 .filter(attempt -> "COMPLETED".equals(attempt.getStatus()))
                 .filter(attempt -> !"PRACTICE".equals(attempt.getType()))
@@ -102,6 +102,12 @@ public class UserLearningService {
         attemptDao.delete(attemptId);
     }
 
+    private boolean isVisibleInHistory(Attempt attempt) {
+        return "COMPLETED".equals(attempt.getStatus())
+                || ("PRACTICE".equals(attempt.getType())
+                    && ("IN_PROGRESS".equals(attempt.getStatus()) || "PAUSED".equals(attempt.getStatus())));
+    }
+
     private Map<String, Object> toAttemptSummary(Attempt attempt) {
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("id", attempt.getId());
@@ -115,6 +121,7 @@ public class UserLearningService {
                 ? !"PRACTICE".equals(attempt.getType())
                 : attempt.getTimed());
         response.put("status", attempt.getStatus());
+        response.put("pausedRemainingSeconds", attempt.pausedRemainingSeconds());
         response.put("currentSection", attempt.getCurrentSection());
         response.put("currentQuestionNumber", attempt.getCurrentQuestionNumber());
         response.put("totalQuestions", attempt.getTotalQuestions());
