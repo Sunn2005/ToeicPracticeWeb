@@ -1,7 +1,8 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import TestMetadataForm from "./TestMetadataForm";
 import PartEditor from "./PartEditor";
+import ConfirmDialog from "./ConfirmDialog";
 import TestValidationSummary from "./TestValidationSummary";
 import TestPreview from "./TestPreview";
 import {
@@ -12,7 +13,7 @@ import {
 import { generateMockToeicTest } from "../../utils/mockToeicTest";
 
 import { useLanguage } from "../../../../i18n/LanguageContext";
-import { normalizeEditorTest, saveEmployeeDraft, saveAndSubmitEmployeeTest, validateEmployeeTest } from "./testEditorState";
+import { employeeTestPayload, normalizeEditorTest, renumberEmployeeTest, saveEmployeeDraft, saveAndSubmitEmployeeTest, validateEmployeeTest } from "./testEditorState";
 
 const STEPS = [
   { id: 1, title: "Thông tin đề" },
@@ -83,14 +84,12 @@ export default function TestEditorWizard({ initialTest, mode = "create" }) {
   // Quick-load a complete 200-question sample test for validation/preview.
   // TestValidationSummary renders its "Nạp đề mẫu" buttons only when this
   // callback is provided, so the wizard must pass it explicitly.
-  const handleLoadMockTest = () => {
-    if (
-      !window.confirm(
-        "Nạp đề mẫu 200 câu sẽ thay thế toàn bộ dữ liệu đề hiện tại. Bạn có chắc chắn?",
-      )
-    ) {
-      return;
-    }
+  const [confirmAction, setConfirmAction] = useState(null);
+
+  const handleLoadMockTest = () => setConfirmAction("mock");
+
+  const doLoadMockTest = () => {
+    setConfirmAction(null);
     setTest((current) => ({
       ...generateMockToeicTest(),
       // Keep the existing id in edit mode so saving updates the same test.
@@ -98,6 +97,12 @@ export default function TestEditorWizard({ initialTest, mode = "create" }) {
     }));
     setError("");
     setSuccessMsg("Đã nạp đề mẫu 200 câu. Hãy kiểm tra lại dữ liệu trước khi lưu.");
+  };
+
+  const handleRenumber = () => {
+    setTest((current) => renumberEmployeeTest(current));
+    setError("");
+    setSuccessMsg("Đã đánh số lại toàn bộ câu hỏi liên tục từ 1 theo thứ tự Part 1–7.");
   };
 
   // Compute question counts for summary
@@ -144,6 +149,47 @@ export default function TestEditorWizard({ initialTest, mode = "create" }) {
     onSaved: (saved) => setTest((current) => ({ ...current, ...normalizeEditorTest(saved) })),
   };
 
+  // Unsaved-changes tracking: snapshot the API payload as last saved (or as
+  // initially loaded) and compare against the current editor state. The
+  // payload is the right comparison basis because it is exactly what would
+  // be sent to the server — server-managed fields never make the editor
+  // look dirty.
+  const snapshotOf = (value) => JSON.stringify(employeeTestPayload(value));
+  const [savedSnapshot, setSavedSnapshot] = useState(() => snapshotOf(test));
+  const currentSnapshot = useMemo(() => snapshotOf(test), [test]);
+  const dirty = currentSnapshot !== savedSnapshot;
+
+  useEffect(() => {
+    if (!dirty) return undefined;
+    const onBeforeUnload = (event) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [dirty]);
+
+  // BrowserRouter has no navigation blocker, so intercept in-app anchor
+  // clicks (sidebar, breadcrumbs) while there are unsaved changes.
+  useEffect(() => {
+    if (!dirty) return undefined;
+    const onClickCapture = (event) => {
+      const anchor = event.target.closest?.("a[href]");
+      if (!anchor) return;
+      const url = new URL(anchor.href, window.location.origin);
+      if (url.origin !== window.location.origin || url.pathname === window.location.pathname) return;
+      if (!window.confirm(t("employeeEditorUnsavedWarning"))) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+    document.addEventListener("click", onClickCapture, true);
+    return () => document.removeEventListener("click", onClickCapture, true);
+  }, [dirty, t]);
+
+  const confirmLeaveIfDirty = () =>
+    !dirty || window.confirm(t("employeeEditorUnsavedWarning"));
+
   const handleSaveDraft = async () => {
     if (mutationRef.current || !editable) return;
     mutationRef.current = true;
@@ -153,7 +199,9 @@ export default function TestEditorWizard({ initialTest, mode = "create" }) {
     try {
       const saved = await saveEmployeeDraft(test, api);
       if (!saved?.testId) throw new Error("employeeEditorMissingSavedId");
-      api.onSaved(saved);
+      const merged = { ...test, ...normalizeEditorTest(saved) };
+      setSavedSnapshot(snapshotOf(merged));
+      setTest(merged);
       setSuccessMsg("Đã lưu bản nháp thành công!");
     } catch (err) {
       setError(requestError(err));
@@ -163,22 +211,28 @@ export default function TestEditorWizard({ initialTest, mode = "create" }) {
     }
   };
 
-  const handleSubmitForReview = async () => {
+  const handleSubmitForReview = () => {
     if (mutationRef.current || !editable) return;
     if (validation.errors.length) {
       setError(t("employeeEditorCannotSubmit"));
       setStep(4);
       return;
     }
-    if (!window.confirm("Bạn có chắc chắn muốn gửi đề thi này để Quản trị viên duyệt?")) return;
+    setConfirmAction("submit");
+  };
+
+  const doSubmitForReview = async () => {
+    setConfirmAction(null);
     mutationRef.current = true;
     setSubmitting(true);
     setError("");
     setSuccessMsg("");
     try {
       await saveAndSubmitEmployeeTest(test, api);
-      alert("Đã gửi đề thi lên hàng chờ duyệt thành công!");
-      navigate("/console/tests", { replace: true });
+      navigate("/console/tests", {
+        replace: true,
+        state: { successMessage: "Đã gửi đề thi lên hàng chờ duyệt thành công!" },
+      });
     } catch (err) {
       setError(requestError(err));
     } finally {
@@ -217,9 +271,15 @@ export default function TestEditorWizard({ initialTest, mode = "create" }) {
         </div>
 
         <div className="flex items-center gap-3">
+          {dirty && (
+            <span role="status" className="hidden items-center gap-1.5 text-xs font-bold text-amber-600 sm:inline-flex">
+              <span className="h-2 w-2 rounded-full bg-amber-500" />
+              {t("employeeEditorUnsavedChanges")}
+            </span>
+          )}
           <button
             type="button"
-            onClick={() => navigate("/console/tests")}
+            onClick={() => { if (confirmLeaveIfDirty()) navigate("/console/tests"); }}
             className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50"
           >
             ← Danh sách đề
@@ -356,6 +416,7 @@ export default function TestEditorWizard({ initialTest, mode = "create" }) {
             test={test}
             onGoToStep={goToIssue}
             onLoadMockTest={handleLoadMockTest}
+            onRenumber={handleRenumber}
           />
         )}
 
@@ -520,6 +581,27 @@ export default function TestEditorWizard({ initialTest, mode = "create" }) {
           </div>
         )}
       </fieldset>
+
+      {confirmAction === "submit" && (
+        <ConfirmDialog
+          title="Gửi phê duyệt đề thi"
+          message="Bạn có chắc chắn muốn gửi đề thi này để Quản trị viên duyệt? Sau khi gửi, đề sẽ bị khóa sửa cho đến khi có kết quả duyệt."
+          confirmLabel="Gửi phê duyệt"
+          busy={busy}
+          onConfirm={doSubmitForReview}
+          onClose={() => setConfirmAction(null)}
+        />
+      )}
+      {confirmAction === "mock" && (
+        <ConfirmDialog
+          title="Nạp đề mẫu 200 câu"
+          message="Nạp đề mẫu sẽ thay thế toàn bộ dữ liệu đề hiện tại trong trình soạn. Bạn có chắc chắn?"
+          confirmLabel="Nạp đề mẫu"
+          danger
+          onConfirm={doLoadMockTest}
+          onClose={() => setConfirmAction(null)}
+        />
+      )}
 
       {/* Floating Bottom Navigation Bar */}
       <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white/95 px-6 py-4 backdrop-blur-md lg:left-70">

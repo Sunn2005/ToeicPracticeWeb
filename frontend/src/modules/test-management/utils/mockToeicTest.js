@@ -18,7 +18,7 @@ export function generateMockToeicTest(customTitle = "ETS TOEIC 2024 Test 01 — 
       ],
       correctAnswer: ["B", "A", "C", "A", "D", "B"][i],
       imageUrl: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&auto=format&fit=crop&q=80",
-      audioUrl: "https://actions.google.com/sounds/v1/ambiences/office_working.ogg",
+      audioUrl: "https://actions.google.com/sounds/v1/ambiences/coffee_shop.ogg",
       transcript: "A man and a woman are reviewing documents together in an office.",
       transcriptTranslation: "Một người đàn ông và phụ nữ đang xem xét tài liệu cùng nhau trong văn phòng.",
       explanation: "Lựa chọn miêu tả chính xác nhất hành động trọng tâm trong bức ảnh.",
@@ -39,7 +39,7 @@ export function generateMockToeicTest(customTitle = "ETS TOEIC 2024 Test 01 — 
         { label: "C", content: "Yes, I already received the agenda." },
       ],
       correctAnswer: correctOptions[i % correctOptions.length],
-      audioUrl: "https://actions.google.com/sounds/v1/ambiences/office_working.ogg",
+      audioUrl: "https://actions.google.com/sounds/v1/ambiences/coffee_shop.ogg",
       transcript: "Where will the quarterly team meeting take place?",
       transcriptTranslation: "Cuộc họp quý của nhóm sẽ diễn ra ở đâu?",
       explanation: "Câu hỏi bắt đầu bằng 'Where' yêu cầu câu trả lời chỉ địa điểm.",
@@ -53,7 +53,7 @@ export function generateMockToeicTest(customTitle = "ETS TOEIC 2024 Test 01 — 
     const endQ = startQ + 2;
     return {
       questionRange: `${startQ}-${endQ}`,
-      audioUrl: "https://actions.google.com/sounds/v1/ambiences/office_working.ogg",
+      audioUrl: "https://actions.google.com/sounds/v1/ambiences/coffee_shop.ogg",
       imageUrl: gIdx === 3 ? "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=600&auto=format&fit=crop&q=80" : "",
       transcript: "Woman: Hi Marcus, do you have the updated financial report for the client meeting?\nMan: Yes, I finished reviewing it this morning. Let me print a copy for you.\nWoman: Thanks, I also noticed the venue was moved to the auditorium.",
       transcriptTranslation: "Nữ: Chào Marcus, bạn có bản báo cáo tài chính cập nhật chưa?\nNam: Tôi vừa xem xong sáng nay, để tôi in cho bạn một bản.\nNữ: Cảm ơn, tôi cũng thấy địa điểm đã đổi sang hội trường.",
@@ -104,7 +104,7 @@ export function generateMockToeicTest(customTitle = "ETS TOEIC 2024 Test 01 — 
     const endQ = startQ + 2;
     return {
       questionRange: `${startQ}-${endQ}`,
-      audioUrl: "https://actions.google.com/sounds/v1/ambiences/office_working.ogg",
+      audioUrl: "https://actions.google.com/sounds/v1/ambiences/coffee_shop.ogg",
       transcript: "Good morning everyone. This announcement is for all passengers travelling on Flight 412 to Chicago. Due to weather conditions, boarding will be delayed by twenty minutes. Please remain near Gate 14.",
       transcriptTranslation: "Chào buổi sáng. Thông báo này dành cho hành khách chuyến bay 412 đi Chicago. Do thời tiết, giờ lên máy bay sẽ hoãn 20 phút. Vui lòng đợi gần Cổng 14.",
       questions: [

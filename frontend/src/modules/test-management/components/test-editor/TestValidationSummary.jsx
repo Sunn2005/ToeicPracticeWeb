@@ -19,7 +19,7 @@ const STANDARD_COUNTS = {
  * @param {function(number, number, number)} onGoToStep - callback to jump to a specific wizard step (step, partNumber, questionNumber)
  * @param {function()} [onLoadMockTest] - callback to auto-populate 200 mock questions for quick test
  */
-export default function TestValidationSummary({ test, onGoToStep, onLoadMockTest }) {
+export default function TestValidationSummary({ test, onGoToStep, onLoadMockTest, onRenumber }) {
   const { t } = useLanguage();
   const validation = useMemo(() => validateEmployeeTest(test), [test]);
   const { partCounts, totalActualQuestions } = validation;
@@ -207,6 +207,21 @@ export default function TestValidationSummary({ test, onGoToStep, onLoadMockTest
           </div>
 
           <div className="mt-6 space-y-3">
+            {onRenumber && (
+              <div>
+                <button
+                  type="button"
+                  onClick={onRenumber}
+                  className="w-full rounded-xl border border-slate-300 py-2.5 text-xs font-bold text-slate-700 hover:border-blue-400 hover:text-blue-600 hover:bg-slate-50 transition"
+                >
+                  🔢 Đánh số lại toàn đề
+                </button>
+                <p className="mt-1.5 text-[11px] leading-relaxed text-slate-400">
+                  Gán lại số câu liên tục từ 1 theo thứ tự Part 1–7. Dùng khi xóa hoặc chèn câu giữa đề làm hở/trùng số câu.
+                </p>
+              </div>
+            )}
+
             <button
               type="button"
               onClick={() => onGoToStep?.(5)}

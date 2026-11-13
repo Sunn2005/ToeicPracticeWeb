@@ -1,12 +1,16 @@
 import { useAuth } from "../../../../auth/useAuth";
 import { canUseConsole } from "../../../../auth/consolePermissions";
-import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import ConfirmDialog from "../../components/test-editor/ConfirmDialog";
 import {
   getEmployeeTests,
+  getEmployeeTest,
+  createEmployeeTest,
   deleteEmployeeTest,
   submitEmployeeTest,
 } from "../../../../api/tests/employeeTests";
+import { employeeTestPayload } from "../../components/test-editor/testEditorState";
 
 const labels = {
   DRAFT: ["Bản nháp", "bg-slate-100 text-slate-700"],
@@ -17,10 +21,35 @@ const labels = {
 
 function MyTestsPage() {
   const { profile } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [notice, setNotice] = useState(location.state?.successMessage || "");
+  const [pendingAction, setPendingAction] = useState(null);
+
+  // Show a one-time success message handed over by the editor/preview after
+  // submission, then scrub it from history so a refresh does not repeat it.
+  useEffect(() => {
+    if (notice) navigate(location.pathname, { replace: true, state: {} });
+  }, [notice, location.pathname, navigate]);
   const [tests, setTests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [actionLoadingId, setActionLoadingId] = useState(null);
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+
+  // Client-side filtering is enough: the API already returns only the
+  // employee's own tests as lightweight metadata. Title matching ignores
+  // case and Vietnamese diacritics ("de nghe" matches "Đề nghe").
+  const visibleTests = useMemo(() => {
+    const normalizeText = (value) =>
+      (value || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const needle = normalizeText(query.trim());
+    return tests.filter((test) => {
+      if (statusFilter !== "ALL" && test.status !== statusFilter) return false;
+      return !needle || normalizeText(test.title).includes(needle);
+    });
+  }, [tests, query, statusFilter]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -54,33 +83,47 @@ function MyTestsPage() {
     };
   }, []);
 
-  const handleDelete = async (testId, title) => {
-    if (!window.confirm(`Bạn có chắc chắn muốn xóa đề thi "${title || testId}"?`)) {
-      return;
-    }
+  const handleDelete = (test) => setPendingAction({ kind: "delete", test });
+
+  const doPendingAction = async () => {
+    const action = pendingAction;
+    setPendingAction(null);
+    if (!action) return;
+    const testId = action.test.testId;
     setActionLoadingId(testId);
     try {
-      await deleteEmployeeTest(testId);
-      setTests((current) => current.filter((t) => t.testId !== testId));
-    } catch (delError) {
-      alert(delError.message || "Xóa đề thi thất bại.");
+      if (action.kind === "delete") {
+        await deleteEmployeeTest(testId);
+        setTests((current) => current.filter((t) => t.testId !== testId));
+      } else {
+        await submitEmployeeTest(testId);
+        load();
+      }
+    } catch (actionError) {
+      setError(actionError.message || (action.kind === "delete" ? "Xóa đề thi thất bại." : "Gửi duyệt thất bại."));
     } finally {
       setActionLoadingId(null);
     }
   };
 
-  const handleSubmit = async (testId) => {
-    if (!window.confirm("Gửi đề thi này để Quản trị viên duyệt?")) return;
-    setActionLoadingId(testId);
+  // Duplicate composes two existing endpoints: fetch the full test, strip
+  // server-managed fields via employeeTestPayload, and create a fresh draft.
+  const handleDuplicate = async (test) => {
+    setActionLoadingId(test.testId);
     try {
-      await submitEmployeeTest(testId);
+      const full = await getEmployeeTest(test.testId);
+      const payload = employeeTestPayload(full);
+      payload.title = `${full.title || test.title || "Đề chưa đặt tên"} (bản sao)`;
+      await createEmployeeTest(payload);
       load();
-    } catch (subError) {
-      alert(subError.message || "Gửi duyệt thất bại.");
+    } catch (dupError) {
+      setError(dupError.message || "Nhân bản đề thi thất bại.");
     } finally {
       setActionLoadingId(null);
     }
   };
+
+  const handleSubmit = (test) => setPendingAction({ kind: "submit", test });
 
   return (
     <section className="mx-auto max-w-6xl">
@@ -103,6 +146,41 @@ function MyTestsPage() {
         </p>
       )}
 
+      {notice && (
+        <p role="status" className="mt-6 flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+          <span>{notice}</span>
+          <button type="button" onClick={() => setNotice("")} className="font-bold text-emerald-600" aria-label="Đóng thông báo">✕</button>
+        </p>
+      )}
+
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <input
+          type="search"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Tìm theo tên đề (không cần dấu)..."
+          aria-label="Tìm theo tên đề"
+          className="min-h-11 flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 outline-none focus:border-blue-400"
+        />
+        <select
+          value={statusFilter}
+          onChange={(event) => setStatusFilter(event.target.value)}
+          aria-label="Lọc theo trạng thái"
+          className="min-h-11 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 outline-none focus:border-blue-400"
+        >
+          <option value="ALL">Tất cả trạng thái</option>
+          <option value="DRAFT">Bản nháp</option>
+          <option value="PENDING_REVIEW">Chờ duyệt</option>
+          <option value="APPROVED">Đã duyệt</option>
+          <option value="REJECTED">Bị từ chối</option>
+        </select>
+        {(query.trim() || statusFilter !== "ALL") && (
+          <span className="text-xs font-semibold text-slate-500">
+            Hiển thị {visibleTests.length}/{tests.length} đề
+          </span>
+        )}
+      </div>
+
       <div className="mt-7 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[760px] text-left text-sm">
@@ -116,7 +194,7 @@ function MyTestsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {tests.map((test) => {
+              {visibleTests.map((test) => {
                 const status = labels[test.status] || [test.status || "Không rõ", "bg-slate-100 text-slate-600"];
                 const isEditable = test.status === "DRAFT" || test.status === "REJECTED";
                 const isProcessing = actionLoadingId === test.testId;
@@ -158,11 +236,21 @@ function MyTestsPage() {
                         >
                           Xem trước
                         </Link>
+                        {canUseConsole(profile, "tests.add") && (
+                          <button
+                            type="button"
+                            onClick={() => handleDuplicate(test)}
+                            disabled={isProcessing}
+                            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition disabled:opacity-50"
+                          >
+                            Nhân bản
+                          </button>
+                        )}
                         {isEditable && (
                           <>
                             {canUseConsole(profile, "tests.edit") && <button
                               type="button"
-                              onClick={() => handleSubmit(test.testId)}
+                              onClick={() => handleSubmit(test)}
                               disabled={isProcessing}
                               className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 transition disabled:opacity-50"
                             >
@@ -170,7 +258,7 @@ function MyTestsPage() {
                             </button>}
                             {canUseConsole(profile, "tests.delete") && <button
                               type="button"
-                              onClick={() => handleDelete(test.testId, test.title)}
+                              onClick={() => handleDelete(test)}
                               disabled={isProcessing}
                               className="rounded-lg border border-red-200 px-2.5 py-1.5 text-xs font-bold text-red-600 hover:bg-red-50 transition disabled:opacity-50"
                               title="Xóa đề"
@@ -189,6 +277,9 @@ function MyTestsPage() {
         </div>
 
         {loading && <p className="p-12 text-center text-sm text-slate-500">Đang tải danh sách đề...</p>}
+        {!loading && tests.length > 0 && visibleTests.length === 0 && (
+          <p className="p-12 text-center text-sm text-slate-500">Không tìm thấy đề nào khớp với tìm kiếm hoặc bộ lọc trạng thái.</p>
+        )}
         {!loading && tests.length === 0 && (
           <div className="p-12 text-center">
             <p className="text-sm text-slate-500">Bạn chưa có đề thi nào.</p>
@@ -198,6 +289,20 @@ function MyTestsPage() {
           </div>
         )}
       </div>
+
+      {pendingAction && (
+        <ConfirmDialog
+          title={pendingAction.kind === "delete" ? "Xóa đề thi" : "Gửi phê duyệt"}
+          message={pendingAction.kind === "delete"
+            ? `Bạn có chắc chắn muốn xóa đề thi "${pendingAction.test.title || pendingAction.test.testId}"? Hành động này không thể hoàn tác.`
+            : "Gửi đề thi này để Quản trị viên duyệt? Sau khi gửi, bạn sẽ không sửa được cho đến khi có kết quả duyệt."}
+          confirmLabel={pendingAction.kind === "delete" ? "Xóa đề" : "Gửi duyệt"}
+          danger={pendingAction.kind === "delete"}
+          busy={actionLoadingId === pendingAction.test.testId}
+          onConfirm={doPendingAction}
+          onClose={() => setPendingAction(null)}
+        />
+      )}
     </section>
   );
 }

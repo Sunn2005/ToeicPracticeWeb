@@ -18,6 +18,7 @@ export default function QuestionGroupEditor({
   onDelete,
 }) {
   const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
+  const [groupNotice, setGroupNotice] = useState("");
 
   const updateGroupField = (field, value) => {
     onChange({ ...group, [field]: value });
@@ -61,9 +62,10 @@ export default function QuestionGroupEditor({
 
   const handleDeleteQuestion = (qIndex) => {
     if (questions.length <= 1) {
-      alert("Mỗi nhóm phải có ít nhất 1 câu hỏi.");
+      setGroupNotice("Mỗi nhóm phải có ít nhất 1 câu hỏi.");
       return;
     }
+    setGroupNotice("");
     const nextQuestions = questions.filter((_, idx) => idx !== qIndex);
     const newRange = `${nextQuestions[0]?.questionNumber}-${nextQuestions.at(-1)?.questionNumber}`;
     onChange({
@@ -76,6 +78,11 @@ export default function QuestionGroupEditor({
 
   return (
     <div className="space-y-6">
+      {groupNotice && (
+        <p role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs font-semibold text-amber-800">
+          {groupNotice}
+        </p>
+      )}
       {/* Group Header Card */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-5 mb-5">

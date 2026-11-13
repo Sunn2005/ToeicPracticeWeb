@@ -122,6 +122,8 @@ export const translations = {
     employeeEditorConflictError: "The test status has changed. Reload it before making further changes.",
     employeeEditorRequestError: "The request failed. Your changes remain in the editor; try again.",
     employeeEditorSaving: "Saving the draft before submission…",
+    employeeEditorUnsavedChanges: "Unsaved changes",
+    employeeEditorUnsavedWarning: "You have unsaved changes. Leave this page and lose them?",
 
     language: "Language",
     english: "English",
@@ -935,6 +937,8 @@ export const translations = {
     employeeEditorConflictError: "Trạng thái đề đã thay đổi. Vui lòng tải lại trước khi chỉnh sửa tiếp.",
     employeeEditorRequestError: "Thao tác thất bại. Nội dung vẫn còn trong editor; vui lòng thử lại.",
     employeeEditorSaving: "Đang lưu nháp trước khi gửi duyệt…",
+    employeeEditorUnsavedChanges: "Chưa lưu thay đổi",
+    employeeEditorUnsavedWarning: "Bạn có thay đổi chưa lưu. Rời trang sẽ mất các thay đổi này?",
 
     language: "Ngôn ngữ",
     english: "Tiếng Anh",
