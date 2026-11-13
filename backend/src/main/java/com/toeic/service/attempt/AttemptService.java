@@ -261,9 +261,9 @@ public class AttemptService {
             if (attempt.getOverallEndAt() != null) {
                 attempt.setOverallEndAt(attempt.getOverallEndAt() + pausedDuration);
             }
-            if (LISTENING.equals(attempt.getCurrentSection())) {
+            if (LISTENING.equals(attempt.getCurrentSection()) && attempt.getReadingStartedAt() == null) {
                 attempt.setListeningEndAt(attempt.getSectionEndAt());
-            } else if (READING.equals(attempt.getCurrentSection())) {
+            } else if (attempt.getReadingStartedAt() != null || READING.equals(attempt.getCurrentSection())) {
                 attempt.setReadingEndAt(attempt.getSectionEndAt());
             }
             attempt.setPausedDurationMillis(pausedDuration + pausedDurationMillis(attempt));
@@ -399,19 +399,36 @@ public class AttemptService {
             Integer questionNumber
     ) throws Exception {
         Attempt attempt = reconcileTimeout(getOwnedAttempt(userId, attemptId));
+        boolean practice = PRACTICE.equals(attemptType(attempt));
+        if (practice && COMPLETED.equals(attempt.getStatus())) {
+            return toResponse(attempt, true);
+        }
         requireInProgress(attempt);
-        if (!READING.equals(attempt.getCurrentSection())) {
+        if (!practice && !READING.equals(attempt.getCurrentSection())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Chưa đến phần Reading");
         }
         if (questionNumber == null
-                || questionNumber < 101
+                || (!practice && questionNumber < 101)
                 || !isQuestionSelected(attempt, questionNumber)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Câu Reading không thuộc phạm vi của chế độ thi này"
+                    "Câu hỏi không thuộc phạm vi của chế độ này"
             );
         }
 
+        if (practice) {
+            long now = System.currentTimeMillis();
+            if (questionNumber >= 101 && !READING.equals(attempt.getCurrentSection())
+                    && attempt.getReadingStartedAt() == null) {
+                transitionToReading(attempt, now);
+            } else {
+                String section = questionNumber < 101 ? LISTENING : READING;
+                if (!section.equals(attempt.getCurrentSection())) {
+                    attempt.setCurrentSection(section);
+                    attempt.setSectionStartedAt(now);
+                }
+            }
+        }
         attempt.setCurrentQuestionNumber(questionNumber);
         attempt.setUpdatedAt(System.currentTimeMillis());
         saveAttempt(attempt);
@@ -575,7 +592,8 @@ public class AttemptService {
         if (LISTENING.equals(attempt.getCurrentSection())
                 && attempt.getSectionEndAt() != null
                 && now >= attempt.getSectionEndAt()) {
-            if (MODE_FULL.equals(mode(attempt))) {
+            if (MODE_FULL.equals(mode(attempt))
+                    && (!PRACTICE.equals(attemptType(attempt)) || attempt.getReadingStartedAt() == null)) {
                 transitionToReading(attempt, attempt.getSectionEndAt());
                 saveAttempt(attempt);
             } else {
@@ -607,13 +625,20 @@ public class AttemptService {
         long now = System.currentTimeMillis();
         attempt.setCurrentSection(READING);
         attempt.setCurrentQuestionNumber(firstSelectedReadingQuestion(attempt));
+        attempt.setSectionStartedAt(readingStart);
+        attempt.setUpdatedAt(now);
+        if (PRACTICE.equals(attemptType(attempt)) && attempt.getReadingStartedAt() != null) {
+            return;
+        }
         attempt.setListeningEndAt(readingStart);
         attempt.setReadingStartedAt(readingStart);
-        attempt.setSectionStartedAt(readingStart);
         if (isTimed(attempt) && MODE_FULL.equals(mode(attempt))) {
-            attempt.setReadingEndAt(readingStart + READING_DURATION_MS);
-            attempt.setSectionEndAt(readingStart + READING_DURATION_MS);
-            attempt.setOverallEndAt(readingStart + READING_DURATION_MS);
+            long readingEnd = FULL_TEST.equals(attemptType(attempt)) && attempt.getOverallEndAt() != null
+                    ? attempt.getOverallEndAt()
+                    : readingStart + READING_DURATION_MS;
+            attempt.setReadingEndAt(readingEnd);
+            attempt.setSectionEndAt(readingEnd);
+            attempt.setOverallEndAt(readingEnd);
         } else if (isTimed(attempt)) {
             Long sessionEnd = attempt.getOverallEndAt() == null
                     ? attempt.getSectionEndAt()
@@ -625,7 +650,6 @@ public class AttemptService {
             attempt.setSectionEndAt(null);
             attempt.setOverallEndAt(null);
         }
-        attempt.setUpdatedAt(now);
     }
 
     private Attempt submitInternal(Attempt attempt, boolean autoSubmitted) throws Exception {

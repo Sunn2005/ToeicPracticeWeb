@@ -5,6 +5,7 @@ import { ApiError, apiFetch } from "../../../api/client";
 import ExamHeader from "../components/ExamHeader";
 import ExamNavigationBar from "../components/ExamNavigationBar";
 import LockedExamAudio from "../components/LockedExamAudio";
+import PracticeAudioPlayer from "../components/PracticeAudioPlayer";
 import PassagePanel from "../components/PassagePanel";
 import QuestionCard from "../components/QuestionCard";
 import QuestionNavigatorDrawer from "../components/QuestionNavigatorDrawer";
@@ -12,9 +13,9 @@ import ResizableExamLayout from "../components/ResizableExamLayout";
 import ReviewTogglePanel from "../components/ReviewTogglePanel";
 import {
   TIMER_TYPES,
+  getDisplayTimerSeconds,
   getTimerSeconds,
   getTimerType,
-  isLastListeningUnit,
   shouldDisableSubmit,
 } from "../config/examTiming";
 import {
@@ -154,7 +155,7 @@ function FullTestExam() {
   const startupResume = useRef(null);
   const [payload, setPayload] = useState(null);
   const [answers, setAnswers] = useState({});
-  const [remainingSeconds, setRemainingSeconds] = useState(null);
+  const [serverClock, setServerClock] = useState(null);
   const [clockSkew, setClockSkew] = useState(0);
   const [error, setError] = useState("");
   const [batchSaveState, setSaveState] = useState("Synced");
@@ -200,7 +201,7 @@ function FullTestExam() {
       setAnswers(nextAnswers);
       answersRef.current = nextAnswers;
       setClockSkew(serverNow - Date.now());
-      setRemainingSeconds(getTimerSeconds(data.attempt, serverNow));
+      setServerClock(serverNow);
     };
 
     const seeded = seededAttempt.current;
@@ -274,6 +275,7 @@ function FullTestExam() {
 
   const attempt = payload?.attempt;
   const timerType = getTimerType(attempt);
+  const remainingSeconds = serverClock === null ? null : getDisplayTimerSeconds(attempt, serverClock);
   const currentQuestion = attempt?.currentQuestionNumber || 1;
   const awaitingListeningSubmission = attempt?.currentSection === "AWAITING_SUBMISSION";
   const currentUnits = attempt?.currentSection === "LISTENING" || awaitingListeningSubmission
@@ -385,18 +387,18 @@ function FullTestExam() {
   }, []);
 
   useEffect(() => {
-    if (attempt?.currentSection !== "READING") return;
+    if (attempt?.currentSection !== "READING" && !isPractice) return;
     readingQuestionsRef.current
       ?.querySelector(`#question-${currentQuestion}`)
       ?.scrollIntoView({ block: "nearest", behavior: "smooth" });
-  }, [attempt?.currentSection, currentQuestion]);
+  }, [attempt?.currentSection, currentQuestion, isPractice]);
 
   useEffect(() => {
     if (!attempt?.sectionEndAt || attempt.status !== "IN_PROGRESS") return undefined;
 
     const updateClock = () => {
       const serverNow = Date.now() + clockSkew;
-      setRemainingSeconds(getTimerSeconds(attempt, serverNow));
+      setServerClock(serverNow);
     };
     updateClock();
     const interval = window.setInterval(updateClock, 1000);
@@ -563,7 +565,8 @@ function FullTestExam() {
   }, [attemptId, navigate, saveCurrentAnswers, waitForPendingSaves]);
 
   const deadlineReached = attempt?.status === "IN_PROGRESS"
-    && timerType === TIMER_TYPES.COUNTDOWN && remainingSeconds === 0;
+    && timerType === TIMER_TYPES.COUNTDOWN
+    && serverClock !== null && getTimerSeconds(attempt, serverClock) === 0;
 
   useEffect(() => {
     if (!attempt || !deadlineReached || busy || hasSubmitted.current) return undefined;
@@ -587,7 +590,7 @@ function FullTestExam() {
 
         const serverNow = nextAttempt.serverTime ?? Date.now();
         setClockSkew(serverNow - Date.now());
-        setRemainingSeconds(getTimerSeconds(nextAttempt, serverNow));
+        setServerClock(serverNow);
         setError("");
         const sectionChanged = nextAttempt.currentSection !== attempt.currentSection;
         if (sectionChanged || nextAttempt.status !== attempt.status) {
@@ -642,7 +645,7 @@ function FullTestExam() {
       setAudioAdvanceError("");
       const serverNow = nextAttempt.serverTime ?? Date.now();
       setClockSkew(serverNow - Date.now());
-      setRemainingSeconds(getTimerSeconds(nextAttempt, serverNow));
+      setServerClock(serverNow);
       setPayload((previous) => ({ ...previous, attempt: nextAttempt }));
       setAnswers(nextAttempt.answers || answersRef.current);
       answersRef.current = nextAttempt.answers || answersRef.current;
@@ -660,9 +663,9 @@ function FullTestExam() {
     }
   };
 
-  const moveReading = async (questionNumber) => {
-    const readingStart = Math.max(101, scopeFirst);
-    if (questionNumber < readingStart || questionNumber > scopeLast || busy || deadlineReached) return;
+  const moveToQuestion = async (questionNumber) => {
+    if (busy || deadlineReached || !scopeQuestionNumbers.includes(questionNumber)
+      || (!isPractice && questionNumber < 101)) return;
     setBusy(true);
     setError("");
     try {
@@ -671,8 +674,17 @@ function FullTestExam() {
         method: "PUT",
         body: JSON.stringify({ questionNumber }),
       });
+      if (nextAttempt.status === "COMPLETED") {
+        navigate(`/full-test/${attemptId}/result`, { replace: true });
+        return;
+      }
+      const serverNow = nextAttempt.serverTime ?? Date.now();
+      setClockSkew(serverNow - Date.now());
+      setServerClock(serverNow);
       setPayload((previous) => ({ ...previous, attempt: nextAttempt }));
-      setAnswers(nextAttempt.answers || answers);
+      const nextAnswers = nextAttempt.answers ?? answersRef.current;
+      answersRef.current = nextAnswers;
+      setAnswers(nextAnswers);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (requestError) {
       setError(examErrorMessage(requestError));
@@ -687,6 +699,7 @@ function FullTestExam() {
       : attempt.timed ? "pauseTimedPracticeConfirm" : "practiceExitConfirm";
     if (!window.confirm(t(message))) return;
 
+    const exitPath = isPractice ? "/history" : "/tests";
     saveQueue.cancelRetries();
     setBusy(true);
     setError("");
@@ -694,7 +707,7 @@ function FullTestExam() {
       if (isPractice) {
         await waitForPendingSaves();
         if (timerType === TIMER_TYPES.UNTIMED) {
-          navigate("/history", { replace: true });
+          navigate(exitPath, { replace: true });
           return;
         }
       } else {
@@ -704,11 +717,11 @@ function FullTestExam() {
       if (exited.status === "COMPLETED") {
         navigate(`/full-test/${attemptId}/result`, { replace: true });
       } else {
-        navigate("/history", { replace: true });
+        navigate(exitPath, { replace: true });
       }
     } catch (requestError) {
       if (!isPractice && requestError instanceof ApiError && requestError.status === 404) {
-        navigate("/history", { replace: true });
+        navigate(exitPath, { replace: true });
       } else {
         setError(examErrorMessage(requestError));
       }
@@ -730,7 +743,7 @@ function FullTestExam() {
       }
       const serverNow = resumed.serverTime ?? Date.now();
       setClockSkew(serverNow - Date.now());
-      setRemainingSeconds(getTimerSeconds(resumed, serverNow));
+      setServerClock(serverNow);
       setAnswers(resumed.answers || {});
       answersRef.current = resumed.answers || {};
       setPayload((previous) => ({ ...previous, attempt: resumed }));
@@ -812,17 +825,13 @@ function FullTestExam() {
   }
 
   const isListening = attempt.currentSection === "LISTENING";
-  const readingQuestionNumbers = [...new Set(
-    readingUnits.flatMap((unit) => unit.questions.map((question) => question.questionNumber)),
-  )].sort((left, right) => left - right);
-  const currentReadingIndex = readingQuestionNumbers.indexOf(currentQuestion);
-  const previousReadingQuestion = currentReadingIndex > 0
-    ? readingQuestionNumbers[currentReadingIndex - 1]
-    : null;
-  const nextReadingQuestion = currentReadingIndex >= 0
-    && currentReadingIndex < readingQuestionNumbers.length - 1
-    ? readingQuestionNumbers[currentReadingIndex + 1]
-    : null;
+  const navigableQuestions = isPractice
+    ? scopeQuestionNumbers
+    : scopeQuestionNumbers.filter((number) => number >= 101);
+  const questionIndex = navigableQuestions.indexOf(currentQuestion);
+  const previousQuestion = navigableQuestions[questionIndex - 1];
+  const nextQuestion = navigableQuestions[questionIndex + 1];
+  const listeningLocked = isListening && !isPractice;
   const mediaImage = currentUnit.imageUrl;
   const mediaAudio = currentUnit.audioUrl;
   const practiceFeedbackQuestions = new Map(
@@ -831,6 +840,30 @@ function FullTestExam() {
       question,
     ]),
   );
+  const selectAnswer = (questionNumber, answer) => {
+    if (isPractice) {
+      unlockPracticeFeedbackAudio();
+      practiceSoundPendingUnitsRef.current.add(currentUnit.key);
+    }
+    saveAnswer(questionNumber, answer).catch(() => undefined);
+  };
+
+  const selectAnswerByShortcut = (optionIndex, focusedRadioName) => {
+    const questions = currentUnit.questions.filter(
+      (question) => !practiceFeedbackQuestions.has(question.questionNumber),
+    );
+    const question = focusedRadioName
+      ? questions.find((item) => focusedRadioName === `question-${item.questionNumber}`)
+      : questions.find((item) => !answersRef.current[item.questionNumber]) ?? questions[0];
+    const answer = question?.answers?.[optionIndex];
+    if (!answer) return false;
+
+    if (answersRef.current[question.questionNumber] !== answer.label) {
+      selectAnswer(question.questionNumber, answer.label);
+    }
+    return true;
+  };
+
   const firstPracticeFeedbackQuestion = currentPracticeFeedback?.questions?.[0];
   const practiceTranscript = currentUnit.partNumber === 2
     ? firstPracticeFeedbackQuestion?.transcript
@@ -932,18 +965,27 @@ function FullTestExam() {
                 >
                   {isListening ? (
                     <>
-                      {mediaAudio ? (
+                      {mediaAudio && isPractice && (
+                        <PracticeAudioPlayer
+                          key={`${currentUnit.key}:${mediaAudio}`}
+                          src={mediaAudio}
+                          paused={showSubmit || deadlineReached || busy}
+                          shortcutsDisabled={showNavigator}
+                          onAnswerShortcut={selectAnswerByShortcut}
+                        />
+                      )}
+                      {mediaAudio && !isPractice && (
                         <LockedExamAudio
                           key={currentUnit.key}
                           src={mediaAudio}
                           advancing={busy}
                           paused={showSubmit || deadlineReached || busy}
                           ready={listeningImageReady}
-                          replayable={isPractice}
                           onEnded={advanceListeningAfterAudio}
                           onSkip={advanceListeningAfterAudio}
                         />
-                      ) : (
+                      )}
+                      {!mediaAudio && (
                         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
                           {isPractice ? t("practiceMissingAudio") : t("missingAudio")}
                         </div>
@@ -1063,13 +1105,7 @@ function FullTestExam() {
                             <QuestionCard
                               question={feedbackQuestion || question}
                               selectedAnswer={answers[String(question.questionNumber)] || null}
-                              onSelect={(answer) => {
-                                if (isPractice) {
-                                  unlockPracticeFeedbackAudio();
-                                  practiceSoundPendingUnitsRef.current.add(currentUnit.key);
-                                }
-                                saveAnswer(question.questionNumber, answer).catch(() => undefined);
-                              }}
+                              onSelect={(answer) => selectAnswer(question.questionNumber, answer)}
                               disabled={feedbackVisible || busy || deadlineReached}
                               hideOptionContent={isListening
                                 && currentUnit.partNumber <= 2
@@ -1095,36 +1131,23 @@ function FullTestExam() {
                   <ExamNavigationBar
                     progressLabel={progressLabel}
                     onOpenNavigator={() => setShowNavigator(true)}
-                    onPrevious={isListening
-                      ? undefined
-                      : () => moveReading(previousReadingQuestion)}
-                    onNext={isListening
+                    onPrevious={() => moveToQuestion(previousQuestion)}
+                    onNext={listeningLocked
                       ? advanceListeningAfterAudio
-                      : () => moveReading(nextReadingQuestion)}
+                      : () => moveToQuestion(nextQuestion)}
                     onSubmit={() => setShowSubmit(true)}
                     submitLabel={isPractice ? t("finishPractice") : t("submitTest")}
-                    previousDisabled={deadlineReached || isListening || previousReadingQuestion === null || busy}
-                    nextDisabled={deadlineReached || (isListening
-                      ? isPractice
-                        ? busy
-                        : busy || (Boolean(mediaAudio) && !audioAdvanceError)
-                      : nextReadingQuestion === null || busy)}
+                    previousDisabled={busy || deadlineReached || listeningLocked || previousQuestion === undefined}
+                    nextDisabled={busy || deadlineReached || (listeningLocked
+                      ? Boolean(mediaAudio) && !audioAdvanceError
+                      : nextQuestion === undefined)}
                     submitDisabled={shouldDisableSubmit(attempt, busy || deadlineReached)}
-                    previousTitle={isListening
-                      ? t("listeningLocked")
+                    previousTitle={listeningLocked ? t("listeningLocked") : undefined}
+                    nextTitle={listeningLocked && mediaAudio && !audioAdvanceError
+                      ? t("nextGroupAuto")
                       : undefined}
-                    nextTitle={isListening && isPractice
-                      ? t("practiceNextGroup")
-                      : isListening && mediaAudio && !audioAdvanceError
-                        ? t("nextGroupAuto")
-                      : undefined}
-                    statusMessage={isListening
-                      ? isPractice
-                        ? isLastListeningUnit(currentUnit, listeningUnits)
-                          && readingUnits.length === 0
-                          ? t("practiceLastListening")
-                          : t("practiceListeningNavigation")
-                        : audioAdvanceError
+                    statusMessage={listeningLocked
+                      ? audioAdvanceError
                         ? t("nextGroupRetry")
                         : mediaAudio
                           ? t("nextListeningAuto")
@@ -1154,11 +1177,11 @@ function FullTestExam() {
         groups={navigatorGroups}
         currentQuestion={currentQuestion}
         answers={answers}
-        navigationLocked={isListening}
+        navigationLocked={listeningLocked}
         questionStatuses={practiceQuestionStatuses}
         practiceMode={isPractice}
-        isQuestionDisabled={(number) => number < 101}
-        onSelect={isListening ? null : moveReading}
+        isQuestionDisabled={(number) => busy || deadlineReached || (!isPractice && number < 101)}
+        onSelect={listeningLocked ? null : moveToQuestion}
       />
     </div>
   );

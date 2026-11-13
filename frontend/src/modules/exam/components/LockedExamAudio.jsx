@@ -8,13 +8,11 @@ function LockedExamAudio({
   advancing,
   paused = false,
   ready = true,
-  replayable = false,
 }) {
   const { t } = useLanguage();
   const audioRef = useRef(null);
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
   const [mediaFailed, setMediaFailed] = useState(false);
-  const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -22,7 +20,6 @@ function LockedExamAudio({
 
     setAutoplayBlocked(false);
     setMediaFailed(false);
-    setPlaying(false);
     return () => {
       audio.pause();
     };
@@ -37,18 +34,16 @@ function LockedExamAudio({
       return;
     }
 
-    if (replayable) return;
-
     const playPromise = audio.play();
     if (playPromise) {
       playPromise
         .then(() => setAutoplayBlocked(false))
-        .catch(() => {
+        .catch((error) => {
           if (audio.error) setMediaFailed(true);
-          else setAutoplayBlocked(true);
+          else if (error.name !== "AbortError") setAutoplayBlocked(true);
         });
     }
-  }, [paused, ready, replayable, src]);
+  }, [paused, ready, src]);
 
   const startAfterBrowserBlock = async () => {
     try {
@@ -60,109 +55,50 @@ function LockedExamAudio({
       await audio.play();
       setAutoplayBlocked(false);
       setMediaFailed(false);
-      setPlaying(true);
     } catch {
       if (audioRef.current?.error) setMediaFailed(true);
       else setAutoplayBlocked(true);
     }
   };
 
-  if (replayable) {
-    return (
-      <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3.5">
-        <div className="mb-3 flex items-center gap-3">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white">
-            ♫
-          </span>
-          <div>
-            <p className="text-sm font-bold text-emerald-900">{t("practiceAudio")}</p>
-            <p className="mt-0.5 text-xs leading-5 text-emerald-700">
-              {t("practiceAudioNote")}
-            </p>
-          </div>
-        </div>
-        <audio
-          ref={audioRef}
-          key={src}
-          src={src}
-          controls
-          preload="metadata"
-          className="w-full"
-        />
-      </div>
-    );
-  }
+  const needsRecovery = (autoplayBlocked || mediaFailed) && !paused && ready && !advancing;
 
   return (
-    <div className="rounded-xl border border-sky-100 bg-sky-50 px-4 py-3.5">
+    <>
       <audio
         ref={audioRef}
         src={src}
         preload="auto"
-        onPlay={() => setPlaying(true)}
-        onPause={() => setPlaying(false)}
-        onError={() => {
-          setPlaying(false);
-          setMediaFailed(true);
-        }}
-        onEnded={() => {
-          setPlaying(false);
-          onEnded();
-        }}
+        onError={() => setMediaFailed(true)}
+        onEnded={onEnded}
         onContextMenu={(event) => event.preventDefault()}
       />
 
-      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-        <div className="flex items-center gap-3">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-600 text-white">
-            <span className={`${playing ? "animate-pulse" : ""}`}>♫</span>
-          </span>
-          <div>
-            <p className="text-sm font-bold text-sky-900">
-              {advancing
-                ? t("audioSavingAdvance")
-                : paused
-                  ? t("audioPaused")
-                  : mediaFailed
-                    ? t("listeningAudioLoadFailed")
-                    : !ready
-                      ? t("waitingForImage")
-                      : playing
-                        ? t("audioPlaying")
-                        : t("audioPreparing")}
-            </p>
-            <p className="mt-0.5 text-xs leading-5 text-sky-700">
-              {paused
-                ? t("audioResumeNote")
-                : mediaFailed
-                  ? t("listeningAudioRecovery")
-                  : !ready
-                    ? t("audioStartsAfterImage")
-                    : t("audioOnceNote")}
-            </p>
+      {needsRecovery && (
+        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-sky-100 bg-sky-50 px-4 py-3 text-sm text-sky-900">
+          <div className="flex-1" role="status">
+            <p className="font-bold">{t(mediaFailed ? "listeningAudioLoadFailed" : "examAudioAutoplayBlocked")}</p>
+            {mediaFailed && <p className="mt-1">{t("listeningAudioRecovery")}</p>}
           </div>
-        </div>
-
-        {(autoplayBlocked || mediaFailed) && !paused && ready && !advancing && (
           <button
             type="button"
             onClick={startAfterBrowserBlock}
-            className="shrink-0 rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-sky-700"
+            className="rounded-xl bg-sky-700 px-4 py-2.5 font-bold text-white hover:bg-sky-800"
           >
-            {mediaFailed ? t("retryListeningAudio") : t("startAudio")}
+            {t(mediaFailed ? "retryListeningAudio" : "startAudio")}
           </button>
-        )}
-        {mediaFailed && !paused && ready && !advancing && (
-          <button
-            type="button"
-            onClick={onSkip}
-            className="shrink-0 rounded-xl border border-sky-300 px-4 py-2.5 text-sm font-bold text-sky-800"
-          >
-            {t("skipUnavailableListeningUnit")}
-          </button>
-        )}
-      </div>
-    </div>
+          {mediaFailed && (
+            <button
+              type="button"
+              onClick={onSkip}
+              className="rounded-xl border border-sky-300 px-4 py-2.5 font-bold"
+            >
+              {t("skipUnavailableListeningUnit")}
+            </button>
+          )}
+        </div>
+      )}
+    </>
   );
 }
 

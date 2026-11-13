@@ -85,6 +85,17 @@ export function getTimerSeconds(attempt, serverNow) {
   return duration === null ? 0 : Math.max(0, duration - elapsed);
 }
 
+export function getDisplayTimerSeconds(attempt, serverNow) {
+  if (normalizeMode(attempt?.mode) === "FULL"
+    && (attempt.type ?? "FULL_TEST") === "FULL_TEST"
+    && attempt.currentSection === "LISTENING"
+    && getTimerType(attempt) === TIMER_TYPES.COUNTDOWN
+    && Number.isFinite(attempt.overallEndAt)) {
+    return Math.max(0, Math.ceil((attempt.overallEndAt - serverNow) / 1000));
+  }
+  return getTimerSeconds(attempt, serverNow);
+}
+
 export function isLastListeningUnit(currentUnit, listeningUnits) {
   if (!currentUnit || !listeningUnits?.length) return false;
   return currentUnit.key === listeningUnits[listeningUnits.length - 1].key;

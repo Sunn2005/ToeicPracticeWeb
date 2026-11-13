@@ -462,6 +462,56 @@ class AttemptServiceTests {
         verify(attemptDao).save(attempt);
     }
 
+    @Test
+    void keepsFullTestDeadlineWhenListeningEndsEarly() throws Exception {
+        AttemptDao attemptDao = mock(AttemptDao.class);
+        AttemptService service = new AttemptService(attemptDao, mock(TestService.class));
+        Attempt attempt = inProgressAttempt("mock-full", List.of(1, 2, 3, 4, 5, 6, 7), "LISTENING", 98);
+        attempt.setMode("FULL");
+        attempt.setLastQuestionNumber(200);
+        attempt.setTotalQuestions(200);
+        attempt.setTimeLimitSeconds(120 * 60);
+        attempt.setStartedAt(System.currentTimeMillis() - 40 * 60_000L);
+        attempt.setSectionEndAt(attempt.getStartedAt() + 45 * 60_000L);
+        long overallEndAt = attempt.getStartedAt() + 120 * 60_000L;
+        attempt.setOverallEndAt(overallEndAt);
+        when(attemptDao.findById("mock-full")).thenReturn(Optional.of(attempt));
+        when(attemptDao.findAnswers("mock-full")).thenReturn(Map.of());
+
+        Map<String, Object> response = service.nextListening("user-1", "mock-full");
+
+        assertEquals("READING", response.get("currentSection"));
+        assertEquals(overallEndAt, response.get("overallEndAt"));
+        assertEquals(overallEndAt, response.get("sectionEndAt"));
+        assertEquals(overallEndAt, response.get("readingEndAt"));
+        verify(attemptDao).save(attempt);
+    }
+
+    @Test
+    void practiceCanNavigateAcrossSelectedSectionsWithoutResettingDeadline() throws Exception {
+        AttemptDao attemptDao = mock(AttemptDao.class);
+        AttemptService service = new AttemptService(attemptDao, mock(TestService.class));
+        Attempt attempt = inProgressAttempt("mixed-practice", List.of(1, 5), "LISTENING", 2);
+        attempt.setType("PRACTICE");
+        attempt.setTimed(true);
+        long deadline = attempt.getSectionEndAt();
+        when(attemptDao.findById("mixed-practice")).thenReturn(Optional.of(attempt));
+        when(attemptDao.findAnswers("mixed-practice")).thenReturn(Map.of(2, "A"));
+
+        assertEquals(1, service.updatePosition("user-1", "mixed-practice", 1).get("currentQuestionNumber"));
+        assertEquals("READING", service.updatePosition("user-1", "mixed-practice", 101).get("currentSection"));
+        Map<String, Object> returned = service.updatePosition("user-1", "mixed-practice", 2);
+        assertEquals("LISTENING", returned.get("currentSection"));
+        assertEquals(Map.of("2", "A"), returned.get("answers"));
+        assertEquals(deadline, service.updatePosition("user-1", "mixed-practice", 101).get("sectionEndAt"));
+        assertEquals(HttpStatus.BAD_REQUEST, assertThrows(ResponseStatusException.class,
+                () -> service.updatePosition("user-1", "mixed-practice", 7)).getStatusCode());
+
+        attempt.setType("FULL_TEST");
+        assertEquals(HttpStatus.BAD_REQUEST, assertThrows(ResponseStatusException.class,
+                () -> service.updatePosition("user-1", "mixed-practice", 2)).getStatusCode());
+    }
+
     private Attempt inProgressAttempt(
             String id,
             List<Integer> selectedParts,

@@ -156,7 +156,7 @@ function FullTestIntro() {
               <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5">
                 <h3 className="font-bold text-amber-900">{t("beforeStart")}</h3>
                 <ul className="mt-3 space-y-2 text-sm leading-6 text-amber-900/80">
-                  <li>• {t("headphonesTip")}</li>
+                  <li>• {t("examAudioBeforeStart")}</li>
                   <li>• {t("serverTimerTip")}</li>
                   <li>• {t("autoReadingTip")}</li>
                   <li>• {t("autoSubmitTip")}</li>

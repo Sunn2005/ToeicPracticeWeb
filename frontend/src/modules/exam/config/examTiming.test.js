@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   PART_TIME_LIMITS,
   TIMER_TYPES,
+  getDisplayTimerSeconds,
   getExamDuration,
   getSuggestedPartDuration,
   getTimerSeconds,
@@ -96,13 +97,27 @@ test("untimed practice has no countdown", () => {
   assert.equal(getTimerSeconds(attempt, 61_000), 0);
 });
 
-test("a Full Test uses the current section deadline when Listening ends early", () => {
+test("Full Test displays one countdown while Listening keeps its own deadline", () => {
   const startedAt = 1_000;
   const readingStartedAt = startedAt + 40 * 60_000;
-  const sectionEndAt = readingStartedAt + 75 * 60_000;
-  const attempt = { mode: "FULL", startedAt, timeLimitSeconds: 7_200, sectionEndAt };
+  const listeningEndAt = startedAt + 45 * 60_000;
+  const overallEndAt = startedAt + 120 * 60_000;
+  const listening = {
+    mode: "FULL",
+    currentSection: "LISTENING",
+    startedAt,
+    overallEndAt,
+    sectionEndAt: listeningEndAt,
+  };
+  const reading = { ...listening, currentSection: "READING", sectionEndAt: overallEndAt };
 
-  assert.equal(getTimerSeconds(attempt, readingStartedAt), 75 * 60);
-  assert.equal(getTimerSeconds(attempt, sectionEndAt - 1), 1);
-  assert.equal(getTimerSeconds(attempt, sectionEndAt), 0);
+  assert.equal(getDisplayTimerSeconds(listening, startedAt), 120 * 60);
+  assert.equal(getDisplayTimerSeconds(listening, readingStartedAt), 80 * 60);
+  assert.equal(getDisplayTimerSeconds(reading, readingStartedAt), 80 * 60);
+  assert.equal(getTimerSeconds(listening, listeningEndAt), 0);
+  assert.equal(getDisplayTimerSeconds(listening, listeningEndAt), 75 * 60);
+  assert.equal(getDisplayTimerSeconds(reading, overallEndAt - 1), 1);
+  assert.equal(getDisplayTimerSeconds(reading, overallEndAt), 0);
+  assert.equal(getDisplayTimerSeconds({ ...listening, type: "PRACTICE" }, startedAt), 45 * 60);
+  assert.equal(getDisplayTimerSeconds({ ...listening, overallEndAt: null }, startedAt), 45 * 60);
 });

@@ -195,6 +195,7 @@ Response trong lúc thi luôn loại bỏ đệ quy các field bí mật: `corre
 - `selectedPart` chỉ có giá trị khi chế độ `PART` chọn đúng một Part.
 - `answers` là object có key là số câu ở dạng chuỗi. Một số response nội bộ sau khi lưu đáp án không kèm `answers`/`answeredCount`; từng endpoint sẽ ghi rõ.
 - Server tự đối chiếu deadline khi đọc hoặc cập nhật attempt; attempt hết giờ có thể được chuyển section hoặc tự nộp trước khi response được trả về.
+- Với lượt thi thử `type=FULL_TEST`, `mode=FULL`, `overallEndAt` là hạn toàn bài 120 phút dùng cho đồng hồ. Trong phần Nghe, `sectionEndAt` là hạn chuyển phần. Khi sang phần Đọc, `sectionEndAt` dùng hạn toàn bài đã cấp.
 
 ### 2.4 `ResultResponse`
 
@@ -537,9 +538,9 @@ Trong Listening chỉ được lưu câu/nhóm câu đang hiển thị; câu cũ
 - **Bảo mật:** response chỉ chứa dữ liệu của unit hiện tại, không trả đáp án của các câu/nhóm chưa hoàn thành.
 - **Response:** `ready=false` kèm `pendingQuestionNumbers` nếu nhóm chưa hoàn tất; khi `ready=true`, response có `questions`, `transcript` và `transcriptTranslation` tương ứng.
 
-### 6.7 Cập nhật vị trí câu Reading
+### 6.7 Cập nhật vị trí câu đang xem
 
-- **Mục đích:** lưu câu Reading đang được user xem để có thể tiếp tục đúng vị trí.
+- **Mục đích:** lưu câu đang được user xem để có thể tiếp tục đúng vị trí.
 - **Method/type:** `PUT`, request/response `application/json`.
 - **Path:** `/api/attempts/{attemptId}/position`.
 - **Quyền:** đã đăng nhập; chỉ owner.
@@ -549,10 +550,10 @@ Trong Listening chỉ được lưu câu/nhóm câu đang hiển thị; câu cũ
 { "questionNumber": 125 }
 ```
 
-`questionNumber` phải từ 101 trở lên và thuộc các Part đã chọn.
+`questionNumber` phải thuộc các Part đã chọn. Với `FULL_TEST`, chỉ chuyển vị trí trong Reading từ câu 101 trở lên. Với `PRACTICE`, có thể chọn câu Nghe hoặc Đọc trong phạm vi đã chọn và quay lại giữa hai phần. Quay lại phần đã mở dùng tiếp hạn hiện tại.
 
 - **Response thành công:** `200 OK`, `AttemptResponse` có đáp án đã lưu.
-- **Lỗi chính:** `409 CONFLICT` nếu chưa đến Reading hoặc bài đã khóa; `400 BAD_REQUEST` nếu câu không thuộc scope Reading.
+- **Lỗi chính:** `409 CONFLICT` nếu lượt thi thử chưa đến Reading hoặc lượt làm đã khóa; `400 BAD_REQUEST` nếu câu nằm ngoài phạm vi cho phép. Nếu lượt luyện tập đã hoàn thành, response trả trạng thái `COMPLETED`.
 
 ### 6.8 Chuyển sang đơn vị Listening tiếp theo
 
