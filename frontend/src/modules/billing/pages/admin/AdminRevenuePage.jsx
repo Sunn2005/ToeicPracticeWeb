@@ -72,6 +72,15 @@ function shortDate(iso) {
   return `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
 }
 
+function previousRange(from, to) {
+  const fromDay = Date.parse(from);
+  const length = Math.round((Date.parse(to) - fromDay) / 86400000) + 1;
+  return {
+    from: new Date(fromDay - length * 86400000).toISOString().slice(0, 10),
+    to: new Date(fromDay - 86400000).toISOString().slice(0, 10),
+  };
+}
+
 function Sparkline({ values, color = "text-blue-600" }) {
   if (values.length < 2) return null;
   const width = 120;
@@ -83,22 +92,26 @@ function Sparkline({ values, color = "text-blue-600" }) {
   return <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} aria-hidden="true" className={`mt-3 ${color}`}><polyline points={points} fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" /></svg>;
 }
 
-function CumulativeChart({ series, t, language }) {
+function CumulativeChart({ series, previousSeries, t, language }) {
   const chartId = useId();
   const locale = language === "vi" ? "vi-VN" : "en-US";
   const totals = [];
   let running = 0;
   for (const point of series) { running += point.revenue; totals.push({ ...point, total: running }); }
+  const showPrevious = Array.isArray(previousSeries) && previousSeries.length === series.length && series.length > 0;
+  const prevTotals = [];
+  if (showPrevious) { let prevRunning = 0; for (const point of previousSeries) { prevRunning += point.revenue; prevTotals.push(prevRunning); } }
   const width = Math.max(1000, series.length * 76 + 110);
   const left = 85;
   const top = 20;
   const height = 210;
   const plotWidth = width - left - 20;
   const slot = plotWidth / Math.max(1, series.length);
-  const max = Math.max(4, ...totals.map((point) => point.total));
+  const max = Math.max(4, ...totals.map((point) => point.total), ...prevTotals);
   const axisFormat = new Intl.NumberFormat(locale);
   if (!series.length) return <p role="status" className="mt-5 text-sm text-slate-600">{t("adminRevenueChartEmpty")}</p>;
   const points = totals.map((point, index) => [left + (index + 0.5) * slot, top + height - point.total / max * height]);
+  const prevPoints = prevTotals.map((total, index) => [left + (index + 0.5) * slot, top + height - total / max * height]);
   const baseline = top + height;
   const areaPath = points.length ? `M ${points[0][0]},${baseline} L ${points.map((point) => point.join(",")).join(" L ")} L ${points[points.length - 1][0]},${baseline} Z` : "";
   const last = totals[totals.length - 1];
@@ -109,6 +122,10 @@ function CumulativeChart({ series, t, language }) {
     : null;
 
   return <>
+    {showPrevious && <div className="mt-3 flex flex-wrap items-center gap-5 text-sm text-slate-600">
+      <span className="flex items-center gap-2"><span aria-hidden="true" className="inline-block h-0.5 w-6 bg-blue-600" />{t("adminRevenueCurrentPeriod")}</span>
+      <span className="flex items-center gap-2"><span aria-hidden="true" className="inline-block h-0 w-6 border-t-2 border-dashed border-orange-600" />{t("adminRevenuePreviousPeriod")}</span>
+    </div>}
     <div className="mt-4 overflow-x-auto rounded-xl focus-visible:outline-2 focus-visible:outline-blue-600" tabIndex={0} role="region" aria-label={t("adminRevenueChartScroll")}>
       <svg width={width} height="285" viewBox={`0 0 ${width} 285`} role="img" aria-labelledby={`${chartId}-title ${chartId}-description`} className="h-auto min-w-full text-slate-600">
         <title id={`${chartId}-title`}>{t("adminRevenueCumulative")}</title>
@@ -118,6 +135,7 @@ function CumulativeChart({ series, t, language }) {
           return <g key={tick}><line x1={left} x2={width - 20} y1={y} y2={y} className="stroke-slate-200" /><text x={left - 10} y={y + 4} textAnchor="end" fontSize="12" fill="currentColor">{axisFormat.format(max * tick / 4)}</text></g>;
         })}
         {areaPath && <path d={areaPath} fill="#2563eb" fillOpacity="0.08" />}
+        {showPrevious && <polyline points={prevPoints.map((point) => point.join(",")).join(" ")} fill="none" stroke="#ea580c" strokeWidth="2" strokeDasharray="6 4" strokeLinejoin="round" strokeLinecap="round" />}
         <polyline points={points.map((point) => point.join(",")).join(" ")} fill="none" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" className="stroke-blue-600" />
         {last && <text x={width - 20} y={14} textAnchor="end" fontSize="12" fontWeight="700" fill="#2563eb">{`${shortPeriod(last.period)}: ${formatOrderAmount(last.total, language)}`}</text>}
         {jump && <text x={jump.x} y={jump.y - 10 < 24 ? jump.y + 22 : jump.y - 10} textAnchor="middle" fontSize="12" fontWeight="700" fill="#2563eb">{`${shortPeriod(jump.period)}: +${formatOrderAmount(jump.revenue, language)}`}</text>}
@@ -203,6 +221,7 @@ export default function AdminRevenuePage() {
   const [granularity, setGranularity] = useState("day");
   const [retry, setRetry] = useState(0);
   const [result, setResult] = useState(null);
+  const [previousResult, setPreviousResult] = useState(null);
   const invalidRange = !range.from || !range.to || range.from > range.to;
   const query = buildRevenueQuery({ ...range, granularity });
   const requestKey = `${query}:${retry}`;
@@ -219,6 +238,20 @@ export default function AdminRevenuePage() {
     );
     return () => controller.abort();
   }, [query, requestKey, invalidRange]);
+
+  const prevRange = invalidRange ? null : previousRange(range.from, range.to);
+  const prevQuery = prevRange ? buildRevenueQuery({ ...prevRange, granularity }) : null;
+  const prevRequestKey = prevQuery ? `${prevQuery}:${retry}` : null;
+  useEffect(() => {
+    if (invalidRange || !prevQuery) return undefined;
+    const controller = new AbortController();
+    getAdminRevenue(prevQuery, { signal: controller.signal }).then(
+      (data) => { if (!controller.signal.aborted) setPreviousResult({ key: prevRequestKey, report: data }); },
+      () => { if (!controller.signal.aborted) setPreviousResult({ key: prevRequestKey, report: null }); },
+    );
+    return () => controller.abort();
+  }, [prevQuery, prevRequestKey, invalidRange]);
+  const previousSeries = previousResult?.key === prevRequestKey ? previousResult.report?.series ?? null : null;
 
   function selectPreset(key) {
     setRange((current) => key === "custom" ? { ...current, preset: key } : presetRange(key));
@@ -285,7 +318,7 @@ export default function AdminRevenuePage() {
         </div>
         {report.paidOrderCount === 0 && <p role="status" className="rounded-xl border border-dashed border-slate-300 p-5 text-sm text-slate-600">{t("adminRevenueEmpty")}</p>}
         <section className={panelClass} aria-labelledby="revenue-chart-title"><h2 id="revenue-chart-title" className="text-lg font-bold">{t("adminRevenueChart")}</h2><RevenueChart series={report.series} t={t} language={language} /></section>
-        <section className={panelClass} aria-labelledby="revenue-cumulative-title"><h2 id="revenue-cumulative-title" className="text-lg font-bold">{t("adminRevenueCumulative")}</h2><CumulativeChart series={report.series} t={t} language={language} /></section>
+        <section className={panelClass} aria-labelledby="revenue-cumulative-title"><h2 id="revenue-cumulative-title" className="text-lg font-bold">{t("adminRevenueCumulative")}</h2><CumulativeChart series={report.series} previousSeries={previousSeries} t={t} language={language} /></section>
         <div className="grid gap-6 lg:grid-cols-2">
           <section className={panelClass} aria-labelledby="revenue-daylist-title"><h2 id="revenue-daylist-title" className="text-lg font-bold">{t(granularity === "day" ? "adminRevenueDayList" : "adminRevenueMonthList")}</h2><DayList series={report.series} t={t} language={language} /></section>
           <section className={panelClass} aria-labelledby="revenue-plans-title"><h2 id="revenue-plans-title" className="text-lg font-bold">{t("adminRevenuePlans")}</h2>
