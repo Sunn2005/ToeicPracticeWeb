@@ -129,8 +129,7 @@ function MyTestsPage() {
     <section className="mx-auto max-w-6xl">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <h1 className="text-2xl font-bold text-slate-950 sm:text-3xl">Quản lý đề thi</h1>
-          <p className="mt-2 text-sm text-slate-500">Danh sách đề thi do tài khoản của bạn tạo.</p>
+          <p className="text-sm text-slate-500">Danh sách đề thi do tài khoản của bạn tạo.</p>
         </div>
         {canUseConsole(profile, "tests.add") && <Link
           to="/console/tests/new"

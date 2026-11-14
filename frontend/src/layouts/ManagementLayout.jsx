@@ -1,6 +1,6 @@
 import { canUseConsole, consoleRoutePermission } from "../auth/consolePermissions";
 import { useEffect, useState } from "react";
-import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
+import { matchPath, NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/useAuth";
 import BrandLogo from "../components/ui/BrandLogo";
 import { useLanguage } from "../i18n/LanguageContext";
@@ -52,6 +52,13 @@ function ManagementLayout() {
     { label: t("adminOrdersNav"), icon: "orders", to: "/console/orders" },
     { label: t("staffProfile"), icon: "profile", to: "/console/profile" },
   ].filter((item) => canUseConsole(profile, consoleRoutePermission(item.to)));
+  const breadcrumb = navigation.filter(({ to }) => matchPath({ path: to, end: false }, pathname));
+  const detailLabel = [
+    ["/console/tests/:testId/edit", "consoleEditTest"],
+    ["/console/tests/:testId/preview", "consolePreviewTest"],
+    ["/console/reviews/:testId", "consoleReviewDetails"],
+  ].find(([path]) => matchPath(path, pathname))?.[1];
+  const pageTitle = detailLabel ? t(detailLabel) : breadcrumb[breadcrumb.length - 1]?.label;
 
   useEffect(() => {
     const refresh = () => { refreshProfile().catch(() => {}); };
@@ -111,6 +118,7 @@ function ManagementLayout() {
           <button type="button" onClick={() => setSidebarOpen(true)} className="rounded-xl border border-slate-200 p-2.5 text-slate-600 lg:hidden" aria-label="Mở menu">
             <Icon name="menu" />
           </button>
+          {pageTitle && <h1 className="min-w-0 flex-1 truncate text-xl font-bold text-slate-950">{pageTitle}</h1>}
           <div className="ml-auto flex shrink-0 items-center gap-3 sm:gap-5">
             <div className="hidden text-right sm:block">
               <p className="max-w-52 truncate text-sm font-bold text-slate-900">{profile?.displayName || profile?.email || "Tài khoản nội bộ"}</p>

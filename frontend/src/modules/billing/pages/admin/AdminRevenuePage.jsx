@@ -269,8 +269,8 @@ export default function AdminRevenuePage() {
     );
   }
 
-  return <section className="mx-auto max-w-[1500px] space-y-6" aria-labelledby="revenue-title">
-    <header><h1 id="revenue-title" className="text-2xl font-bold text-slate-950 sm:text-3xl">{t("adminRevenueTitle")}</h1><p className="mt-2 text-sm text-slate-600">{t("adminRevenueDescription")}</p></header>
+  return <section className="mx-auto max-w-[1500px] space-y-6">
+    <header><p className="text-sm text-slate-600">{t("adminRevenueDescription")}</p></header>
     <div className={panelClass}>
       <fieldset><legend className="text-sm font-semibold">{t("adminRevenueRange")}</legend>
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3">

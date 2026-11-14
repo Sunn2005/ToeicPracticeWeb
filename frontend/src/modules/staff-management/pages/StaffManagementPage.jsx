@@ -123,7 +123,7 @@ export default function StaffManagementPage() {
   function chooseGroup(id) { if (!discard()) return; setGroupId(id); setDirty(false); setPage(1); setSelectedUid(""); setGroupForm(null); }
   function closeMember() { setMemberForm(null); setError(""); }
   return <section className="mx-auto max-w-[1600px] space-y-7" aria-busy={blocked}>
-    <div><h1 className="text-2xl font-bold text-slate-950 sm:text-3xl">{t("staffTitle")}</h1><p className="mt-2 text-sm text-slate-500 sm:text-base">{t("staffDescription")}</p></div>
+    <div><p className="text-sm text-slate-500 sm:text-base">{t("staffDescription")}</p></div>
     {error && !memberForm && !confirmation && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{t(error)}</div>}
     <div role="status" aria-live="polite" aria-atomic="true" className="text-sm text-slate-600">{blocked ? t(busy ? "staffWorking" : "staffLoading") : success ? t(success) : ""}</div>
     <div className="grid min-w-0 items-start gap-6 xl:grid-cols-[250px_minmax(0,1fr)]">

@@ -155,7 +155,7 @@ export default function ConsoleProfilePage() {
     if (feature === "tests" && permissions.includes("tests.add")) chips.push({ key: "createTest", label: t("staffPermissionCreateTest") });
   }
   if (permissions.includes("account.view")) chips.push({ key: "account", label: t("staffPermissionProfile") });
-  return <section className="mx-auto max-w-[1500px] space-y-6"><h1 className="text-2xl font-bold">{t("staffProfile")}</h1>
+  return <section className="mx-auto max-w-[1500px] space-y-6">
     <div className="rounded-2xl border border-slate-200 bg-white p-6">
       <div className="flex flex-wrap items-start gap-5">
         <span aria-hidden="true" className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-blue-100 text-lg font-bold text-blue-700">{profileInitials(profile)}</span>

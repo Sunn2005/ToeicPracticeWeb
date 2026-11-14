@@ -161,8 +161,8 @@ export default function AdminOrdersPage() {
     || (order.buyerEmail || "").toLowerCase().includes(searchQuery),
   ).slice(0, 8) : [];
 
-  return <section className="mx-auto max-w-[1500px] space-y-6" aria-labelledby="orders-title">
-    <header><h1 id="orders-title" className="text-2xl font-bold text-slate-950 sm:text-3xl">{t("adminOrdersTitle")}</h1><p className="mt-2 text-sm text-slate-600">{t("adminOrdersDescription")}</p></header>
+  return <section className="mx-auto max-w-[1500px] space-y-6">
+    <header><p className="text-sm text-slate-600">{t("adminOrdersDescription")}</p></header>
     <form onSubmit={searchOrder} className="flex flex-wrap items-end gap-3">
       <div className="relative min-w-0 flex-1">
         <label className="block text-sm font-semibold">{t("adminOrdersSearchLabel")}
