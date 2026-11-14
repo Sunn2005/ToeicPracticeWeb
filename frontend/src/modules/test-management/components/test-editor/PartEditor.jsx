@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import QuestionEditor from "./QuestionEditor";
 import QuestionGroupEditor from "./QuestionGroupEditor";
+import ConfirmDialog from "./ConfirmDialog";
 
 const LISTENING_PARTS = [
   { partNumber: 1, name: "Phần 1: Hình ảnh", desc: "Photographs (6 câu)" },
@@ -254,9 +255,14 @@ export default function PartEditor({
     }
   };
 
-  // Delete item at index
-  const handleDeleteItem = (indexToDelete) => {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa mục này?")) return;
+  // Delete item at index (confirmed via ConfirmDialog)
+  const [pendingDeleteIndex, setPendingDeleteIndex] = useState(null);
+  const handleDeleteItem = (indexToDelete) => setPendingDeleteIndex(indexToDelete);
+
+  const doDeleteItem = () => {
+    const indexToDelete = pendingDeleteIndex;
+    setPendingDeleteIndex(null);
+    if (indexToDelete === null) return;
 
     let updated = { ...currentPart };
     if (isIndividualQuestionPart) {
@@ -505,6 +511,17 @@ export default function PartEditor({
           )}
         </div>
       </div>
+
+      {pendingDeleteIndex !== null && (
+        <ConfirmDialog
+          title="Xóa mục này"
+          message="Bạn có chắc chắn muốn xóa mục này? Nội dung thuộc mục sẽ bị xóa khỏi đề trong trình soạn (chỉ thực sự lưu khi bạn bấm Lưu nháp)."
+          confirmLabel="Xóa"
+          danger
+          onConfirm={doDeleteItem}
+          onClose={() => setPendingDeleteIndex(null)}
+        />
+      )}
     </div>
   );
 }

@@ -17,9 +17,8 @@ const STANDARD_COUNTS = {
  *
  * @param {object} test - test object
  * @param {function(number, number, number)} onGoToStep - callback to jump to a specific wizard step (step, partNumber, questionNumber)
- * @param {function()} [onLoadMockTest] - callback to auto-populate 200 mock questions for quick test
  */
-export default function TestValidationSummary({ test, onGoToStep, onLoadMockTest }) {
+export default function TestValidationSummary({ test, onGoToStep, onRenumber }) {
   const { t } = useLanguage();
   const validation = useMemo(() => validateEmployeeTest(test), [test]);
   const { partCounts, totalActualQuestions } = validation;
@@ -72,15 +71,6 @@ export default function TestValidationSummary({ test, onGoToStep, onLoadMockTest
           </p>
         </div>
 
-        {onLoadMockTest && (
-          <button
-            type="button"
-            onClick={onLoadMockTest}
-            className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2.5 text-xs font-bold text-amber-800 hover:bg-amber-100 shadow-sm transition"
-          >
-            <span>⚡</span> Nạp đề mẫu 200 câu (Dev Test)
-          </button>
-        )}
       </div>
 
       {/* Bento Grid */}
@@ -207,6 +197,21 @@ export default function TestValidationSummary({ test, onGoToStep, onLoadMockTest
           </div>
 
           <div className="mt-6 space-y-3">
+            {onRenumber && (
+              <div>
+                <button
+                  type="button"
+                  onClick={onRenumber}
+                  className="w-full rounded-xl border border-slate-300 py-2.5 text-xs font-bold text-slate-700 hover:border-blue-400 hover:text-blue-600 hover:bg-slate-50 transition"
+                >
+                  🔢 Đánh số lại toàn đề
+                </button>
+                <p className="mt-1.5 text-[11px] leading-relaxed text-slate-400">
+                  Gán lại số câu liên tục từ 1 theo thứ tự Part 1–7. Dùng khi xóa hoặc chèn câu giữa đề làm hở/trùng số câu.
+                </p>
+              </div>
+            )}
+
             <button
               type="button"
               onClick={() => onGoToStep?.(5)}
@@ -214,16 +219,6 @@ export default function TestValidationSummary({ test, onGoToStep, onLoadMockTest
             >
               Tiếp tục sang Xem trước →
             </button>
-
-            {onLoadMockTest && (
-              <button
-                type="button"
-                onClick={onLoadMockTest}
-                className="w-full rounded-xl border border-dashed border-slate-300 py-2.5 text-xs font-bold text-slate-600 hover:border-blue-400 hover:text-blue-600 hover:bg-slate-50 transition"
-              >
-                ⚡ Điền tự động 200 câu mẫu
-              </button>
-            )}
           </div>
         </div>
       </div>

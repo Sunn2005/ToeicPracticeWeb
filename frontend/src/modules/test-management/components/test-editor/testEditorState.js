@@ -79,6 +79,38 @@ export function employeeTestPayload(test) {
   ].filter((key) => normalized[key] !== undefined).map((key) => [key, normalized[key]]));
 }
 
+// Reassign questionNumber sequentially (1..N) following the canonical
+// traversal order of questionsInPart: parts in ascending partNumber order,
+// and inside a part: questions, then groups, passages, passageGroups.
+// Group questionRange labels (Part 3/4) are recomputed from the new numbers.
+// Use after deleting or inserting questions mid-test leaves numbering gaps
+// that both the frontend validator and the backend reject on submission.
+export function renumberEmployeeTest(test) {
+  let next = 1;
+  const renumberQuestions = (questions = []) =>
+    questions.map((question) => ({ ...question, questionNumber: next++ }));
+  const renumberGroup = (group) => {
+    const questions = renumberQuestions(group.questions || []);
+    const updated = { ...group, questions };
+    if (typeof group.questionRange === "string" && questions.length) {
+      updated.questionRange = `${questions[0].questionNumber}-${questions[questions.length - 1].questionNumber}`;
+    }
+    return updated;
+  };
+  const parts = [...(test?.parts || [])]
+    .sort((a, b) => (a.partNumber || 0) - (b.partNumber || 0))
+    .map((part) => ({
+      ...part,
+      ...(part.questions ? { questions: renumberQuestions(part.questions) } : {}),
+      ...(part.groups ? { groups: part.groups.map(renumberGroup) } : {}),
+      ...(part.passages
+        ? { passages: part.passages.map((passage) => ({ ...passage, questions: renumberQuestions(passage.questions || []) })) }
+        : {}),
+      ...(part.passageGroups ? { passageGroups: part.passageGroups.map(renumberGroup) } : {}),
+    }));
+  return { ...test, parts };
+}
+
 export async function saveEmployeeDraft(test, { create, update }) {
   const payload = employeeTestPayload(test);
   return test.testId ? update(test.testId, payload) : create(payload);

@@ -3,7 +3,8 @@ import assert from "node:assert/strict";
 import { generateMockToeicTest } from "../../utils/mockToeicTest.js";
 import { buildReadingUnits } from "../../../exam/utils/testData.js";
 import {
-  employeeTestPayload, normalizeEditorTest, validateEmployeeTest, saveAndSubmitEmployeeTest,
+  employeeTestPayload, normalizeEditorTest, questionsInPart, renumberEmployeeTest,
+  validateEmployeeTest, saveAndSubmitEmployeeTest,
 } from "./testEditorState.js";
 
 test("sample has 200 valid questions with A/B/C in Part 2 and persistent reading content", () => {
@@ -15,6 +16,47 @@ test("sample has 200 valid questions with A/B/C in Part 2 and persistent reading
     assert.ok(unit.passages.every((p) => p.content?.length > 0));
     assert.ok(unit.passages.every((p) => !("text" in p)));
   }
+});
+
+test("sample listening slots always carry a media URL", () => {
+  const sample = generateMockToeicTest();
+  for (const part of sample.parts) {
+    if (part.partNumber <= 2) {
+      for (const question of part.questions) {
+        assert.ok(question.audioUrl, `Part ${part.partNumber} question ${question.questionNumber} is missing audioUrl`);
+      }
+    }
+    if (part.partNumber === 1) {
+      for (const question of part.questions) {
+        assert.ok(question.imageUrl, `Part 1 question ${question.questionNumber} is missing imageUrl`);
+      }
+    }
+    if (part.partNumber === 3 || part.partNumber === 4) {
+      for (const group of part.groups) {
+        assert.ok(group.audioUrl, `Part ${part.partNumber} group is missing audioUrl`);
+      }
+    }
+  }
+});
+
+test("renumber restores continuous numbering after a mid-test deletion", () => {
+  const sample = generateMockToeicTest();
+  sample.parts[0].questions.splice(2, 1); // drop question 3: leaves a gap
+  assert.ok(validateEmployeeTest(sample).errors.some((e) => e.key === "employeeEditorNumbersInvalid"));
+  const fixed = renumberEmployeeTest(sample);
+  const numbers = fixed.parts.flatMap((part) => questionsInPart(part).map((q) => q.questionNumber));
+  assert.deepEqual(numbers, Array.from({ length: 199 }, (_, i) => i + 1));
+  const group = fixed.parts[2].groups[0];
+  assert.equal(group.questionRange, `${group.questions[0].questionNumber}-${group.questions.at(-1).questionNumber}`);
+});
+
+test("renumber makes a complete test with scrambled numbers valid again", () => {
+  const sample = generateMockToeicTest();
+  for (const part of sample.parts) {
+    for (const question of questionsInPart(part)) question.questionNumber = 999;
+  }
+  assert.ok(validateEmployeeTest(sample).errors.some((e) => e.key === "employeeEditorNumbersInvalid"));
+  assert.deepEqual(validateEmployeeTest(renumberEmployeeTest(sample)).errors, []);
 });
 
 test("rejects Part 2 D, four options, duplicate labels and missing correct answers", () => {

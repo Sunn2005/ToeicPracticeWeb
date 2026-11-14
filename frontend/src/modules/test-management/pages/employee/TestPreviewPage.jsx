@@ -5,6 +5,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useLanguage } from "../../../../i18n/LanguageContext";
 import { normalizeEditorTest, validateEmployeeTest } from "../../components/test-editor/testEditorState";
 import TestPreview from "../../components/test-editor/TestPreview";
+import ConfirmDialog from "../../components/test-editor/ConfirmDialog";
 import { getEmployeeTest, submitEmployeeTest } from "../../../../api/tests/employeeTests";
 
 function TestPreviewPage() {
@@ -50,19 +51,26 @@ function TestPreviewPage() {
 
   const editable = canUseConsole(profile, "tests.edit") && test && ["DRAFT", "REJECTED"].includes(test.status);
   const validation = validateEmployeeTest(test);
-  const handleSubmit = async () => {
+  const [confirmSubmit, setConfirmSubmit] = useState(false);
+  const handleSubmit = () => {
     if (submitting || !editable) return;
     if (validation.errors.length) {
       setError(t("employeeEditorCannotSubmit"));
       return;
     }
-    if (!window.confirm("Bạn muốn gửi đề thi này để Admin phê duyệt?")) return;
+    setConfirmSubmit(true);
+  };
+
+  const doSubmit = async () => {
+    setConfirmSubmit(false);
     setSubmitting(true);
     setError("");
     try {
       await submitEmployeeTest(testId);
-      alert("Đã gửi phê duyệt thành công!");
-      navigate("/console/tests", { replace: true });
+      navigate("/console/tests", {
+        replace: true,
+        state: { successMessage: "Đã gửi phê duyệt thành công!" },
+      });
     } catch (err) {
       setError(err?.message || "Không thể gửi phê duyệt.");
     } finally {
@@ -126,6 +134,17 @@ function TestPreviewPage() {
       </div>
 
       <TestPreview test={test} />
+
+      {confirmSubmit && (
+        <ConfirmDialog
+          title="Gửi phê duyệt đề thi"
+          message="Bạn muốn gửi đề thi này để Admin phê duyệt? Sau khi gửi, đề sẽ bị khóa sửa cho đến khi có kết quả duyệt."
+          confirmLabel="Gửi phê duyệt"
+          busy={submitting}
+          onConfirm={doSubmit}
+          onClose={() => setConfirmSubmit(false)}
+        />
+      )}
     </div>
   );
 }

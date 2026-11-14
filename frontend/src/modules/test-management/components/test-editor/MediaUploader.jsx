@@ -1,6 +1,15 @@
 import { useState, useRef } from "react";
 import { uploadEmployeeMedia } from "../../../../api/tests/employeeTests";
 
+// Mirror of the server-side upload rules (MediaStorageService): reject early
+// in the browser so an oversized or unsupported file fails instantly with a
+// clear message instead of after a full upload round-trip.
+const MAX_FILE_SIZE_BYTES = 15 * 1024 * 1024;
+const ALLOWED_TYPES = {
+  audio: ["audio/mp3", "audio/mpeg", "audio/mp4", "audio/wav", "audio/x-wav", "audio/ogg"],
+  image: ["image/png", "image/jpeg", "image/webp", "image/gif"],
+};
+
 /**
  * MediaUploader
  *
@@ -37,6 +46,19 @@ export default function MediaUploader({
   const handleFileChange = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      setError(`Tệp vượt quá dung lượng tối đa 15MB (tệp này ${(file.size / 1024 / 1024).toFixed(1)}MB). Vui lòng chọn tệp nhỏ hơn.`);
+      event.target.value = "";
+      return;
+    }
+    if (file.type && !ALLOWED_TYPES[type].includes(file.type)) {
+      setError(type === "audio"
+        ? "Định dạng âm thanh không được hỗ trợ. Chỉ nhận MP3, MP4, WAV hoặc OGG."
+        : "Định dạng hình ảnh không được hỗ trợ. Chỉ nhận PNG, JPG, WebP hoặc GIF.");
+      event.target.value = "";
+      return;
+    }
 
     setUploading(true);
     setError("");
