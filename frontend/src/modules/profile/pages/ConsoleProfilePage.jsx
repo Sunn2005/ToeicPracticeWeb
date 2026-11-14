@@ -172,6 +172,8 @@ export default function ConsoleProfilePage() {
           <button type="button" onClick={() => setEditOpen(true)} className="min-h-11 rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-700 focus-visible:outline-blue-600">{t("staffEditProfile")}</button>
           <button type="button" onClick={() => setPasswordOpen(true)} className="min-h-11 rounded-xl border border-slate-300 px-4 py-3 font-semibold hover:bg-slate-50 focus-visible:outline-blue-600">{t("staffChangePassword")}</button>
         </div>
+      </div>
+      <div className="mt-5 border-t border-slate-100 pt-5">
         <CompletionRingButton profile={profile} t={t} onOpen={() => setEditOpen(true)} />
       </div>
     </div>

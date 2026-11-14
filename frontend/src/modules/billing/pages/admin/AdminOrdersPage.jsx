@@ -93,6 +93,7 @@ export default function AdminOrdersPage() {
   const [expanded, setExpanded] = useState(null);
   const [searchCode, setSearchCode] = useState("");
   const [searched, setSearched] = useState(null);
+  const [searchNotice, setSearchNotice] = useState(null);
   const [copied, setCopied] = useState(null);
   const [suggestOpen, setSuggestOpen] = useState(false);
   const copyTimer = useRef(null);
@@ -117,18 +118,29 @@ export default function AdminOrdersPage() {
     setPage(0);
     setExpanded(null);
   }
+  function clearSearch() {
+    setSearchCode("");
+    setSearched(null);
+    setSearchNotice(null);
+    setExpanded(null);
+    setSuggestOpen(false);
+  }
   function searchOrder(event) {
     event.preventDefault();
     const code = searchCode.trim();
     setExpanded(null);
     setSuggestOpen(false);
-    if (!code) { setSearched(null); return; }
+    if (!code) { setSearched(null); setSearchNotice(null); return; }
     const lower = code.toLowerCase();
-    const match = (request.data?.items ?? []).find((order) => String(order.orderCode).toLowerCase().endsWith(lower));
-    if (match) { setSearched(null); setExpanded(match.orderCode); return; }
-    const byBuyer = (request.data?.items ?? []).find((order) => (order.buyerName || "").toLowerCase().includes(lower) || (order.buyerEmail || "").toLowerCase().includes(lower));
-    if (byBuyer) { setSearched(null); setExpanded(byBuyer.orderCode); return; }
-    setSearched(code);
+    const match = (request.data?.items ?? []).find((order) =>
+      String(order.orderCode).toLowerCase().endsWith(lower)
+      || (order.buyerName || "").toLowerCase().includes(lower)
+      || (order.buyerEmail || "").toLowerCase().includes(lower),
+    );
+    if (match) { setSearched(match.orderCode); setSearchNotice(null); return; }
+    if (/^\d+$/.test(code)) { setSearched(code); setSearchNotice(null); return; }
+    setSearched(null);
+    setSearchNotice("adminOrdersSearchNoMatch");
   }
   function copyCode(code) {
     if (!navigator.clipboard?.writeText) return;
@@ -154,11 +166,14 @@ export default function AdminOrdersPage() {
     <form onSubmit={searchOrder} className="flex flex-wrap items-end gap-3">
       <div className="relative min-w-0 flex-1">
         <label className="block text-sm font-semibold">{t("adminOrdersSearchLabel")}
-          <input value={searchCode} onChange={(event) => { setSearchCode(event.target.value); setSuggestOpen(true); }} onFocus={() => setSuggestOpen(true)} onBlur={() => setTimeout(() => setSuggestOpen(false), 150)} onKeyDown={(event) => { if (event.key === "Escape") setSuggestOpen(false); }} placeholder={t("adminOrdersSearchPlaceholder")} className={inputClass} role="combobox" aria-expanded={suggestOpen && suggestions.length > 0} aria-controls="orders-search-suggestions" autoComplete="off" />
+          <span className="relative block">
+            <input value={searchCode} onChange={(event) => { setSearchCode(event.target.value); setSuggestOpen(true); }} onFocus={() => setSuggestOpen(true)} onBlur={() => setTimeout(() => setSuggestOpen(false), 150)} onKeyDown={(event) => { if (event.key === "Escape") setSuggestOpen(false); }} placeholder={t("adminOrdersSearchPlaceholder")} className={`${inputClass} pr-10`} role="combobox" aria-expanded={suggestOpen && suggestions.length > 0} aria-controls="orders-search-suggestions" autoComplete="off" />
+            {searchCode && <button type="button" aria-label={t("adminOrdersClearSearch")} onClick={clearSearch} className="absolute right-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-2 focus-visible:outline-blue-600"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="M6 6l12 12" /></svg></button>}
+          </span>
         </label>
         {suggestOpen && suggestions.length > 0 && <ul id="orders-search-suggestions" role="listbox" className="absolute inset-x-0 top-full z-10 mt-1 max-h-80 overflow-auto rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
           {suggestions.map((order) => <li key={order.orderCode} role="option" aria-selected={false}>
-            <button type="button" onMouseDown={(event) => { event.preventDefault(); setSearchCode(String(order.orderCode)); setSearched(null); setExpanded(order.orderCode); setSuggestOpen(false); }} className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-blue-600">
+            <button type="button" onMouseDown={(event) => { event.preventDefault(); setSearchCode(String(order.orderCode)); setSearched(order.orderCode); setSearchNotice(null); setExpanded(null); setSuggestOpen(false); }} className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-blue-600">
               <span className="font-semibold">{truncateCode(order.orderCode)}</span>
               <span className="min-w-0 flex-1 truncate text-slate-600">{order.buyerName || order.buyerEmail || order.userId}</span>
               <span className="whitespace-nowrap text-slate-600">{formatOrderAmount(order.amount, language)}</span>
@@ -190,9 +205,11 @@ export default function AdminOrdersPage() {
         ))}
       </div>
     </div>
-    {searched !== null && <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex items-center justify-between gap-4"><h2 className="text-lg font-bold">{t("adminOrdersDetail")}</h2><button type="button" onClick={() => { setSearched(null); setSearchCode(""); }} className={buttonClass}>{t("adminOrdersClose")}</button></div>
-      <OrderDetail key={searched} orderCode={searched} t={t} language={language} onReconciled={() => setRetry((value) => value + 1)} />
+    {(searched !== null || searchNotice) && <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="flex items-center justify-between gap-4"><h2 className="text-lg font-bold">{t("adminOrdersDetail")}</h2><button type="button" onClick={clearSearch} className={buttonClass}>{t("adminOrdersClose")}</button></div>
+      {searched !== null
+        ? <OrderDetail key={searched} orderCode={searched} t={t} language={language} onReconciled={() => setRetry((value) => value + 1)} />
+        : <p role="status" className="mt-4 text-sm text-slate-600">{t(searchNotice)}</p>}
     </div>}
     <div aria-busy={Boolean(request.loading)} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <RequestState request={request} t={t} onRetry={() => setRetry((value) => value + 1)} />
