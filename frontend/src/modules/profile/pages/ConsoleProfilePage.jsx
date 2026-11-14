@@ -3,34 +3,54 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../auth/useAuth";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { updateProfile } from "../../../api/me.js";
+import { getStaffDirectory } from "../../../api/staff/adminStaff.js";
 import { getPendingSubmissions, getReviewHistory } from "../../../api/tests/adminReviews.js";
 import StaffDialog from "../../staff-management/components/StaffDialog";
 import StaffPasswordForm from "../../authentication/components/StaffPasswordForm";
 
 const inputClass = "mt-2 min-h-11 w-full min-w-0 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-blue-600";
 const ringFields = ["displayName", "email", "phoneNumber", "dateOfBirth"];
+const ringFieldLabels = { displayName: "staffName", email: "staffEmail", phoneNumber: "staffPhone", dateOfBirth: "staffDateOfBirth" };
+const consoleFeatures = ["dashboard", "staff", "tests", "reviews", "history", "orders", "revenue"];
 
-function CompletionRing({ profile, t }) {
+function profileInitials(profile) {
+  const name = (profile?.displayName || "").trim();
+  if (name) return name.split(/\s+/).filter(Boolean).slice(-2).map((part) => part[0]).join("").toUpperCase();
+  const local = (profile?.email || "").split("@")[0];
+  return (local.slice(0, 2) || "?").toUpperCase();
+}
+
+function CompletionRingButton({ profile, t, onOpen }) {
   const filled = ringFields.filter((field) => profile?.[field]).length;
   const percent = Math.round(filled / ringFields.length * 100);
-  const radius = 52;
+  const radius = 24;
   const circumference = 2 * Math.PI * radius;
-  return <div className="flex items-center gap-5">
-    <svg width="128" height="128" viewBox="0 0 128 128" role="img" aria-label={`${t("staffProfileCompletion")}: ${percent}%`} className="shrink-0 text-slate-900">
-      <circle cx="64" cy="64" r={radius} fill="none" strokeWidth="10" className="stroke-slate-200" />
-      <circle cx="64" cy="64" r={radius} fill="none" strokeWidth="10" strokeLinecap="round" strokeDasharray={`${circumference * percent / 100} ${circumference}`} className="stroke-blue-600" />
-      <text x="64" y="64" textAnchor="middle" dominantBaseline="central" fontSize="22" fontWeight="700" fill="currentColor">{`${percent}%`}</text>
-    </svg>
-    <div><h2 className="font-bold">{t("staffProfileCompletion")}</h2><p className="mt-1 text-sm leading-6 text-slate-600">{t("staffProfileCompletionHelp").replace("{filled}", filled).replace("{total}", ringFields.length)}</p></div>
-  </div>;
+  const missing = ringFields.filter((field) => !profile?.[field]).map((field) => t(ringFieldLabels[field]));
+  return <button type="button" onClick={onOpen} title={t("staffEditProfile")} className="flex items-center gap-3 rounded-xl p-2 text-left hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-blue-600">
+    <span className="relative grid h-[58px] w-[58px] shrink-0 place-items-center">
+      <svg width="58" height="58" viewBox="0 0 58 58" aria-hidden="true">
+        <circle cx="29" cy="29" r={radius} fill="none" strokeWidth="6" className="stroke-slate-200" />
+        <circle cx="29" cy="29" r={radius} fill="none" strokeWidth="6" strokeLinecap="round" strokeDasharray={`${circumference * percent / 100} ${circumference}`} className="stroke-blue-600" />
+      </svg>
+      <span className="absolute text-xs font-bold text-slate-900">{`${percent}%`}</span>
+    </span>
+    <span><span className="block font-bold">{t("staffProfileCompletion")}</span><span className="mt-0.5 block text-sm leading-5 text-slate-600">{missing.length ? t("staffProfileCompletionNote").replace("{fields}", missing.join(", ")) : t("staffProfileComplete")}</span></span>
+  </button>;
 }
 
 function ReviewStats({ t }) {
   const [stats, setStats] = useState(null);
   useEffect(() => {
     let cancelled = false;
-    Promise.all([getReviewHistory(), getPendingSubmissions()]).then(
-      ([history, queue]) => {
+    const staffPromise = getStaffDirectory().then(
+      (directory) => {
+        const members = Array.isArray(directory) ? directory : directory?.members ?? directory?.staff ?? [];
+        return Array.isArray(members) ? members.length : null;
+      },
+      () => null,
+    );
+    Promise.all([getReviewHistory(), getPendingSubmissions(), staffPromise]).then(
+      ([history, queue, staffCount]) => {
         if (cancelled) return;
         const historyList = Array.isArray(history) ? history : history?.items ?? [];
         const queueList = Array.isArray(queue) ? queue : queue?.items ?? [];
@@ -38,21 +58,26 @@ function ReviewStats({ t }) {
           approved: historyList.filter((item) => item.status === "APPROVED").length,
           rejected: historyList.filter((item) => item.status === "REJECTED").length,
           pending: queueList.length,
+          staff: staffCount,
         });
       },
-      () => { if (!cancelled) setStats({ approved: null, rejected: null, pending: null }); },
+      () => { if (!cancelled) setStats({ approved: null, rejected: null, pending: null, staff: null }); },
     );
     return () => { cancelled = true; };
   }, []);
   const cards = [
-    ["staffStatsApproved", stats?.approved],
-    ["staffStatsRejected", stats?.rejected],
-    ["staffStatsPending", stats?.pending],
+    { key: "staffStatsApproved", value: stats?.approved, icon: <path d="M20 6 9 17l-5-5" />, iconClass: "bg-green-50 text-green-700" },
+    { key: "staffStatsRejected", value: stats?.rejected, icon: <><path d="M18 6 6 18" /><path d="M6 6l12 12" /></>, iconClass: "bg-red-50 text-red-600" },
+    { key: "staffStatsPending", value: stats?.pending, icon: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>, iconClass: "bg-amber-50 text-amber-600" },
+    { key: "staffStatsStaff", value: stats?.staff, icon: <><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></>, iconClass: "bg-blue-50 text-blue-600" },
   ];
   return <section aria-labelledby="profile-stats-title" className="rounded-2xl border border-slate-200 bg-white p-6">
     <h2 id="profile-stats-title" className="font-bold">{t("staffReviewStats")}</h2>
-    <div className="mt-4 grid gap-4 sm:grid-cols-3">
-      {cards.map(([key, value]) => <div key={key}><p className="text-sm text-slate-600">{t(key)}</p><p className="mt-1 text-2xl font-bold">{value ?? "—"}</p></div>)}
+    <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {cards.map(({ key, value, icon, iconClass }) => <div key={key} className="flex items-start gap-3">
+        <span aria-hidden="true" className={`grid h-10 w-10 shrink-0 place-items-center rounded-lg ${iconClass}`}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">{icon}</svg></span>
+        <div className="min-w-0"><p className="text-sm text-slate-600">{t(key)}</p><p className="mt-1 text-2xl font-bold">{value ?? "—"}</p></div>
+      </div>)}
     </div>
   </section>;
 }
@@ -113,17 +138,42 @@ export default function ConsoleProfilePage() {
     try { await refreshProfile(); } catch { /* keep the old profile on screen; fresh values load on next focus */ }
     setEditOpen(false);
   }
+  const isAdmin = profile?.role === "ADMIN";
+  const groupId = profile?.consoleAccess?.groupId;
+  const granted = new Set((profile?.consoleAccess?.permissions ?? []).map((permission) => String(permission).split(".")[0]));
+  const features = consoleFeatures.filter((feature) => granted.has(feature));
   return <section className="mx-auto max-w-4xl space-y-6"><h1 className="text-2xl font-bold">{t("staffProfile")}</h1>
-    <div className="grid gap-6 lg:grid-cols-2">
-      <div className="space-y-5 rounded-2xl border border-slate-200 bg-white p-6"><dl className="space-y-4">{[["staffName", profile?.displayName], ["staffEmail", profile?.email], ["staffPhone", profile?.phoneNumber], ["staffDateOfBirth", profile?.dateOfBirth]].map(([key, value]) => <div key={key}><dt className="text-sm text-slate-600">{t(key)}</dt><dd className="mt-1 break-words font-semibold">{value || "—"}</dd></div>)}</dl>
+    <div className="rounded-2xl border border-slate-200 bg-white p-6">
+      <div className="flex flex-wrap items-start gap-5">
+        <span aria-hidden="true" className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-blue-100 text-lg font-bold text-blue-700">{profileInitials(profile)}</span>
+        <div className="min-w-0 flex-1">
+          <h2 className="break-words text-lg font-bold">{profile?.displayName || "—"}</h2>
+          <p className="mt-1 break-words text-sm text-slate-600">{profile?.email || "—"}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">{isAdmin ? "Quản trị viên" : profile?.role === "EMPLOYEE" ? "Nhân viên" : "—"}</span>
+            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">{t("staffProfileGroup").replace("{group}", groupId === "admin" ? "Quản trị" : groupId || "—")}</span>
+            {profile?.consoleAccess?.active !== false && <span className="flex items-center gap-1.5 rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700"><span aria-hidden="true" className="h-2 w-2 rounded-full bg-green-500" />{t("staffProfileActive")}</span>}
+          </div>
+        </div>
         <div className="flex flex-wrap gap-3">
           <button type="button" onClick={() => setEditOpen(true)} className="min-h-11 rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-700 focus-visible:outline-blue-600">{t("staffEditProfile")}</button>
           <button type="button" onClick={() => setPasswordOpen(true)} className="min-h-11 rounded-xl border border-slate-300 px-4 py-3 font-semibold hover:bg-slate-50 focus-visible:outline-blue-600">{t("staffChangePassword")}</button>
         </div>
+        <CompletionRingButton profile={profile} t={t} onOpen={() => setEditOpen(true)} />
       </div>
-      <div className="rounded-2xl border border-slate-200 bg-white p-6"><CompletionRing profile={profile} t={t} /></div>
     </div>
     <ReviewStats t={t} />
+    <div className="grid gap-6 lg:grid-cols-2">
+      <div className="rounded-2xl border border-slate-200 bg-white p-6">
+        <h2 className="font-bold">{t("staffProfileInfo")}</h2>
+        <dl className="mt-4 space-y-4">{[["staffName", profile?.displayName], ["staffEmail", profile?.email], ["staffPhone", profile?.phoneNumber], ["staffDateOfBirth", profile?.dateOfBirth]].map(([key, value]) => <div key={key}><dt className="text-sm text-slate-600">{t(key)}</dt><dd className="mt-1 break-words font-semibold">{value || <span className="text-sm font-semibold text-amber-700">{t("staffProfileMissing")}</span>}</dd></div>)}</dl>
+      </div>
+      <div className="rounded-2xl border border-slate-200 bg-white p-6">
+        <h2 className="font-bold">{t("staffPermissionsTitle")}</h2>
+        <p className="mt-2 text-sm leading-6 text-slate-600">{t("staffPermissionsHelp")}</p>
+        <div className="mt-4 flex flex-wrap gap-2">{features.length ? features.map((feature) => <span key={feature} className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">{t(`staffFeature_${feature}`)}</span>) : <span className="text-sm text-slate-600">—</span>}</div>
+      </div>
+    </div>
     {editOpen && <EditProfileDialog profile={profile} onClose={() => setEditOpen(false)} onSaved={profileSaved} />}
     {passwordOpen && <StaffDialog title={t("staffChangePassword")} busy={passwordBusy} onClose={() => setPasswordOpen(false)}><div className="p-6"><StaffPasswordForm onSuccess={completed} onBusyChange={setPasswordBusy} /><button type="button" disabled={passwordBusy} onClick={() => setPasswordOpen(false)} className="mt-4 min-h-11 w-full rounded-xl border border-slate-300 px-4 py-2 font-semibold disabled:opacity-50">{t("staffCancel")}</button></div></StaffDialog>}
   </section>;

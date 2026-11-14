@@ -59,7 +59,8 @@ function OrderDetail({ orderCode, t, language, onReconciled }) {
     {request.order && <dl className="mt-5 grid gap-5 sm:grid-cols-2">
       {detailFields.map((field) => {
         const value = request.order[field];
-        const display = ["createdAt", "paidAt", "proExpiresAt"].includes(field) ? formatOrderDate(value, language)
+        const display = field === "paidAt" && request.order.status === "PAID" && value == null ? t("adminOrdersMissingPaidAt")
+          : ["createdAt", "paidAt", "proExpiresAt"].includes(field) ? formatOrderDate(value, language)
           : field === "amount" ? formatOrderAmount(value, language)
           : field === "status" ? t(orderStatusKey(request.order)) : value ?? "—";
         return <div key={field} className="min-w-0"><dt className="text-sm text-slate-600">{t(`adminOrders_${field}`)}</dt><dd className="mt-1 break-words text-sm font-semibold">{display}</dd></div>;
@@ -119,7 +120,10 @@ export default function AdminOrdersPage() {
     event.preventDefault();
     const code = searchCode.trim();
     setExpanded(null);
-    setSearched(code || null);
+    if (!code) { setSearched(null); return; }
+    const match = (request.data?.items ?? []).find((order) => String(order.orderCode).toLowerCase().endsWith(code.toLowerCase()));
+    if (match) { setSearched(null); setExpanded(match.orderCode); return; }
+    setSearched(code);
   }
   function copyCode(code) {
     if (!navigator.clipboard?.writeText) return;
@@ -136,6 +140,12 @@ export default function AdminOrdersPage() {
 
   return <section className="mx-auto max-w-7xl space-y-6" aria-labelledby="orders-title">
     <header><h1 id="orders-title" className="text-2xl font-bold text-slate-950 sm:text-3xl">{t("adminOrdersTitle")}</h1><p className="mt-2 text-sm text-slate-600">{t("adminOrdersDescription")}</p></header>
+    <form onSubmit={searchOrder} className="flex flex-wrap items-end gap-3">
+      <label className="min-w-0 flex-1 text-sm font-semibold">{t("adminOrdersSearchLabel")}
+        <input value={searchCode} onChange={(event) => setSearchCode(event.target.value)} placeholder={t("adminOrdersSearchPlaceholder")} className={inputClass} />
+      </label>
+      <button type="submit" className={`${buttonClass} border-slate-300 text-slate-700 hover:bg-slate-50`}>{t("adminOrdersSearch")}</button>
+    </form>
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {["status", "planCode"].map((field) => <label key={field} className="text-sm font-semibold">{t(`adminOrders_${field}`)}
@@ -158,12 +168,6 @@ export default function AdminOrdersPage() {
           </label>
         ))}
       </div>
-      <form onSubmit={searchOrder} className="mt-4 flex flex-wrap items-end gap-3">
-        <label className="min-w-0 flex-1 text-sm font-semibold">{t("adminOrdersSearchLabel")}
-          <input value={searchCode} onChange={(event) => setSearchCode(event.target.value)} placeholder={t("adminOrdersSearchPlaceholder")} className={inputClass} />
-        </label>
-        <button type="submit" className={`${buttonClass} border-slate-300 text-slate-700 hover:bg-slate-50`}>{t("adminOrdersSearch")}</button>
-      </form>
       <p id="orders-date-help" className="mt-3 text-sm text-slate-600">{t("adminOrdersDateHelp")}</p>
     </div>
     {searched !== null && <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -174,15 +178,15 @@ export default function AdminOrdersPage() {
       <RequestState request={request} t={t} onRetry={() => setRetry((value) => value + 1)} />
       {data && (data.items.length === 0 ? <p role="status" className="p-12 text-center text-sm text-slate-500">{t("adminOrdersEmpty")}</p> : <div className="overflow-x-auto"><table className="w-full text-left text-sm">
         <caption className="sr-only">{t("adminOrdersTitle")}</caption>
-        <thead className="bg-slate-50 text-slate-600"><tr><th scope="col" className="w-12 px-2 py-3"><span className="sr-only">{t("adminOrdersDetail")}</span></th>{columns.map((column) => <th key={column} scope="col" className="whitespace-nowrap px-4 py-3 font-semibold">{t(`adminOrders_${column}`)}</th>)}</tr></thead>
+        <thead className="bg-slate-50 text-slate-600"><tr>{columns.map((column) => <th key={column} scope="col" className="whitespace-nowrap px-4 py-3 font-semibold">{t(`adminOrders_${column}`)}</th>)}<th scope="col" className="w-12 px-2 py-3"><span className="sr-only">{t("adminOrdersDetail")}</span></th></tr></thead>
         <tbody className="divide-y divide-slate-100">{data.items.map((order) => <Fragment key={order.orderCode}>
           <tr className="hover:bg-blue-50/50">
-            <td className="px-2 py-3"><button type="button" aria-expanded={expanded === order.orderCode} aria-label={expanded === order.orderCode ? t("adminOrdersCollapse") : t("adminOrdersExpand")} onClick={() => setExpanded((current) => current === order.orderCode ? null : order.orderCode)} className="grid h-9 w-9 place-items-center rounded-lg text-slate-500 hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-blue-600"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`h-5 w-5 transition-transform ${expanded === order.orderCode ? "rotate-180" : ""}`}><path d="m6 9 6 6 6-6" /></svg></button></td>
             <td className="px-4 py-3"><span className="flex items-center gap-2"><span className="font-semibold">{truncateCode(order.orderCode)}</span><button type="button" onClick={() => copyCode(order.orderCode)} aria-label={`${t("adminOrdersCopy")} ${order.orderCode}`} className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-slate-500 hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-blue-600"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><rect x="9" y="9" width="12" height="12" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg></button>{copied === order.orderCode && <span className="whitespace-nowrap text-xs font-semibold text-green-700">{t("adminOrdersCopied")}</span>}</span></td>
             <td className="max-w-64 break-words px-4 py-3"><div className="flex items-start gap-3"><span aria-hidden="true" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">{buyerInitials(order)}</span><div className="min-w-0"><p className="font-semibold">{order.buyerName || order.buyerEmail || t("adminOrdersUnknownBuyer")}</p>{order.buyerName && order.buyerEmail && <p className="text-slate-600">{order.buyerEmail}</p>}{!order.buyerName && !order.buyerEmail && <p className="break-all text-slate-600">{order.userId}</p>}</div></div></td>
             <td className="px-4 py-3">{order.planCode}</td><td className="whitespace-nowrap px-4 py-3">{formatOrderAmount(order.amount, language)}</td>
             <td className="px-4 py-3"><span className={`whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${statusClasses[order.status] || statusClasses.CANCELLED}`}>{t(orderStatusKey(order))}</span></td>
             <td className="whitespace-nowrap px-4 py-3">{formatOrderDate(order.createdAt, language)}</td><td className="whitespace-nowrap px-4 py-3">{order.status === "PAID" && order.paidAt == null ? t("adminOrdersMissingPaidAt") : formatOrderDate(order.paidAt, language)}</td>
+            <td className="px-2 py-3"><button type="button" aria-expanded={expanded === order.orderCode} aria-label={expanded === order.orderCode ? t("adminOrdersCollapse") : t("adminOrdersExpand")} onClick={() => setExpanded((current) => current === order.orderCode ? null : order.orderCode)} className="grid h-9 w-9 place-items-center rounded-lg text-slate-500 hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-blue-600"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`h-5 w-5 transition-transform ${expanded === order.orderCode ? "rotate-180" : ""}`}><path d="m6 9 6 6 6-6" /></svg></button></td>
           </tr>
           {expanded === order.orderCode && <tr><td colSpan={8} className="bg-slate-50 px-4 py-5"><OrderDetail key={order.orderCode} orderCode={order.orderCode} t={t} language={language} onReconciled={() => setRetry((value) => value + 1)} /></td></tr>}
         </Fragment>)}</tbody>
