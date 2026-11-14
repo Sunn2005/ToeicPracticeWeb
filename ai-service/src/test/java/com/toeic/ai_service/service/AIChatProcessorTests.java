@@ -4,12 +4,16 @@ import com.toeic.ai_service.model.AIChatRequest;
 import com.toeic.ai_service.model.AIChatResult;
 import com.toeic.ai_service.model.ToeicChatAnswer;
 import org.junit.jupiter.api.Test;
+import org.springframework.ai.chat.client.ChatClient;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -72,6 +76,29 @@ class AIChatProcessorTests {
         verify(promptService, never()).answer(request);
         verify(repository, never()).saveTerminal(
                 org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void savesASuccessWhenRetrievalThrows() throws Exception {
+        var repository = mock(FirestoreChatResultRepository.class);
+        var retrieval = mock(RagRetrievalService.class);
+        var client = mock(ChatClient.class);
+        var prompt = mock(ChatClient.ChatClientRequestSpec.class);
+        var response = mock(ChatClient.CallResponseSpec.class);
+        var request = request();
+        var saved = AIChatResult.succeeded(request, "General guidance");
+
+        when(retrieval.retrieve("Explain")).thenThrow(new IllegalStateException());
+        when(client.prompt()).thenReturn(prompt);
+        when(prompt.system(anyString())).thenReturn(prompt);
+        when(prompt.user(new AIChatPromptService(client).prepare(request).user())).thenReturn(prompt);
+        when(prompt.call()).thenReturn(response);
+        when(response.entity(eq(ToeicChatAnswer.class), any())).thenReturn(new ToeicChatAnswer("General guidance"));
+        when(repository.claim(request, false)).thenReturn(FirestoreChatResultRepository.Claim.claimed());
+        when(repository.saveTerminal(request, saved)).thenReturn(saved);
+
+        var service = new AIChatPromptService(client, 12, 12_000, retrieval, true);
+        assertEquals(saved, new AIChatProcessor(repository, service).process(request, false).orElseThrow());
     }
 
     private AIChatRequest request() {
