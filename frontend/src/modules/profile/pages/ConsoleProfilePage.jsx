@@ -30,7 +30,7 @@ function CompletionRingButton({ profile, t, onOpen }) {
     <span className="relative grid h-[58px] w-[58px] shrink-0 place-items-center">
       <svg width="58" height="58" viewBox="0 0 58 58" aria-hidden="true">
         <circle cx="29" cy="29" r={radius} fill="none" strokeWidth="6" className="stroke-slate-200" />
-        <circle cx="29" cy="29" r={radius} fill="none" strokeWidth="6" strokeLinecap="round" strokeDasharray={`${circumference * percent / 100} ${circumference}`} className="stroke-blue-600" />
+        <circle cx="29" cy="29" r={radius} fill="none" strokeWidth="6" strokeLinecap="round" strokeDasharray={`${circumference * percent / 100} ${circumference}`} transform="rotate(-90 29 29)" className="stroke-blue-600" />
       </svg>
       <span className="absolute text-xs font-bold text-slate-900">{`${percent}%`}</span>
     </span>

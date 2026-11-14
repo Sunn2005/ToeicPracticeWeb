@@ -98,7 +98,7 @@ function CumulativeChart({ series, previousSeries, t, language }) {
   const totals = [];
   let running = 0;
   for (const point of series) { running += point.revenue; totals.push({ ...point, total: running }); }
-  const showPrevious = Array.isArray(previousSeries) && previousSeries.length === series.length && series.length > 0;
+  const showPrevious = Array.isArray(previousSeries) && previousSeries.length === series.length && series.length > 1;
   const prevTotals = [];
   if (showPrevious) { let prevRunning = 0; for (const point of previousSeries) { prevRunning += point.revenue; prevTotals.push(prevRunning); } }
   const width = Math.max(1000, series.length * 76 + 110);
@@ -170,7 +170,7 @@ function DayList({ series, t, language }) {
 }
 
 function renderInsight(text, values) {
-  return text.split(/(\{[a-z]+\})/g).map((part, index) => values[part] ? <b key={index}>{values[part]}</b> : <span key={index}>{part}</span>);
+  return text.split(/(\{[a-z]+\})/g).map((part, index) => values[part] !== undefined ? <b key={index}>{values[part]}</b> : <span key={index}>{part}</span>);
 }
 
 const donutColors = ["#2563eb", "#d97706", "#059669", "#7c3aed", "#db2777", "#0891b2"];
