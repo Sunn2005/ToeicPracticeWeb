@@ -94,6 +94,7 @@ export default function AdminOrdersPage() {
   const [searchCode, setSearchCode] = useState("");
   const [searched, setSearched] = useState(null);
   const [copied, setCopied] = useState(null);
+  const [suggestOpen, setSuggestOpen] = useState(false);
   const copyTimer = useRef(null);
   useEffect(() => () => clearTimeout(copyTimer.current), []);
   const invalidRange = Boolean(filters.from && filters.to && filters.from > filters.to);
@@ -120,9 +121,13 @@ export default function AdminOrdersPage() {
     event.preventDefault();
     const code = searchCode.trim();
     setExpanded(null);
+    setSuggestOpen(false);
     if (!code) { setSearched(null); return; }
-    const match = (request.data?.items ?? []).find((order) => String(order.orderCode).toLowerCase().endsWith(code.toLowerCase()));
+    const lower = code.toLowerCase();
+    const match = (request.data?.items ?? []).find((order) => String(order.orderCode).toLowerCase().endsWith(lower));
     if (match) { setSearched(null); setExpanded(match.orderCode); return; }
+    const byBuyer = (request.data?.items ?? []).find((order) => (order.buyerName || "").toLowerCase().includes(lower) || (order.buyerEmail || "").toLowerCase().includes(lower));
+    if (byBuyer) { setSearched(null); setExpanded(byBuyer.orderCode); return; }
     setSearched(code);
   }
   function copyCode(code) {
@@ -137,14 +142,31 @@ export default function AdminOrdersPage() {
     );
   }
   const data = request.data;
+  const searchQuery = searchCode.trim().toLowerCase();
+  const suggestions = searchQuery ? (data?.items ?? []).filter((order) =>
+    String(order.orderCode).toLowerCase().endsWith(searchQuery)
+    || (order.buyerName || "").toLowerCase().includes(searchQuery)
+    || (order.buyerEmail || "").toLowerCase().includes(searchQuery),
+  ).slice(0, 8) : [];
 
-  return <section className="mx-auto max-w-7xl space-y-6" aria-labelledby="orders-title">
+  return <section className="mx-auto max-w-[1500px] space-y-6" aria-labelledby="orders-title">
     <header><h1 id="orders-title" className="text-2xl font-bold text-slate-950 sm:text-3xl">{t("adminOrdersTitle")}</h1><p className="mt-2 text-sm text-slate-600">{t("adminOrdersDescription")}</p></header>
     <form onSubmit={searchOrder} className="flex flex-wrap items-end gap-3">
-      <label className="min-w-0 flex-1 text-sm font-semibold">{t("adminOrdersSearchLabel")}
-        <input value={searchCode} onChange={(event) => setSearchCode(event.target.value)} placeholder={t("adminOrdersSearchPlaceholder")} className={inputClass} />
-      </label>
-      <button type="submit" className={`${buttonClass} border-slate-300 text-slate-700 hover:bg-slate-50`}>{t("adminOrdersSearch")}</button>
+      <div className="relative min-w-0 flex-1">
+        <label className="block text-sm font-semibold">{t("adminOrdersSearchLabel")}
+          <input value={searchCode} onChange={(event) => { setSearchCode(event.target.value); setSuggestOpen(true); }} onFocus={() => setSuggestOpen(true)} onBlur={() => setTimeout(() => setSuggestOpen(false), 150)} onKeyDown={(event) => { if (event.key === "Escape") setSuggestOpen(false); }} placeholder={t("adminOrdersSearchPlaceholder")} className={inputClass} role="combobox" aria-expanded={suggestOpen && suggestions.length > 0} aria-controls="orders-search-suggestions" autoComplete="off" />
+        </label>
+        {suggestOpen && suggestions.length > 0 && <ul id="orders-search-suggestions" role="listbox" className="absolute inset-x-0 top-full z-10 mt-1 max-h-80 overflow-auto rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
+          {suggestions.map((order) => <li key={order.orderCode} role="option" aria-selected={false}>
+            <button type="button" onMouseDown={(event) => { event.preventDefault(); setSearchCode(String(order.orderCode)); setSearched(null); setExpanded(order.orderCode); setSuggestOpen(false); }} className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-blue-600">
+              <span className="font-semibold">{truncateCode(order.orderCode)}</span>
+              <span className="min-w-0 flex-1 truncate text-slate-600">{order.buyerName || order.buyerEmail || order.userId}</span>
+              <span className="whitespace-nowrap text-slate-600">{formatOrderAmount(order.amount, language)}</span>
+            </button>
+          </li>)}
+        </ul>}
+      </div>
+      <button type="submit" className="sr-only">{t("adminOrdersSearch")}</button>
     </form>
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -163,12 +185,10 @@ export default function AdminOrdersPage() {
               value={filters[field]}
               onChange={(event) => changeFilter(field, event.target.value)}
               aria-invalid={invalidRange}
-              aria-describedby="orders-date-help"
             />
           </label>
         ))}
       </div>
-      <p id="orders-date-help" className="mt-3 text-sm text-slate-600">{t("adminOrdersDateHelp")}</p>
     </div>
     {searched !== null && <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex items-center justify-between gap-4"><h2 className="text-lg font-bold">{t("adminOrdersDetail")}</h2><button type="button" onClick={() => { setSearched(null); setSearchCode(""); }} className={buttonClass}>{t("adminOrdersClose")}</button></div>

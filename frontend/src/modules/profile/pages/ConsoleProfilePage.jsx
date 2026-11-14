@@ -86,20 +86,23 @@ function EditProfileDialog({ profile, onClose, onSaved }) {
   const { t } = useLanguage();
   const [name, setName] = useState(profile?.displayName ?? "");
   const [phone, setPhone] = useState(profile?.phoneNumber ?? "");
+  const [dob, setDob] = useState(profile?.dateOfBirth ?? "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   async function save(event) {
     event.preventDefault();
     const displayName = name.trim();
     const phoneNumber = phone.trim();
-    if (displayName.length < 1 || displayName.length > 80 || (phoneNumber && !/^\+?[0-9]{8,15}$/.test(phoneNumber))) {
+    const dateOfBirth = dob.trim();
+    const today = new Date().toISOString().slice(0, 10);
+    if (displayName.length < 1 || displayName.length > 80 || (phoneNumber && !/^\+?[0-9]{8,15}$/.test(phoneNumber)) || (dateOfBirth && (dateOfBirth.length !== 10 || dateOfBirth > today))) {
       setError("staffProfileInvalid");
       return;
     }
     setBusy(true);
     setError(null);
     try {
-      await updateProfile({ displayName, phoneNumber: phoneNumber || null });
+      await updateProfile({ displayName, phoneNumber: phoneNumber || null, dateOfBirth: dateOfBirth || null });
       onSaved();
     } catch (saveError) {
       setError(saveError?.status === 400 ? "staffProfileInvalid" : "staffProfileSaveError");
@@ -113,6 +116,9 @@ function EditProfileDialog({ profile, onClose, onSaved }) {
       </label>
       <label className="block text-sm font-semibold">{t("staffPhone")}
         <input value={phone} onChange={(event) => setPhone(event.target.value)} className={inputClass} autoComplete="tel" inputMode="tel" />
+      </label>
+      <label className="block text-sm font-semibold">{t("staffDateOfBirth")}
+        <input type="date" value={dob} onChange={(event) => setDob(event.target.value)} className={inputClass} autoComplete="bday" />
       </label>
       {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-800">{t(error)}</p>}
       <div className="flex gap-3">
@@ -141,8 +147,15 @@ export default function ConsoleProfilePage() {
   const isAdmin = profile?.role === "ADMIN";
   const groupId = profile?.consoleAccess?.groupId;
   const granted = new Set((profile?.consoleAccess?.permissions ?? []).map((permission) => String(permission).split(".")[0]));
-  const features = consoleFeatures.filter((feature) => granted.has(feature));
-  return <section className="mx-auto max-w-4xl space-y-6"><h1 className="text-2xl font-bold">{t("staffProfile")}</h1>
+  const permissions = profile?.consoleAccess?.permissions ?? [];
+  const chips = [];
+  for (const feature of consoleFeatures) {
+    if (!granted.has(feature)) continue;
+    chips.push({ key: feature, label: t(`staffFeature_${feature}`) });
+    if (feature === "tests" && permissions.includes("tests.add")) chips.push({ key: "createTest", label: t("staffPermissionCreateTest") });
+  }
+  if (permissions.includes("account.view")) chips.push({ key: "account", label: t("staffPermissionProfile") });
+  return <section className="mx-auto max-w-[1500px] space-y-6"><h1 className="text-2xl font-bold">{t("staffProfile")}</h1>
     <div className="rounded-2xl border border-slate-200 bg-white p-6">
       <div className="flex flex-wrap items-start gap-5">
         <span aria-hidden="true" className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-blue-100 text-lg font-bold text-blue-700">{profileInitials(profile)}</span>
@@ -170,8 +183,7 @@ export default function ConsoleProfilePage() {
       </div>
       <div className="rounded-2xl border border-slate-200 bg-white p-6">
         <h2 className="font-bold">{t("staffPermissionsTitle")}</h2>
-        <p className="mt-2 text-sm leading-6 text-slate-600">{t("staffPermissionsHelp")}</p>
-        <div className="mt-4 flex flex-wrap gap-2">{features.length ? features.map((feature) => <span key={feature} className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">{t(`staffFeature_${feature}`)}</span>) : <span className="text-sm text-slate-600">—</span>}</div>
+        <div className="mt-4 flex flex-wrap gap-2">{chips.length ? chips.map(({ key, label }) => <span key={key} className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">{label}</span>) : <span className="text-sm text-slate-600">—</span>}</div>
       </div>
     </div>
     {editOpen && <EditProfileDialog profile={profile} onClose={() => setEditOpen(false)} onSaved={profileSaved} />}

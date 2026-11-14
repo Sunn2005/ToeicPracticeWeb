@@ -32,7 +32,6 @@ function RevenueChart({ series, t, language }) {
   if (!series.length) return <p role="status" className="mt-5 text-sm text-slate-600">{t("adminRevenueChartEmpty")}</p>;
 
   return <>
-    <p className="mt-2 text-sm text-slate-600">{t("adminRevenueChartHelp")}</p>
     <div className="mt-4 overflow-x-auto rounded-xl focus-visible:outline-2 focus-visible:outline-blue-600" tabIndex={0} role="region" aria-label={t("adminRevenueChartScroll")}>
       <svg width={width} height="285" viewBox={`0 0 ${width} 285`} role="img" aria-labelledby={`${chartId}-title ${chartId}-description`} className="h-auto min-w-full text-slate-600">
         <title id={`${chartId}-title`}>{t("adminRevenueChart")}</title>
@@ -69,7 +68,11 @@ function shortPeriod(period) {
   return period.length === 7 ? period : `${period.slice(8, 10)}/${period.slice(5, 7)}`;
 }
 
-function Sparkline({ values }) {
+function shortDate(iso) {
+  return `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
+}
+
+function Sparkline({ values, color = "text-blue-600" }) {
   if (values.length < 2) return null;
   const width = 120;
   const height = 36;
@@ -77,7 +80,7 @@ function Sparkline({ values }) {
   const min = Math.min(...values);
   const range = max - min || 1;
   const points = values.map((value, index) => `${(index / (values.length - 1)) * width},${height - 4 - ((value - min) / range) * (height - 8)}`).join(" ");
-  return <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} aria-hidden="true" className="mt-3 text-blue-600"><polyline points={points} fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" /></svg>;
+  return <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} aria-hidden="true" className={`mt-3 ${color}`}><polyline points={points} fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" /></svg>;
 }
 
 function CumulativeChart({ series, t, language }) {
@@ -106,7 +109,6 @@ function CumulativeChart({ series, t, language }) {
     : null;
 
   return <>
-    <p className="mt-2 text-sm text-slate-600">{t("adminRevenueCumulativeHelp")}</p>
     <div className="mt-4 overflow-x-auto rounded-xl focus-visible:outline-2 focus-visible:outline-blue-600" tabIndex={0} role="region" aria-label={t("adminRevenueChartScroll")}>
       <svg width={width} height="285" viewBox={`0 0 ${width} 285`} role="img" aria-labelledby={`${chartId}-title ${chartId}-description`} className="h-auto min-w-full text-slate-600">
         <title id={`${chartId}-title`}>{t("adminRevenueCumulative")}</title>
@@ -157,7 +159,7 @@ const donutColors = ["#2563eb", "#d97706", "#059669", "#7c3aed", "#db2777", "#08
 
 function PlanDonut({ plans, totalRevenue, percent, t, language }) {
   const [selected, setSelected] = useState(null);
-  const radius = 52;
+  const radius = 80;
   const circumference = 2 * Math.PI * radius;
   const shares = plans.map((plan) => totalRevenue > 0 ? plan.revenue / totalRevenue : 0);
   const segments = plans.map((plan, index) => ({
@@ -171,16 +173,16 @@ function PlanDonut({ plans, totalRevenue, percent, t, language }) {
   return <div>
     <div className="mt-4 flex flex-col items-stretch gap-4">
       <div className="relative mx-auto w-fit">
-        <svg width="132" height="132" viewBox="0 0 132 132" role="img" aria-label={t("adminRevenuePlans")} className="block">
-          <circle cx="66" cy="66" r={radius} fill="none" strokeWidth="17" className="stroke-slate-100" />
-          {segments.map((segment, index) => <circle key={segment.planCode ?? index} cx="66" cy="66" r={radius} fill="none" strokeWidth="17" stroke={segment.color} strokeDasharray={`${segment.share * circumference} ${circumference}`} strokeDashoffset={-segment.offset} transform="rotate(-90 66 66)" onClick={() => setSelected(selected === index ? null : index)} className={`cursor-pointer transition-opacity ${selected !== null && selected !== index ? "opacity-25" : ""}`}>
+        <svg width="200" height="200" viewBox="0 0 200 200" role="img" aria-label={t("adminRevenuePlans")} className="block">
+          <circle cx="100" cy="100" r={radius} fill="none" strokeWidth="26" className="stroke-slate-100" />
+          {segments.map((segment, index) => <circle key={segment.planCode ?? index} cx="100" cy="100" r={radius} fill="none" strokeWidth="26" stroke={segment.color} strokeDasharray={`${segment.share * circumference} ${circumference}`} strokeDashoffset={-segment.offset} transform="rotate(-90 100 100)" onClick={() => setSelected(selected === index ? null : index)} className={`cursor-pointer transition-opacity ${selected !== null && selected !== index ? "opacity-25" : ""}`}>
             <title>{`${segment.planCode}: ${formatOrderAmount(segment.revenue, language)}`}</title>
           </circle>)}
         </svg>
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-2 text-center">
-          <span className="w-[88px] text-xs font-semibold leading-tight text-slate-700">{active ? active.planCode : t("adminRevenueDonutAll")}</span>
-          <span className="mt-0.5 w-[88px] break-words text-sm font-bold leading-tight text-slate-950">{formatOrderAmount(active ? active.revenue : totalRevenue, language)}</span>
-          <span className="mt-0.5 w-[88px] text-[11px] leading-tight text-slate-500">{active ? t("adminRevenueDonutSelectedSub").replace("{orders}", active.orders).replace("{share}", percent.format(active.share)) : t("adminRevenueDonutTotalSub").replace("{count}", totalOrders)}</span>
+          <span className="w-[132px] text-sm font-semibold leading-tight text-slate-700">{active ? active.planCode : t("adminRevenueDonutAll")}</span>
+          <span className="mt-0.5 w-[132px] break-words text-lg font-bold leading-tight text-slate-950">{formatOrderAmount(active ? active.revenue : totalRevenue, language)}</span>
+          <span className="mt-0.5 w-[132px] text-xs leading-tight text-slate-500">{active ? t("adminRevenueDonutSelectedSub").replace("{orders}", active.orders).replace("{share}", percent.format(active.share)) : t("adminRevenueDonutTotalSub").replace("{count}", totalOrders)}</span>
         </div>
       </div>
       <ul className="w-full space-y-2">
@@ -191,7 +193,7 @@ function PlanDonut({ plans, totalRevenue, percent, t, language }) {
         </button></li>)}
       </ul>
     </div>
-    <p role="status" className="mt-4 text-sm text-slate-600">{active ? t("adminRevenueDonutDetail").replace("{plan}", active.planCode).replace("{orders}", active.orders).replace("{share}", percent.format(active.share)) : t("adminRevenueDonutHint")}</p>
+    {active && <p role="status" className="mt-4 text-sm text-slate-600">{t("adminRevenueDonutDetail").replace("{plan}", active.planCode).replace("{orders}", active.orders).replace("{share}", percent.format(active.share))}</p>}
   </div>;
 }
 
@@ -234,19 +236,20 @@ export default function AdminRevenuePage() {
     );
   }
 
-  return <section className="mx-auto max-w-7xl space-y-6" aria-labelledby="revenue-title">
+  return <section className="mx-auto max-w-[1500px] space-y-6" aria-labelledby="revenue-title">
     <header><h1 id="revenue-title" className="text-2xl font-bold text-slate-950 sm:text-3xl">{t("adminRevenueTitle")}</h1><p className="mt-2 text-sm text-slate-600">{t("adminRevenueDescription")}</p></header>
     <div className={panelClass}>
       <fieldset><legend className="text-sm font-semibold">{t("adminRevenueRange")}</legend>
-        <div className="mt-3 flex flex-wrap gap-2">{revenuePresets().map(({ key }) => <button key={key} type="button" aria-pressed={range.preset === key} onClick={() => selectPreset(key)} className={`${buttonClass} ${range.preset === key ? "border-blue-600 bg-blue-600 text-white" : "border-slate-300 text-slate-700 hover:bg-slate-50"}`}>{t(`adminRevenuePreset_${key}`)}</button>)}</div>
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap gap-2">{revenuePresets().map(({ key }) => <button key={key} type="button" aria-pressed={range.preset === key} onClick={() => selectPreset(key)} className={`${buttonClass} ${range.preset === key ? "border-blue-600 bg-blue-600 text-white" : "border-slate-300 text-slate-700 hover:bg-slate-50"}`}>{t(`adminRevenuePreset_${key}`)}</button>)}</div>
+          <button type="button" disabled={!report} onClick={exportCsv} className={`${buttonClass} flex items-center gap-2 border-slate-300 text-slate-700 hover:bg-slate-50`}><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v12" /><path d="m6 11 6 6 6-6" /><path d="M4 21h16" /></svg>{t("adminRevenueExportCsv")}</button>
+        </div>
       </fieldset>
       <div className="mt-5 grid gap-4 sm:grid-cols-3">
-        {range.preset === "custom" && ["from", "to"].map((field) => <label key={field} className="min-w-0 text-sm font-semibold">{t(`adminRevenue_${field}`)}<input type="date" value={range[field]} className={inputClass} onChange={(event) => setRange((current) => ({ ...current, [field]: event.target.value }))} aria-invalid={invalidRange} aria-describedby="revenue-range-help" /></label>)}
+        {range.preset === "custom" && ["from", "to"].map((field) => <label key={field} className="min-w-0 text-sm font-semibold">{t(`adminRevenue_${field}`)}<input type="date" value={range[field]} className={inputClass} onChange={(event) => setRange((current) => ({ ...current, [field]: event.target.value }))} aria-invalid={invalidRange} /></label>)}
         <label className="text-sm font-semibold">{t("adminRevenueGranularity")}<select value={granularity} onChange={(event) => setGranularity(event.target.value)} className={inputClass}><option value="day">{t("adminRevenueDay")}</option><option value="month">{t("adminRevenueMonth")}</option></select></label>
       </div>
-      <p id="revenue-range-help" className="mt-4 text-sm text-slate-600">{t("adminRevenueDateHelp")}</p>
       {!invalidRange && <p className="mt-2 text-sm text-slate-700">{formatOrderDate(orderDateEpoch(range.from), language)} – {formatOrderDate(orderDateEpoch(range.to, true), language)}</p>}
-      <div className="mt-4"><button type="button" disabled={!report} onClick={exportCsv} className={`${buttonClass} border-slate-300 text-slate-700 hover:bg-slate-50`}>{t("adminRevenueExportCsv")}</button></div>
     </div>
 
     <div aria-busy={Boolean(request.loading)}>
@@ -265,26 +268,26 @@ export default function AdminRevenuePage() {
         </div>
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {[
-            { key: "TotalRevenue", value: formatOrderAmount(report.totalRevenue, language), spark: report.series.map((point) => point.revenue), icon: <><path d="M3 17l5.5-5.5 3.5 3.5L20 7" /><path d="M14 7h6v6" /></>, iconClass: "bg-blue-50 text-blue-600", meta: t("adminRevenueMetaPeriod").replace("{from}", formatOrderDate(orderDateEpoch(range.from), language)).replace("{to}", formatOrderDate(orderDateEpoch(range.to, true), language)) },
-            { key: "PaidOrders", value: report.paidOrderCount, spark: report.series.map((point) => point.orders), icon: <path d="M20 6 9 17l-5-5" />, iconClass: "bg-green-50 text-green-700", meta: t("adminRevenueMetaCreated").replace("{count}", report.totalOrderCount) },
-            { key: "SuccessRate", value: percent.format(report.successRate), spark: null, icon: <><path d="M19 5 5 19" /><circle cx="7" cy="7" r="2.4" /><circle cx="17" cy="17" r="2.4" /></>, iconClass: "bg-violet-50 text-violet-600", meta: t("adminRevenueMetaSamePeriod") },
-            { key: "AverageOrder", value: formatOrderAmount(report.averageOrderValue, language), spark: null, icon: <><rect x="3" y="6" width="18" height="13" rx="2" /><path d="M3 10h18M7 15h4" /></>, iconClass: "bg-amber-50 text-amber-600", meta: t("adminRevenueMetaAverage").replace("{count}", report.paidOrderCount) },
-          ].map(({ key, value, spark, icon, iconClass, meta }) => <div key={key} className={panelClass}>
+            { key: "TotalRevenue", value: formatOrderAmount(report.totalRevenue, language), spark: report.series.map((point) => point.revenue), sparkColor: "text-blue-600", icon: <><path d="M3 17l5.5-5.5 3.5 3.5L20 7" /><path d="M14 7h6v6" /></>, iconClass: "bg-blue-50 text-blue-600", meta: t("adminRevenueMetaPeriod").replace("{from}", shortDate(range.from)).replace("{to}", shortDate(range.to)) },
+            { key: "PaidOrders", value: report.paidOrderCount, spark: report.series.map((point) => point.orders), sparkColor: "text-green-700", icon: <path d="M20 6 9 17l-5-5" />, iconClass: "bg-green-50 text-green-700", meta: t("adminRevenueMetaCreated").replace("{count}", report.totalOrderCount) },
+            { key: "SuccessRate", value: percent.format(report.successRate), spark: null, sub: t("adminRevenueRateSub").replace("{paid}", report.paidOrderCount).replace("{total}", report.totalOrderCount), icon: <><path d="M19 5 5 19" /><circle cx="7" cy="7" r="2.4" /><circle cx="17" cy="17" r="2.4" /></>, iconClass: "bg-violet-50 text-violet-600", meta: t("adminRevenueMetaSamePeriod") },
+            { key: "AverageOrder", value: formatOrderAmount(report.averageOrderValue, language), spark: report.series.map((point) => point.orders > 0 ? point.revenue / point.orders : 0), sparkColor: "text-amber-600", icon: <><rect x="3" y="6" width="18" height="13" rx="2" /><path d="M3 10h18M7 15h4" /></>, iconClass: "bg-amber-50 text-amber-600", meta: t("adminRevenueMetaAverage").replace("{count}", report.paidOrderCount) },
+          ].map(({ key, value, spark, sparkColor, sub, icon, iconClass, meta }) => <div key={key} className={panelClass}>
             <div className="flex items-start justify-between gap-2">
               <span aria-hidden="true" className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg ${iconClass}`}><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">{icon}</svg></span>
-              <span className="text-right text-xs leading-5 text-slate-500">{meta}</span>
+              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-right text-xs font-medium leading-5 text-slate-600">{meta}</span>
             </div>
             <h2 className="mt-3 text-sm font-semibold text-slate-600">{t(`adminRevenue${key}`)}</h2>
             <p className="mt-1 break-words text-2xl font-bold text-slate-950">{value}</p>
-            {spark && <Sparkline values={spark} />}
+            {sub && <p className="mt-1 text-sm text-slate-600">{sub}</p>}
+            {spark && <Sparkline values={spark} color={sparkColor} />}
           </div>)}
         </div>
-        <div className="space-y-2 text-sm text-slate-600"><p>{t("adminRevenueSuccessHelp").replace("{count}", report.totalOrderCount)}</p><p>{t("adminRevenueMissingDateHelp")}</p></div>
         {report.paidOrderCount === 0 && <p role="status" className="rounded-xl border border-dashed border-slate-300 p-5 text-sm text-slate-600">{t("adminRevenueEmpty")}</p>}
         <section className={panelClass} aria-labelledby="revenue-chart-title"><h2 id="revenue-chart-title" className="text-lg font-bold">{t("adminRevenueChart")}</h2><RevenueChart series={report.series} t={t} language={language} /></section>
         <section className={panelClass} aria-labelledby="revenue-cumulative-title"><h2 id="revenue-cumulative-title" className="text-lg font-bold">{t("adminRevenueCumulative")}</h2><CumulativeChart series={report.series} t={t} language={language} /></section>
         <div className="grid gap-6 lg:grid-cols-2">
-          <section className={panelClass} aria-labelledby="revenue-daylist-title"><h2 id="revenue-daylist-title" className="text-lg font-bold">{t(granularity === "day" ? "adminRevenueDayList" : "adminRevenueMonthList")}</h2><p className="mt-2 text-sm text-slate-600">{t("adminRevenueDayListHelp")}</p><DayList series={report.series} t={t} language={language} /></section>
+          <section className={panelClass} aria-labelledby="revenue-daylist-title"><h2 id="revenue-daylist-title" className="text-lg font-bold">{t(granularity === "day" ? "adminRevenueDayList" : "adminRevenueMonthList")}</h2><DayList series={report.series} t={t} language={language} /></section>
           <section className={panelClass} aria-labelledby="revenue-plans-title"><h2 id="revenue-plans-title" className="text-lg font-bold">{t("adminRevenuePlans")}</h2>
             {!report.byPlan.length ? <p className="mt-4 text-sm text-slate-600">{t("adminRevenueChartEmpty")}</p> : <PlanDonut plans={report.byPlan} totalRevenue={report.totalRevenue} percent={percent} t={t} language={language} />}
           </section>
