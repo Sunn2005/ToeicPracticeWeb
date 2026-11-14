@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import TestMetadataForm from "./TestMetadataForm";
 import PartEditor from "./PartEditor";
 import ConfirmDialog from "./ConfirmDialog";
+import CsvImportDialog from "./CsvImportDialog";
 import TestValidationSummary from "./TestValidationSummary";
 import TestPreview from "./TestPreview";
 import {
@@ -10,8 +11,6 @@ import {
   updateEmployeeTest,
   submitEmployeeTest,
 } from "../../../../api/tests/employeeTests";
-import { generateMockToeicTest } from "../../utils/mockToeicTest";
-
 import { useLanguage } from "../../../../i18n/LanguageContext";
 import { employeeTestPayload, normalizeEditorTest, renumberEmployeeTest, saveEmployeeDraft, saveAndSubmitEmployeeTest, validateEmployeeTest } from "./testEditorState";
 
@@ -81,22 +80,23 @@ export default function TestEditorWizard({ initialTest, mode = "create" }) {
     setTest((current) => ({ ...current, parts: newParts }));
   };
 
-  // Quick-load a complete 200-question sample test for validation/preview.
-  // TestValidationSummary renders its "Nạp đề mẫu" buttons only when this
-  // callback is provided, so the wizard must pass it explicitly.
   const [confirmAction, setConfirmAction] = useState(null);
 
-  const handleLoadMockTest = () => setConfirmAction("mock");
+  // CSV import (create mode): the dialog validates the file and hands back a
+  // complete test, which replaces the parts in the editor as an unsaved
+  // draft. When the editor already holds questions, confirm the overwrite.
+  const [importOpen, setImportOpen] = useState(false);
+  const [pendingImport, setPendingImport] = useState(null);
 
-  const doLoadMockTest = () => {
-    setConfirmAction(null);
+  const applyImport = (imported) => {
+    setPendingImport(null);
     setTest((current) => ({
-      ...generateMockToeicTest(),
-      // Keep the existing id in edit mode so saving updates the same test.
-      ...(current.testId ? { testId: current.testId } : {}),
+      ...current,
+      title: imported.title || current.title,
+      parts: imported.parts,
     }));
     setError("");
-    setSuccessMsg("Đã nạp đề mẫu 200 câu. Hãy kiểm tra lại dữ liệu trước khi lưu.");
+    setSuccessMsg(t("employeeImportLoadedBanner"));
   };
 
   const handleRenumber = () => {
@@ -277,6 +277,15 @@ export default function TestEditorWizard({ initialTest, mode = "create" }) {
               {t("employeeEditorUnsavedChanges")}
             </span>
           )}
+          {mode === "create" && editable && (
+            <button
+              type="button"
+              onClick={() => setImportOpen(true)}
+              className="rounded-xl border border-blue-200 bg-white px-4 py-2 text-xs font-bold text-blue-700 hover:bg-blue-50"
+            >
+              📥 {t("employeeImportButton")}
+            </button>
+          )}
           <button
             type="button"
             onClick={() => { if (confirmLeaveIfDirty()) navigate("/console/tests"); }}
@@ -415,7 +424,6 @@ export default function TestEditorWizard({ initialTest, mode = "create" }) {
           <TestValidationSummary
             test={test}
             onGoToStep={goToIssue}
-            onLoadMockTest={handleLoadMockTest}
             onRenumber={handleRenumber}
           />
         )}
@@ -592,14 +600,24 @@ export default function TestEditorWizard({ initialTest, mode = "create" }) {
           onClose={() => setConfirmAction(null)}
         />
       )}
-      {confirmAction === "mock" && (
+      {importOpen && (
+        <CsvImportDialog
+          onClose={() => setImportOpen(false)}
+          onImport={(imported) => {
+            setImportOpen(false);
+            if (questionSummary.totalAll > 0) setPendingImport(imported);
+            else applyImport(imported);
+          }}
+        />
+      )}
+      {pendingImport && (
         <ConfirmDialog
-          title="Nạp đề mẫu 200 câu"
-          message="Nạp đề mẫu sẽ thay thế toàn bộ dữ liệu đề hiện tại trong trình soạn. Bạn có chắc chắn?"
-          confirmLabel="Nạp đề mẫu"
+          title={t("employeeImportOverwriteTitle")}
+          message={t("employeeImportOverwriteMessage")}
+          confirmLabel={t("employeeImportOverwriteConfirm")}
           danger
-          onConfirm={doLoadMockTest}
-          onClose={() => setConfirmAction(null)}
+          onConfirm={() => applyImport(pendingImport)}
+          onClose={() => setPendingImport(null)}
         />
       )}
 
