@@ -1,0 +1,123 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {
+  PART_TIME_LIMITS,
+  TIMER_TYPES,
+  getDisplayTimerSeconds,
+  getExamDuration,
+  getSuggestedPartDuration,
+  getTimerSeconds,
+  getTimerType,
+  shouldDisableSubmit,
+  shouldSubmitAfterListeningAudio,
+} from "./examTiming.js";
+
+test("Part 1 uses its suggested countdown and waits for confirmation after its last audio", () => {
+  const units = [{ key: "part1-1" }, { key: "part1-6" }];
+  const attempt = { mode: "PART", selectedPart: 1, startedAt: 1_000 };
+
+  assert.equal(getExamDuration("PART", 1), 5 * 60);
+  assert.equal(getTimerType("PART", 1), TIMER_TYPES.COUNTDOWN);
+  assert.equal(getTimerSeconds(attempt, 6_000), 4 * 60 + 55);
+  assert.equal(shouldSubmitAfterListeningAudio(attempt, units[0], units), false);
+  assert.equal(shouldSubmitAfterListeningAudio(attempt, units[1], units), false);
+});
+
+test("Part 3 waits for confirmation after the last question group audio", () => {
+  const units = [{ key: "32-34" }, { key: "68-70" }];
+  const attempt = { mode: "PART", selectedPart: 3, startedAt: 1_000 };
+
+  assert.equal(getTimerType("PART", 3), TIMER_TYPES.COUNTDOWN);
+  assert.equal(shouldSubmitAfterListeningAudio(attempt, units[0], units), false);
+  assert.equal(shouldSubmitAfterListeningAudio(attempt, units[1], units), false);
+});
+
+test("Part 5 uses a 20-minute countdown", () => {
+  const attempt = { mode: "PART", selectedPart: 5, startedAt: 1_000 };
+
+  assert.equal(getExamDuration("PART", 5), PART_TIME_LIMITS[5]);
+  assert.equal(getTimerType("PART", 5), TIMER_TYPES.COUNTDOWN);
+  assert.equal(getTimerSeconds(attempt, 1_000), 20 * 60);
+  assert.equal(getTimerSeconds(attempt, 61_000), 19 * 60);
+});
+
+test("multiple Parts sum suggested time and respect a custom attempt limit", () => {
+  assert.equal(getSuggestedPartDuration([5, 6]), 30 * 60);
+  assert.equal(getExamDuration("PART", null, [5, 6]), 30 * 60);
+  assert.equal(getExamDuration("PART", null, [5, 6], 25 * 60), 25 * 60);
+});
+
+test("mixed Listening and Reading Parts continue after the final Listening audio", () => {
+  const units = [{ key: "part1-6" }];
+  const attempt = { mode: "PART", selectedParts: [1, 5] };
+
+  assert.equal(shouldSubmitAfterListeningAudio(attempt, units[0], units), false);
+});
+
+test("full, listening and reading retain their standard countdowns", () => {
+  assert.equal(getExamDuration("FULL"), 120 * 60);
+  assert.equal(getExamDuration("LISTENING"), 45 * 60);
+  assert.equal(getExamDuration("READING"), 75 * 60);
+});
+
+test("full test locks submit during Listening and unlocks it in Reading", () => {
+  assert.equal(
+    shouldDisableSubmit({ mode: "FULL", currentSection: "LISTENING" }),
+    true,
+  );
+  assert.equal(
+    shouldDisableSubmit({ mode: "FULL", currentSection: "READING" }),
+    false,
+  );
+  assert.equal(
+    shouldDisableSubmit({ mode: "LISTENING", currentSection: "LISTENING" }),
+    false,
+  );
+  assert.equal(
+    shouldDisableSubmit({ mode: "FULL", currentSection: "READING" }, true),
+    true,
+  );
+  assert.equal(
+    shouldDisableSubmit({ type: "PRACTICE", mode: "FULL", currentSection: "LISTENING" }),
+    false,
+  );
+});
+
+test("practice Listening never auto-submits when replayable audio ends", () => {
+  const units = [{ key: "first" }, { key: "last" }];
+  const attempt = { type: "PRACTICE", mode: "LISTENING" };
+
+  assert.equal(shouldSubmitAfterListeningAudio(attempt, units[1], units), false);
+});
+
+test("untimed practice has no countdown", () => {
+  const attempt = { type: "PRACTICE", timed: false, mode: "PART", startedAt: 1_000 };
+
+  assert.equal(getTimerType(attempt), TIMER_TYPES.UNTIMED);
+  assert.equal(getTimerSeconds(attempt, 61_000), 0);
+});
+
+test("Full Test displays one countdown while Listening keeps its own deadline", () => {
+  const startedAt = 1_000;
+  const readingStartedAt = startedAt + 40 * 60_000;
+  const listeningEndAt = startedAt + 45 * 60_000;
+  const overallEndAt = startedAt + 120 * 60_000;
+  const listening = {
+    mode: "FULL",
+    currentSection: "LISTENING",
+    startedAt,
+    overallEndAt,
+    sectionEndAt: listeningEndAt,
+  };
+  const reading = { ...listening, currentSection: "READING", sectionEndAt: overallEndAt };
+
+  assert.equal(getDisplayTimerSeconds(listening, startedAt), 120 * 60);
+  assert.equal(getDisplayTimerSeconds(listening, readingStartedAt), 80 * 60);
+  assert.equal(getDisplayTimerSeconds(reading, readingStartedAt), 80 * 60);
+  assert.equal(getTimerSeconds(listening, listeningEndAt), 0);
+  assert.equal(getDisplayTimerSeconds(listening, listeningEndAt), 75 * 60);
+  assert.equal(getDisplayTimerSeconds(reading, overallEndAt - 1), 1);
+  assert.equal(getDisplayTimerSeconds(reading, overallEndAt), 0);
+  assert.equal(getDisplayTimerSeconds({ ...listening, type: "PRACTICE" }, startedAt), 45 * 60);
+  assert.equal(getDisplayTimerSeconds({ ...listening, overallEndAt: null }, startedAt), 45 * 60);
+});

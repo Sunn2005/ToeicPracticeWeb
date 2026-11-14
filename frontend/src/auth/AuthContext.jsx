@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { signOut } from "firebase/auth";
-import { createSession, destroySession } from "../api/auth";
+import { createSession, destroySession } from "../api/auth/auth";
 import { apiFetch } from "../api/client";
 import { auth } from "../firebase";
 import {
@@ -26,19 +26,30 @@ export function AuthProvider({ children }) {
   const [authLoading, setAuthLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileError, setProfileError] = useState("");
+  const [sessionUnavailable, setSessionUnavailable] = useState(false);
+  const sessionCheck = useRef(null);
+
+  const cancelSessionCheck = useCallback(() => {
+    sessionCheck.current?.abort();
+    setAuthLoading(false);
+  }, []);
 
   const applyProfile = useCallback((nextProfile) => {
+    cancelSessionCheck();
     setProfile(nextProfile);
     setUser(profileToUser(nextProfile));
     setProfileError("");
+    setSessionUnavailable(false);
     return nextProfile;
-  }, []);
+  }, [cancelSessionCheck]);
 
   const handleUnauthorized = useCallback(() => {
+    cancelSessionCheck();
     setUser(null);
     setProfile(null);
     setProfileError("");
-  }, []);
+    setSessionUnavailable(false);
+  }, [cancelSessionCheck]);
 
   const refreshProfile = useCallback(async () => {
     setProfileLoading(true);
@@ -58,6 +69,7 @@ export function AuthProvider({ children }) {
   }, [applyProfile, handleUnauthorized]);
 
   const establishSession = useCallback(async (firebaseUser) => {
+    cancelSessionCheck();
     setProfileLoading(true);
     setProfileError("");
     try {
@@ -74,36 +86,55 @@ export function AuthProvider({ children }) {
     } finally {
       setProfileLoading(false);
     }
-  }, [applyProfile, handleUnauthorized]);
+  }, [applyProfile, handleUnauthorized, cancelSessionCheck]);
 
   const logout = useCallback(async () => {
-    await terminateBackendSession(destroySession, () => signOut(auth));
-    handleUnauthorized();
+    try {
+      await terminateBackendSession(destroySession, () => signOut(auth));
+    } finally {
+      handleUnauthorized();
+    }
   }, [handleUnauthorized]);
 
-  useEffect(() => {
-    let active = true;
-    loadBackendSession(() => apiFetch("/api/me")).then((result) => {
-      if (!active) return;
+  const restoreSession = useCallback(() => {
+    sessionCheck.current?.abort();
+    const controller = new AbortController();
+    sessionCheck.current = controller;
+    return loadBackendSession(
+      (signal) => apiFetch("/api/me", { signal }),
+      { signal: controller.signal },
+    ).then((result) => {
+      if (controller.signal.aborted) return;
       if (result.status === "authenticated") {
         applyProfile(result.profile);
+      } else if (result.status === "anonymous") {
+        handleUnauthorized();
       } else {
-        setUser(null);
-        setProfile(null);
+        // A network failure is not evidence that the cookie has expired.
+        setSessionUnavailable(true);
         setProfileError(result.error);
       }
       setAuthLoading(false);
     });
-    return () => {
-      active = false;
-    };
-  }, [applyProfile]);
+  }, [applyProfile, handleUnauthorized]);
+
+  const retrySession = useCallback(() => {
+    setAuthLoading(true);
+    void restoreSession();
+  }, [restoreSession]);
+
+  useEffect(() => {
+    void restoreSession();
+    return () => sessionCheck.current?.abort();
+  }, [restoreSession]);
 
   const value = useMemo(() => ({
     user,
     profile,
     role: String(profile?.role || "").toUpperCase(),
     authLoading,
+    sessionUnavailable,
+    retrySession,
     profileLoading,
     profileError,
     establishSession,
@@ -114,6 +145,8 @@ export function AuthProvider({ children }) {
     user,
     profile,
     authLoading,
+    sessionUnavailable,
+    retrySession,
     profileLoading,
     profileError,
     establishSession,

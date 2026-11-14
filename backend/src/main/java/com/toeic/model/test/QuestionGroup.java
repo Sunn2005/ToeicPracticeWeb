@@ -1,0 +1,21 @@
+package com.toeic.model.test;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+public class QuestionGroup {
+
+    private Integer groupNumber;
+    private String questionRange;
+    private String audioUrl;
+    private String imageUrl;
+    private String transcript;
+    private String transcriptTranslation;
+    private List<Question> questions;
+}

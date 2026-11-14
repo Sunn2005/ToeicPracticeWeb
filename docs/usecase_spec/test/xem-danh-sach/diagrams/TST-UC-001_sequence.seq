@@ -1,0 +1,13 @@
+title: TST-UC-001 Xem danh sách đề thi
+
+actor u "Người học"
+boundary ui "Trang danh sách đề"
+control service "Dịch vụ đề thi"
+entity repo "Lớp truy cập dữ liệu đề"
+
+u -> ui : mở danh sách đề
+ui -> service : yêu cầu danh sách đề công bố
+service -> repo : lấy danh sách đề phù hợp
+repo --> service : metadata các đề
+service --> ui : trả danh sách metadata
+ui --> u : hiển thị danh sách đề

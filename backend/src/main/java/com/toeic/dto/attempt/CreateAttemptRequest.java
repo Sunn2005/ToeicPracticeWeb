@@ -1,0 +1,32 @@
+package com.toeic.dto.attempt;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.List;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+public class CreateAttemptRequest {
+    private String testId;
+    private String type;
+    private String mode;
+    private Integer part;
+    private List<Integer> parts;
+    private Integer durationMinutes;
+    private Boolean restartExisting;
+
+    public CreateAttemptRequest(String testId) {
+        this.testId = testId;
+    }
+
+    public CreateAttemptRequest(String testId, String mode, Integer part) {
+        this.testId = testId;
+        this.mode = mode;
+        this.part = part;
+    }
+}

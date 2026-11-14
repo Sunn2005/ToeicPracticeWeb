@@ -1,3 +1,4 @@
+import SessionRecovery from "./auth/SessionRecovery";
 import { Analytics } from "@vercel/analytics/react";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -7,37 +8,49 @@ import {
   Routes,
   useLocation,
 } from "react-router-dom";
-import Login from "./pages/Login";
-import PracticePart from "./pages/PracticePart";
-import FullTestExam from "./pages/FullTestExam";
-import FullTestIntro from "./pages/FullTestIntro";
-import FullTestResult from "./pages/FullTestResult";
-import FullTestReview from "./pages/FullTestReview";
-import { LanguageProvider, useLanguage } from "./i18n/LanguageContext";
-import LoadingScreen from "./components/LoadingScreen";
-import FloatingPet from "./components/FloatingPet";
-import AIChatBox from "./components/ai-chat/AIChatBox";
+import Login from "./modules/authentication/pages/Login";
+import PracticePart from "./modules/legacy-practice/pages/PracticePart";
+import FullTestExam from "./modules/exam/pages/FullTestExam";
+import FullTestIntro from "./modules/exam/pages/FullTestIntro";
+import FullTestResult from "./modules/exam/pages/FullTestResult";
+import FullTestReview from "./modules/exam/pages/FullTestReview";
+import { useLanguage } from "./i18n/LanguageContext";
+import AppLanguageProvider from "./i18n/AppLanguageProvider";
+import LoadingScreen from "./components/ui/LoadingScreen";
+import FloatingPet from "./modules/ai-chat/components/FloatingPet";
+import AIChatBox from "./modules/ai-chat/components/AIChatBox";
 import { AuthProvider } from "./auth/AuthContext";
 import { useAuth } from "./auth/useAuth";
 import ProtectedRoute from "./auth/ProtectedRoute";
-import LoginPage from "./pages/auth/LoginPage";
+import LoginPage from "./modules/authentication/pages/LoginPage";
+import StaffPasswordPage from "./modules/authentication/pages/StaffPasswordPage";
+import ConsoleProfilePage from "./modules/profile/pages/ConsoleProfilePage";
 import ManagementLayout from "./layouts/ManagementLayout";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import MyTestsPage from "./pages/employee/MyTestsPage";
-import CreateTestPage from "./pages/employee/CreateTestPage";
-import ReviewQueuePage from "./pages/admin/ReviewQueuePage";
-import ReviewHistoryPage from "./pages/admin/ReviewHistoryPage";
-import SubscriptionManagementPage from "./pages/admin/SubscriptionManagementPage";
-import TestReviewPage from "./pages/admin/TestReviewPage";
-import ForbiddenPage from "./pages/errors/ForbiddenPage";
+import PublicLayout from "./layouts/PublicLayout";
+import LandingPage from "./modules/public/pages/LandingPage";
+import StaffManagementPage from "./modules/staff-management/pages/StaffManagementPage";
+import AdminDashboard from "./modules/dashboard/pages/admin/AdminDashboard";
+import MyTestsPage from "./modules/test-management/pages/employee/MyTestsPage";
+import CreateTestPage from "./modules/test-management/pages/employee/CreateTestPage";
+import EditTestPage from "./modules/test-management/pages/employee/EditTestPage";
+import TestPreviewPage from "./modules/test-management/pages/employee/TestPreviewPage";
+import ReviewQueuePage from "./modules/test-management/pages/admin/ReviewQueuePage";
+import ReviewHistoryPage from "./modules/test-management/pages/admin/ReviewHistoryPage";
+import AdminRevenuePage from "./modules/billing/pages/admin/AdminRevenuePage";
+import AdminOrdersPage from "./modules/billing/pages/admin/AdminOrdersPage";
+import TestReviewPage from "./modules/test-management/pages/admin/TestReviewPage";
+import ForbiddenPage from "./modules/errors/pages/ForbiddenPage";
 import UserLayout from "./layouts/UserLayout";
-import UserDashboard from "./pages/user/UserDashboard";
-import TestCatalogPage from "./pages/user/TestCatalogPage";
-import AttemptHistoryPage from "./pages/user/AttemptHistoryPage";
-import ProfilePage from "./pages/user/ProfilePage";
-import { useAIChat } from "./hooks/useAIChat";
-import { getChatEligibleAttempts, getChatQuestionChoices } from "./api/userLearning";
-import { hasEffectiveAIChat } from "./components/floatingPetInteraction";
+import UserDashboard from "./modules/dashboard/pages/user/UserDashboard";
+import TestCatalogPage from "./modules/test-catalog/pages/TestCatalogPage";
+import AttemptHistoryPage from "./modules/learning-history/pages/AttemptHistoryPage";
+import ProfilePage from "./modules/profile/pages/ProfilePage";
+import EditProfilePage from "./modules/profile/pages/EditProfilePage";
+import PaymentResultPage from "./modules/billing/pages/user/PaymentResultPage";
+import PricingPage from "./modules/billing/pages/user/PricingPage";
+import { useAIChat } from "./modules/ai-chat/hooks/useAIChat";
+import { getChatEligibleAttempts, getChatQuestionChoices } from "./api/users/userLearning";
+import { hasEffectiveAIChat } from "./modules/ai-chat/utils/floatingPetInteraction";
 
 function LearnerChatShell({ user, role, profile, pathname }) {
   const { language } = useLanguage();
@@ -82,21 +95,32 @@ function LearnerChatShell({ user, role, profile, pathname }) {
   );
 }
 
-function AppRoutes() {
-  const { user, role, profile, authLoading } = useAuth();
+export function AppRoutes() {
+  const { user, role, profile, authLoading, sessionUnavailable } = useAuth();
   const location = useLocation();
 
-  if (authLoading) {
-    return <LoadingScreen />;
+  // Login and recovery remain reachable while the backend restores a cookie.
+  const isPublicEntry = ["/", "/login", "/console", "/console/forgot-password", "/console/reset-password"].includes(location.pathname);
+  if (!isPublicEntry) {
+    if (authLoading) return <LoadingScreen />;
+    if (sessionUnavailable) {
+      return <main className="flex min-h-screen items-center justify-center bg-sky-50 px-4"><div className="w-full max-w-md"><SessionRecovery /></div></main>;
+    }
   }
 
+  if (profile?.passwordChangeRequired && !["/console/change-password", "/console/forgot-password", "/console/reset-password"].includes(location.pathname)) return <Navigate to="/console/change-password" replace />;
   return (
     <>
+      {sessionUnavailable && location.pathname.startsWith("/console") && isPublicEntry && (
+        <div className="mx-auto max-w-xl px-4 pt-4"><SessionRecovery /></div>
+      )}
       <Routes>
         <Route
           path="/"
-          element={<Navigate to={user ? "/dashboard" : "/login"} replace />}
-        />
+          element={user ? <Navigate to="/dashboard" replace /> : <PublicLayout />}
+        >
+          <Route index element={<LandingPage />} />
+        </Route>
         <Route
           path="/login"
           element={user ? <Navigate to="/dashboard" replace /> : <Login />}
@@ -108,6 +132,10 @@ function AppRoutes() {
           <Route path="/tests" element={<TestCatalogPage />} />
           <Route path="/history" element={<AttemptHistoryPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/profile/edit" element={<EditProfilePage />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/payment/success" element={<PaymentResultPage mode="success" />} />
+          <Route path="/payment/cancel" element={<PaymentResultPage mode="cancel" />} />
           <Route
             path="/full-test/:attemptId/result"
             element={<FullTestResult />}
@@ -134,20 +162,27 @@ function AppRoutes() {
           element={<Navigate to={user ? "/dashboard" : "/login"} replace />}
         />
 
+        <Route path="/console/forgot-password" element={<StaffPasswordPage key="forgot" mode="forgot" />} />
+        <Route path="/console/reset-password" element={<StaffPasswordPage key="reset" mode="reset" />} />
+        <Route path="/console/change-password" element={<StaffPasswordPage key="change" mode="change" />} />
         <Route path="/console" element={<LoginPage />} />
         <Route path="/console/forbidden" element={<ForbiddenPage />} />
         <Route
           element={<ProtectedRoute allowedRoles={["ADMIN", "EMPLOYEE"]} />}
         >
           <Route element={<ManagementLayout />}>
+            <Route path="/console/profile" element={<ConsoleProfilePage />} />
             <Route path="/console/dashboard" element={<AdminDashboard />} />
             <Route path="/console/tests" element={<MyTestsPage />} />
             <Route path="/console/tests/new" element={<CreateTestPage />} />
+            <Route path="/console/tests/:testId/edit" element={<EditTestPage />} />
+            <Route path="/console/tests/:testId/preview" element={<TestPreviewPage />} />
             <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
-              <Route
-                path="/console/subscriptions"
-                element={<SubscriptionManagementPage />}
-              />
+              <Route path="/console/staff" element={<StaffManagementPage />} />
+            </Route>
+            <Route element={<ProtectedRoute allowedRoles={["ADMIN", "EMPLOYEE"]} />}>
+              <Route path="/console/revenue" element={<AdminRevenuePage />} />
+              <Route path="/console/orders" element={<AdminOrdersPage />} />
               <Route path="/console/reviews" element={<ReviewQueuePage />} />
               <Route
                 path="/console/reviews/:testId"
@@ -174,16 +209,21 @@ function AppRoutes() {
   );
 }
 
+function SafeAnalytics() {
+  const { pathname } = useLocation();
+  return pathname === "/console/reset-password" ? null : <Analytics />;
+}
+
 function App() {
   return (
-    <LanguageProvider>
-      <AuthProvider>
-        <BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <AppLanguageProvider>
           <AppRoutes />
-          <Analytics />
-        </BrowserRouter>
-      </AuthProvider>
-    </LanguageProvider>
+          <SafeAnalytics />
+        </AppLanguageProvider>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

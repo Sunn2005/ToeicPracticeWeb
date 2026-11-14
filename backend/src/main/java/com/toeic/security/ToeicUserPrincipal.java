@@ -1,7 +1,7 @@
 package com.toeic.security;
 
-import com.toeic.model.User;
-import com.toeic.model.enums.UserRole;
+import com.toeic.model.user.User;
+import com.toeic.model.user.enums.UserRole;
 
 public record ToeicUserPrincipal(
         String uid,
@@ -27,15 +27,14 @@ public record ToeicUserPrincipal(
     }
 
     public User toUser() {
-        return new User(
-                uid,
-                email,
-                displayName,
-                photoUrl,
-                null,
-                role,
-                createdAt,
-                lastLoginAt
-        );
+        User user = new User();
+        user.setUid(uid);
+        user.setEmail(email);
+        user.setDisplayName(displayName);
+        user.setPhotoUrl(photoUrl);
+        user.setRole(role);
+        user.setCreatedAt(createdAt);
+        user.setLastLoginAt(lastLoginAt);
+        return user;
     }
 }

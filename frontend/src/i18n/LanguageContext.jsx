@@ -14,24 +14,35 @@ function getInitialLanguage() {
   }
 }
 
-export function LanguageProvider({ children }) {
-  const [language, setLanguage] = useState(getInitialLanguage);
+export function LanguageProvider({ children, fixedLanguage = null }) {
+  const [preferredLanguage, setPreferredLanguage] = useState(getInitialLanguage);
+  const language = fixedLanguage ?? preferredLanguage;
+  const canSwitchLanguage = fixedLanguage === null;
 
   useEffect(() => {
+    if (!canSwitchLanguage) return;
     try {
-      window.localStorage.setItem(STORAGE_KEY, language);
+      window.localStorage.setItem(STORAGE_KEY, preferredLanguage);
     } catch {
       // The language still works for this session when storage is unavailable.
     }
+  }, [preferredLanguage, canSwitchLanguage]);
+
+  useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
 
   const value = useMemo(() => ({
     language,
-    setLanguage,
-    toggleLanguage: () => setLanguage((current) => (current === "en" ? "vi" : "en")),
+    canSwitchLanguage,
+    setLanguage: (nextLanguage) => {
+      if (canSwitchLanguage) setPreferredLanguage(nextLanguage);
+    },
+    toggleLanguage: () => {
+      if (canSwitchLanguage) setPreferredLanguage((current) => (current === "en" ? "vi" : "en"));
+    },
     t: (key) => translations[language]?.[key] ?? translations.en[key] ?? key,
-  }), [language]);
+  }), [language, canSwitchLanguage]);
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }

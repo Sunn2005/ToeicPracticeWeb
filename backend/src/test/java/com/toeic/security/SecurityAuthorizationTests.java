@@ -1,15 +1,18 @@
 package com.toeic.security;
 
 import com.toeic.config.SecurityConfig;
-import com.toeic.controller.ApiExceptionHandler;
-import com.toeic.controller.AdminSubscriptionController;
+import com.toeic.exception.ApiExceptionHandler;
+import com.toeic.controller.billing.PaymentController;
+import com.toeic.controller.billing.AdminPaymentController;
+import com.toeic.service.billing.AdminPaymentService;
+import com.toeic.service.billing.AdminRevenueService;
 import com.toeic.config.AuthProperties;
-import com.toeic.model.FirebaseIdentity;
-import com.toeic.model.User;
-import com.toeic.model.enums.UserRole;
-import com.toeic.service.CurrentUserService;
-import com.toeic.service.FirebaseSessionService;
-import com.toeic.service.SubscriptionService;
+import com.toeic.model.auth.FirebaseIdentity;
+import com.toeic.model.user.User;
+import com.toeic.model.user.enums.UserRole;
+import com.toeic.service.user.CurrentUserService;
+import com.toeic.service.auth.FirebaseSessionService;
+import com.toeic.service.billing.PaymentService;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +48,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.mockito.Mockito.when;
 
-@WebMvcTest({SecurityAuthorizationTests.SecurityProbeController.class, AdminSubscriptionController.class})
+@WebMvcTest({
+        SecurityAuthorizationTests.SecurityProbeController.class,
+        com.toeic.controller.staff.StaffManagementController.class,
+        com.toeic.controller.staff.StaffPasswordController.class,
+        com.toeic.controller.test.EmployeeTestController.class,
+        com.toeic.controller.test.AdminReviewController.class,
+        PaymentController.class,
+        AdminPaymentController.class
+})
 @ImportAutoConfiguration({
         SecurityAutoConfiguration.class,
         SecurityFilterAutoConfiguration.class,
@@ -53,7 +64,12 @@ import static org.mockito.Mockito.when;
 })
 @Import({
         SecurityAuthorizationTests.SecurityProbeController.class,
-        AdminSubscriptionController.class,
+        com.toeic.controller.staff.StaffManagementController.class,
+        com.toeic.controller.staff.StaffPasswordController.class,
+        com.toeic.controller.test.EmployeeTestController.class,
+        com.toeic.controller.test.AdminReviewController.class,
+        PaymentController.class,
+        AdminPaymentController.class,
         ApiExceptionHandler.class,
         SecurityConfig.class,
         AuthProperties.class,
@@ -67,13 +83,56 @@ class SecurityAuthorizationTests {
     private MockMvc mockMvc;
 
     @MockitoBean
+    private com.toeic.service.staff.StaffAccessService staffAccessService;
+
+    @MockitoBean
     private CurrentUserService currentUserService;
 
     @MockitoBean
     private FirebaseSessionService firebaseSessionService;
 
     @MockitoBean
-    private SubscriptionService subscriptionService;
+    private PaymentService paymentService;
+
+    @MockitoBean private com.toeic.service.staff.StaffRecoveryLimiter staffRecoveryLimiter;
+    @MockitoBean(name = "staffRecoveryExecutor") private org.springframework.core.task.TaskExecutor staffRecoveryExecutor;
+    @MockitoBean private com.toeic.service.staff.StaffCredentialService staffCredentialService;
+    @MockitoBean private com.toeic.service.staff.StaffManagementService staffManagementService;
+    @MockitoBean private com.toeic.service.test.EmployeeTestService employeeTestService;
+    @MockitoBean private com.toeic.service.media.MediaStorageService mediaStorageService;
+    @MockitoBean private com.toeic.service.test.AdminReviewService adminReviewService;
+    @MockitoBean private AdminPaymentService adminPaymentService;
+    @MockitoBean private AdminRevenueService adminRevenueService;
+
+    @Test
+    void ownerConfirmationRequiresAuthenticationAndCsrf() throws Exception {
+        String path = "/api/payments/orders/123/confirm";
+        mockMvc.perform(post(path).with(csrf())).andExpect(status().isUnauthorized());
+        mockMvc.perform(post(path).with(authentication(authenticationFor(UserRole.USER))))
+                .andExpect(status().isForbidden());
+        org.mockito.Mockito.verifyNoInteractions(paymentService);
+        when(paymentService.confirmPayment("user-1", 123))
+                .thenReturn(new PaymentService.OrderState(123, "PRO_30", "PAID"));
+        mockMvc.perform(post(path).with(csrf()).with(authentication(authenticationFor(UserRole.USER))))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("PAID"));
+        org.mockito.Mockito.verify(paymentService).confirmPayment("user-1", 123);
+    }
+
+    @Test
+    void reconciliationRequiresAdminAuthenticationAndCsrf() throws Exception {
+        String path = "/api/admin/payments/orders/123/reconcile";
+        mockMvc.perform(post(path).with(csrf())).andExpect(status().isUnauthorized());
+        for (var role : List.of(UserRole.USER, UserRole.EMPLOYEE)) {
+            mockMvc.perform(post(path).with(csrf()).with(authentication(authenticationFor(role))))
+                    .andExpect(status().isForbidden());
+        }
+        mockMvc.perform(post(path).with(authentication(authenticationFor(UserRole.ADMIN))))
+                .andExpect(status().isForbidden());
+        org.mockito.Mockito.verifyNoInteractions(paymentService);
+        mockMvc.perform(post(path).with(csrf()).with(authentication(authenticationFor(UserRole.ADMIN))))
+                .andExpect(status().isOk());
+        org.mockito.Mockito.verify(paymentService).reconcile(123);
+    }
 
     @Test
     void productionDomainCanCompleteCorsPreflight() throws Exception {
@@ -121,6 +180,45 @@ class SecurityAuthorizationTests {
         mockMvc.perform(get("/api/ai/chat/conversations")
                         .with(authentication(authenticationFor(UserRole.USER))))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void paymentCreationRequiresAuthenticationAndCsrfButWebhookDoesNot() throws Exception {
+        when(paymentService.availablePlans("user-1")).thenReturn(List.of(
+                new PaymentService.PlanOption("PRO_30", 99_000L, 30, false, false)
+        ));
+        when(paymentService.createProPayment("user-1", "PRO_30"))
+                .thenReturn(new PaymentService.CreatePaymentResult("https://payos.test/checkout/1", 1L));
+        when(paymentService.handleWebhook(org.mockito.ArgumentMatchers.anyMap()))
+                .thenReturn(new PaymentService.WebhookResult(true, "activated"));
+
+        mockMvc.perform(get("/api/payments/pro/plans"))
+                .andExpect(status().isUnauthorized());
+
+        mockMvc.perform(get("/api/payments/pro/plans")
+                        .with(authentication(authenticationFor(UserRole.USER))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].planCode").value("PRO_30"));
+
+        mockMvc.perform(post("/api/payments/pro")
+                        .with(authentication(authenticationFor(UserRole.USER)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"planCode\":\"PRO_30\"}"))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(post("/api/payments/pro")
+                        .with(csrf())
+                        .with(authentication(authenticationFor(UserRole.USER)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"planCode\":\"PRO_30\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.orderCode").value(1L));
+
+        mockMvc.perform(post("/api/payments/webhook")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"data\":{},\"signature\":\"signed\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.handled").value(true));
     }
 
     @Test
@@ -211,9 +309,13 @@ class SecurityAuthorizationTests {
     }
 
     @Test
-    void employeeCanUseEmployeeButNotAdminApis() throws Exception {
+    void employeeNeedsTestPermissionsAndCannotUseUnrelatedAdminApis() throws Exception {
+        mockMvc.perform(get("/api/employee/tests").with(authentication(authenticationFor(UserRole.EMPLOYEE))))
+                .andExpect(status().isForbidden());
+        var viewer = new ToeicAuthenticationToken(authenticationFor(UserRole.EMPLOYEE).getPrincipal(), List.of(
+                new SimpleGrantedAuthority("ROLE_EMPLOYEE"), new SimpleGrantedAuthority("tests.view")));
         mockMvc.perform(get("/api/employee/tests")
-                        .with(authentication(authenticationFor(UserRole.EMPLOYEE))))
+                        .with(authentication(viewer)))
                 .andExpect(status().isOk());
 
         mockMvc.perform(get("/api/admin/test-submissions")
@@ -233,50 +335,128 @@ class SecurityAuthorizationTests {
     }
 
     @Test
-    void adminCanReadActivateAndRevokeSubscriptions() throws Exception {
-        SubscriptionService.SubscriptionSummary summary = new SubscriptionService.SubscriptionSummary(
-                "PRO", com.toeic.model.enums.SubscriptionStatus.ACTIVE, 1L, 1_800_000_050_000L,
-                List.of(com.toeic.model.enums.Entitlement.AI_CHAT, com.toeic.model.enums.Entitlement.AI_ANALYSIS), true);
-        when(subscriptionService.getSummary("target-user")).thenReturn(summary);
-        when(subscriptionService.activateOrExtend("target-user", 1_800_000_050_000L, "admin-1"))
-                .thenReturn(summary);
-        when(subscriptionService.revoke("target-user", "admin-1")).thenReturn(summary);
+    void grantedEmployeesCanReadRevenueButCannotManageStaffOrReconcile() throws Exception {
+        var employee = new ToeicAuthenticationToken(authenticationFor(UserRole.EMPLOYEE).getPrincipal(), List.of(
+                new SimpleGrantedAuthority("ROLE_EMPLOYEE"), new SimpleGrantedAuthority("revenue.view"),
+                new SimpleGrantedAuthority("orders.view")));
+        mockMvc.perform(get("/api/admin/payments/revenue").with(authentication(employee))).andExpect(status().isOk());
+        mockMvc.perform(get("/api/admin/payments/orders").with(authentication(employee))).andExpect(status().isOk());
+        mockMvc.perform(get("/api/admin/staff").with(authentication(employee))).andExpect(status().isForbidden());
+        mockMvc.perform(get("/api/admin/test-submissions").with(authentication(employee))).andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/admin/payments/orders/123/reconcile").with(csrf()).with(authentication(employee))).andExpect(status().isForbidden());
+        org.mockito.Mockito.verifyNoInteractions(paymentService);
+    }
+
+
+    @Test
+    void currentGroupPermissionsAreAppliedOnEverySessionRequestAndBlockingKeepsLearningAvailable() throws Exception {
+        var identity = new FirebaseIdentity("employee-1", "employee@example.test", "Staff", null, null);
+        var user = new User(); user.setUid("employee-1"); user.setRole(UserRole.EMPLOYEE);
+        when(firebaseSessionService.verifySession("staff-session")).thenReturn(identity);
+        when(currentUserService.requireUser(identity)).thenReturn(user);
+        when(staffAccessService.forUser(user)).thenReturn(new com.toeic.service.staff.StaffAccessService.Access(true, "accountants", List.of("revenue.view")));
+        mockMvc.perform(get("/api/admin/payments/revenue").cookie(new Cookie("session", "staff-session"))).andExpect(status().isOk());
+        when(staffAccessService.forUser(user)).thenReturn(new com.toeic.service.staff.StaffAccessService.Access(false, "accountants", List.of()));
+        mockMvc.perform(get("/api/admin/payments/revenue").cookie(new Cookie("session", "staff-session"))).andExpect(status().isForbidden());
+        mockMvc.perform(get("/api/employee/tests").cookie(new Cookie("session", "staff-session"))).andExpect(status().isForbidden());
+        mockMvc.perform(get("/api/users/me/statistics").cookie(new Cookie("session", "staff-session"))).andExpect(status().isOk());
+    }
+
+    @Test
+    void testViewerCannotCreateEditDeleteSubmitOrUpload() throws Exception {
+        var viewer = new ToeicAuthenticationToken(authenticationFor(UserRole.EMPLOYEE).getPrincipal(), List.of(
+                new SimpleGrantedAuthority("ROLE_EMPLOYEE"), new SimpleGrantedAuthority("tests.view")));
+        for (var mutation : List.of(post("/api/employee/tests"), put("/api/employee/tests/test"),
+                delete("/api/employee/tests/test"), post("/api/employee/tests/test/submit"))) {
+            mockMvc.perform(mutation.with(csrf()).with(authentication(viewer))
+                    .contentType(MediaType.APPLICATION_JSON).content("{}"))
+                    .andExpect(status().isForbidden());
+        }
+        var upload = org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart("/api/employee/media")
+                .file("file", new byte[]{1});
+        mockMvc.perform(upload.with(csrf()).with(authentication(viewer))).andExpect(status().isForbidden());
+        org.mockito.Mockito.verifyNoInteractions(employeeTestService, mediaStorageService);
+    }
+
+    @Test
+    void staffMutationsAreAdminOnlyAndCsrfProtected() throws Exception {
+        String path = "/api/admin/staff/groups";
+        String json = "{\"name\":\"Finance\",\"code\":\"FINANCE\",\"permissions\":[\"revenue.view\"]}";
+        mockMvc.perform(post(path).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isUnauthorized());
+        mockMvc.perform(post(path).with(csrf()).with(authentication(authenticationFor(UserRole.EMPLOYEE)))
+                .contentType(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isForbidden());
+        mockMvc.perform(post(path).with(authentication(authenticationFor(UserRole.ADMIN)))
+                .contentType(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isForbidden());
+        org.mockito.Mockito.verifyNoInteractions(staffManagementService);
+        mockMvc.perform(post(path).with(csrf()).with(authentication(authenticationFor(UserRole.ADMIN)))
+                .contentType(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isCreated());
+        org.mockito.Mockito.verify(staffManagementService).saveGroup(org.mockito.ArgumentMatchers.eq("admin-1"), org.mockito.ArgumentMatchers.isNull(), org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void removedSubscriptionManagementEndpointsAreUnavailableEvenToAdmins() throws Exception {
         for (var request : List.of(get("/api/admin/subscriptions/target-user"),
-                put("/api/admin/subscriptions/target-user").contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"expiresAt\":1800000050000}"),
+                put("/api/admin/subscriptions/target-user").contentType(MediaType.APPLICATION_JSON).content("{\"expiresAt\":1800000050000}"),
                 delete("/api/admin/subscriptions/target-user"))) {
             mockMvc.perform(request.with(csrf()).with(authentication(authenticationFor(UserRole.ADMIN))))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.planCode").value("PRO"));
+                    .andExpect(status().isNotFound());
         }
     }
 
     @Test
-    void userAndEmployeeCannotReadActivateOrRevokeSubscriptions() throws Exception {
-        for (UserRole role : List.of(UserRole.USER, UserRole.EMPLOYEE)) {
-            for (var request : List.of(get("/api/admin/subscriptions/target-user"),
-                    put("/api/admin/subscriptions/target-user").contentType(MediaType.APPLICATION_JSON)
-                            .content("{\"expiresAt\":1800000050000}"),
-                    delete("/api/admin/subscriptions/target-user"))) {
-                mockMvc.perform(request.with(csrf()).with(authentication(authenticationFor(role))))
-                        .andExpect(status().isForbidden())
-                        .andExpect(jsonPath("$.code").value("ACCESS_DENIED"));
-            }
-        }
-        org.mockito.Mockito.verifyNoInteractions(subscriptionService);
+    void temporaryPasswordCannotBypassChangeWithDirectApiCalls() throws Exception {
+        var identity = new FirebaseIdentity("employee-1", "staff@example.test", "Staff", null, null);
+        var user = new User(); user.setUid("employee-1"); user.setRole(UserRole.EMPLOYEE); user.setPasswordChangeRequired(true);
+        when(firebaseSessionService.verifySession("temporary")).thenReturn(identity);
+        when(currentUserService.requireUser(identity)).thenReturn(user);
+        when(staffAccessService.forUser(user)).thenReturn(new com.toeic.service.staff.StaffAccessService.Access(true, "creators", List.of("tests.view")));
+        mockMvc.perform(get("/api/employee/tests").cookie(new Cookie("session", "temporary")))
+                .andExpect(status().isForbidden()).andExpect(jsonPath("$.code").value("STAFF_PASSWORD_CHANGE_REQUIRED"));
+        mockMvc.perform(get("/api/users/me/statistics").cookie(new Cookie("session", "temporary"))).andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/console/account/password").cookie(new Cookie("session", "temporary")).with(csrf())
+                .contentType(MediaType.APPLICATION_JSON).content("{\"oldPassword\":\"temporary\",\"newPassword\":\"NewPassword123!\"}"))
+                .andExpect(status().isNoContent());
+        org.mockito.Mockito.verify(staffCredentialService).change("employee-1", "temporary", "NewPassword123!");
     }
 
     @Test
-    void guestCannotReadOrMutateSubscriptions() throws Exception {
-        for (var request : List.of(get("/api/admin/subscriptions/target-user"),
-                put("/api/admin/subscriptions/target-user").contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"expiresAt\":1800000050000}"),
-                delete("/api/admin/subscriptions/target-user"))) {
-            mockMvc.perform(request.with(csrf()))
-                    .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.code").value("AUTHENTICATION_REQUIRED"));
+    void revokedCredentialEpochRejectsOldAndSameSecondSessions() throws Exception {
+        var user = new User(); user.setUid("employee-1"); user.setRole(UserRole.EMPLOYEE); user.setCredentialsChangedAt(1_800_000_000_999L);
+        var old = new FirebaseIdentity("employee-1", "staff@example.test", "Staff", null, null, 1_800_000_000L);
+        when(firebaseSessionService.verifySession("old-epoch")).thenReturn(old); when(currentUserService.requireUser(old)).thenReturn(user);
+        mockMvc.perform(get("/api/users/me/statistics").cookie(new Cookie("session", "old-epoch"))).andExpect(status().isUnauthorized());
+        var fresh = new FirebaseIdentity("employee-1", "staff@example.test", "Staff", null, null, 1_800_000_001L);
+        when(firebaseSessionService.verifySession("fresh-epoch")).thenReturn(fresh); when(currentUserService.requireUser(fresh)).thenReturn(user);
+        when(staffAccessService.forUser(user)).thenReturn(new com.toeic.service.staff.StaffAccessService.Access(true, "creators", List.of()));
+        mockMvc.perform(get("/api/users/me/statistics").cookie(new Cookie("session", "fresh-epoch"))).andExpect(status().isOk());
+    }
+
+    @Test
+    void passwordRecoveryIsPublicCsrfProtectedAndHasGenericResponseEvenWithRevokedCookie() throws Exception {
+        String path = "/api/v1/auth/staff/forgot-password";
+        mockMvc.perform(post(path).contentType(MediaType.APPLICATION_JSON).content("{\"email\":\"unknown@example.test\"}"))
+                .andExpect(status().isForbidden());
+        for (String email : List.of("known@example.test", "unknown@example.test")) {
+            mockMvc.perform(post(path).cookie(new Cookie("session", "revoked")).with(csrf()).contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"email\":\"" + email + "\"}"))
+                    .andExpect(status().isAccepted()).andExpect(jsonPath("$.code").value("STAFF_RESET_REQUESTED"));
         }
-        org.mockito.Mockito.verifyNoInteractions(subscriptionService);
+        org.mockito.Mockito.verifyNoInteractions(firebaseSessionService);
+    }
+
+    @Test
+    void passwordChangeRequiresInternalRoleAndCsrfAndResendIsAdminOnly() throws Exception {
+        String path = "/api/console/account/password", body = "{\"oldPassword\":\"old\",\"newPassword\":\"NewPassword123!\"}";
+        mockMvc.perform(post(path).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isUnauthorized());
+        org.mockito.Mockito.doThrow(new com.toeic.exception.ApiCodeException(HttpStatus.FORBIDDEN, "ACCESS_DENIED", "Not a staff password owner"))
+                .when(staffCredentialService).change("user-1", "old", "NewPassword123!");
+        mockMvc.perform(post(path).with(csrf()).with(authentication(authenticationFor(UserRole.USER))).contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isForbidden());
+        mockMvc.perform(post(path).with(authentication(authenticationFor(UserRole.EMPLOYEE))).contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isForbidden());
+        for (var role : List.of(UserRole.ADMIN, UserRole.EMPLOYEE)) {
+            mockMvc.perform(post(path).with(csrf()).with(authentication(authenticationFor(role))).contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isNoContent());
+        }
+        mockMvc.perform(post("/api/admin/staff/members/target/credentials/resend").with(csrf()).with(authentication(authenticationFor(UserRole.EMPLOYEE)))).andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/admin/staff/members/target/credentials/resend").with(csrf()).with(authentication(authenticationFor(UserRole.ADMIN)))).andExpect(status().isOk());
     }
 
     private ToeicAuthenticationToken authenticationFor(UserRole role) {
@@ -320,16 +500,6 @@ class SecurityAuthorizationTests {
 
         @PostMapping("/api/tests/{testId}/attempts")
         Map<String, Object> createAttempt() {
-            return Map.of("ok", true);
-        }
-
-        @GetMapping("/api/employee/tests")
-        Map<String, Object> employeeTests() {
-            return Map.of("ok", true);
-        }
-
-        @GetMapping("/api/admin/test-submissions")
-        Map<String, Object> adminSubmissions() {
             return Map.of("ok", true);
         }
 

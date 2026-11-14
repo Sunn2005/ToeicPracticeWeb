@@ -1,9 +1,9 @@
 package com.toeic.security;
 
 import com.toeic.config.AuthProperties;
-import com.toeic.model.User;
-import com.toeic.service.CurrentUserService;
-import com.toeic.service.FirebaseSessionService;
+import com.toeic.model.user.User;
+import com.toeic.service.user.CurrentUserService;
+import com.toeic.service.auth.FirebaseSessionService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,7 +18,9 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.WebUtils;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.ArrayList;
+import com.toeic.service.staff.StaffAccessService;
+import com.toeic.model.user.enums.UserRole;
 
 @Component
 public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
@@ -26,17 +28,20 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
     private static final String AUTH_PATH_PREFIX = "/api/v1/auth/";
 
     private final CurrentUserService currentUserService;
+    private final StaffAccessService staffAccessService;
     private final FirebaseSessionService firebaseSessionService;
     private final AuthProperties authProperties;
     private final RestAuthenticationEntryPoint authenticationEntryPoint;
 
     public FirebaseAuthenticationFilter(
             CurrentUserService currentUserService,
+            StaffAccessService staffAccessService,
             FirebaseSessionService firebaseSessionService,
             AuthProperties authProperties,
             RestAuthenticationEntryPoint authenticationEntryPoint
     ) {
         this.currentUserService = currentUserService;
+        this.staffAccessService = staffAccessService;
         this.firebaseSessionService = firebaseSessionService;
         this.authProperties = authProperties;
         this.authenticationEntryPoint = authenticationEntryPoint;
@@ -70,10 +75,29 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
         try {
             var identity = firebaseSessionService.verifySession(sessionCookie.getValue());
             User user = currentUserService.requireUser(identity);
+            // Firebase auth_time has second precision. Reject even same-second pre-change sessions.
+            if (user.getCredentialsChangedAt() != null && (identity.authenticatedAtEpochSeconds() == null
+                    || identity.authenticatedAtEpochSeconds() <= user.getCredentialsChangedAt() / 1000)) {
+                authenticationEntryPoint.writeError(request, response, HttpStatus.UNAUTHORIZED,
+                        "AUTHENTICATION_REQUIRED", "Mật khẩu đã thay đổi. Vui lòng đăng nhập lại");
+                return;
+            }
+            if (user.getCredentialOperation() != null || (Boolean.TRUE.equals(user.getPasswordChangeRequired())
+                    && !("GET".equals(request.getMethod()) && "/api/me".equals(request.getRequestURI()))
+                    && !("POST".equals(request.getMethod()) && "/api/console/account/password".equals(request.getRequestURI())))) {
+                authenticationEntryPoint.writeError(request, response, HttpStatus.FORBIDDEN,
+                        "STAFF_PASSWORD_CHANGE_REQUIRED", "Cần đổi mật khẩu trước khi tiếp tục");
+                return;
+            }
             ToeicUserPrincipal principal = ToeicUserPrincipal.from(user);
-            var authorities = List.of(
-                    new SimpleGrantedAuthority("ROLE_" + principal.role().name())
-            );
+            var authorities = new ArrayList<SimpleGrantedAuthority>();
+            if (user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.EMPLOYEE) {
+                var access = staffAccessService.forUser(user);
+                authorities.add(new SimpleGrantedAuthority(access.active() ? "ROLE_" + principal.role().name() : "ROLE_USER"));
+                access.permissions().forEach(permission -> authorities.add(new SimpleGrantedAuthority(permission)));
+            } else {
+                authorities.add(new SimpleGrantedAuthority("ROLE_" + principal.role().name()));
+            }
             var authentication = new ToeicAuthenticationToken(principal, authorities);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (ResponseStatusException exception) {

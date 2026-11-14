@@ -37,7 +37,13 @@ public class SecurityConfig {
             RestAccessDeniedHandler accessDeniedHandler
     ) throws Exception {
         return http
-                .csrf(csrf -> csrf.csrfTokenRepository(csrfTokenRepository()))
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(csrfTokenRepository())
+                        // PayOS posts the webhook without a CSRF token; authenticity
+                        // comes from the PayOS signature verified in PaymentService.
+                        .ignoringRequestMatchers(request ->
+                                HttpMethod.POST.matches(request.getMethod())
+                                        && "/api/payments/webhook".equals(request.getRequestURI())))
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
@@ -62,6 +68,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/health")
                         .permitAll()
 
+                        // PayOS webhook is public: authenticity comes from the PayOS
+                        // signature, verified inside PaymentService — never from a session.
+                        .requestMatchers(HttpMethod.POST, "/api/payments/webhook")
+                        .permitAll()
+
                         // Chỉ các API đọc catalog đề thi là public.
                         .requestMatchers(
                                 HttpMethod.GET,
@@ -69,6 +80,21 @@ public class SecurityConfig {
                                 "/api/tests/*",
                                 "/api/tests/*/parts/*"
                         ).permitAll()
+
+                        .requestMatchers(HttpMethod.GET, "/api/admin/test-submissions", "/api/admin/test-submissions/*")
+                        .hasAnyAuthority("ROLE_ADMIN", "reviews.view")
+
+                        .requestMatchers(HttpMethod.POST, "/api/admin/test-submissions/*/approve", "/api/admin/test-submissions/*/reject")
+                        .hasAnyAuthority("ROLE_ADMIN", "reviews.edit")
+
+                        .requestMatchers(HttpMethod.GET, "/api/admin/review-history")
+                        .hasAnyAuthority("ROLE_ADMIN", "history.view")
+
+                        .requestMatchers(HttpMethod.GET, "/api/admin/payments/revenue")
+                        .hasAnyAuthority("ROLE_ADMIN", "revenue.view")
+
+                        .requestMatchers(HttpMethod.GET, "/api/admin/payments/orders", "/api/admin/payments/orders/*")
+                        .hasAnyAuthority("ROLE_ADMIN", "orders.view")
 
                         // Admin
                         .requestMatchers("/api/admin/**")
@@ -84,11 +110,13 @@ public class SecurityConfig {
 
                         // Các endpoint còn lại cần đăng nhập
                         .requestMatchers(
+                                "/api/console/account/password",
                                 "/api/me",
                                 "/api/users/me/**",
                                 "/api/attempts/**",
                                 "/api/ai/jobs/**",
-                                "/api/ai/chat/**"
+                                "/api/ai/chat/**",
+                                "/api/payments/**"
                         ).authenticated()
 
                         // Tạo attempt cũng cần đăng nhập

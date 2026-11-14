@@ -38,9 +38,9 @@ export function clearCsrfToken() {
   csrfTokenPromise = null;
 }
 
-export async function getCsrfToken() {
+export function getCsrfToken() {
   if (!csrfTokenPromise) {
-    csrfTokenPromise = fetch(`${API_BASE_URL}/api/v1/auth/csrf`, {
+    const pending = fetch(`${API_BASE_URL}/api/v1/auth/csrf`, {
       credentials: "include",
     })
       .then(async (response) => {
@@ -54,9 +54,10 @@ export async function getCsrfToken() {
         return body.token;
       })
       .catch((error) => {
-        csrfTokenPromise = null;
+        if (csrfTokenPromise === pending) clearCsrfToken();
         throw error;
       });
+    csrfTokenPromise = pending;
   }
   return csrfTokenPromise;
 }
@@ -71,26 +72,38 @@ async function request(path, options = {}) {
   if (options.body != null && !isFormData && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
-  if (unsafe) {
-    headers.set("X-XSRF-TOKEN", await getCsrfToken());
-  }
-
   const execute = async () => {
+    let tokenRequest;
+    if (unsafe) {
+      let token;
+      do {
+        options.signal?.throwIfAborted();
+        tokenRequest = getCsrfToken();
+        token = await tokenRequest;
+      } while (tokenRequest !== csrfTokenPromise);
+      options.signal?.throwIfAborted();
+      headers.set("X-XSRF-TOKEN", token);
+    }
     const response = await fetch(`${API_BASE_URL}${path}`, {
       ...options,
       method,
       headers: new Headers(headers),
       credentials: "include",
     });
-    return { response, body: await parseResponse(response) };
+    return { response, body: await parseResponse(response), tokenRequest };
   };
 
-  let { response, body } = await execute();
-  if (unsafe && response.status === 403 && body?.code === "CSRF_TOKEN_INVALID") {
-    clearCsrfToken();
-    headers.set("X-XSRF-TOKEN", await getCsrfToken());
-    ({ response, body } = await execute());
+  const csrfRejected = ({ response, body }) =>
+    unsafe && response.status === 403 && body?.code === "CSRF_TOKEN_INVALID";
+
+  let result = await execute();
+  if (csrfRejected(result)) {
+    if (csrfTokenPromise === result.tokenRequest) clearCsrfToken();
+    result = await execute();
+    if (csrfRejected(result) && csrfTokenPromise === result.tokenRequest) clearCsrfToken();
   }
+
+  const { response, body } = result;
   if (!response.ok) {
     throw errorFromResponse(response, body);
   }

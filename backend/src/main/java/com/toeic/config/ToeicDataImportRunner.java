@@ -1,8 +1,8 @@
 package com.toeic.config;
 
-import com.toeic.dao.TestDao;
-import com.toeic.model.Test;
-import com.toeic.model.TestPart;
+import com.toeic.dao.test.TestDao;
+import com.toeic.model.test.Test;
+import com.toeic.model.test.TestPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;

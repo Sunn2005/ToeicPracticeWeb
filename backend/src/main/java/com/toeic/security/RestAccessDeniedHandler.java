@@ -1,6 +1,6 @@
 package com.toeic.security;
 
-import com.toeic.dto.ApiErrorResponse;
+import com.toeic.dto.common.ApiErrorResponse;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
