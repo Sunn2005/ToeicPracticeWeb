@@ -27,7 +27,7 @@ function RevenueChart({ series, t, language }) {
   const plotWidth = width - left - 20;
   const slot = plotWidth / Math.max(1, series.length);
   const max = Math.max(4, ...series.map((point) => point.revenue));
-  const axisFormat = new Intl.NumberFormat(locale, { notation: "compact", maximumFractionDigits: 1 });
+  const axisFormat = new Intl.NumberFormat(locale);
   if (!series.length) return <p role="status" className="mt-5 text-sm text-slate-600">{t("adminRevenueChartEmpty")}</p>;
 
   return <>
@@ -60,6 +60,101 @@ function RevenueChart({ series, t, language }) {
       </table></div>
     </details>
   </>;
+}
+
+function Sparkline({ values }) {
+  if (values.length < 2) return null;
+  const width = 120;
+  const height = 36;
+  const max = Math.max(...values);
+  const min = Math.min(...values);
+  const range = max - min || 1;
+  const points = values.map((value, index) => `${(index / (values.length - 1)) * width},${height - 4 - ((value - min) / range) * (height - 8)}`).join(" ");
+  return <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} aria-hidden="true" className="mt-3 text-blue-600"><polyline points={points} fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" /></svg>;
+}
+
+function CumulativeChart({ series, t, language }) {
+  const chartId = useId();
+  const locale = language === "vi" ? "vi-VN" : "en-US";
+  const totals = [];
+  let running = 0;
+  for (const point of series) { running += point.revenue; totals.push({ ...point, total: running }); }
+  const width = Math.max(1000, series.length * 76 + 110);
+  const left = 85;
+  const top = 20;
+  const height = 210;
+  const plotWidth = width - left - 20;
+  const slot = plotWidth / Math.max(1, series.length);
+  const max = Math.max(4, ...totals.map((point) => point.total));
+  const axisFormat = new Intl.NumberFormat(locale);
+  if (!series.length) return <p role="status" className="mt-5 text-sm text-slate-600">{t("adminRevenueChartEmpty")}</p>;
+
+  return <>
+    <p className="mt-2 text-sm text-slate-600">{t("adminRevenueCumulativeHelp")}</p>
+    <div className="mt-4 overflow-x-auto rounded-xl focus-visible:outline-2 focus-visible:outline-blue-600" tabIndex={0} role="region" aria-label={t("adminRevenueChartScroll")}>
+      <svg width={width} height="285" viewBox={`0 0 ${width} 285`} role="img" aria-labelledby={`${chartId}-title ${chartId}-description`} className="h-auto min-w-full text-slate-600">
+        <title id={`${chartId}-title`}>{t("adminRevenueCumulative")}</title>
+        <desc id={`${chartId}-description`}>{t("adminRevenueCumulativeHelp")}</desc>
+        {[0, 1, 2, 3, 4].map((tick) => {
+          const y = top + height - tick / 4 * height;
+          return <g key={tick}><line x1={left} x2={width - 20} y1={y} y2={y} className="stroke-slate-200" /><text x={left - 10} y={y + 4} textAnchor="end" fontSize="12" fill="currentColor">{axisFormat.format(max * tick / 4)}</text></g>;
+        })}
+        <polyline points={totals.map((point, index) => `${left + (index + 0.5) * slot},${top + height - point.total / max * height}`).join(" ")} fill="none" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" className="stroke-blue-600" />
+        {totals.map((point, index) => <g key={point.period}>
+          <title>{`${point.period}: ${formatOrderAmount(point.total, language)}`}</title>
+          <circle cx={left + (index + 0.5) * slot} cy={top + height - point.total / max * height} r="4" className="fill-blue-600" />
+          <text x={left + (index + 0.5) * slot} y={top + height + 24} textAnchor="middle" fontSize="11" fill="currentColor">{point.period}</text>
+        </g>)}
+      </svg>
+    </div>
+    <details className="mt-3 text-sm">
+      <summary className="cursor-pointer rounded-lg py-3 font-semibold text-blue-700 focus-visible:outline-2 focus-visible:outline-blue-600">{t("adminRevenueChartData")}</summary>
+      <div className="mt-2 max-h-80 overflow-auto"><table className="w-full text-left">
+        <caption className="sr-only">{t("adminRevenueCumulative")}</caption>
+        <thead><tr>{["Period", "Revenue"].map((key) => <th key={key} scope="col" className="px-3 py-2">{t(`adminRevenue${key}`)}</th>)}</tr></thead>
+        <tbody>{totals.map((point) => <tr key={point.period} className="border-t border-slate-100"><th scope="row" className="whitespace-nowrap px-3 py-2 font-normal">{point.period}</th><td className="whitespace-nowrap px-3 py-2">{formatOrderAmount(point.total, language)}</td></tr>)}</tbody>
+      </table></div>
+    </details>
+  </>;
+}
+
+const donutColors = ["#2563eb", "#d97706", "#059669", "#7c3aed", "#db2777", "#0891b2"];
+
+function PlanDonut({ plans, totalRevenue, percent, t, language }) {
+  const [selected, setSelected] = useState(null);
+  const radius = 70;
+  const circumference = 2 * Math.PI * radius;
+  let offset = 0;
+  const segments = plans.map((plan, index) => {
+    const share = totalRevenue > 0 ? plan.revenue / totalRevenue : 0;
+    const segment = { ...plan, share, color: donutColors[index % donutColors.length], offset };
+    offset += share * circumference;
+    return segment;
+  });
+  const active = selected === null ? null : segments[selected];
+  return <div>
+    <div className="mt-4 flex flex-wrap items-center gap-6">
+      <svg width="200" height="200" viewBox="0 0 200 200" role="img" aria-label={t("adminRevenuePlans")} className="shrink-0 -rotate-90 text-slate-900">
+        <circle cx="100" cy="100" r={radius} fill="none" strokeWidth="28" className="stroke-slate-100" />
+        {segments.map((segment, index) => <circle key={segment.planCode ?? index} cx="100" cy="100" r={radius} fill="none" strokeWidth="28" stroke={segment.color} strokeDasharray={`${segment.share * circumference} ${circumference}`} strokeDashoffset={-segment.offset} onClick={() => setSelected(index)} className="cursor-pointer">
+          <title>{`${segment.planCode}: ${formatOrderAmount(segment.revenue, language)}`}</title>
+        </circle>)}
+        <text x="100" y="100" textAnchor="middle" fontSize="14" fontWeight="700" fill="currentColor" transform="rotate(90 100 100)">
+          <tspan x="100" dy="-1.4em">{active ? active.planCode : t("adminRevenueTotalRevenue")}</tspan>
+          <tspan x="100" dy="1.5em">{formatOrderAmount(active ? active.revenue : totalRevenue, language)}</tspan>
+          <tspan x="100" dy="1.5em" fontSize="12" fontWeight="400" fill="#475569">{active ? percent.format(active.share) : ""}</tspan>
+        </text>
+      </svg>
+      <ul className="min-w-44 flex-1 space-y-2">
+        {segments.map((segment, index) => <li key={segment.planCode ?? index}><button type="button" aria-pressed={selected === index} onClick={() => setSelected(selected === index ? null : index)} className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-blue-600 ${selected === index ? "bg-blue-50" : ""}`}>
+          <span aria-hidden="true" className="h-3 w-3 shrink-0 rounded-sm" style={{ backgroundColor: segment.color }} />
+          <span className="min-w-0 flex-1 truncate font-semibold">{segment.planCode || "—"}</span>
+          <span className="whitespace-nowrap">{formatOrderAmount(segment.revenue, language)}</span>
+        </button></li>)}
+      </ul>
+    </div>
+    <p role="status" className="mt-4 text-sm text-slate-600">{active ? t("adminRevenueDonutDetail").replace("{plan}", active.planCode).replace("{orders}", active.orders).replace("{share}", percent.format(active.share)) : t("adminRevenueDonutHint")}</p>
+  </div>;
 }
 
 export default function AdminRevenuePage() {
@@ -122,21 +217,18 @@ export default function AdminRevenuePage() {
       {report && <div className="space-y-6">
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {[
-            ["TotalRevenue", formatOrderAmount(report.totalRevenue, language)],
-            ["PaidOrders", report.paidOrderCount],
-            ["SuccessRate", percent.format(report.successRate)],
-            ["AverageOrder", formatOrderAmount(report.averageOrderValue, language)],
-          ].map(([key, value]) => <div key={key} className={panelClass}><h2 className="text-sm font-semibold text-slate-600">{t(`adminRevenue${key}`)}</h2><p className="mt-3 break-words text-2xl font-bold text-slate-950">{value}</p></div>)}
+            ["TotalRevenue", formatOrderAmount(report.totalRevenue, language), report.series.map((point) => point.revenue)],
+            ["PaidOrders", report.paidOrderCount, report.series.map((point) => point.orders)],
+            ["SuccessRate", percent.format(report.successRate), null],
+            ["AverageOrder", formatOrderAmount(report.averageOrderValue, language), null],
+          ].map(([key, value, spark]) => <div key={key} className={panelClass}><h2 className="text-sm font-semibold text-slate-600">{t(`adminRevenue${key}`)}</h2><p className="mt-3 break-words text-2xl font-bold text-slate-950">{value}</p>{spark && <Sparkline values={spark} />}</div>)}
         </div>
         <div className="space-y-2 text-sm text-slate-600"><p>{t("adminRevenueSuccessHelp").replace("{count}", report.totalOrderCount)}</p><p>{t("adminRevenueMissingDateHelp")}</p></div>
         {report.paidOrderCount === 0 && <p role="status" className="rounded-xl border border-dashed border-slate-300 p-5 text-sm text-slate-600">{t("adminRevenueEmpty")}</p>}
         <section className={panelClass} aria-labelledby="revenue-chart-title"><h2 id="revenue-chart-title" className="text-lg font-bold">{t("adminRevenueChart")}</h2><RevenueChart series={report.series} t={t} language={language} /></section>
+        <section className={panelClass} aria-labelledby="revenue-cumulative-title"><h2 id="revenue-cumulative-title" className="text-lg font-bold">{t("adminRevenueCumulative")}</h2><CumulativeChart series={report.series} t={t} language={language} /></section>
         <section className={panelClass} aria-labelledby="revenue-plans-title"><h2 id="revenue-plans-title" className="text-lg font-bold">{t("adminRevenuePlans")}</h2>
-          {!report.byPlan.length ? <p className="mt-4 text-sm text-slate-600">{t("adminRevenueChartEmpty")}</p> : <div className="mt-4 overflow-x-auto"><table className="w-full text-left text-sm">
-            <caption className="sr-only">{t("adminRevenuePlans")}</caption>
-            <thead className="bg-slate-50 text-slate-600"><tr>{["Plan", "Orders", "Revenue", "Share"].map((key) => <th key={key} scope="col" className="whitespace-nowrap px-4 py-3 font-semibold">{t(`adminRevenue${key}`)}</th>)}</tr></thead>
-            <tbody className="divide-y divide-slate-100">{report.byPlan.map((plan) => <tr key={plan.planCode ?? "unknown"}><th scope="row" className="px-4 py-3 font-semibold">{plan.planCode || "—"}</th><td className="px-4 py-3">{plan.orders}</td><td className="whitespace-nowrap px-4 py-3">{formatOrderAmount(plan.revenue, language)}</td><td className="px-4 py-3">{percent.format(report.totalRevenue ? plan.revenue / report.totalRevenue : 0)}</td></tr>)}</tbody>
-          </table></div>}
+          {!report.byPlan.length ? <p className="mt-4 text-sm text-slate-600">{t("adminRevenueChartEmpty")}</p> : <PlanDonut plans={report.byPlan} totalRevenue={report.totalRevenue} percent={percent} t={t} language={language} />}
         </section>
       </div>}
     </div>
