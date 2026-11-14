@@ -3,6 +3,7 @@ import { getAdminRevenue } from "../../../../api/billing/adminPayments.js";
 import { useLanguage } from "../../../../i18n/LanguageContext";
 import { formatOrderAmount, formatOrderDate, orderDateEpoch } from "../../utils/adminPayments.js";
 import { buildRevenueQuery, revenueErrorKey, revenuePresets } from "../../utils/adminRevenue.js";
+import { buildRevenueCsv, downloadCsv } from "../../utils/adminRevenueCsv.js";
 
 const inputClass = "mt-2 min-h-11 w-full min-w-0 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-blue-600";
 const buttonClass = "min-h-11 rounded-xl border px-4 py-2 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-50";
@@ -88,6 +89,18 @@ export default function AdminRevenuePage() {
     setRange((current) => key === "custom" ? { ...current, preset: key } : presetRange(key));
   }
 
+  function exportCsv() {
+    if (!report) return;
+    downloadCsv(
+      `doanh-thu-${range.from}-${range.to}.csv`,
+      buildRevenueCsv(report, {
+        granularityLabel: t(granularity === "day" ? "adminRevenueDay" : "adminRevenueMonth"),
+        fromLabel: formatOrderDate(orderDateEpoch(range.from), language),
+        toLabel: formatOrderDate(orderDateEpoch(range.to, true), language),
+      }),
+    );
+  }
+
   return <section className="mx-auto max-w-7xl space-y-6" aria-labelledby="revenue-title">
     <header><h1 id="revenue-title" className="text-2xl font-bold text-slate-950 sm:text-3xl">{t("adminRevenueTitle")}</h1><p className="mt-2 text-sm text-slate-600">{t("adminRevenueDescription")}</p></header>
     <div className={panelClass}>
@@ -100,6 +113,7 @@ export default function AdminRevenuePage() {
       </div>
       <p id="revenue-range-help" className="mt-4 text-sm text-slate-600">{t("adminRevenueDateHelp")}</p>
       {!invalidRange && <p className="mt-2 text-sm text-slate-700">{formatOrderDate(orderDateEpoch(range.from), language)} – {formatOrderDate(orderDateEpoch(range.to, true), language)}</p>}
+      <div className="mt-4"><button type="button" disabled={!report} onClick={exportCsv} className={`${buttonClass} border-slate-300 text-slate-700 hover:bg-slate-50`}>{t("adminRevenueExportCsv")}</button></div>
     </div>
 
     <div aria-busy={Boolean(request.loading)}>
