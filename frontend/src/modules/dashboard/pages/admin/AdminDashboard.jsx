@@ -146,8 +146,7 @@ function AdminDashboardContent() {
     <section className="mx-auto max-w-[1500px]">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">Tổng quan hệ thống</h1>
-          <p className="mt-2 text-sm text-slate-500 sm:text-base">
+          <p className="text-sm text-slate-500 sm:text-base">
             {isAdmin ? "Báo cáo số liệu và hoạt động của hệ thống phê duyệt." : "Theo dõi đề thi và trạng thái phê duyệt của bạn."}
           </p>
         </div>
@@ -277,6 +276,6 @@ function AdminDashboard() {
   const { t } = useLanguage();
   return canUseConsole(profile, "tests.view") || profile?.role === "ADMIN"
     ? <AdminDashboardContent />
-    : <section className="rounded-2xl border border-slate-200 bg-white p-8"><h1 className="text-2xl font-bold">{t("staffFeature_dashboard")}</h1><p className="mt-3 text-slate-500">{t("staffConsoleWelcome")}</p></section>;
+    : <section className="rounded-2xl border border-slate-200 bg-white p-8"><p className="text-slate-500">{t("staffConsoleWelcome")}</p></section>;
 }
 export default AdminDashboard;

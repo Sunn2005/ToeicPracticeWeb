@@ -1,6 +1,6 @@
 import { canUseConsole, consoleRoutePermission } from "../auth/consolePermissions";
 import { useEffect, useState } from "react";
-import { Link, matchPath, NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
+import { matchPath, NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/useAuth";
 import BrandLogo from "../components/ui/BrandLogo";
 import { useLanguage } from "../i18n/LanguageContext";
@@ -58,6 +58,7 @@ function ManagementLayout() {
     ["/console/tests/:testId/preview", "consolePreviewTest"],
     ["/console/reviews/:testId", "consoleReviewDetails"],
   ].find(([path]) => matchPath(path, pathname))?.[1];
+  const pageTitle = detailLabel ? t(detailLabel) : breadcrumb[breadcrumb.length - 1]?.label;
 
   useEffect(() => {
     const refresh = () => { refreshProfile().catch(() => {}); };
@@ -117,27 +118,7 @@ function ManagementLayout() {
           <button type="button" onClick={() => setSidebarOpen(true)} className="rounded-xl border border-slate-200 p-2.5 text-slate-600 lg:hidden" aria-label="Mở menu">
             <Icon name="menu" />
           </button>
-          <nav aria-label={t("consoleBreadcrumb")} className="min-w-0 text-sm">
-            <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              {breadcrumb.map((item, index) => {
-                const current = index === breadcrumb.length - 1 && !detailLabel;
-                return (
-                  <li key={item.to} className="flex items-center gap-2">
-                    {index > 0 && <span aria-hidden="true" className="text-slate-400">/</span>}
-                    {current
-                      ? <span aria-current="page" className="font-semibold text-slate-900">{item.label}</span>
-                      : <Link to={item.to} className="text-slate-600 hover:underline">{item.label}</Link>}
-                  </li>
-                );
-              })}
-              {detailLabel && (
-                <li aria-current="page" className="flex items-center gap-2 font-semibold text-slate-900">
-                  {breadcrumb.length > 0 && <span aria-hidden="true" className="text-slate-400">/</span>}
-                  {t(detailLabel)}
-                </li>
-              )}
-            </ol>
-          </nav>
+          {pageTitle && <h1 className="min-w-0 flex-1 truncate text-xl font-bold text-slate-950">{pageTitle}</h1>}
           <div className="ml-auto flex shrink-0 items-center gap-3 sm:gap-5">
             <div className="hidden text-right sm:block">
               <p className="max-w-52 truncate text-sm font-bold text-slate-900">{profile?.displayName || profile?.email || "Tài khoản nội bộ"}</p>

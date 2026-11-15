@@ -36,8 +36,7 @@ function ReviewQueuePage() {
 
   return (
     <section className="mx-auto max-w-[1500px]">
-      <h1 className="text-2xl font-bold text-slate-950 sm:text-3xl">Yêu cầu chờ duyệt</h1>
-      <p className="mt-2 text-sm text-slate-500">Kiểm tra nội dung trước khi phát hành đề thi.</p>
+      <p className="text-sm text-slate-500">Kiểm tra nội dung trước khi phát hành đề thi.</p>
 
       {error && (
         <div role="alert" className="mt-6 flex flex-col gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 sm:flex-row sm:items-center sm:justify-between">
