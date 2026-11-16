@@ -5,7 +5,7 @@
  * @param {object} form - current form values
  * @param {function(object)} onChange - handler when form fields change
  */
-export default function TestMetadataForm({ form, onChange }) {
+export default function TestMetadataForm({ form, onChange, children }) {
   const updateField = (field, value) => {
     onChange({ ...form, [field]: value });
   };
@@ -60,6 +60,8 @@ export default function TestMetadataForm({ form, onChange }) {
               className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-900 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-100"
             />
           </div>
+
+          {children}
 
           {/* Mô tả */}
           <div>

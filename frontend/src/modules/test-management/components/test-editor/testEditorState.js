@@ -113,7 +113,7 @@ export function renumberEmployeeTest(test) {
 
 export async function saveEmployeeDraft(test, { create, update }) {
   const payload = employeeTestPayload(test);
-  return test.testId ? update(test.testId, payload) : create(payload);
+  return test.testId ? update(test.testId, payload) : create(payload, test.requestedId?.trim() || undefined);
 }
 
 export async function saveAndSubmitEmployeeTest(test, api) {

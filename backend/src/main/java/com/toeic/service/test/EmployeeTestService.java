@@ -1,6 +1,7 @@
 package com.toeic.service.test;
 
 import com.toeic.dao.test.TestDao;
+import com.toeic.exception.ApiCodeException;
 import com.toeic.model.test.Test;
 import com.toeic.model.test.enums.TestStatus;
 import org.springframework.http.HttpStatus;
@@ -33,16 +34,22 @@ public class EmployeeTestService {
                 .toList();
     }
 
-    public Map<String, Object> create(String employeeUid, Test request) throws Exception {
+    public Map<String, Object> create(String employeeUid, Test request, String requestedId) throws Exception {
         support.validateDraftMetadata(request);
+        String id = requestedId == null ? "" : requestedId.strip();
+        if (id.length() > 64 || (!id.isEmpty() && !id.matches("[a-z0-9]+(?:-[a-z0-9]+)*"))) {
+            throw new ApiCodeException(HttpStatus.BAD_REQUEST, "TEST_ID_INVALID", "Invalid test ID");
+        }
         long now = System.currentTimeMillis();
-        request.setTestId(testDao.nextId());
+        request.setTestId(id.isEmpty() ? testDao.nextId() : id);
         request.setCreatedBy(employeeUid);
         request.setStatus(TestStatus.DRAFT);
         request.setCreatedAt(now);
         request.setUpdatedAt(now);
         clearReview(request);
-        testDao.save(request);
+        if (!testDao.createIfAbsent(request)) {
+            throw new ApiCodeException(HttpStatus.CONFLICT, "TEST_ID_EXISTS", "Test ID already exists");
+        }
         return support.toMap(request, true);
     }
 

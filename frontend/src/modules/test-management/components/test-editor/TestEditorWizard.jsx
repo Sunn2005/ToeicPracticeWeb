@@ -138,6 +138,8 @@ export default function TestEditorWizard({ initialTest, mode = "create" }) {
   const requestError = (err) => {
     if (err?.status === 401) return t("employeeEditorAuthError");
     if (err?.status === 403) return t("employeeEditorAccessError");
+    if (err?.status === 400 && err.body?.code === "TEST_ID_INVALID") return t("employeeEditorTestIdInvalid");
+    if (err?.status === 409 && err.body?.code === "TEST_ID_EXISTS") return t("employeeEditorTestIdExists");
     if (err?.status === 409) return t("employeeEditorConflictError");
     if (["employeeEditorCannotSubmit", "employeeEditorMissingSavedId"].includes(err?.message)) return t(err.message);
     return t("employeeEditorRequestError");
@@ -154,7 +156,7 @@ export default function TestEditorWizard({ initialTest, mode = "create" }) {
   // payload is the right comparison basis because it is exactly what would
   // be sent to the server — server-managed fields never make the editor
   // look dirty.
-  const snapshotOf = (value) => JSON.stringify(employeeTestPayload(value));
+  const snapshotOf = (value) => JSON.stringify([employeeTestPayload(value), value.testId ? "" : value.requestedId?.trim() || ""]);
   const [savedSnapshot, setSavedSnapshot] = useState(() => snapshotOf(test));
   const currentSnapshot = useMemo(() => snapshotOf(test), [test]);
   const dirty = currentSnapshot !== savedSnapshot;
@@ -397,7 +399,27 @@ export default function TestEditorWizard({ initialTest, mode = "create" }) {
       {/* Step Content */}
       <fieldset disabled={busy || !editable} className="min-w-0 min-h-[460px]">
         {step === 1 && (
-          <TestMetadataForm form={test} onChange={updateMetadata} />
+          <TestMetadataForm form={test} onChange={updateMetadata}>
+            {mode === "create" && !test.testId && (
+              <div>
+                <label htmlFor="requestedTestId" className="mb-2 block text-sm font-bold text-slate-700">
+                  {t("employeeEditorTestId")}
+                </label>
+                <input
+                  id="requestedTestId"
+                  value={test.requestedId || ""}
+                  onChange={(event) => updateMetadata({ requestedId: event.target.value })}
+                  aria-describedby="requestedTestIdHint"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  maxLength={64}
+                  placeholder="test-4"
+                  className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-100"
+                />
+                <p id="requestedTestIdHint" className="mt-2 text-sm text-slate-600">{t("employeeEditorTestIdHint")}</p>
+              </div>
+            )}
+          </TestMetadataForm>
         )}
 
         {step === 2 && (

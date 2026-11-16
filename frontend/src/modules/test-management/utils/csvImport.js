@@ -1,10 +1,9 @@
 /**
- * CSV import for employee tests.
+ * CSV parsing and shared import validation for employee tests.
  *
- * The CSV follows the team's template: one row per question, media columns
- * hold bare file names only (e.g. "T05-01.mp3", "T05-P1-1.png"). Files are
- * uploaded to the public Supabase bucket `toeic-media` beforehand; at import
- * time each name is expanded into the full public URL the player consumes:
+ * CSV and Excel share the same template with one row per question. Media
+ * columns accept file names or their corresponding public URLs in the
+ * Supabase `toeic-media` bucket. The player consumes URLs in this format:
  *
  *   <MEDIA_BASE_URL>/<Txx-media>/audio/<name>    for the "File audio" column
  *   <MEDIA_BASE_URL>/<Txx-media>/picture/<name>  for the "File ảnh" column
@@ -12,8 +11,8 @@
  * The media folder is derived from the file-name prefix (T05-… → T05-media),
  * which matches the bucket layout used by the packaged seed tests.
  *
- * buildTestFromCsv returns { test, issues, stats, suggestedTitle }. When
- * issues is non-empty, test is null and every issue carries the CSV row it
+ * The import builders return { test, issues, stats, suggestedTitle }. When
+ * issues is non-empty, test is null and every issue carries the source row it
  * came from so the dialog can report errors per row and block the import.
  */
 
@@ -94,27 +93,37 @@ function suggestTitleFromText(text) {
 }
 
 const splitNames = (cell) =>
-  String(cell || "").split(";").map((name) => name.trim()).filter(Boolean);
+  String(cell ?? "").split(/[;\r\n]+/).map((name) => name.trim()).filter(Boolean);
 
-export function buildTestFromCsv(text, { title = "" } = {}) {
+function mediaNames(cell, kind) {
+  return splitNames(cell).map((value) => {
+    const name = value.slice(value.lastIndexOf("/") + 1);
+    return value === mediaFileUrl(name, kind) ? name : value;
+  });
+}
+
+export function buildTestFromCsv(text, options) {
+  return buildTestFromRows(parseCsv(text), options);
+}
+
+export function buildTestFromRows(rows, { title = "" } = {}) {
   const issues = [];
   const add = (code, values = {}, row = 0) => issues.push({ row, code, values });
-  const suggestedTitle = suggestTitleFromText(text);
   const stats = {
     rowCount: 0,
     partCounts: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 },
     audioCount: 0,
     imageCount: 0,
-    ignoredAnswerTranslation: false,
   };
+  let suggestedTitle = "";
   const done = (test) => ({ test, issues, stats, suggestedTitle });
 
-  const rawRows = parseCsv(text);
+  const rawRows = rows.filter((cells) => cells.some((value) => String(value ?? "").trim() !== ""));
   if (!rawRows.length) {
     add("employeeImportIssueEmptyFile");
     return done(null);
   }
-  const header = rawRows[0].map((cell) => String(cell).trim());
+  const header = rawRows[0].map((cell) => String(cell ?? "").trim());
   const missingHeaders = CSV_TEMPLATE_HEADERS.filter((name) => !header.includes(name));
   if (missingHeaders.length) {
     missingHeaders.forEach((name) => add("employeeImportIssueHeader", { column: name }));
@@ -139,11 +148,11 @@ export function buildTestFromCsv(text, { title = "" } = {}) {
     transcriptTranslation: cell(cells, "Dịch transcript"),
     passageContent: cell(cells, "Nội dung đoạn"),
     passageTitle: cell(cells, "Tiêu đề đoạn"),
-    imageNames: splitNames(cell(cells, "File ảnh")),
-    audioNames: splitNames(cell(cells, "File audio")),
+    imageNames: mediaNames(cell(cells, "File ảnh"), "image"),
+    audioNames: mediaNames(cell(cells, "File audio"), "audio"),
   }));
+  suggestedTitle = suggestTitleFromText(records.flatMap(({ audioNames, imageNames }) => [...audioNames, ...imageNames]).join(" "));
   stats.rowCount = records.length;
-  stats.ignoredAnswerTranslation = records.some((rec) => rec.answerTranslation !== "");
 
   // --- File-level structure -------------------------------------------------
   if (records.length !== 200) {
@@ -207,6 +216,7 @@ export function buildTestFromCsv(text, { title = "" } = {}) {
       correctAnswer: rec.correctAnswer,
     };
     if (rec.questionTranslation) question.questionTranslation = rec.questionTranslation;
+    if (rec.answerTranslation) question.answerTranslation = rec.answerTranslation;
     if (rec.explanation) question.explanation = rec.explanation;
     return question;
   };

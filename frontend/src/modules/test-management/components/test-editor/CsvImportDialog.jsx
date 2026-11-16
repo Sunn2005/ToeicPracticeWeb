@@ -1,13 +1,13 @@
 import { useRef, useState } from "react";
 import StaffDialog from "../../../staff-management/components/StaffDialog";
 import { useLanguage } from "../../../../i18n/LanguageContext";
-import { buildTemplateCsv, buildTestFromCsv } from "../../utils/csvImport";
+import { buildTemplateCsv, buildTestFromCsv, buildTestFromRows } from "../../utils/csvImport";
 
 const EXPECTED_COUNTS = { 1: 6, 2: 25, 3: 39, 4: 30, 5: 30, 6: 16, 7: 54 };
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 /**
- * CsvImportDialog — pick a CSV file in the team template, validate it row by
+ * CsvImportDialog — pick a CSV or Excel file in the team template, validate it row by
  * row, and (only when fully valid) load the built test into the editor as an
  * unsaved draft. Nothing is saved or submitted from here.
  *
@@ -21,14 +21,16 @@ export default function CsvImportDialog({ onImport, onClose }) {
   const [result, setResult] = useState(null);
   const [title, setTitle] = useState("");
   const [localError, setLocalError] = useState("");
+  const readingRef = useRef(false);
+  const [reading, setReading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
 
   const format = (key, values = {}) =>
     t(key).replace(/\{(\w+)\}/g, (_, name) => values[name] ?? "");
 
   const handleFile = async (file) => {
-    if (!file) return;
-    if (!/\.csv$/i.test(file.name)) {
+    if (!file || readingRef.current) return;
+    if (!/\.(csv|xlsx)$/i.test(file.name)) {
       setLocalError(t("employeeImportFileTypeError"));
       return;
     }
@@ -36,12 +38,27 @@ export default function CsvImportDialog({ onImport, onClose }) {
       setLocalError(t("employeeImportFileTooLarge"));
       return;
     }
+    readingRef.current = true;
+    setReading(true);
     setLocalError("");
-    const text = await file.text();
-    const parsed = buildTestFromCsv(text);
-    setResult(parsed);
-    setFileName(file.name);
-    setTitle(parsed.suggestedTitle || "");
+    try {
+      let parsed;
+      if (/\.xlsx$/i.test(file.name)) {
+        const { readSheet } = await import("read-excel-file/universal");
+        parsed = buildTestFromRows(await readSheet(file));
+      } else {
+        parsed = buildTestFromCsv(await file.text());
+      }
+      setResult(parsed);
+      setFileName(file.name);
+      setTitle(parsed.suggestedTitle || "");
+    } catch {
+      setLocalError(t("employeeImportReadError"));
+    } finally {
+      readingRef.current = false;
+      setReading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   };
 
   const reset = () => {
@@ -91,10 +108,11 @@ export default function CsvImportDialog({ onImport, onClose }) {
               <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
                 <button
                   type="button"
+                  disabled={reading}
                   onClick={() => fileInputRef.current?.click()}
-                  className="rounded-xl bg-[#2188ee] px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-600"
+                  className="rounded-xl bg-[#2188ee] px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-600 disabled:opacity-50"
                 >
-                  {t("employeeImportChooseFile")}
+                  {t(reading ? "employeeImportReading" : "employeeImportChooseFile")}
                 </button>
                 <button
                   type="button"
@@ -107,7 +125,7 @@ export default function CsvImportDialog({ onImport, onClose }) {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".csv,text/csv"
+                accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 className="hidden"
                 onChange={(event) => handleFile(event.target.files?.[0])}
               />
@@ -190,11 +208,6 @@ export default function CsvImportDialog({ onImport, onClose }) {
                     </div>
                   ))}
                 </div>
-                {result.stats.ignoredAnswerTranslation && (
-                  <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-800">
-                    {t("employeeImportAnswerTranslationNote")}
-                  </p>
-                )}
                 <label className="block">
                   <span className="mb-1.5 block text-xs font-bold text-slate-700">
                     {t("employeeImportTitleLabel")}

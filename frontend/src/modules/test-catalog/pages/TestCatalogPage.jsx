@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { apiFetch, publicApiFetch } from "../../../api/client";
 import TestModeModal from "../components/TestModeModal";
-import { TOEIC_TESTS } from "../data/testCatalog";
+import { ETS_2026_TEST_4, TOEIC_TESTS } from "../data/testCatalog";
 import { canContinuePractice, getAttemptParts, getFullMockScoreSummary } from "../../learning-history/utils/attemptHistory";
 import { useUserAttempts } from "../../learning-history/hooks/useUserAttempts";
 import { useLanguage } from "../../../i18n/LanguageContext";
@@ -85,7 +85,10 @@ export default function TestCatalogPage() {
       .then((catalog) => {
         if (!active || !Array.isArray(catalog)) return;
         const metadata = new Map(catalog.map((test) => [test.testId, test]));
-        setTests(TOEIC_TESTS.map((test) => ({ ...test, ...(metadata.get(test.id) || {}) })));
+        const configuredTests = metadata.has(ETS_2026_TEST_4.id)
+          ? [...TOEIC_TESTS, ETS_2026_TEST_4]
+          : TOEIC_TESTS;
+        setTests(configuredTests.map((test) => ({ ...test, ...(metadata.get(test.id) || {}) })));
       })
       .catch(() => undefined);
     return () => { active = false; };

@@ -980,10 +980,11 @@ Yêu cầu role `EMPLOYEE` hoặc `ADMIN`. API danh sách/chi tiết chỉ thao 
 - **Mục đích:** tạo đề mới ở trạng thái `DRAFT`.
 - **Method/type:** `POST`, request/response `application/json`.
 - **Path:** `/api/employee/tests`.
+- **Query param tùy chọn:** `requestedId` tối đa 64 ký tự, gồm chữ thường và số, có thể ngăn cách bằng dấu gạch nối (ví dụ `test-4`). Khi bỏ trống, server tự sinh ID.
 - **Request body:** object `Test` đầy đủ theo mục 2.2. `title` là bắt buộc; có thể gửi `parts` ngay khi tạo.
 - **Field do server kiểm soát:** `testId`, `createdBy`, `status`, `createdAt`, `updatedAt`, `submittedAt`, `reviewedBy`, `reviewedAt`, `rejectionReason` được server tạo, ghi đè hoặc xóa phù hợp.
 - **Response thành công:** `201 Created`, object `Test` đầy đủ với `status=DRAFT`.
-- **Lỗi chính:** `400 BAD_REQUEST` nếu `title` rỗng.
+- **Lỗi chính:** `400 BAD_REQUEST` nếu `title` rỗng, `400 TEST_ID_INVALID` nếu ID sai định dạng, `409 TEST_ID_EXISTS` nếu ID đã tồn tại.
 
 ### 8.3 Lấy chi tiết đề của mình
 

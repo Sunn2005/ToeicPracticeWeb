@@ -51,9 +51,10 @@ public class EmployeeTestController {
     @ResponseStatus(HttpStatus.CREATED)
     public Map<String, Object> create(
             @RequestBody Test request,
+            @RequestParam(name = "requestedId", required = false) String requestedId,
             @AuthenticationPrincipal ToeicUserPrincipal principal
     ) throws Exception {
-        return employeeTestService.create(principal.uid(), request);
+        return employeeTestService.create(principal.uid(), request, requestedId);
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('tests.view')")

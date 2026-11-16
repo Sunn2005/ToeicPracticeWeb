@@ -8,8 +8,9 @@ export function getEmployeeTest(testId) {
   return apiFetch(`/api/employee/tests/${encodeURIComponent(testId)}`);
 }
 
-export function createEmployeeTest(test) {
-  return apiFetch("/api/employee/tests", {
+export function createEmployeeTest(test, requestedId) {
+  const query = requestedId ? `?requestedId=${encodeURIComponent(requestedId)}` : "";
+  return apiFetch(`/api/employee/tests${query}`, {
     method: "POST",
     body: JSON.stringify(test),
   });

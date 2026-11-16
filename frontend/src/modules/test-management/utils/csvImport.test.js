@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  CSV_TEMPLATE_HEADERS, buildTemplateCsv, buildTestFromCsv, mediaFileUrl, parseCsv,
+  CSV_TEMPLATE_HEADERS, buildTemplateCsv, buildTestFromCsv, buildTestFromRows, mediaFileUrl, parseCsv,
 } from "./csvImport.js";
 import {
   employeeTestPayload, validateEmployeeTest,
@@ -154,4 +154,39 @@ test("row-level problems carry their CSV row and issue code", () => {
   assert.ok(codes.includes("employeeImportIssueGroupAudioInconsistent"));
   const dup = buildTestFromCsv(toCsv([makeRow(5, 101), makeRow(5, 101)])).issues;
   assert.ok(dup.some((i) => i.code === "employeeImportIssueQuestionDuplicate" && i.row === 3));
+});
+
+test("spreadsheet rows and CSV produce the same test with full media URLs", () => {
+  const rows = validRows();
+  const mediaRows = rows.map((row) => {
+    const cells = row.map((value) => value === "" ? null : value);
+    cells[17] = row[17] ? row[17].split("; ").map((name) => mediaFileUrl(name, "image")).join("\n") : null;
+    cells[18] = row[18] ? mediaFileUrl(row[18], "audio") : null;
+    return cells;
+  });
+  const expected = buildTestFromCsv(toCsv(rows));
+  assert.ok(expected.test);
+  assert.deepEqual(buildTestFromRows([CSV_TEMPLATE_HEADERS, ...mediaRows]), expected);
+});
+
+test("media URLs must match the configured bucket, folder and media type", () => {
+  const rows = validRows();
+  rows[0][17] = "https://example.com/T05-P1-1.png";
+  rows[0][18] = mediaFileUrl("T05-01.mp3", "image");
+  const { test: imported, issues } = buildTestFromRows([CSV_TEMPLATE_HEADERS, ...rows]);
+  assert.equal(imported, null);
+  assert.equal(issues.filter(({ code }) => code === "employeeImportIssueMediaNameInvalid").length, 2);
+});
+
+test("keeps multiline answer translations in the draft payload for CSV and Excel rows", () => {
+  const rows = validRows();
+  const translation = "A. Một\nB. Hai\nC. Ba\nD. Bốn";
+  rows[0][CSV_TEMPLATE_HEADERS.indexOf("Dịch đáp án")] = translation;
+
+  for (const result of [buildTestFromCsv(toCsv(rows)), buildTestFromRows([CSV_TEMPLATE_HEADERS, ...rows])]) {
+    assert.deepEqual(result.issues, []);
+    const [first, second] = employeeTestPayload(result.test).parts[0].questions;
+    assert.equal(first.answerTranslation, translation);
+    assert.equal(second.answerTranslation, undefined);
+  }
 });

@@ -18,6 +18,8 @@ public interface TestDao {
 
     String nextId();
 
+    boolean createIfAbsent(Test test) throws Exception;
+
     void save(Test test) throws Exception;
 
     void delete(String testId) throws Exception;

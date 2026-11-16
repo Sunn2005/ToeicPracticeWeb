@@ -1,10 +1,13 @@
 package com.toeic.dao.test.firestore;
 
 import com.google.api.core.ApiFuture;
+import com.google.api.gax.rpc.ApiException;
+import com.google.api.gax.rpc.StatusCode;
 import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.FirestoreException;
 import com.google.cloud.firestore.SetOptions;
 import com.google.cloud.firestore.WriteBatch;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
@@ -12,6 +15,7 @@ import com.toeic.dao.test.TestDao;
 import com.toeic.model.test.Test;
 import com.toeic.model.test.TestPart;
 import com.toeic.model.test.enums.TestStatus;
+import io.grpc.Status;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -22,6 +26,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 
 @Repository
 public class FirestoreTestDao implements TestDao {
@@ -127,10 +132,33 @@ public class FirestoreTestDao implements TestDao {
     }
 
     @Override
+    public boolean createIfAbsent(Test test) throws Exception {
+        try {
+            write(test, true);
+            return true;
+        } catch (ExecutionException failure) {
+            Throwable cause = failure.getCause();
+            if (cause instanceof FirestoreException firestoreFailure
+                    && firestoreFailure.getStatus().getCode() == Status.Code.ALREADY_EXISTS) return false;
+            if (cause instanceof ApiException apiFailure
+                    && apiFailure.getStatusCode().getCode() == StatusCode.Code.ALREADY_EXISTS) return false;
+            throw failure;
+        }
+    }
+
+    @Override
     public void save(Test test) throws Exception {
+        write(test, false);
+    }
+
+    private void write(Test test, boolean create) throws Exception {
         DocumentReference testDocument = firestore.collection("tests").document(test.getTestId());
         WriteBatch batch = firestore.batch();
-        batch.set(testDocument, metadataDocument(test), SetOptions.merge());
+        if (create) {
+            batch.create(testDocument, metadataDocument(test));
+        } else {
+            batch.set(testDocument, metadataDocument(test), SetOptions.merge());
+        }
 
         if (test.getParts() != null) {
             for (TestPart part : test.getParts()) {

@@ -1,6 +1,7 @@
 package com.toeic.service.test;
 
 import com.toeic.dao.test.TestDao;
+import com.toeic.exception.ApiCodeException;
 import com.toeic.model.test.enums.TestStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -24,14 +25,36 @@ class EmployeeTestServiceTests {
         com.toeic.model.test.Test request = new com.toeic.model.test.Test();
         request.setTitle("Test mới");
         when(testDao.nextId()).thenReturn("test-new");
+        when(testDao.createIfAbsent(request)).thenReturn(true);
         when(support.toMap(request, true)).thenReturn(Map.of("testId", "test-new"));
 
-        Map<String, Object> result = service.create("employee-1", request);
+        Map<String, Object> result = service.create("employee-1", request, null);
 
         assertEquals("test-new", result.get("testId"));
         assertEquals("employee-1", request.getCreatedBy());
         assertEquals(TestStatus.DRAFT, request.getStatus());
-        verify(testDao).save(request);
+        verify(testDao).createIfAbsent(request);
+    }
+
+    @Test
+    void usesRequestedIdAndRejectsDuplicate() throws Exception {
+        TestDao testDao = mock(TestDao.class);
+        TestManagementSupport support = mock(TestManagementSupport.class);
+        EmployeeTestService service = new EmployeeTestService(testDao, support);
+        com.toeic.model.test.Test request = new com.toeic.model.test.Test();
+        when(testDao.createIfAbsent(request)).thenReturn(true, false);
+        when(support.toMap(request, true)).thenReturn(Map.of("testId", "test-4"));
+
+        assertEquals("test-4", service.create("employee-1", request, " test-4 ").get("testId"));
+        assertEquals("test-4", request.getTestId());
+        ApiCodeException duplicate = assertThrows(ApiCodeException.class,
+                () -> service.create("employee-1", request, "test-4"));
+        assertEquals(HttpStatus.CONFLICT, duplicate.getStatus());
+        assertEquals("TEST_ID_EXISTS", duplicate.getCode());
+        ApiCodeException invalid = assertThrows(ApiCodeException.class,
+                () -> service.create("employee-1", request, "test/4"));
+        assertEquals(HttpStatus.BAD_REQUEST, invalid.getStatus());
+        assertEquals("TEST_ID_INVALID", invalid.getCode());
     }
 
     @Test

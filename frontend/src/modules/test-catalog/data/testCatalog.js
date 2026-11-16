@@ -25,12 +25,27 @@ export const TOEIC_TESTS = [
   },
 ];
 
+export const ETS_2026_TEST_4 = {
+  id: "test-4",
+  name: "Test 4",
+  title: "ETS 2026 Listening & Reading – Test 4",
+  totalQuestions: 200,
+  duration: 120,
+  available: true,
+};
+
+function findTest(testId) {
+  return testId === ETS_2026_TEST_4.id
+    ? ETS_2026_TEST_4
+    : TOEIC_TESTS.find((test) => test.id === testId);
+}
+
 export function getTestName(testId) {
-  return TOEIC_TESTS.find((test) => test.id === testId)?.name || testId || "TOEIC Test";
+  return findTest(testId)?.name || testId || "TOEIC Test";
 }
 
 export function getTestTitle(testId) {
-  return TOEIC_TESTS.find((test) => test.id === testId)?.title || getTestName(testId);
+  return findTest(testId)?.title || getTestName(testId);
 }
 
 export const TOEIC_PARTS = [
