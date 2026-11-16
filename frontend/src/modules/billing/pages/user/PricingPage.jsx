@@ -1,3 +1,4 @@
+import usePageTitle from "../../../../components/ui/usePageTitle";
 import { useEffect, useState } from "react";
 import { useAuth } from "../../../../auth/useAuth";
 import { useLanguage } from "../../../../i18n/LanguageContext";
@@ -48,6 +49,7 @@ function TrustSignals({ t }) {
 
 export default function PricingPage() {
   const { t, language } = useLanguage();
+  usePageTitle(t("pricingTitle"));
   const { profile } = useAuth();
   const [plans, setPlans] = useState([]);
   const [loadingPlans, setLoadingPlans] = useState(true);

@@ -1,5 +1,6 @@
+import usePageTitle from "../../../../components/ui/usePageTitle";
 import { useAuth } from "../../../../auth/useAuth";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useId, useRef, useState } from "react";
 import { getAdminOrder, getAdminOrders, reconcileAdminOrder } from "../../../../api/billing/adminPayments.js";
 import { useLanguage } from "../../../../i18n/LanguageContext";
 import { buildOrdersQuery, formatOrderAmount, formatOrderDate, orderDateEpoch, orderStatusKey, paymentErrorKey } from "../../utils/adminPayments.js";
@@ -86,6 +87,7 @@ function RequestState({ request, t, onRetry }) {
 
 export default function AdminOrdersPage() {
   const { t, language } = useLanguage();
+  usePageTitle(t("adminOrdersTitle"));
   const [filters, setFilters] = useState({ status: "", planCode: "", from: "", to: "" });
   const [page, setPage] = useState(0);
   const [retry, setRetry] = useState(0);
@@ -96,6 +98,9 @@ export default function AdminOrdersPage() {
   const [searchNotice, setSearchNotice] = useState(null);
   const [copied, setCopied] = useState(null);
   const [suggestOpen, setSuggestOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const searchId = useId();
+  const searchInput = useRef(null);
   const copyTimer = useRef(null);
   useEffect(() => () => clearTimeout(copyTimer.current), []);
   const invalidRange = Boolean(filters.from && filters.to && filters.from > filters.to);
@@ -118,29 +123,60 @@ export default function AdminOrdersPage() {
     setPage(0);
     setExpanded(null);
   }
+  function closeSuggestions() {
+    setSuggestOpen(false);
+    setActiveIndex(-1);
+  }
+
   function clearSearch() {
     setSearchCode("");
     setSearched(null);
     setSearchNotice(null);
     setExpanded(null);
-    setSuggestOpen(false);
+    closeSuggestions();
   }
+
+  function openOrder(code) {
+    setSearchCode(String(code));
+    setSearched(code);
+    setSearchNotice(null);
+    setExpanded(null);
+    closeSuggestions();
+  }
+
   function searchOrder(event) {
     event.preventDefault();
     const code = searchCode.trim();
-    setExpanded(null);
-    setSuggestOpen(false);
-    if (!code) { setSearched(null); setSearchNotice(null); return; }
-    const lower = code.toLowerCase();
-    const match = (request.data?.items ?? []).find((order) =>
-      String(order.orderCode).toLowerCase().endsWith(lower)
-      || (order.buyerName || "").toLowerCase().includes(lower)
-      || (order.buyerEmail || "").toLowerCase().includes(lower),
-    );
-    if (match) { setSearched(match.orderCode); setSearchNotice(null); return; }
-    if (/^\d+$/.test(code)) { setSearched(code); setSearchNotice(null); return; }
+    if (!code) { clearSearch(); return; }
+    if (/^\d+$/.test(code)) { openOrder(code); return; }
+    if (suggestions.length === 1) { openOrder(suggestions[0].orderCode); return; }
     setSearched(null);
-    setSearchNotice("adminOrdersSearchNoMatch");
+    setExpanded(null);
+    setSearchNotice(suggestions.length ? null : "adminOrdersSearchNoMatch");
+    if (suggestions.length) {
+      searchInput.current?.focus();
+      setSuggestOpen(true);
+    } else {
+      closeSuggestions();
+    }
+  }
+
+  function handleSearchKey(event) {
+    if (event.key === "Escape" && suggestionsVisible) {
+      event.preventDefault();
+      closeSuggestions();
+    } else if (event.key === "Enter" && activeOption) {
+      event.preventDefault();
+      openOrder(activeOption.orderCode);
+    } else if (["ArrowDown", "ArrowUp"].includes(event.key) && suggestions.length) {
+      event.preventDefault();
+      const last = suggestions.length - 1;
+      const next = event.key === "ArrowDown"
+        ? (suggestionsVisible && activeIndex < last ? activeIndex + 1 : 0)
+        : (suggestionsVisible && activeIndex > 0 ? activeIndex - 1 : last);
+      setSuggestOpen(true);
+      setActiveIndex(next);
+    }
   }
   function copyCode(code) {
     if (!navigator.clipboard?.writeText) return;
@@ -159,29 +195,70 @@ export default function AdminOrdersPage() {
     String(order.orderCode).toLowerCase().endsWith(searchQuery)
     || (order.buyerName || "").toLowerCase().includes(searchQuery)
     || (order.buyerEmail || "").toLowerCase().includes(searchQuery),
-  ).slice(0, 8) : [];
+  ) : [];
+  const suggestionsVisible = suggestOpen && suggestions.length > 0;
+  const activeOption = suggestionsVisible ? suggestions[activeIndex] : null;
+  const activeOptionId = activeOption ? `${searchId}-option-${activeOption.orderCode}` : undefined;
+
+  useEffect(() => {
+    if (activeOptionId) document.getElementById(activeOptionId)?.scrollIntoView({ block: "nearest" });
+  }, [activeOptionId]);
 
   return <section className="mx-auto max-w-[1500px] space-y-6">
     <header><p className="text-sm text-slate-600">{t("adminOrdersDescription")}</p></header>
-    <form onSubmit={searchOrder} className="flex flex-wrap items-end gap-3">
-      <div className="relative min-w-0 flex-1">
-        <label className="block text-sm font-semibold">{t("adminOrdersSearchLabel")}
-          <span className="relative block">
-            <input value={searchCode} onChange={(event) => { setSearchCode(event.target.value); setSuggestOpen(true); }} onFocus={() => setSuggestOpen(true)} onBlur={() => setTimeout(() => setSuggestOpen(false), 150)} onKeyDown={(event) => { if (event.key === "Escape") setSuggestOpen(false); }} placeholder={t("adminOrdersSearchPlaceholder")} className={`${inputClass} pr-10`} role="combobox" aria-expanded={suggestOpen && suggestions.length > 0} aria-controls="orders-search-suggestions" autoComplete="off" />
-            {searchCode && <button type="button" aria-label={t("adminOrdersClearSearch")} onClick={clearSearch} className="absolute right-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-2 focus-visible:outline-blue-600"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="M6 6l12 12" /></svg></button>}
-          </span>
-        </label>
-        {suggestOpen && suggestions.length > 0 && <ul id="orders-search-suggestions" role="listbox" className="absolute inset-x-0 top-full z-10 mt-1 max-h-80 overflow-auto rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
-          {suggestions.map((order) => <li key={order.orderCode} role="option" aria-selected={false}>
-            <button type="button" onMouseDown={(event) => { event.preventDefault(); setSearchCode(String(order.orderCode)); setSearched(order.orderCode); setSearchNotice(null); setExpanded(null); setSuggestOpen(false); }} className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-blue-600">
-              <span className="font-semibold">{truncateCode(order.orderCode)}</span>
+    <form onSubmit={searchOrder} onBlur={(event) => {
+      if (!event.currentTarget.contains(event.relatedTarget)) closeSuggestions();
+    }}>
+      <label htmlFor={searchId} className="block text-sm font-semibold">{t("adminOrdersSearchLabel")}</label>
+      <div className="flex items-start gap-2">
+        <div className="relative min-w-0 flex-1">
+          <input
+            id={searchId}
+            ref={searchInput}
+            value={searchCode}
+            onChange={(event) => {
+              setSearchCode(event.target.value);
+              setSearchNotice(null);
+              setSuggestOpen(true);
+              setActiveIndex(-1);
+            }}
+            onFocus={() => setSuggestOpen(true)}
+            onKeyDown={handleSearchKey}
+            placeholder={t("adminOrdersSearchPlaceholder")}
+            className={`${inputClass} pr-11`}
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded={suggestionsVisible}
+            aria-controls={suggestionsVisible ? `${searchId}-suggestions` : undefined}
+            aria-activedescendant={activeOptionId}
+            aria-describedby={`${searchId}-help`}
+            autoComplete="off"
+          />
+          {searchCode && <button type="button" aria-label={t("adminOrdersClearSearch")} onClick={() => {
+            clearSearch();
+            searchInput.current?.focus();
+          }} className="absolute right-0 top-2 grid h-11 w-11 place-items-center rounded-lg text-slate-500 hover:text-slate-700 focus-visible:outline-2 focus-visible:outline-blue-600">
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+          </button>}
+          {suggestionsVisible && <ul id={`${searchId}-suggestions`} role="listbox" aria-label={t("adminOrdersSearchLabel")} className="absolute inset-x-0 top-full z-10 mt-1 max-h-80 overflow-auto rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
+            {suggestions.map((order, index) => <li
+              key={order.orderCode}
+              id={`${searchId}-option-${order.orderCode}`}
+              role="option"
+              aria-selected={index === activeIndex}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => openOrder(order.orderCode)}
+              className={`flex min-h-11 cursor-pointer flex-wrap items-center gap-x-3 px-3 py-2 text-sm hover:bg-slate-50 ${index === activeIndex ? "bg-blue-50 outline-2 -outline-offset-2 outline-blue-600" : ""}`}
+            >
+              <span className="font-semibold break-all">{order.orderCode}</span>
               <span className="min-w-0 flex-1 truncate text-slate-600">{order.buyerName || order.buyerEmail || order.userId}</span>
               <span className="whitespace-nowrap text-slate-600">{formatOrderAmount(order.amount, language)}</span>
-            </button>
-          </li>)}
-        </ul>}
+            </li>)}
+          </ul>}
+        </div>
+        <button type="submit" className={`${buttonClass} mt-2`}>{t("adminOrdersSearch")}</button>
       </div>
-      <button type="submit" className="sr-only">{t("adminOrdersSearch")}</button>
+      <p id={`${searchId}-help`} className="mt-2 text-sm text-slate-600">{t("adminOrdersSearchHelp")}</p>
     </form>
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

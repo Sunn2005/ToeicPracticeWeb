@@ -1,8 +1,9 @@
+import usePageTitle from "../../../../components/ui/usePageTitle";
 import { useEffect, useId, useState } from "react";
 import { getAdminRevenue } from "../../../../api/billing/adminPayments.js";
 import { useLanguage } from "../../../../i18n/LanguageContext";
 import { formatOrderAmount, formatOrderDate, orderDateEpoch } from "../../utils/adminPayments.js";
-import { buildRevenueQuery, revenueErrorKey, revenuePresets } from "../../utils/adminRevenue.js";
+import { buildRevenueQuery, previousRevenueRange, revenueErrorKey, revenuePresets } from "../../utils/adminRevenue.js";
 import { buildRevenueCsv, downloadCsv } from "../../utils/adminRevenueCsv.js";
 
 const inputClass = "mt-2 min-h-11 w-full min-w-0 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-blue-600";
@@ -72,15 +73,6 @@ function shortDate(iso) {
   return `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
 }
 
-function previousRange(from, to) {
-  const fromDay = Date.parse(from);
-  const length = Math.round((Date.parse(to) - fromDay) / 86400000) + 1;
-  return {
-    from: new Date(fromDay - length * 86400000).toISOString().slice(0, 10),
-    to: new Date(fromDay - 86400000).toISOString().slice(0, 10),
-  };
-}
-
 function Sparkline({ values, color = "text-blue-600" }) {
   if (values.length < 2) return null;
   const width = 120;
@@ -92,16 +84,16 @@ function Sparkline({ values, color = "text-blue-600" }) {
   return <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} aria-hidden="true" className={`mt-3 ${color}`}><polyline points={points} fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" /></svg>;
 }
 
-function CumulativeChart({ series, previousSeries, t, language }) {
+function CumulativeChart({ series, previousSeries, range, previousRange, t, language }) {
   const chartId = useId();
   const locale = language === "vi" ? "vi-VN" : "en-US";
   const totals = [];
   let running = 0;
   for (const point of series) { running += point.revenue; totals.push({ ...point, total: running }); }
-  const showPrevious = Array.isArray(previousSeries) && previousSeries.length === series.length && series.length > 1;
+  const showPrevious = Array.isArray(previousSeries) && previousSeries.length === series.length && series.length > 0;
   const prevTotals = [];
   if (showPrevious) { let prevRunning = 0; for (const point of previousSeries) { prevRunning += point.revenue; prevTotals.push(prevRunning); } }
-  const width = Math.max(1000, series.length * 76 + 110);
+  const width = Math.max(320, series.length * 76 + 110);
   const left = 85;
   const top = 20;
   const height = 210;
@@ -110,10 +102,12 @@ function CumulativeChart({ series, previousSeries, t, language }) {
   const max = Math.max(4, ...totals.map((point) => point.total), ...prevTotals);
   const axisFormat = new Intl.NumberFormat(locale);
   if (!series.length) return <p role="status" className="mt-5 text-sm text-slate-600">{t("adminRevenueChartEmpty")}</p>;
-  const points = totals.map((point, index) => [left + (index + 0.5) * slot, top + height - point.total / max * height]);
-  const prevPoints = prevTotals.map((total, index) => [left + (index + 0.5) * slot, top + height - total / max * height]);
+  const singleComparison = showPrevious && series.length === 1;
+  const offset = singleComparison ? 12 : 0;
+  const points = totals.map((point, index) => [left + (index + 0.5) * slot - offset, top + height - point.total / max * height]);
+  const prevPoints = prevTotals.map((total, index) => [left + (index + 0.5) * slot + offset, top + height - total / max * height]);
   const baseline = top + height;
-  const areaPath = points.length ? `M ${points[0][0]},${baseline} L ${points.map((point) => point.join(",")).join(" L ")} L ${points[points.length - 1][0]},${baseline} Z` : "";
+  const areaPath = points.length > 1 ? `M ${points[0][0]},${baseline} L ${points.map((point) => point.join(",")).join(" L ")} L ${points[points.length - 1][0]},${baseline} Z` : "";
   const last = totals[totals.length - 1];
   let jumpIndex = 0;
   series.forEach((point, index) => { if (point.revenue > series[jumpIndex].revenue) jumpIndex = index; });
@@ -122,12 +116,18 @@ function CumulativeChart({ series, previousSeries, t, language }) {
     : null;
 
   return <>
-    {showPrevious && <div className="mt-3 flex flex-wrap items-center gap-5 text-sm text-slate-600">
-      <span className="flex items-center gap-2"><span aria-hidden="true" className="inline-block h-0.5 w-6 bg-blue-600" />{t("adminRevenueCurrentPeriod")}</span>
-      <span className="flex items-center gap-2"><span aria-hidden="true" className="inline-block h-0 w-6 border-t-2 border-dashed border-orange-600" />{t("adminRevenuePreviousPeriod")}</span>
-    </div>}
+    <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm text-slate-600">
+      <span className="flex items-center gap-2">
+        <span aria-hidden="true" className="inline-block h-0.5 w-6 shrink-0 bg-blue-600" />
+        {t("adminRevenueCurrentPeriod")} ({range.from} – {range.to}) · {formatOrderAmount(last.total, language)}
+      </span>
+      {showPrevious && <span className="flex items-center gap-2">
+        <span aria-hidden="true" className="inline-block h-0 w-6 shrink-0 border-t-2 border-dashed border-orange-600" />
+        {t("adminRevenuePreviousPeriod")} ({previousRange.from} – {previousRange.to}) · {formatOrderAmount(prevTotals.at(-1), language)}
+      </span>}
+    </div>
     <div className="mt-4 overflow-x-auto rounded-xl focus-visible:outline-2 focus-visible:outline-blue-600" tabIndex={0} role="region" aria-label={t("adminRevenueChartScroll")}>
-      <svg width={width} height="285" viewBox={`0 0 ${width} 285`} role="img" aria-labelledby={`${chartId}-title ${chartId}-description`} className="h-auto min-w-full text-slate-600">
+      <svg width={width} height="285" viewBox={`0 0 ${width} 285`} role="img" aria-labelledby={`${chartId}-title ${chartId}-description`} className="block h-[285px] min-w-full text-slate-600">
         <title id={`${chartId}-title`}>{t("adminRevenueCumulative")}</title>
         <desc id={`${chartId}-description`}>{t("adminRevenueCumulativeHelp")}</desc>
         {[0, 1, 2, 3, 4].map((tick) => {
@@ -135,7 +135,8 @@ function CumulativeChart({ series, previousSeries, t, language }) {
           return <g key={tick}><line x1={left} x2={width - 20} y1={y} y2={y} className="stroke-slate-200" /><text x={left - 10} y={y + 4} textAnchor="end" fontSize="12" fill="currentColor">{axisFormat.format(max * tick / 4)}</text></g>;
         })}
         {areaPath && <path d={areaPath} fill="#2563eb" fillOpacity="0.08" />}
-        {showPrevious && <polyline points={prevPoints.map((point) => point.join(",")).join(" ")} fill="none" stroke="#ea580c" strokeWidth="2" strokeDasharray="6 4" strokeLinejoin="round" strokeLinecap="round" />}
+        {showPrevious && series.length > 1 && <polyline points={prevPoints.map((point) => point.join(",")).join(" ")} fill="none" stroke="#ea580c" strokeWidth="2" strokeDasharray="6 4" strokeLinejoin="round" strokeLinecap="round" />}
+        {singleComparison && <circle cx={prevPoints[0][0]} cy={prevPoints[0][1]} r="5" className="fill-orange-600" />}
         <polyline points={points.map((point) => point.join(",")).join(" ")} fill="none" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" className="stroke-blue-600" />
         {last && <text x={width - 20} y={14} textAnchor="end" fontSize="12" fontWeight="700" fill="#2563eb">{`${shortPeriod(last.period)}: ${formatOrderAmount(last.total, language)}`}</text>}
         {jump && <text x={jump.x} y={jump.y - 10 < 24 ? jump.y + 22 : jump.y - 10} textAnchor="middle" fontSize="12" fontWeight="700" fill="#2563eb">{`${shortPeriod(jump.period)}: +${formatOrderAmount(jump.revenue, language)}`}</text>}
@@ -150,8 +151,14 @@ function CumulativeChart({ series, previousSeries, t, language }) {
       <summary className="cursor-pointer rounded-lg py-3 font-semibold text-blue-700 focus-visible:outline-2 focus-visible:outline-blue-600">{t("adminRevenueChartData")}</summary>
       <div className="mt-2 max-h-80 overflow-auto"><table className="w-full text-left">
         <caption className="sr-only">{t("adminRevenueCumulative")}</caption>
-        <thead><tr>{["Period", "Revenue"].map((key) => <th key={key} scope="col" className="px-3 py-2">{t(`adminRevenue${key}`)}</th>)}</tr></thead>
-        <tbody>{totals.map((point) => <tr key={point.period} className="border-t border-slate-100"><th scope="row" className="whitespace-nowrap px-3 py-2 font-normal">{point.period}</th><td className="whitespace-nowrap px-3 py-2">{formatOrderAmount(point.total, language)}</td></tr>)}</tbody>
+        <thead><tr>
+          <th scope="col" className="px-3 py-2">{t("adminRevenueCurrentPeriod")}</th>
+          {showPrevious && <th scope="col" className="px-3 py-2">{t("adminRevenuePreviousPeriod")}</th>}
+        </tr></thead>
+        <tbody>{totals.map((point, index) => <tr key={point.period} className="border-t border-slate-100">
+          <td className="whitespace-nowrap px-3 py-2">{point.period} · {formatOrderAmount(point.total, language)}</td>
+          {showPrevious && <td className="whitespace-nowrap px-3 py-2">{previousSeries[index].period} · {formatOrderAmount(prevTotals[index], language)}</td>}
+        </tr>)}</tbody>
       </table></div>
     </details>
   </>;
@@ -217,6 +224,7 @@ function PlanDonut({ plans, totalRevenue, percent, t, language }) {
 
 export default function AdminRevenuePage() {
   const { t, language } = useLanguage();
+  usePageTitle(t("adminRevenueTitle"));
   const [range, setRange] = useState(() => presetRange("7d"));
   const [granularity, setGranularity] = useState("day");
   const [retry, setRetry] = useState(0);
@@ -239,7 +247,7 @@ export default function AdminRevenuePage() {
     return () => controller.abort();
   }, [query, requestKey, invalidRange]);
 
-  const prevRange = invalidRange ? null : previousRange(range.from, range.to);
+  const prevRange = invalidRange ? null : previousRevenueRange(range.from, range.to, granularity);
   const prevQuery = prevRange ? buildRevenueQuery({ ...prevRange, granularity }) : null;
   const prevRequestKey = prevQuery ? `${prevQuery}:${retry}` : null;
   useEffect(() => {
@@ -303,22 +311,21 @@ export default function AdminRevenuePage() {
           {[
             { key: "TotalRevenue", value: formatOrderAmount(report.totalRevenue, language), spark: report.series.map((point) => point.revenue), sparkColor: "text-blue-600", icon: <><path d="M3 17l5.5-5.5 3.5 3.5L20 7" /><path d="M14 7h6v6" /></>, iconClass: "bg-blue-50 text-blue-600", meta: t("adminRevenueMetaPeriod").replace("{from}", shortDate(range.from)).replace("{to}", shortDate(range.to)) },
             { key: "PaidOrders", value: report.paidOrderCount, spark: report.series.map((point) => point.orders), sparkColor: "text-green-700", icon: <path d="M20 6 9 17l-5-5" />, iconClass: "bg-green-50 text-green-700", meta: t("adminRevenueMetaCreated").replace("{count}", report.totalOrderCount) },
-            { key: "SuccessRate", value: percent.format(report.successRate), spark: null, sub: t("adminRevenueRateSub").replace("{paid}", report.paidOrderCount).replace("{total}", report.totalOrderCount), icon: <><path d="M19 5 5 19" /><circle cx="7" cy="7" r="2.4" /><circle cx="17" cy="17" r="2.4" /></>, iconClass: "bg-violet-50 text-violet-600", meta: t("adminRevenueMetaSamePeriod") },
+            { key: "SuccessRate", value: percent.format(report.successRate), spark: null, icon: <><path d="M19 5 5 19" /><circle cx="7" cy="7" r="2.4" /><circle cx="17" cy="17" r="2.4" /></>, iconClass: "bg-violet-50 text-violet-600", meta: t("adminRevenueMetaSamePeriod") },
             { key: "AverageOrder", value: formatOrderAmount(report.averageOrderValue, language), spark: report.series.map((point) => point.orders > 0 ? point.revenue / point.orders : 0), sparkColor: "text-amber-600", icon: <><rect x="3" y="6" width="18" height="13" rx="2" /><path d="M3 10h18M7 15h4" /></>, iconClass: "bg-amber-50 text-amber-600", meta: t("adminRevenueMetaAverage").replace("{count}", report.paidOrderCount) },
-          ].map(({ key, value, spark, sparkColor, sub, icon, iconClass, meta }) => <div key={key} className={panelClass}>
+          ].map(({ key, value, spark, sparkColor, icon, iconClass, meta }) => <div key={key} className={panelClass}>
             <div className="flex items-start justify-between gap-2">
               <span aria-hidden="true" className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg ${iconClass}`}><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">{icon}</svg></span>
               <span className="rounded-full bg-slate-100 px-2.5 py-1 text-right text-xs font-medium leading-5 text-slate-600">{meta}</span>
             </div>
             <h2 className="mt-3 text-sm font-semibold text-slate-600">{t(`adminRevenue${key}`)}</h2>
             <p className="mt-1 break-words text-2xl font-bold text-slate-950">{value}</p>
-            {sub && <p className="mt-1 text-sm text-slate-600">{sub}</p>}
             {spark && <Sparkline values={spark} color={sparkColor} />}
           </div>)}
         </div>
         {report.paidOrderCount === 0 && <p role="status" className="rounded-xl border border-dashed border-slate-300 p-5 text-sm text-slate-600">{t("adminRevenueEmpty")}</p>}
         <section className={panelClass} aria-labelledby="revenue-chart-title"><h2 id="revenue-chart-title" className="text-lg font-bold">{t("adminRevenueChart")}</h2><RevenueChart series={report.series} t={t} language={language} /></section>
-        <section className={panelClass} aria-labelledby="revenue-cumulative-title"><h2 id="revenue-cumulative-title" className="text-lg font-bold">{t("adminRevenueCumulative")}</h2><CumulativeChart series={report.series} previousSeries={previousSeries} t={t} language={language} /></section>
+        <section className={panelClass} aria-labelledby="revenue-cumulative-title"><h2 id="revenue-cumulative-title" className="text-lg font-bold">{t("adminRevenueCumulative")}</h2><CumulativeChart series={report.series} previousSeries={previousSeries} range={range} previousRange={prevRange} t={t} language={language} /></section>
         <div className="grid gap-6 lg:grid-cols-2">
           <section className={panelClass} aria-labelledby="revenue-daylist-title"><h2 id="revenue-daylist-title" className="text-lg font-bold">{t(granularity === "day" ? "adminRevenueDayList" : "adminRevenueMonthList")}</h2><DayList series={report.series} t={t} language={language} /></section>
           <section className={panelClass} aria-labelledby="revenue-plans-title"><h2 id="revenue-plans-title" className="text-lg font-bold">{t("adminRevenuePlans")}</h2>

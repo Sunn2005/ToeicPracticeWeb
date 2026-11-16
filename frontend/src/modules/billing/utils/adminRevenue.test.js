@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { buildRevenueQuery, revenuePresets, revenueErrorKey } from "./adminRevenue.js";
+import { buildRevenueQuery, previousRevenueRange, revenuePresets, revenueErrorKey } from "./adminRevenue.js";
 import { translations } from "../../../i18n/translations.js";
 
 test("revenue query uses whole Vietnam days and selected grouping", () => {
@@ -17,6 +17,25 @@ test("empty bounds are omitted and grouping defaults to day", () => {
   assert.equal(query.has("to"), false);
   assert.equal(query.get("granularity"), "day");
   assert.ok(new URLSearchParams(buildRevenueQuery({ to: "2026-10-24" })).has("to"));
+});
+
+test("daily comparison uses the same number of calendar days immediately before the current range", () => {
+  assert.deepEqual(previousRevenueRange("2024-03-01", "2024-03-03", "day"), {
+    from: "2024-02-27", to: "2024-02-29",
+  });
+  assert.deepEqual(previousRevenueRange("2026-01-01", "2026-01-01", "day"), {
+    from: "2025-12-31", to: "2025-12-31",
+  });
+});
+
+test("monthly comparison uses preceding calendar months even when the current month is partial", () => {
+  assert.deepEqual(previousRevenueRange("2026-04-01", "2026-04-08", "month"), {
+    from: "2026-03-01", to: "2026-03-31",
+  });
+  assert.deepEqual(previousRevenueRange("2026-01-30", "2026-03-02", "month"), {
+    from: "2025-10-01", to: "2025-12-31",
+  });
+  assert.equal(previousRevenueRange("2026-03-02", "2026-03-01", "month"), null);
 });
 
 test("presets have stable order and return independent values", () => {

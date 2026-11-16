@@ -1,3 +1,4 @@
+import usePageTitle from "../../../../components/ui/usePageTitle";
 import { useAuth } from "../../../../auth/useAuth";
 import { canUseConsole } from "../../../../auth/consolePermissions";
 import { useEffect, useState } from "react";
@@ -13,6 +14,7 @@ function TestPreviewPage() {
   const { testId } = useParams();
   const navigate = useNavigate();
   const { t } = useLanguage();
+  usePageTitle(t("consolePreviewTest"));
 
   const [test, setTest] = useState(null);
   const [loading, setLoading] = useState(Boolean(testId));

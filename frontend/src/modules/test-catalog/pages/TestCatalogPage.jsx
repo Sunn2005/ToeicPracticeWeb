@@ -1,3 +1,4 @@
+import usePageTitle from "../../../components/ui/usePageTitle";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { apiFetch, publicApiFetch } from "../../../api/client";
@@ -65,6 +66,7 @@ function TestCatalogCard({ test, attempts, onMode, t }) {
 
 export default function TestCatalogPage() {
   const { t } = useLanguage();
+  usePageTitle(t("testCatalogNav"));
   const navigate = useNavigate();
   const { attempts } = useUserAttempts();
   const [tests, setTests] = useState(TOEIC_TESTS);

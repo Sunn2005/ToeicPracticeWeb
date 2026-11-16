@@ -1,9 +1,11 @@
+import usePageTitle from "../../../../components/ui/usePageTitle";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import TestEditorWizard from "../../components/test-editor/TestEditorWizard";
 import { getEmployeeTest } from "../../../../api/tests/employeeTests";
 
 function EditTestPage() {
+  usePageTitle("Chỉnh sửa đề thi");
   const { testId } = useParams();
   const navigate = useNavigate();
 

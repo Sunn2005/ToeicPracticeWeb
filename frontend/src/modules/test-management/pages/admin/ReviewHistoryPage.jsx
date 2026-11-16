@@ -1,3 +1,4 @@
+import usePageTitle from "../../../../components/ui/usePageTitle";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { getReviewHistory } from "../../../../api/tests/adminReviews";
@@ -26,6 +27,7 @@ function formatDate(timestamp) {
 //   preview đề + timeline) khi đề không còn PENDING_REVIEW — đúng nội dung
 //   frame 6 mà không cần thêm route.
 function ReviewHistoryPage() {
+  usePageTitle("Lịch sử phê duyệt");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

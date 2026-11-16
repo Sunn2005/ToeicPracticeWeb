@@ -1,3 +1,4 @@
+import usePageTitle from "../../../components/ui/usePageTitle";
 import { formatClock } from "../../exam/utils/testData";
 import { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -46,6 +47,7 @@ function SummaryCard({ icon, value, label, tone = "sky" }) {
 
 export default function AttemptHistoryPage() {
   const { language, t } = useLanguage();
+  usePageTitle(t("attemptHistory"));
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const testId = searchParams.get("testId");

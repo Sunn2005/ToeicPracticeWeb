@@ -1,3 +1,4 @@
+import usePageTitle from "../../../components/ui/usePageTitle";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { updateUserProfile } from "../../../api/users/userLearning";
@@ -280,6 +281,7 @@ function EditProfileForm({ profile, t }) {
 
 export default function EditProfilePage() {
   const { t } = useLanguage();
+  usePageTitle(t("editProfile"));
   const { profile, profileLoading, profileError } = useAuth();
 
   if (profileLoading && !profile) {

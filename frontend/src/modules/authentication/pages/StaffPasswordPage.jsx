@@ -1,3 +1,4 @@
+import usePageTitle from "../../../components/ui/usePageTitle";
 import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../../../auth/useAuth";
@@ -7,6 +8,8 @@ import StaffPasswordForm from "../components/StaffPasswordForm";
 
 export default function StaffPasswordPage({ mode }) {
   const { t } = useLanguage();
+  const title = t(mode === "forgot" ? "staffForgotPassword" : mode === "reset" ? "staffResetPassword" : "staffChangePassword");
+  usePageTitle(title);
   const { user, profile, logout, handleUnauthorized } = useAuth();
   const [loginPath] = useState(() => mode === "change" && profile?.role === "USER" ? "/login" : "/console");
   const [email, setEmail] = useState("");
@@ -38,7 +41,7 @@ export default function StaffPasswordPage({ mode }) {
     setDone(true);
   }
   return <main className="flex min-h-dvh items-center justify-center bg-slate-50 px-4 py-10 text-slate-900"><section className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-    <h1 className="mb-5 text-2xl font-bold">{t(mode === "forgot" ? "staffForgotPassword" : mode === "reset" ? "staffResetPassword" : "staffChangePassword")}</h1>
+    <h1 className="mb-5 text-2xl font-bold">{title}</h1>
     {done ? <p role="status" className="mb-5 text-sm leading-6 text-slate-700">{t(mode === "forgot" ? "staffResetRequested" : "staffPasswordChanged")}</p>
       : mode === "forgot" ? <form onSubmit={forgot} className="mb-5 space-y-4"><p className="text-sm leading-6 text-slate-600">{t("staffForgotHint")}</p><label className="block text-sm font-semibold">{t("staffEmail")} *<input type="email" required maxLength={254} autoComplete="email" value={email} disabled={busy} onChange={(event) => setEmail(event.target.value)} className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-blue-600" /></label>{error && <p role="alert" className="text-sm text-red-700">{t(error)}</p>}<button type="submit" disabled={busy} className="min-h-11 w-full rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-50">{t(busy ? "staffWorking" : "staffRequestReset")}</button></form>
       : invalid || expired ? <div role="alert" className="mb-5 space-y-4 text-sm text-red-700"><p>{t(expired ? "staffError_STAFF_TEMP_EXPIRED" : "staffError_STAFF_RESET_INVALID")}</p><Link className="inline-flex min-h-11 items-center font-semibold text-blue-700 underline" to="/console/forgot-password">{t("staffRequestReset")}</Link></div>

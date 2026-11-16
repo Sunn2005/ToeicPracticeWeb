@@ -1,3 +1,4 @@
+import usePageTitle from "../../../../components/ui/usePageTitle";
 import { useAuth } from "../../../../auth/useAuth";
 import { useLanguage } from "../../../../i18n/LanguageContext";
 import { canUseConsole } from "../../../../auth/consolePermissions";
@@ -125,6 +126,7 @@ function ApprovalInfoCard({ test }) {
 function TestReviewPage() {
   const { profile } = useAuth();
   const { t } = useLanguage();
+  usePageTitle(t("consoleReviewDetails"));
   const { testId } = useParams();
   const navigate = useNavigate();
   const [test, setTest] = useState(null);

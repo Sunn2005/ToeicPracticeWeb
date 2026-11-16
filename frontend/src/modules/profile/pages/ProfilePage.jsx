@@ -1,3 +1,4 @@
+import usePageTitle from "../../../components/ui/usePageTitle";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../auth/useAuth";
@@ -49,6 +50,7 @@ function StatCard({ icon, value, label }) {
 
 export default function ProfilePage() {
   const { t } = useLanguage();
+  usePageTitle(t("profileNav"));
   const navigate = useNavigate();
   const { profile, profileLoading, profileError } = useAuth();
   const [stats, setStats] = useState(null);

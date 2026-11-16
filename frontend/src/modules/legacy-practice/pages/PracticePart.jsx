@@ -1,3 +1,4 @@
+import usePageTitle from "../../../components/ui/usePageTitle";
 import { useEffect, useState } from "react";
 import { loadPracticePart, startPracticeAttempt } from "../../../api/attempts/practice";
 import { useAuth } from "../../../auth/useAuth";
@@ -7,6 +8,7 @@ import { useLanguage } from "../../../i18n/LanguageContext";
 
 function PracticePart() {
   const { t } = useLanguage();
+  usePageTitle(`${t("practice")} Part 5`);
   const { user } = useAuth();
   const [part, setPart] = useState(null);
   const [answers, setAnswers] = useState({});

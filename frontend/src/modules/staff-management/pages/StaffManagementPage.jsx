@@ -1,3 +1,4 @@
+import usePageTitle from "../../../components/ui/usePageTitle";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "../../../auth/useAuth";
 import { useLanguage } from "../../../i18n/LanguageContext";
@@ -72,6 +73,7 @@ function MemberForm({ member, groups, defaultGroup, selfUid, busy, error, onSave
 
 export default function StaffManagementPage() {
   const { t } = useLanguage();
+  usePageTitle(t("staffTitle"));
   const { profile, refreshProfile } = useAuth();
   const [data, setData] = useState({ groups: [], members: [], catalog: [] });
   const [loading, setLoading] = useState(true);

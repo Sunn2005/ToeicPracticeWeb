@@ -1,3 +1,4 @@
+import usePageTitle from "../../../../components/ui/usePageTitle";
 import { useAuth } from "../../../../auth/useAuth";
 import { canUseConsole } from "../../../../auth/consolePermissions";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -5,12 +6,9 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import ConfirmDialog from "../../components/test-editor/ConfirmDialog";
 import {
   getEmployeeTests,
-  getEmployeeTest,
-  createEmployeeTest,
   deleteEmployeeTest,
   submitEmployeeTest,
 } from "../../../../api/tests/employeeTests";
-import { employeeTestPayload } from "../../components/test-editor/testEditorState";
 
 const labels = {
   DRAFT: ["Bản nháp", "bg-slate-100 text-slate-700"],
@@ -20,6 +18,7 @@ const labels = {
 };
 
 function MyTestsPage() {
+  usePageTitle("Quản lý đề thi");
   const { profile } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -101,23 +100,6 @@ function MyTestsPage() {
       }
     } catch (actionError) {
       setError(actionError.message || (action.kind === "delete" ? "Xóa đề thi thất bại." : "Gửi duyệt thất bại."));
-    } finally {
-      setActionLoadingId(null);
-    }
-  };
-
-  // Duplicate composes two existing endpoints: fetch the full test, strip
-  // server-managed fields via employeeTestPayload, and create a fresh draft.
-  const handleDuplicate = async (test) => {
-    setActionLoadingId(test.testId);
-    try {
-      const full = await getEmployeeTest(test.testId);
-      const payload = employeeTestPayload(full);
-      payload.title = `${full.title || test.title || "Đề chưa đặt tên"} (bản sao)`;
-      await createEmployeeTest(payload);
-      load();
-    } catch (dupError) {
-      setError(dupError.message || "Nhân bản đề thi thất bại.");
     } finally {
       setActionLoadingId(null);
     }
@@ -235,16 +217,6 @@ function MyTestsPage() {
                         >
                           Xem trước
                         </Link>
-                        {canUseConsole(profile, "tests.add") && (
-                          <button
-                            type="button"
-                            onClick={() => handleDuplicate(test)}
-                            disabled={isProcessing}
-                            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition disabled:opacity-50"
-                          >
-                            Nhân bản
-                          </button>
-                        )}
                         {isEditable && (
                           <>
                             {canUseConsole(profile, "tests.edit") && <button

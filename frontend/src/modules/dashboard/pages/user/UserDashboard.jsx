@@ -1,3 +1,4 @@
+import usePageTitle from "../../../../components/ui/usePageTitle";
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../../auth/useAuth";
@@ -40,6 +41,7 @@ function modeName(attempt, t) {
 
 export default function UserDashboard() {
   const { language, t } = useLanguage();
+  usePageTitle(t("dashboard"));
   const navigate = useNavigate();
   const { user, profile, role } = useAuth();
   const { attempts, loading, error } = useUserAttempts();

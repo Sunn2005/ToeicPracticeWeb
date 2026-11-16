@@ -1,3 +1,4 @@
+import usePageTitle from "../../../../components/ui/usePageTitle";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../../../auth/useAuth";
@@ -18,6 +19,7 @@ export default function PaymentResultPage() {
   const status = state.code === orderCode ? state.status : "";
   const loading = validCode && state.code !== orderCode;
   const success = status === "PAID";
+  usePageTitle(t(success ? "proPaymentSuccessTitle" : "proPaymentResultTitle"));
 
   useEffect(() => {
     if (!validCode) return;

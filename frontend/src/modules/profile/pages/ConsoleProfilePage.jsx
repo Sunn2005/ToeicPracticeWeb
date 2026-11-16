@@ -1,3 +1,4 @@
+import usePageTitle from "../../../components/ui/usePageTitle";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../auth/useAuth";
@@ -9,8 +10,6 @@ import StaffDialog from "../../staff-management/components/StaffDialog";
 import StaffPasswordForm from "../../authentication/components/StaffPasswordForm";
 
 const inputClass = "mt-2 min-h-11 w-full min-w-0 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-blue-600";
-const ringFields = ["displayName", "email", "phoneNumber", "dateOfBirth"];
-const ringFieldLabels = { displayName: "staffName", email: "staffEmail", phoneNumber: "staffPhone", dateOfBirth: "staffDateOfBirth" };
 const consoleFeatures = ["dashboard", "staff", "tests", "reviews", "history", "orders", "revenue"];
 
 function profileInitials(profile) {
@@ -18,24 +17,6 @@ function profileInitials(profile) {
   if (name) return name.split(/\s+/).filter(Boolean).slice(-2).map((part) => part[0]).join("").toUpperCase();
   const local = (profile?.email || "").split("@")[0];
   return (local.slice(0, 2) || "?").toUpperCase();
-}
-
-function CompletionRingButton({ profile, t, onOpen }) {
-  const filled = ringFields.filter((field) => profile?.[field]).length;
-  const percent = Math.round(filled / ringFields.length * 100);
-  const radius = 24;
-  const circumference = 2 * Math.PI * radius;
-  const missing = ringFields.filter((field) => !profile?.[field]).map((field) => t(ringFieldLabels[field]));
-  return <button type="button" onClick={onOpen} title={t("staffEditProfile")} className="flex items-center gap-3 rounded-xl p-2 text-left hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-blue-600">
-    <span className="relative grid h-[58px] w-[58px] shrink-0 place-items-center">
-      <svg width="58" height="58" viewBox="0 0 58 58" aria-hidden="true">
-        <circle cx="29" cy="29" r={radius} fill="none" strokeWidth="6" className="stroke-slate-200" />
-        <circle cx="29" cy="29" r={radius} fill="none" strokeWidth="6" strokeLinecap="round" strokeDasharray={`${circumference * percent / 100} ${circumference}`} transform="rotate(-90 29 29)" className="stroke-blue-600" />
-      </svg>
-      <span className="absolute text-xs font-bold text-slate-900">{`${percent}%`}</span>
-    </span>
-    <span><span className="block font-bold">{t("staffProfileCompletion")}</span><span className="mt-0.5 block text-sm leading-5 text-slate-600">{missing.length ? t("staffProfileCompletionNote").replace("{fields}", missing.join(", ")) : t("staffProfileComplete")}</span></span>
-  </button>;
 }
 
 function ReviewStats({ t }) {
@@ -85,24 +66,26 @@ function ReviewStats({ t }) {
 function EditProfileDialog({ profile, onClose, onSaved }) {
   const { t } = useLanguage();
   const [name, setName] = useState(profile?.displayName ?? "");
-  const [phone, setPhone] = useState(profile?.phoneNumber ?? "");
-  const [dob, setDob] = useState(profile?.dateOfBirth ?? "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   async function save(event) {
     event.preventDefault();
     const displayName = name.trim();
-    const phoneNumber = phone.trim();
-    const dateOfBirth = dob.trim();
-    const today = new Date().toISOString().slice(0, 10);
-    if (displayName.length < 1 || displayName.length > 80 || (phoneNumber && !/^\+?[0-9]{8,15}$/.test(phoneNumber)) || (dateOfBirth && (dateOfBirth.length !== 10 || dateOfBirth > today))) {
+    if (displayName.length < 1 || displayName.length > 80) {
       setError("staffProfileInvalid");
       return;
     }
     setBusy(true);
     setError(null);
     try {
-      await updateProfile({ displayName, phoneNumber: phoneNumber || null, dateOfBirth: dateOfBirth || null });
+      await updateProfile({
+        displayName,
+        photoUrl: profile?.photoUrl,
+        targetScore: profile?.targetScore,
+        phoneNumber: profile?.phoneNumber,
+        dateOfBirth: profile?.dateOfBirth,
+        gender: profile?.gender,
+      });
       onSaved();
     } catch (saveError) {
       setError(saveError?.status === 400 ? "staffProfileInvalid" : "staffProfileSaveError");
@@ -113,12 +96,6 @@ function EditProfileDialog({ profile, onClose, onSaved }) {
     <form onSubmit={save} className="space-y-4 p-6">
       <label className="block text-sm font-semibold">{t("staffName")}
         <input value={name} onChange={(event) => setName(event.target.value)} className={inputClass} autoComplete="name" />
-      </label>
-      <label className="block text-sm font-semibold">{t("staffPhone")}
-        <input value={phone} onChange={(event) => setPhone(event.target.value)} className={inputClass} autoComplete="tel" inputMode="tel" />
-      </label>
-      <label className="block text-sm font-semibold">{t("staffDateOfBirth")}
-        <input type="date" value={dob} onChange={(event) => setDob(event.target.value)} className={inputClass} autoComplete="bday" />
       </label>
       {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-800">{t(error)}</p>}
       <div className="flex gap-3">
@@ -132,6 +109,7 @@ function EditProfileDialog({ profile, onClose, onSaved }) {
 export default function ConsoleProfilePage() {
   const { profile, logout, handleUnauthorized, refreshProfile } = useAuth();
   const { t } = useLanguage();
+  usePageTitle(t("staffProfile"));
   const navigate = useNavigate();
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -173,20 +151,11 @@ export default function ConsoleProfilePage() {
           <button type="button" onClick={() => setPasswordOpen(true)} className="min-h-11 rounded-xl border border-slate-300 px-4 py-3 font-semibold hover:bg-slate-50 focus-visible:outline-blue-600">{t("staffChangePassword")}</button>
         </div>
       </div>
-      <div className="mt-5 border-t border-slate-100 pt-5">
-        <CompletionRingButton profile={profile} t={t} onOpen={() => setEditOpen(true)} />
-      </div>
     </div>
     <ReviewStats t={t} />
-    <div className="grid gap-6 lg:grid-cols-2">
-      <div className="rounded-2xl border border-slate-200 bg-white p-6">
-        <h2 className="font-bold">{t("staffProfileInfo")}</h2>
-        <dl className="mt-4 space-y-4">{[["staffName", profile?.displayName], ["staffEmail", profile?.email], ["staffPhone", profile?.phoneNumber], ["staffDateOfBirth", profile?.dateOfBirth]].map(([key, value]) => <div key={key}><dt className="text-sm text-slate-600">{t(key)}</dt><dd className="mt-1 break-words font-semibold">{value || <span className="text-sm font-semibold text-amber-700">{t("staffProfileMissing")}</span>}</dd></div>)}</dl>
-      </div>
-      <div className="rounded-2xl border border-slate-200 bg-white p-6">
-        <h2 className="font-bold">{t("staffPermissionsTitle")}</h2>
-        <div className="mt-4 flex flex-wrap gap-2">{chips.length ? chips.map(({ key, label }) => <span key={key} className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">{label}</span>) : <span className="text-sm text-slate-600">—</span>}</div>
-      </div>
+    <div className="rounded-2xl border border-slate-200 bg-white p-6">
+      <h2 className="font-bold">{t("staffPermissionsTitle")}</h2>
+      <div className="mt-4 flex flex-wrap gap-2">{chips.length ? chips.map(({ key, label }) => <span key={key} className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">{label}</span>) : <span className="text-sm text-slate-600">—</span>}</div>
     </div>
     {editOpen && <EditProfileDialog profile={profile} onClose={() => setEditOpen(false)} onSaved={profileSaved} />}
     {passwordOpen && <StaffDialog title={t("staffChangePassword")} busy={passwordBusy} onClose={() => setPasswordOpen(false)}><div className="p-6"><StaffPasswordForm onSuccess={completed} onBusyChange={setPasswordBusy} /><button type="button" disabled={passwordBusy} onClick={() => setPasswordOpen(false)} className="mt-4 min-h-11 w-full rounded-xl border border-slate-300 px-4 py-2 font-semibold disabled:opacity-50">{t("staffCancel")}</button></div></StaffDialog>}

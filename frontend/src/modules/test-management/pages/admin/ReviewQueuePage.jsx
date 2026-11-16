@@ -1,3 +1,4 @@
+import usePageTitle from "../../../../components/ui/usePageTitle";
 import { useCallback, useEffect, useState } from "react";
 import { getPendingSubmissions } from "../../../../api/tests/adminReviews";
 import SubmissionTable from "../../components/review/SubmissionTable";
@@ -11,6 +12,7 @@ function getQueueErrorMessage(error) {
 }
 
 function ReviewQueuePage() {
+  usePageTitle("Xét duyệt");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

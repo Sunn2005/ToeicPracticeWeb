@@ -1,7 +1,9 @@
+import usePageTitle from "../../../components/ui/usePageTitle";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../auth/useAuth";
 
 function ForbiddenPage() {
+  usePageTitle("Bạn không có quyền truy cập");
   const navigate = useNavigate();
   const { logout } = useAuth();
 
