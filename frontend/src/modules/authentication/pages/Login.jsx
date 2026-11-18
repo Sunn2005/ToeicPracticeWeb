@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { auth } from "../../../firebase";
 import { useAuth } from "../../../auth/useAuth";
+import { consoleHome } from "../../../auth/consolePermissions";
 import BrandLogo from "../../../components/ui/BrandLogo";
 import LanguageSwitcher from "../../../components/ui/LanguageSwitcher";
 import { useLanguage } from "../../../i18n/LanguageContext";
@@ -38,8 +39,10 @@ function Login() {
       provider.setCustomParameters({ prompt: "select_account" });
 
       const credential = await signInWithPopup(auth, provider);
-      await establishSession(credential.user);
-      navigate("/dashboard", { replace: true });
+      const profile = await establishSession(credential.user);
+      navigate(String(profile?.role || "").toUpperCase() === "USER"
+        ? "/dashboard"
+        : consoleHome(profile), { replace: true });
     } catch (error) {
       const errorCode = typeof error?.code === "string" ? error.code : "unknown";
       console.error("Google sign-in failed", errorCode);

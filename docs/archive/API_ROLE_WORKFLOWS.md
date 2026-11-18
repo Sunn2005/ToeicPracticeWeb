@@ -1171,6 +1171,14 @@ Response gồm `totalRevenue`, `paidOrderCount`, `totalOrderCount`, `successRate
 
 Frontend `/console/revenue` có preset 7/30 ngày bao gồm hôm nay, tháng này hoặc tùy chỉnh, theo ngày lịch Việt Nam; các chỉ số tiền dùng VND. Không trả thông tin người mua hay `checkoutUrl`. API đọc toàn bộ đơn một lần rồi tổng hợp trong service, không ghi dữ liệu hoặc thay đổi luồng PayOS.
 
+### 9.9 Quản lý học viên (chỉ đọc)
+
+`GET /api/admin/users?search=&pro=ALL&size=20&cursor=` chỉ cho `ADMIN` đang hoạt động. Danh sách chỉ gồm tài khoản có role `USER`; `EMPLOYEE` không được cấp quyền qua nhóm Console. `search` tìm chuỗi con theo tên hiển thị hoặc email, không phân biệt hoa thường. `pro` nhận `ALL`, `PRO` hoặc `FREE`, `size` từ 1–50. Danh sách dùng cursor do server sinh, không trả tổng số trang, và trả `{items,nextCursor}`. Mỗi item gồm `uid`, `displayName`, `email`, `photoUrl`, `targetScore`, `createdAt`, `lastLoginAt`, `proExpiresAt`, `proStatus`. `proStatus` là `PRO`, `FREE` hoặc `UNKNOWN`. Bộ lọc Pro/Free trả `503 LEARNER_SUBSCRIPTIONS_UNAVAILABLE` nếu nguồn subscription không đọc được.
+
+`GET /api/admin/users/{uid}` trả hồ sơ tương tự cùng `statistics` gồm `completedExamAttempts`, `completedPracticeAttempts`, `bestListeningScore`, `bestReadingScore`, `lastStudyAt`. Chỉ tổng hợp lượt đã hoàn thành, không trả mã lượt thi, đáp án, transcript hay nội dung kết quả chi tiết. Hai điểm cao nhất là `null` nếu không có dữ liệu phần hợp lệ. Contract `GET /api/users/me/statistics` không thay đổi.
+
+`GET /api/admin/users/{uid}/orders?size=20&cursor=` trả `{items,nextCursor}` cho đơn của học viên đó theo `createdAt` giảm dần, rồi `orderCode` giảm dần. Mỗi item có `orderCode`, `planCode`, `amount`, `durationDays`, `status`, `createdAt`, `paidAt`. Không trả `checkoutUrl`, `paymentLinkId` hay dữ liệu ngân hàng. UID không tồn tại hoặc không là học viên trả `404 LEARNER_NOT_FOUND`; query/cursor sai trả `400 LEARNER_QUERY_INVALID`; lỗi dữ liệu trả `503 LEARNER_DATA_UNAVAILABLE`. Response ba API dùng `Cache-Control: no-store`.
+
 ## 10. API nội bộ kiểm thử AI
 
 ### 10.1 Publish trực tiếp một yêu cầu giải thích

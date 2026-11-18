@@ -8,6 +8,7 @@ import { useLanguage } from "../i18n/LanguageContext";
 const iconPaths = {
   dashboard: ["M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"],
   staff: ["M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M16 3a4 4 0 0 1 0 8M22 21v-2a4 4 0 0 0-3-3.87", "M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"],
+  learners: ["M2 9.5 12 4l10 5.5-10 5.5L2 9.5Z", "M6.5 12.5v4c0 1.5 2.5 2.5 5.5 2.5s5.5-1 5.5-2.5v-4"],
   tests: ["M7 3h7l4 4v14H7z", "M14 3v5h5M10 13h6M10 17h6"],
   create: ["M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z", "M12 8v8M8 12h8"],
   review: ["M7 4h10v17H7zM9 4V2h6v2", "m9 13 2 2 4-5"],
@@ -44,6 +45,7 @@ function ManagementLayout() {
   const navigation = [
     { label: "Trang tổng quan", icon: "dashboard", to: "/console/dashboard" },
     { label: t("staffTitle"), icon: "staff", to: "/console/staff" },
+    { label: t("adminLearnersNav"), icon: "learners", to: "/console/learners" },
     { label: "Quản lý đề thi", icon: "tests", to: "/console/tests" },
     { label: "Tạo đề mới", icon: "create", to: "/console/tests/new" },
     { label: "Xét duyệt", icon: "review", to: "/console/reviews" },
@@ -57,6 +59,7 @@ function ManagementLayout() {
     ["/console/tests/:testId/edit", "consoleEditTest"],
     ["/console/tests/:testId/preview", "consolePreviewTest"],
     ["/console/reviews/:testId", "consoleReviewDetails"],
+    ["/console/learners/:uid", "adminLearnerDetail"],
   ].find(([path]) => matchPath(path, pathname))?.[1];
   const pageTitle = detailLabel ? t(detailLabel) : breadcrumb[breadcrumb.length - 1]?.label;
 

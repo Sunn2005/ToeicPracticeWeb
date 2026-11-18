@@ -1,0 +1,14 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "paymentOrders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" },
+        { "fieldPath": "orderCode", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

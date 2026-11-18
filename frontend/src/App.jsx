@@ -22,6 +22,7 @@ import AIChatBox from "./modules/ai-chat/components/AIChatBox";
 import { AuthProvider } from "./auth/AuthContext";
 import { useAuth } from "./auth/useAuth";
 import ProtectedRoute from "./auth/ProtectedRoute";
+import { consoleHome } from "./auth/consolePermissions";
 import LoginPage from "./modules/authentication/pages/LoginPage";
 import StaffPasswordPage from "./modules/authentication/pages/StaffPasswordPage";
 import ConsoleProfilePage from "./modules/profile/pages/ConsoleProfilePage";
@@ -38,6 +39,8 @@ import ReviewQueuePage from "./modules/test-management/pages/admin/ReviewQueuePa
 import ReviewHistoryPage from "./modules/test-management/pages/admin/ReviewHistoryPage";
 import AdminRevenuePage from "./modules/billing/pages/admin/AdminRevenuePage";
 import AdminOrdersPage from "./modules/billing/pages/admin/AdminOrdersPage";
+import LearnersListPage from "./modules/learners/pages/admin/LearnersListPage";
+import LearnerDetailPage from "./modules/learners/pages/admin/LearnerDetailPage";
 import TestReviewPage from "./modules/test-management/pages/admin/TestReviewPage";
 import ForbiddenPage from "./modules/errors/pages/ForbiddenPage";
 import UserLayout from "./layouts/UserLayout";
@@ -98,6 +101,8 @@ function LearnerChatShell({ user, role, profile, pathname }) {
 export function AppRoutes() {
   const { user, role, profile, authLoading, sessionUnavailable } = useAuth();
   const location = useLocation();
+  const isLearner = role === "USER";
+  const signedInHome = isLearner ? "/dashboard" : consoleHome(profile);
 
   // Login and recovery remain reachable while the backend restores a cookie.
   const isPublicEntry = ["/", "/login", "/console", "/console/forgot-password", "/console/reset-password"].includes(location.pathname);
@@ -117,16 +122,16 @@ export function AppRoutes() {
       <Routes>
         <Route
           path="/"
-          element={user ? <Navigate to="/dashboard" replace /> : <PublicLayout />}
+          element={user ? <Navigate to={signedInHome} replace /> : <PublicLayout />}
         >
           <Route index element={<LandingPage />} />
         </Route>
         <Route
           path="/login"
-          element={user ? <Navigate to="/dashboard" replace /> : <Login />}
+          element={user ? <Navigate to={signedInHome} replace /> : <Login />}
         />
         <Route
-          element={user ? <UserLayout /> : <Navigate to="/login" replace />}
+          element={isLearner ? <UserLayout /> : <Navigate to={user ? signedInHome : "/login"} replace />}
         >
           <Route path="/dashboard" element={<UserDashboard />} />
           <Route path="/tests" element={<TestCatalogPage />} />
@@ -143,23 +148,23 @@ export function AppRoutes() {
         </Route>
         <Route
           path="/practice/part5"
-          element={user ? <PracticePart /> : <Navigate to="/login" replace />}
+          element={isLearner ? <PracticePart /> : <Navigate to={user ? signedInHome : "/login"} replace />}
         />
         <Route
           path="/full-test/:testId"
-          element={user ? <FullTestIntro /> : <Navigate to="/login" replace />}
+          element={isLearner ? <FullTestIntro /> : <Navigate to={user ? signedInHome : "/login"} replace />}
         />
         <Route
           path="/full-test/:attemptId/exam"
-          element={user ? <FullTestExam /> : <Navigate to="/login" replace />}
+          element={isLearner ? <FullTestExam /> : <Navigate to={user ? signedInHome : "/login"} replace />}
         />
         <Route
           path="/full-test/:attemptId/review"
-          element={user ? <FullTestReview /> : <Navigate to="/login" replace />}
+          element={isLearner ? <FullTestReview /> : <Navigate to={user ? signedInHome : "/login"} replace />}
         />
         <Route
           path="*"
-          element={<Navigate to={user ? "/dashboard" : "/login"} replace />}
+          element={<Navigate to={user ? signedInHome : "/login"} replace />}
         />
 
         <Route path="/console/forgot-password" element={<StaffPasswordPage key="forgot" mode="forgot" />} />
@@ -179,6 +184,8 @@ export function AppRoutes() {
             <Route path="/console/tests/:testId/preview" element={<TestPreviewPage />} />
             <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
               <Route path="/console/staff" element={<StaffManagementPage />} />
+              <Route path="/console/learners" element={<LearnersListPage />} />
+              <Route path="/console/learners/:uid" element={<LearnerDetailPage />} />
             </Route>
             <Route element={<ProtectedRoute allowedRoles={["ADMIN", "EMPLOYEE"]} />}>
               <Route path="/console/revenue" element={<AdminRevenuePage />} />

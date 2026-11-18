@@ -45,7 +45,7 @@ final class FirestoreUserMapper {
         return user;
     }
 
-    private static Long epochMillis(Object value, String field) {
+    static Long epochMillis(Object value, String field) {
         if (value == null) return null;
         if (value instanceof Number number) return number.longValue();
         if (value instanceof Timestamp timestamp) {

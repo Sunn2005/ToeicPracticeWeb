@@ -91,15 +91,19 @@ public class SubscriptionService {
         return new SubscriptionDao.Mutation(subscription, true);
     }
 
+    public static boolean isEffective(Subscription subscription, long now) {
+        return subscription != null && subscription.getStatus() == SubscriptionStatus.ACTIVE
+                && subscription.getStartsAt() != null && subscription.getStartsAt() <= now
+                && subscription.getExpiresAt() != null && now < subscription.getExpiresAt();
+    }
+
     private SubscriptionSummary summary(Subscription subscription, long now) {
         if (subscription == null) {
             return new SubscriptionSummary(null, null, null, null, List.of(), false);
         }
-        boolean effective = subscription.getStatus() == SubscriptionStatus.ACTIVE
-                && subscription.getStartsAt() != null && subscription.getStartsAt() <= now
-                && subscription.getExpiresAt() != null && now < subscription.getExpiresAt();
         return new SubscriptionSummary(subscription.getPlanCode(), subscription.getStatus(),
-                subscription.getStartsAt(), subscription.getExpiresAt(), subscription.getEntitlements(), effective);
+                subscription.getStartsAt(), subscription.getExpiresAt(), subscription.getEntitlements(),
+                isEffective(subscription, now));
     }
 
     public record SubscriptionSummary(String planCode, SubscriptionStatus status, Long startsAt, Long expiresAt,
